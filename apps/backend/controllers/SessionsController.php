@@ -13,10 +13,12 @@ class SessionsController extends BaseController {
 			$this->response->redirect('/admin/home');
 			exit;
 		}
+		$this->view->token_key = $this->security->getTokenKey();
+		$this->view->token     = $this->security->getToken();
 	}
 
 	function createAction() {
-		if ($this->request->isPost()) {
+		if ($this->request->isPost() && $this->security->checkToken()) {
 			$username = $this->request->getPost('username');
 			$password = $this->request->getPost('password');
 			$user = User::findFirst([
