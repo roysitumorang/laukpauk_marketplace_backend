@@ -9,6 +9,7 @@ use Phalcon\Mvc\Model\Metadata\Memory;
 use Phalcon\Mvc\Url;
 use Phalcon\Flash\Direct;
 use Phalcon\Flash\Session;
+use Phalcon\Http\Request;
 
 /**
  * Application logger
@@ -82,4 +83,8 @@ $di->set('flashSession', function() {
 		'notice'  => 'alert alert-info',
 		'warning' => 'alert alert-warning',
 	]);
+});
+
+$di->set('request', function() {
+	return new Request;
 });

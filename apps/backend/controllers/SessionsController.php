@@ -2,7 +2,6 @@
 
 namespace Application\Backend\Controllers;
 use Application\Models\User;
-use Phalcon\Http\Request;
 
 class SessionsController extends BaseController {
 	function initialize() {
@@ -40,9 +39,8 @@ class SessionsController extends BaseController {
 
 	function deleteAction() {
 		if ($this->session->get('user_id')) {
-			$request = new Request;
 			$this->session->remove('user_id');
-			$this->flashSession->success('Anda sudah logout dari IP: ' . $request->getClientAddress());
+			$this->flashSession->success('Anda sudah logout dari IP: ' . $this->request->getClientAddress());
 		}
 		return $this->response->redirect('/admin/sessions/new');
 	}
