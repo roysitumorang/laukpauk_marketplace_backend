@@ -25,6 +25,7 @@
 			<!-- start: page -->
 			<div class="panel panel-default">
 				<div class="panel-body">
+					{{ flashSession.output() }}
 					<h2>Welcome {{ current_user.name }}</h2>
 				</div>
 			</div>

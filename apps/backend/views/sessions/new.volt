@@ -9,7 +9,7 @@
 				<h2 class="title text-uppercase text-weight-bold m-none"><i class="fa fa-user mr-xs"></i> Login Administrator</h2>
 			</div>
 			<div class="panel-body">
-				{{ content() }}
+				{{ flashSession.output() }}
 				{{ form('/admin/sessions/create', 'method': 'POST') }}
 					<input type="hidden" name="{{ token_key }}" value="{{ token }}">
 					<div class="form-group mb-lg">

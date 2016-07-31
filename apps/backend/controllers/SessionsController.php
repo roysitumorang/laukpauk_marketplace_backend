@@ -28,10 +28,9 @@ class SessionsController extends BaseController {
 			]);
 			if ($user && $this->security->checkHash($password, $user->password)) {
 				$this->session->set('user_id', $user->id);
-				$this->flashSession->success('Welcome ' . $user->name);
 				return $this->response->redirect('/admin/home');
 			}
-			$this->flash->error('Username dan/atau password salah');
+			$this->flashSession->error('Username dan/atau password salah');
 		}
 		return $this->dispatcher->forward([
 			'controller' => 'sessions',
@@ -42,7 +41,7 @@ class SessionsController extends BaseController {
 	function deleteAction() {
 		if ($this->session->get('user_id')) {
 			$request = new Request;
-			$this->session->destroy();
+			$this->session->remove('user_id');
 			$this->flashSession->success('Anda sudah logout dari IP: ' . $request->getClientAddress());
 		}
 		return $this->response->redirect('/admin/sessions/new');
