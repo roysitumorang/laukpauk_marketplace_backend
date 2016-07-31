@@ -80,7 +80,7 @@ class Module implements ModuleDefinitionInterface {
 			return User::findFirst($di->getSession()->get('user_id'));
 		});
 
-		$di->set('currentDatetime', function() use($config) {
+		$di->set('currentDatetime', function() use($di) {
 			$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
 			return $current_datetime->setTimezone(new DateTimeZone($di->getConfig()->timezone));
 		});
