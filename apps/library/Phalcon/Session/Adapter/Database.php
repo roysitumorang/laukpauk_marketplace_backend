@@ -89,7 +89,7 @@ class Database extends Adapter implements AdapterInterface {
 	function read($sessionId) {
 		$maxLifetime = (int) ini_get('session.gc_maxlifetime');
 		$options = $this->getOptions();
-		return base64_decode($this->connection->fetchColumn(
+		return $this->connection->fetchColumn(
 			sprintf(
 				'SELECT %s FROM %s WHERE %s = ? AND %s + %d >= ?',
 				$this->connection->escapeIdentifier($options['column_data']),
@@ -99,17 +99,16 @@ class Database extends Adapter implements AdapterInterface {
 				$maxLifetime
 			),
 			[$sessionId, time()]
-		));
+		);
 	}
 	/**
 	 * {@inheritdoc}
 	 *
 	 * @param  string $sessionId
-	 * @param  string $encoded_data
+	 * @param  string $data
 	 * @return boolean
 	 */
 	function write($sessionId, $data) {
-		$encoded_data = base64_encode($data);
 		$options = $this->getOptions();
 		$request = new Request;
 		$row = $this->connection->fetchColumn(
@@ -132,7 +131,7 @@ class Database extends Adapter implements AdapterInterface {
 					$this->connection->escapeIdentifier($options['column_last_activity']),
 					$this->connection->escapeIdentifier($options['column_id'])
 				),
-				[$this->get('user_id'), $request->getClientAddress(), $request->getUserAgent(), $encoded_data, time(), $sessionId]
+				[$this->get('user_id'), $request->getClientAddress(), $request->getUserAgent(), $data, time(), $sessionId]
 			);
 		}
 		return $this->connection->execute(
@@ -146,7 +145,7 @@ class Database extends Adapter implements AdapterInterface {
 				$this->connection->escapeIdentifier($options['column_data']),
 				$this->connection->escapeIdentifier($options['column_last_activity'])
 			),
-			[$sessionId, $this->get('user_id'), $request->getClientAddress(), $request->getUserAgent(), $encoded_data, time()]
+			[$sessionId, $this->get('user_id'), $request->getClientAddress(), $request->getUserAgent(), $data, time()]
 		);
 	}
 	/**
