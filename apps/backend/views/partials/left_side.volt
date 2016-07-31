@@ -23,10 +23,10 @@
 							<span>Mailbox</span>
 						</a>
 						<ul class="nav nav-children">
-							<li><a href="message.php?do=inbox">Inbox</a></li>
-							<li><a href="message.php?do=outbox">Outbox</a></li>
-							<li><a href="message.php?do=add">Kirim Pesan</a></li>
-							<li><a href="message.php">Semua Pesan</a></li>
+							<li><a href="/admin/messages/unread">Inbox</a></li>
+							<li><a href="/admin/messages/read">Outbox</a></li>
+							<li><a href="/admin/messages/new">Kirim Pesan</a></li>
+							<li><a href="/admin/messages">Semua Pesan</a></li>
 						</ul>
 					</li>
 					<li class="nav-parent">
@@ -35,11 +35,11 @@
 							<span>Content</span>
 						</a>
 						<ul class="nav nav-children">
-							<li><a href="page.php">Pages</a></li>
-							<li><a href="main.php?do=pageconf">Page Setting</a></li>
-							<li><a href="news.php">Content</a></li>
-							<li><a href="banner.php">Banner</a></li>
-							<li><a href="filemanager.php">File Manager</a></li>
+							<li><a href="/admin/pages">Pages</a></li>
+							<li><a href="/admin/page_categories">Page Setting</a></li>
+							<li><a href="/admin/contents">Content</a></li>
+							<li><a href="/admin/banners">Banner</a></li>
+							<li><a href="/admin/files">File Manager</a></li>
 						</ul>
 					</li>
 					<li class="nav-parent">
@@ -48,16 +48,16 @@
 							<span>Member</span>
 						</a>
 						<ul class="nav nav-children">
-							<li><a href="members.php">Member List</a></li>
-							<li><a href="members.php?do=add">Tambah Member</a></li>
-							<li><a href="members.php?do=exportemail">Export Email Member</a></li>
-							<li><a href="billing.php">Billing Member</a></li>
-							<li><a href="transaksi.php">Transaksi Member</a></li>
-							<li><a href="withdraw.php">Withdraw Member</a></li>
-							<li><a href="members.php?do=deposit">Tambah / Potong Dompet</a></li>
-							<li><a href="members.php?do=reward">Tambah / Potong Reward Pembeli</a></li>
-							<li><a href="members.php?do=upgrade">Upgrade Membership</a></li>
-							<li><a href="member_options.php">Member Testimony</a></li>
+							<li><a href="/admin/users">Member List</a></li>
+							<li><a href="/admin/users/new">Tambah Member</a></li>
+							<li><a href="/admin/emails/export">Export Email Member</a></li>
+							<li><a href="/admin/invoices">Billing Member</a></li>
+							<li><a href="/admin/transactions">Transaksi Member</a></li>
+							<li><a href="/admin/withdrawals">Withdraw Member</a></li>
+							<li><a href="/admin/deposits">Tambah / Potong Dompet</a></li>
+							<li><a href="/admin/rewards">Tambah / Potong Reward Pembeli</a></li>
+							<li><a href="/admin/membership">Upgrade Membership</a></li>
+							<li><a href="/admin/testimonies">Member Testimony</a></li>
 						</ul>
 					</li>
 					<li class="nav-parent">
@@ -66,25 +66,25 @@
 							<span>Products</span>
 						</a>
 						<ul class="nav nav-children">
-							<li><a href="products.php?do=category">Category Produk</a></li>
-							<li><a href="products.php?do=catmeta">Category Meta</a></li>
-							<li><a href="products.php?do=brand">Brand Produk</a></li>
-							<li><a href="products.php?do=brandmeta">Brand Meta</a></li>
-							<li><a href="products.php?do=add">Tambah Produk Baru</a></li>
-							<li><a href="products.php">Produk List</a></li>
-							<li><a href="products.php?do=slotoptions">Slot Category</a></li>
-							<li><a href="products.php?do=slotmeta">Slot Meta</a></li>
-							<li><a href="products.php?do=slot">Slot List</a></li>
-							<li><a href="products.php?do=wishlist">Member Wishlist</a></li>
-							<li><a href="products.php?do=productreview">Member Product Review</a></li>
-							<li><a href="products.php?do=contentq">Produk Meta</a></li>
-							<li><a href="poin.php?do=category">Category Poin</a></li>
-							<li><a href="poin.php">Poin</a></li>
-							<li><a href="poin.php?do=meta">Poin Meta</a></li>
-							<li><a href="poin.php?do=order">Permintaan Poin</a></li>
-							<li><a href="poin.php?do=log">Poin Log</a></li>
-							<li><a href="kupon.php">Kupon Member</a></li>
-							<li><a href="discount.php">Discount</a></li>
+							<li><a href="/admin/product_categories">Category Produk</a></li>
+							<li><a href="/admin/product_metas">Category Meta</a></li>
+							<li><a href="/admin/product_brands">Brand Produk</a></li>
+							<li><a href="/admin_product_brand_metas">Brand Meta</a></li>
+							<li><a href="/admin/products/new">Tambah Produk Baru</a></li>
+							<li><a href="/admin/products">Produk List</a></li>
+							<li><a href="/admin/slot_categories">Slot Category</a></li>
+							<li><a href="/admin/slot_metas">Slot Meta</a></li>
+							<li><a href="/admin/slots">Slot List</a></li>
+							<li><a href="/admin/wishlists">Member Wishlist</a></li>
+							<li><a href="/admin/product_reviews">Member Product Review</a></li>
+							<li><a href="/admin/product_metas">Produk Meta</a></li>
+							<li><a href="/admin/point_categories">Category Poin</a></li>
+							<li><a href="/admin/points">Poin</a></li>
+							<li><a href="/admin/point_metas">Poin Meta</a></li>
+							<li><a href="/admin/point_orders">Permintaan Poin</a></li>
+							<li><a href="/admin/point/logs">Poin Log</a></li>
+							<li><a href="/admin/coupons">Kupon Member</a></li>
+							<li><a href="/admin/discounts">Discount</a></li>
 						</ul>
 					</li>
 					<li class="nav-parent">
@@ -93,13 +93,13 @@
 							<span>Order</span>
 						</a>
 						<ul class="nav nav-children">
-							<li><a href="order.php?do=new">Buat Order Baru</a></li>
-							<li><a href="order.php">Order List</a></li>
-							<li><a href="order.php?do=state">Data Propinsi / Kota</a></li>
-							<li><a href="order.php?do=shippingsource">Kota Asal Pengiriman</a></li>
-							<li><a href="order.php?do=shipping">Pengiriman</a></li>
-							<li><a href="order.php?do=shippingoption">Opsi Pengiriman</a></li>
-							<li><a href="emailoptions.php?do=defaultemail">Email Template</a></li>
+							<li><a href="/admin/orders/new">Buat Order Baru</a></li>
+							<li><a href="/admin/orders">Order List</a></li>
+							<li><a href="/admin/order_states">Data Propinsi / Kota</a></li>
+							<li><a href="/admin/order_shipping_sources">Kota Asal Pengiriman</a></li>
+							<li><a href="/admin/order_shippings">Pengiriman</a></li>
+							<li><a href="/admin/order_shipping_options">Opsi Pengiriman</a></li>
+							<li><a href="/admin/email_templates">Email Template</a></li>
 						</ul>
 					</li>
 					<li class="nav-parent">
@@ -108,26 +108,25 @@
 							<span>Options</span>
 						</a>
 						<ul class="nav nav-children">
-							<li><a href="options.php">Rekening Admin</a></li>
-							<li><a href="options.php?do=userbank">Rekening Member</a></li>
-							<li><a href="options.php?do=banned">Banned Username</a></li>
-							<li><a href="options.php?do=usersetting">User Setting</a></li>
-							<li><a href="options.php?do=adminsetting">Admin Setting</a></li>
-							<li><a href="options.php?do=notif">User Notifikasi</a></li>
-							<li><a href="options.php?do=notifmessage">User Notifikasi Message</a></li>
-							<li><a href="options.php?do=keywordlog">Keyword Log</a></li>
-							<li><a href="options.php?do=link">Short Link</a></li>
-							<li><a href="options.php?do=random">Random Text</a></li>
+							<li><a href="/admin/bank_accounts">Rekening Admin</a></li>
+							<li><a href="/admin/users/banned">Banned Username</a></li>
+							<li><a href="/admin/users/setting">User Setting</a></li>
+							<li><a href="/admin/settings">Admin Setting</a></li>
+							<li><a href="/admin/user_notifications">User Notifikasi</a></li>
+							<li><a href="/admin/user_messages">User Notifikasi Message</a></li>
+							<li><a href="/admin/keyword_logs">Keyword Log</a></li>
+							<li><a href="/admin/short_links">Short Link</a></li>
+							<li><a href="/admin/random_texts">Random Text</a></li>
 						</ul>
 					</li>
 					<li>
-						<a href="useradmin.php">
+						<a href="/admin/users">
 							<i class="fa fa-user-plus" aria-hidden="true"></i>
 							<span>Manage User</span>
 						</a>
 					</li>
 					<li>
-						<a href="index.php?submit=yes&action=logout">
+						<a href="/admin/sessions/delete">
 							<i class="fa fa-sign-out" aria-hidden="true"></i>
 							<span>Logout</span>
 						</a>
