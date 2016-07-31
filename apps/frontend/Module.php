@@ -8,73 +8,81 @@ use Phalcon\DiInterface;
 use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View\Engine\Volt;
+use Application\Models\User;
 
-class Module implements ModuleDefinitionInterface
-{
-    /**
-     * Register a specific autoloader for the module.
-     */
-    public function registerAutoloaders(DiInterface $di = null)
-    {
-        $loader = new Loader();
+class Module implements ModuleDefinitionInterface {
+	/**
+	 * Register a specific autoloader for the module.
+	 */
+	function registerAutoloaders(DiInterface $di = null) {
+		$application = $di->getConfig()->application;
+		$loader      = new Loader();
+		$loader->registerNamespaces([
+			'Application\Frontend\Controllers' => APP_PATH . 'apps/frontend/controllers/',
+			'Application\Frontend\Forms'       => APP_PATH . 'apps/frontend/forms',
+			'Application\Models'               => $application->modelsDir,
+			'Application\Plugins'              => $application->pluginsDir,
+			'Phalcon'                          => $application->libraryDir,
+		]);
+		$loader->register();
+	}
 
-        $loader->registerNamespaces([
-            'Application\Frontend\Controllers' => APP_PATH . 'apps/frontend/controllers/',
-            'Application\Frontend\Models'      => APP_PATH . 'apps/frontend/models/',
-            'Application\Frontend\Forms'       => APP_PATH . 'apps/frontend/forms',
-            'Phalcon'                          => APP_PATH . 'apps/library/Phalcon/',
-        ]);
+	/**
+	 * Register specific services for the module.
+	 */
+	function registerServices(DiInterface $di) {
+		/**
+		 * Start the session the first time some component request the session service
+		 */
+		$di->setShared('session', function() use($di) {
+			$session = new \Phalcon\Session\Adapter\Database([
+				'db'    => $di->getDb(),
+				'table' => 'sessions',
+			]);
+			$session->start();
+			return $session;
+		});
 
-        $loader->register();
-    }
+		// Registering a dispatcher
+		$di->set('dispatcher', function() {
+			$dispatcher = new Dispatcher();
+			$dispatcher->setDefaultNamespace('Application\Frontend\Controllers');
 
-    /**
-     * Register specific services for the module.
-     */
-    public function registerServices(DiInterface $di)
-    {
-        /**
-         * Start the session the first time some component request the session service
-         */
-        $di->set('session', function() use($di) {
-            $session = new \Phalcon\Session\Adapter\Database([
-                'db'    => $di->getDb(),
-                'table' => 'sessions'
-            ]);
-            $session->start();
-            return $session;
-        });
+			return $dispatcher;
+		});
 
-        // Registering a dispatcher
-        $di->set('dispatcher', function() {
-            $dispatcher = new Dispatcher();
-            $dispatcher->setDefaultNamespace('Application\Frontend\Controllers');
+		// Registering the view component
+		$di->set('view', function() {
+			$view = new View();
+			$view->setViewsDir(APP_PATH . 'apps/frontend/views/');
+			$view->registerEngines([
+				'.volt' => function($view, $di) {
+					$volt = new Volt($view, $di);
+					$volt->setOptions([
+						'compiledPath'      => APP_PATH . 'apps/frontend/cache/',
+						'compiledSeparator' => '_',
+					]);
+					$volt->getCompiler()
+						->addFunction('is_a', 'is_a')
+						->addFunction('count', 'count')
+						->addFunction('number_format', 'number_format')
+						->addFunction('date', 'date')
+						->addFunction('strtotime', 'strtotime');
 
-            return $dispatcher;
-        });
+					return $volt;
+				},
+			]);
 
-        // Registering the view component
-        $di->set('view', function() {
-            $view = new View();
-            $view->setViewsDir(APP_PATH . 'apps/frontend/views/');
-            $view->registerEngines([
-                '.volt' => function($view, $di) {
-                    $volt = new Volt($view, $di);
-                    $volt->setOptions([
-                        'compiledPath' => APP_PATH . 'apps/frontend/cache/',
-                        'compiledSeparator' => '_',
-                    ]);
-                    $volt->getCompiler()->addFunction('is_a', 'is_a')
-                        ->addFunction('count', 'count')
-                        ->addFunction('number_format', 'number_format')
-                        ->addFunction('date', 'date')
-                        ->addFunction('strtotime', 'strtotime');
+			return $view;
+		});
 
-                    return $volt;
-                },
-            ]);
+		$di->set('currentUser', function() use($di) {
+			return User::findFirst($di->getSession()->get('user_id'));
+		});
 
-            return $view;
-        });
-    }
+		$di->set('currentDatetime', function() use($config) {
+			$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
+			return $current_datetime->setTimezone(new DateTimeZone($di->getConfig()->timezone));
+		});
+	}
 }

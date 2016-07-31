@@ -32,27 +32,27 @@ require APP_PATH . 'apps/config/services.php';
 require APP_PATH . 'apps/config/routes.php';
 
 try {
-    // Create an application
-    $application = new Application($di);
+	// Create an application
+	$application = new Application($di);
 
-    // Register the installed modules
-    $application->registerModules([
-        'frontend' => [
-            'className' => 'Application\Frontend\Module',
-            'path' => APP_PATH . 'apps/frontend/Module.php',
-        ],
-        'backend' => [
-            'className' => 'Application\Backend\Module',
-            'path' => APP_PATH . 'apps/backend/Module.php',
-        ],
-    ]);
+	// Register the installed modules
+	$application->registerModules([
+		'frontend' => [
+			'className' => 'Application\Frontend\Module',
+			'path'      => APP_PATH . 'apps/frontend/Module.php',
+		],
+		'backend' => [
+			'className' => 'Application\Backend\Module',
+			'path'      => APP_PATH . 'apps/backend/Module.php',
+		],
+	]);
 
-    // Handle the request
-    $response = $application->handle();
+	// Handle the request
+	$response = $application->handle();
 
-    $response->send();
+	$response->send();
 } catch (\Throwable $e) {
-    echo $e->getMessage();
+	echo $e->getMessage();
 } catch (\Exception $e) {
-    echo $e->getMessage();
+	echo $e->getMessage();
 }
