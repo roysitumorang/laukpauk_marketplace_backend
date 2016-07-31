@@ -1,5 +1,5 @@
 {{ partial('partials/header') }}
 
-<?php echo $this->getContent(); ?>
+{{ content() }}
 
 {{ partial('partials/footer') }}

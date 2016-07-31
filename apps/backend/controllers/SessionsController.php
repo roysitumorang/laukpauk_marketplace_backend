@@ -2,6 +2,7 @@
 
 namespace Application\Backend\Controllers;
 use Application\Models\User;
+use Phalcon\Http\Request;
 
 class SessionsController extends BaseController {
 	function initialize() {
@@ -27,7 +28,7 @@ class SessionsController extends BaseController {
 			]);
 			if ($user && $this->security->checkHash($password, $user->password)) {
 				$this->session->set('user_id', $user->id);
-				$this->flash->success('Welcome ' . $user->name);
+				$this->flashSession->success('Welcome ' . $user->name);
 				return $this->response->redirect('/admin/home');
 			}
 			$this->flash->error('Username dan/atau password salah');
@@ -40,8 +41,10 @@ class SessionsController extends BaseController {
 
 	function deleteAction() {
 		if ($this->session->get('user_id')) {
+			$request = new Request;
 			$this->session->destroy();
+			$this->flashSession->success('Anda sudah logout dari IP: ' . $request->getClientAddress());
 		}
-		return $this->response->redirect('/admin/home');
+		return $this->response->redirect('/admin/sessions/new');
 	}
 }
