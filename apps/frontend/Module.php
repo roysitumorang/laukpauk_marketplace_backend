@@ -21,6 +21,7 @@ class Module implements ModuleDefinitionInterface
         $loader->registerNamespaces([
             'Application\Frontend\Controllers' => APP_PATH . 'apps/frontend/controllers/',
             'Application\Frontend\Models'      => APP_PATH . 'apps/frontend/models/',
+            'Application\Frontend\Forms'       => APP_PATH . 'apps/frontend/forms',
             'Phalcon'                          => APP_PATH . 'apps/library/Phalcon/',
         ]);
 
