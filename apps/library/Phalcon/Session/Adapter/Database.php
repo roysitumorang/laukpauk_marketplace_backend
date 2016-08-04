@@ -111,7 +111,7 @@ class Database extends Adapter implements AdapterInterface {
 	function write($sessionId, $data) {
 		$options = $this->getOptions();
 		$request = new Request;
-		$row = $this->connection->fetchColumn(
+		$session_exists = $this->connection->fetchColumn(
 			sprintf(
 				'SELECT COUNT(*) FROM %s WHERE %s = ?',
 				$this->connection->escapeIdentifier($options['table']),
@@ -119,7 +119,7 @@ class Database extends Adapter implements AdapterInterface {
 			),
 			[$sessionId]
 		);
-		if (intval($row[0]) > 0) {
+		if ($session_exists) {
 			return $this->connection->execute(
 				sprintf(
 					'UPDATE %s SET %s = ?, %s = ?, %s = ?, %s = ?, %s = ? WHERE %s = ?',
