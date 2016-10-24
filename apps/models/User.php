@@ -3,43 +3,44 @@
 namespace Application\Models;
 
 use Application\Models\BaseModel;
-use Phalcon\Text;
 
 class User extends BaseModel {
-	const STATUS = ['hold', 'active', 'banned'];
-	const GENDERS = ['male', 'female'];
-	const USER_TYPES = ['admin', 'shopper', 'affiliator'];
+	const STATUS_HOLD   =  0;
+	const STATUS_ACTIVE =  1;
+	const STATUS_BANNED = -1;
+	const GENDERS       = ['Pria', 'Wanita'];
 
 	public $id;
-	public $username;
+	public $role_id;
 	public $name;
 	public $email;
 	public $password;
-	public $verified_at;
 	public $address;
 	public $zip_code;
-	public $city_id;
+	public $subdistrict_id;
 	public $phone;
 	public $mobile;
 	public $premium;
 	public $affiliation_url;
 	public $status;
-	public $user_type;
+	public $activated_at;
+	public $activation_token;
+	public $password_reset_token;
+	public $last_seen;
 	public $deposit;
 	public $ktp;
 	public $company;
 	public $npwp;
 	public $avatar;
-	public $activation_ip;
+	public $registration_ip;
 	public $twitter_id;
 	public $google_id;
 	public $facebook_id;
 	public $reward;
 	public $gender;
-	public $dob;
+	public $date_of_birth;
 	public $buy_point;
 	public $affiliation_point;
-	public $remember_token;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -51,31 +52,16 @@ class User extends BaseModel {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\Message', 'user_id', [
-			'alias'  => 'messages',
-			'params' => [
-				'order' => '[Application\Models\Message].id DESC',
-			],
-		]);
-		$this->hasMany('id', 'Application\Models\Message', 'user_id', [
-			'alias'  => 'unread_messages',
-			'params' => [
-				'conditions' => '[Application\Models\Message].updated_at IS NULL',
-				'order'      => '[Application\Models\Message].id DESC',
-			],
-		]);
-		$this->hasMany('id', 'Application\Models\Message', 'user_id', [
-			'alias'  => 'read_messages',
-			'params' => [
-				'conditions' => '[Application\Models\Message].updated_at IS NOT NULL',
-				'order'      => '[Application\Models\Message].id DESC',
-			],
-		]);
+		$this->belongsTo('role_id', 'Application\Models\Role', 'id');
 	}
 
 	function beforeCreate() {
 		parent::beforeCreate();
-		$this->status           = 'hold';
-		$this->activation_token = Text::random(Text::RANDOM_ALNUM, 32);
+		$this->status            = self::STATUS_HOLD;
+		$this->activation_token  = bin2hex(random_bytes(32));
+		$this->deposit           = 0;
+		$this->reward            = 0;
+		$this->buy_point         = 0;
+		$this->affiliation_point = 0;
 	}
 }

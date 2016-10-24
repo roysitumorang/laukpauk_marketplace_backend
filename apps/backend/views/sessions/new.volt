@@ -13,9 +13,9 @@
 				{{ form('/admin/sessions/create', 'method': 'POST') }}
 					<input type="hidden" name="{{ token_key }}" value="{{ token }}">
 					<div class="form-group mb-lg">
-						<label>Username</label>
+						<label>Email</label>
 						<div class="input-group input-group-icon">
-							{{ text_field('username', 'class': 'form-control input-lg') }}
+							{{ text_field('email', 'class': 'form-control input-lg') }}
 							<span class="input-group-addon">
 								<span class="icon icon-lg">
 									<i class="fa fa-user"></i>
@@ -46,7 +46,7 @@
 				<br>
 			</div>
 		</div>
-		<p class="text-center text-muted mt-md mb-md">&copy; Copyright 2015. All Rights Reserved.</p>
+		<p class="text-center text-muted mt-md mb-md">&copy; Copyright 2016. All Rights Reserved.</p>
 	</div>
 </section>
 <!-- end: page -->
