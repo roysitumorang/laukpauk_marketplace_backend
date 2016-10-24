@@ -9263,7 +9263,7 @@ CREATE TABLE `users` (
   `ktp` varchar(80) DEFAULT NULL,
   `company` varchar(100) DEFAULT NULL,
   `npwp` varchar(80) DEFAULT NULL,
-  `avatar` char(36) DEFAULT NULL,
+  `image_id` bigint(20) DEFAULT NULL,
   `registration_ip` varchar(41) NOT NULL,
   `twitter_id` bigint(20) DEFAULT NULL,
   `google_id` bigint(20) DEFAULT NULL,
@@ -9292,14 +9292,15 @@ CREATE TABLE `users` (
   KEY `premium` (`premium`),
   KEY `status` (`status`),
   KEY `subdistrict_id` (`subdistrict_id`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `image_id` (`image_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users` */
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`avatar`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`image_id`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
 (1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'0',NULL,NULL,NULL,NULL,'::1',NULL,NULL,NULL,'0','Pria','1981-07-06','0','0',1,'2016-10-25 01:07:27',NULL,NULL);
 
 UNLOCK TABLES;
