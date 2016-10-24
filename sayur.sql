@@ -96,6 +96,36 @@ LOCK TABLES `banners` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `brands` */
+
+DROP TABLE IF EXISTS `brands`;
+
+CREATE TABLE `brands` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `permalink` varchar(50) NOT NULL,
+  `picture` char(36) NOT NULL,
+  `description` text,
+  `meta_title` varchar(200) DEFAULT NULL,
+  `meta_desc` varchar(250) DEFAULT NULL,
+  `meta_keyword` varchar(200) DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `permalink` (`permalink`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `brands` */
+
+LOCK TABLES `brands` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `captcha_codes` */
 
 DROP TABLE IF EXISTS `captcha_codes`;
@@ -1218,6 +1248,84 @@ LOCK TABLES `notifications` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `order_products` */
+
+DROP TABLE IF EXISTS `order_products`;
+
+CREATE TABLE `order_products` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `quantity` smallint(6) NOT NULL,
+  `buy_point` decimal(10,0) NOT NULL,
+  `affiliate_point` decimal(10,0) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `order_id` (`order_id`,`product_id`),
+  KEY `product_id` (`product_id`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `order_products` */
+
+LOCK TABLES `order_products` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `orders` */
+
+DROP TABLE IF EXISTS `orders`;
+
+CREATE TABLE `orders` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `code` varchar(20) NOT NULL,
+  `name` varchar(80) NOT NULL,
+  `email` varchar(80) NOT NULL,
+  `address` varchar(200) NOT NULL,
+  `subdistrict_id` bigint(20) NOT NULL,
+  `zip_code` char(5) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `mobile` varchar(20) DEFAULT NULL,
+  `tracking_number` varchar(20) DEFAULT NULL,
+  `payment` text,
+  `final_bill` decimal(10,0) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `buyer_id` bigint(20) DEFAULT NULL,
+  `admin_fee` decimal(10,0) NOT NULL,
+  `original_bill` decimal(10,0) NOT NULL,
+  `ip_address` varchar(41) DEFAULT NULL,
+  `affiliate_user_id` bigint(20) DEFAULT NULL,
+  `shipping_fee` decimal(10,0) DEFAULT NULL,
+  `detail` text,
+  `coupon_id` bigint(20) DEFAULT NULL,
+  `estimated_delivery` datetime NOT NULL,
+  `actual_delivery` datetime DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
+  KEY `affiliate_user_id` (`affiliate_user_id`),
+  KEY `buyer_id` (`buyer_id`),
+  KEY `coupon_id` (`coupon_id`),
+  KEY `created_by` (`created_by`),
+  KEY `status` (`status`),
+  KEY `subdistrict_id` (`subdistrict_id`),
+  KEY `updated_by` (`updated_by`),
+  KEY `actual_delivery` (`actual_delivery`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `orders` */
+
+LOCK TABLES `orders` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `page_categories` */
 
 DROP TABLE IF EXISTS `page_categories`;
@@ -1431,36 +1539,6 @@ LOCK TABLES `points` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_brands` */
-
-DROP TABLE IF EXISTS `product_brands`;
-
-CREATE TABLE `product_brands` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `permalink` varchar(50) NOT NULL,
-  `picture` char(36) NOT NULL,
-  `description` text,
-  `meta_title` varchar(200) DEFAULT NULL,
-  `meta_desc` varchar(250) DEFAULT NULL,
-  `meta_keyword` varchar(200) DEFAULT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `permalink` (`permalink`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_brands` */
-
-LOCK TABLES `product_brands` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `product_cities` */
 
 DROP TABLE IF EXISTS `product_cities`;
@@ -1584,84 +1662,6 @@ LOCK TABLES `product_notifications` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_order_items` */
-
-DROP TABLE IF EXISTS `product_order_items`;
-
-CREATE TABLE `product_order_items` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `order_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
-  `quantity` smallint(6) NOT NULL,
-  `buy_point` decimal(10,0) NOT NULL,
-  `affiliate_point` decimal(10,0) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `order_id` (`order_id`,`product_id`),
-  KEY `product_id` (`product_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_order_items` */
-
-LOCK TABLES `product_order_items` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `product_orders` */
-
-DROP TABLE IF EXISTS `product_orders`;
-
-CREATE TABLE `product_orders` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `code` varchar(20) NOT NULL,
-  `name` varchar(80) NOT NULL,
-  `email` varchar(80) NOT NULL,
-  `address` varchar(200) NOT NULL,
-  `subdistrict_id` bigint(20) NOT NULL,
-  `zip_code` char(5) NOT NULL,
-  `phone` varchar(20) NOT NULL,
-  `mobile` varchar(20) DEFAULT NULL,
-  `tracking_number` varchar(20) DEFAULT NULL,
-  `payment` text,
-  `final_bill` decimal(10,0) NOT NULL,
-  `status` varchar(20) NOT NULL,
-  `buyer_id` bigint(20) DEFAULT NULL,
-  `admin_fee` decimal(10,0) NOT NULL,
-  `original_bill` decimal(10,0) NOT NULL,
-  `ip_address` varchar(41) DEFAULT NULL,
-  `affiliate_user_id` bigint(20) DEFAULT NULL,
-  `shipping_fee` decimal(10,0) DEFAULT NULL,
-  `detail` text,
-  `coupon_id` bigint(20) DEFAULT NULL,
-  `estimated_delivery` datetime NOT NULL,
-  `actual_delivery` datetime DEFAULT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code` (`code`),
-  KEY `affiliate_user_id` (`affiliate_user_id`),
-  KEY `buyer_id` (`buyer_id`),
-  KEY `coupon_id` (`coupon_id`),
-  KEY `created_by` (`created_by`),
-  KEY `status` (`status`),
-  KEY `subdistrict_id` (`subdistrict_id`),
-  KEY `updated_by` (`updated_by`),
-  KEY `actual_delivery` (`actual_delivery`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_orders` */
-
-LOCK TABLES `product_orders` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `product_rates` */
 
 DROP TABLE IF EXISTS `product_rates`;
@@ -1718,70 +1718,6 @@ LOCK TABLES `product_reviews` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_slot_items` */
-
-DROP TABLE IF EXISTS `product_slot_items`;
-
-CREATE TABLE `product_slot_items` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_slot_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
-  `show` tinyint(1) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `product_id` (`product_id`,`product_slot_id`),
-  KEY `product_slot_id` (`product_slot_id`),
-  KEY `created_by` (`created_by`),
-  KEY `show` (`show`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_slot_items` */
-
-LOCK TABLES `product_slot_items` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `product_slots` */
-
-DROP TABLE IF EXISTS `product_slots`;
-
-CREATE TABLE `product_slots` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `subject` varchar(100) NOT NULL,
-  `permalink` varchar(100) NOT NULL,
-  `picture` char(36) DEFAULT NULL,
-  `description` text NOT NULL,
-  `meta_title` varchar(200) DEFAULT NULL,
-  `meta_desc` varchar(200) DEFAULT NULL,
-  `meta_keyword` varchar(200) DEFAULT NULL,
-  `show` tinyint(1) DEFAULT NULL,
-  `displayed_at_home` tinyint(1) DEFAULT NULL,
-  `position` int(11) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `permalink` (`permalink`),
-  UNIQUE KEY `subject` (`subject`),
-  UNIQUE KEY `picture` (`picture`),
-  KEY `created_by` (`created_by`),
-  KEY `displayed_at_home` (`displayed_at_home`),
-  KEY `position` (`position`),
-  KEY `show` (`show`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_slots` */
-
-LOCK TABLES `product_slots` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `product_variants` */
 
 DROP TABLE IF EXISTS `product_variants`;
@@ -1813,31 +1749,6 @@ LOCK TABLES `product_variants` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_wishlists` */
-
-DROP TABLE IF EXISTS `product_wishlists`;
-
-CREATE TABLE `product_wishlists` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) DEFAULT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `product_id` (`product_id`,`user_id`),
-  KEY `user_id` (`user_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_wishlists` */
-
-LOCK TABLES `product_wishlists` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `products` */
 
 DROP TABLE IF EXISTS `products`;
@@ -1857,7 +1768,7 @@ CREATE TABLE `products` (
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
   `stock` smallint(6) NOT NULL,
-  `product_brand_id` bigint(20) DEFAULT NULL,
+  `brand_id` bigint(20) DEFAULT NULL,
   `buy_point` decimal(10,0) NOT NULL,
   `affiliate_point` decimal(10,0) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -1869,11 +1780,11 @@ CREATE TABLE `products` (
   UNIQUE KEY `code` (`code`),
   KEY `created_by` (`created_by`),
   KEY `name` (`name`),
-  KEY `product_brand_id` (`product_brand_id`),
   KEY `product_category_id` (`product_category_id`),
   KEY `show` (`show`),
   KEY `status` (`status`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `brand_id` (`brand_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `products` */
@@ -2182,6 +2093,70 @@ CREATE TABLE `short_urls` (
 /*Data for the table `short_urls` */
 
 LOCK TABLES `short_urls` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `slot_products` */
+
+DROP TABLE IF EXISTS `slot_products`;
+
+CREATE TABLE `slot_products` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `slot_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `show` tinyint(1) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slot_id` (`slot_id`,`product_id`),
+  KEY `created_by` (`created_by`),
+  KEY `show` (`show`),
+  KEY `updated_by` (`updated_by`),
+  KEY `product_id` (`product_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `slot_products` */
+
+LOCK TABLES `slot_products` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `slots` */
+
+DROP TABLE IF EXISTS `slots`;
+
+CREATE TABLE `slots` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `subject` varchar(100) NOT NULL,
+  `permalink` varchar(100) NOT NULL,
+  `picture` char(36) DEFAULT NULL,
+  `description` text NOT NULL,
+  `meta_title` varchar(200) DEFAULT NULL,
+  `meta_desc` varchar(200) DEFAULT NULL,
+  `meta_keyword` varchar(200) DEFAULT NULL,
+  `show` tinyint(1) DEFAULT NULL,
+  `displayed_at_home` tinyint(1) DEFAULT NULL,
+  `position` int(11) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permalink` (`permalink`),
+  UNIQUE KEY `subject` (`subject`),
+  UNIQUE KEY `picture` (`picture`),
+  KEY `created_by` (`created_by`),
+  KEY `displayed_at_home` (`displayed_at_home`),
+  KEY `position` (`position`),
+  KEY `show` (`show`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `slots` */
+
+LOCK TABLES `slots` WRITE;
 
 UNLOCK TABLES;
 
@@ -9326,6 +9301,31 @@ LOCK TABLES `users` WRITE;
 
 insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`avatar`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
 (1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'0',NULL,NULL,NULL,NULL,'::1',NULL,NULL,NULL,'0','Pria','1981-07-06','0','0',1,'2016-10-25 01:07:27',NULL,NULL);
+
+UNLOCK TABLES;
+
+/*Table structure for table `wishlists` */
+
+DROP TABLE IF EXISTS `wishlists`;
+
+CREATE TABLE `wishlists` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_id` (`product_id`,`user_id`),
+  KEY `user_id` (`user_id`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `wishlists` */
+
+LOCK TABLES `wishlists` WRITE;
 
 UNLOCK TABLES;
 
