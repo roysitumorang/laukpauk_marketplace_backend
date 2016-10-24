@@ -7,29 +7,26 @@ $di->set('router', function() {
 
 	$router->setDefaultModule('frontend');
 
-	$router->add('/admin', [
+	$router->add('/admin(\/home)?', [
 		'module'     => 'backend',
 		'controller' => 'home',
 		'action'     => 'index',
 	]);
 
-	$router->add('/admin/home', [
+	$router->add('/admin/users(\/index)?', [
 		'module'     => 'backend',
-		'controller' => 'home',
+		'controller' => 'users',
 		'action'     => 'index',
 	]);
 
-	$router->add('/admin/home/', [
+	$router->add('/admin/:controller/:action/:params', [
 		'module'     => 'backend',
-		'controller' => 'home',
-		'action'     => 'index',
+		'controller' => 1,
+		'action'     => 2,
+		'params'     => 3,
 	]);
 
-	$router->add('/admin/sessions/:action', [
-		'module'     => 'backend',
-		'controller' => 'sessions',
-		'action'     => 1,
-	]);
+	$router->removeExtraSlashes(true);
 
 	return $router;
 });

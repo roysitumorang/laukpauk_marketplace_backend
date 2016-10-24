@@ -15,7 +15,6 @@ class User extends BaseModel {
 	public $name;
 	public $email;
 	public $password;
-	public $verified;
 	public $verified_at;
 	public $address;
 	public $zip_code;

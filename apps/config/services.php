@@ -3,7 +3,7 @@
 use Phalcon\Logger;
 use Phalcon\Logger\Adapter\File;
 use Phalcon\Assets\Manager as AssetsManager;
-use Phalcon\Db\Adapter\Pdo\Postgresql;
+use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Mvc\Model\Transaction\Transaction as TransactionManager;
 use Phalcon\Mvc\Model\Metadata\Memory;
 use Phalcon\Mvc\Url;
@@ -44,7 +44,7 @@ $di->set('url', function() use($config) {
  * Database connection is created based in the parameters defined in the configuration file
  */
 $di->set('db', function() use($config) {
-	return new Postgresql([
+	return new Mysql([
 		'host'       => $config->database->host,
 		'dbname'     => $config->database->dbname,
 		'username'   => $config->database->username,
