@@ -31,7 +31,6 @@ class User extends BaseModel {
 	public $ktp;
 	public $company;
 	public $npwp;
-	public $image_id;
 	public $registration_ip;
 	public $twitter_id;
 	public $google_id;

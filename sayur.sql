@@ -935,6 +935,8 @@ DROP TABLE IF EXISTS `images`;
 CREATE TABLE `images` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `parent_id` bigint(20) DEFAULT NULL,
+  `reference_name` varchar(20) NOT NULL,
+  `reference_id` bigint(20) NOT NULL,
   `name` char(36) NOT NULL,
   `width` smallint(6) NOT NULL,
   `height` smallint(6) NOT NULL,
@@ -948,7 +950,9 @@ CREATE TABLE `images` (
   KEY `width` (`width`),
   KEY `height` (`height`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `reference_id` (`reference_id`),
+  KEY `reference_name` (`reference_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `images` */
@@ -1116,7 +1120,6 @@ CREATE TABLE `news` (
   `permalink` varchar(100) NOT NULL,
   `custom_link` varchar(200) DEFAULT NULL,
   `body` text,
-  `picture` char(36) DEFAULT NULL,
   `meta_title` varchar(100) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
@@ -1367,7 +1370,6 @@ CREATE TABLE `pages` (
   `url` varchar(100) DEFAULT NULL,
   `body` text,
   `url_target` varchar(6) NOT NULL,
-  `picture` char(36) DEFAULT NULL,
   `meta_title` varchar(100) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
@@ -1425,7 +1427,6 @@ CREATE TABLE `point_categories` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `permalink` varchar(50) NOT NULL,
-  `picture` char(36) DEFAULT NULL,
   `show` tinyint(1) NOT NULL,
   `description` text,
   `meta_title` varchar(200) DEFAULT NULL,
@@ -1446,31 +1447,6 @@ CREATE TABLE `point_categories` (
 /*Data for the table `point_categories` */
 
 LOCK TABLES `point_categories` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `point_images` */
-
-DROP TABLE IF EXISTS `point_images`;
-
-CREATE TABLE `point_images` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `point_id` bigint(20) NOT NULL,
-  `name` char(36) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `point_id` (`point_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `point_images` */
-
-LOCK TABLES `point_images` WRITE;
 
 UNLOCK TABLES;
 
@@ -1539,6 +1515,39 @@ LOCK TABLES `points` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `product_categories` */
+
+DROP TABLE IF EXISTS `product_categories`;
+
+CREATE TABLE `product_categories` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `parent_id` bigint(20) DEFAULT NULL,
+  `name` varchar(50) NOT NULL,
+  `permalink` varchar(50) NOT NULL,
+  `show` tinyint(1) NOT NULL,
+  `description` text,
+  `meta_title` varchar(200) DEFAULT NULL,
+  `meta_desc` varchar(250) DEFAULT NULL,
+  `meta_keyword` varchar(200) DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permalink` (`permalink`),
+  KEY `parent_id` (`parent_id`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  KEY `show` (`show`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `product_categories` */
+
+LOCK TABLES `product_categories` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `product_cities` */
 
 DROP TABLE IF EXISTS `product_cities`;
@@ -1571,7 +1580,7 @@ CREATE TABLE `product_dimensions` (
   `product_id` bigint(20) NOT NULL,
   `item` varchar(20) NOT NULL,
   `size` decimal(10,0) NOT NULL,
-  `unit` varchar(10) NOT NULL,
+  `stock_keeping_unit` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1609,31 +1618,6 @@ CREATE TABLE `product_hits` (
 /*Data for the table `product_hits` */
 
 LOCK TABLES `product_hits` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `product_images` */
-
-DROP TABLE IF EXISTS `product_images`;
-
-CREATE TABLE `product_images` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
-  `name` char(36) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `product_id` (`product_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_images` */
-
-LOCK TABLES `product_images` WRITE;
 
 UNLOCK TABLES;
 
@@ -9263,7 +9247,6 @@ CREATE TABLE `users` (
   `ktp` varchar(80) DEFAULT NULL,
   `company` varchar(100) DEFAULT NULL,
   `npwp` varchar(80) DEFAULT NULL,
-  `image_id` bigint(20) DEFAULT NULL,
   `registration_ip` varchar(41) NOT NULL,
   `twitter_id` bigint(20) DEFAULT NULL,
   `google_id` bigint(20) DEFAULT NULL,
@@ -9292,16 +9275,15 @@ CREATE TABLE `users` (
   KEY `premium` (`premium`),
   KEY `status` (`status`),
   KEY `subdistrict_id` (`subdistrict_id`),
-  KEY `updated_by` (`updated_by`),
-  KEY `image_id` (`image_id`)
+  KEY `updated_by` (`updated_by`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users` */
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`image_id`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'0',NULL,NULL,NULL,NULL,'::1',NULL,NULL,NULL,'0','Pria','1981-07-06','0','0',1,'2016-10-25 01:07:27',NULL,NULL);
+insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'0',NULL,NULL,NULL,'::1',NULL,NULL,NULL,'0','Pria','1981-07-06','0','0',1,'2016-10-25 01:07:27',NULL,NULL);
 
 UNLOCK TABLES;
 
