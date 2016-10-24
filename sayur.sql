@@ -1662,6 +1662,34 @@ LOCK TABLES `product_orders` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `product_rates` */
+
+DROP TABLE IF EXISTS `product_rates`;
+
+CREATE TABLE `product_rates` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `price` int(11) NOT NULL,
+  `quantity` decimal(10,0) NOT NULL,
+  `stock_keeping_unit` varchar(10) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_id` (`product_id`,`quantity`,`stock_keeping_unit`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  KEY `quantity` (`quantity`),
+  KEY `stock_keeping_unit` (`stock_keeping_unit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `product_rates` */
+
+LOCK TABLES `product_rates` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `product_reviews` */
 
 DROP TABLE IF EXISTS `product_reviews`;
@@ -1754,11 +1782,11 @@ LOCK TABLES `product_slots` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_types` */
+/*Table structure for table `product_variants` */
 
-DROP TABLE IF EXISTS `product_types`;
+DROP TABLE IF EXISTS `product_variants`;
 
-CREATE TABLE `product_types` (
+CREATE TABLE `product_variants` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
   `name` varchar(100) NOT NULL,
@@ -1779,9 +1807,9 @@ CREATE TABLE `product_types` (
   KEY `updated_by` (`updated_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `product_types` */
+/*Data for the table `product_variants` */
 
-LOCK TABLES `product_types` WRITE;
+LOCK TABLES `product_variants` WRITE;
 
 UNLOCK TABLES;
 
