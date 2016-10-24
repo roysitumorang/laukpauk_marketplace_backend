@@ -21,7 +21,7 @@ class User extends BaseModel {
 	public $phone;
 	public $mobile;
 	public $premium;
-	public $affiliation_url;
+	public $affiliate_link;
 	public $status;
 	public $activated_at;
 	public $activation_token;
@@ -40,7 +40,7 @@ class User extends BaseModel {
 	public $gender;
 	public $date_of_birth;
 	public $buy_point;
-	public $affiliation_point;
+	public $affiliate_point;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -57,11 +57,11 @@ class User extends BaseModel {
 
 	function beforeCreate() {
 		parent::beforeCreate();
-		$this->status            = self::STATUS_HOLD;
-		$this->activation_token  = bin2hex(random_bytes(32));
-		$this->deposit           = 0;
-		$this->reward            = 0;
-		$this->buy_point         = 0;
-		$this->affiliation_point = 0;
+		$this->status           = self::STATUS_HOLD;
+		$this->activation_token = bin2hex(random_bytes(32));
+		$this->deposit          = 0;
+		$this->reward           = 0;
+		$this->buy_point        = 0;
+		$this->affiliate_point  = 0;
 	}
 }

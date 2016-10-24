@@ -895,6 +895,8 @@ CREATE TABLE `product_orders` (
   `shipping_fee` decimal(10,0) DEFAULT NULL,
   `detail` text,
   `coupon_id` bigint(20) DEFAULT NULL,
+  `estimated_delivery` datetime NOT NULL,
+  `actual_delivery` datetime DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -907,7 +909,8 @@ CREATE TABLE `product_orders` (
   KEY `created_by` (`created_by`),
   KEY `status` (`status`),
   KEY `subdistrict_id` (`subdistrict_id`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `actual_delivery` (`actual_delivery`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Table structure for table `product_reviews` */
@@ -1346,7 +1349,7 @@ CREATE TABLE `users` (
   `phone` varchar(20) DEFAULT NULL,
   `mobile` varchar(20) DEFAULT NULL,
   `premium` tinyint(1) NOT NULL,
-  `affiliation_url` varchar(200) DEFAULT NULL,
+  `affiliate_link` varchar(200) DEFAULT NULL,
   `status` smallint(6) NOT NULL,
   `activated_at` datetime DEFAULT NULL,
   `activation_token` char(32) DEFAULT NULL,
@@ -1365,7 +1368,7 @@ CREATE TABLE `users` (
   `gender` varchar(6) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
   `buy_point` decimal(10,0) NOT NULL,
-  `affiliation_point` decimal(10,0) NOT NULL,
+  `affiliate_point` decimal(10,0) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
