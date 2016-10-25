@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Phalcon\Debug;
 use Phalcon\Mvc\Application;
 use Phalcon\Di\FactoryDefault;

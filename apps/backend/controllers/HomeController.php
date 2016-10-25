@@ -8,5 +8,7 @@ class HomeController extends BaseController {
 		parent::initialize();
 	}
 
-	function indexAction() {}
+	function indexAction() {
+		$this->view->menu = $this->_menu();
+	}
 }
