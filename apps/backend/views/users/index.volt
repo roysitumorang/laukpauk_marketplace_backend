@@ -30,10 +30,10 @@
 				{{ flashSession.output() }}
 				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/new" title="Tambah Member">Members Add</a><br><br>
 				<div style="padding:10px;background:#e5f2ff;font-size:14px;color:#333333">
-					<strong>Total Members:</strong>&nbsp;{{ count(unbanned_users) }} members /
+					<strong>Total Members:</strong>&nbsp;{{ total_users }} members /
 					<font size="2">
-						<strong>Aktif:</strong>&nbsp;{{ count(active_users) }} /
-						<strong>Pending:</strong>&nbsp;{{ count(pending_users) }}
+						<strong>Aktif:</strong>&nbsp;{{ total_active_users }} /
+						<strong>Pending:</strong>&nbsp;{{ total_pending_users }}
 					</font>
 				</div>
 				<table class="table table-striped">
@@ -42,18 +42,12 @@
 							<!-- Main Content //-->
 							<form action="/admin/members" method="GET">
 								<b>Cari berdasarkan:</b>
-								<select name="vCompare" class="form form-control form-20">
-									<option{if $vCompare == 'vUsername'} selected{/if} value="vUsername">Username</option>
-									<option{if $vCompare == 'vName'} selected{/if} value="vName">Nama Member</option>
-									<option{if $vCompare == 'vEmail'} selected{/if} value="vEmail">Email</option>
-									<option{if $vCompare == 'vCity'} selected{/if} value="vCity">Kota</option>
-									<option{if $vCompare == 'vZIP'} selected{/if} value="vZIP">Kode Pos</option>
-									<option{if $vCompare == 'iType'} selected{/if} value="iType">Member Type</option>
-									<option{if $vCompare == 'dReg'} selected{/if} value="dReg">Registration Date (YYYY-mm-dd YYYY-mm-dd)</option>
-									<option{if $vCompare == 'dAktif'} selected{/if} value="dAktif">Active Date (YYYY-mm-dd YYYY-mm-dd)</option>
-									<option{if $vCompare == 'iStatus'} selected{/if} value="iStatus">Member Active Status</option>
+								<select name="based_on" class="form form-control form-20">
+									{% for value, label in search_options %}
+									<option value="{{ value }}"{% if based_on == value %} selected{% endif %}>{{ label }}</option>
+									{% endfor %}
 								</select>&nbsp;&nbsp;
-								<input type="text" name="vTeks" value="{$vTeks}" class="form form-control form-40" size="40">&nbsp;
+								<input type="text" name="keyword" value="{{ keyword }}" class="form form-control form-40" size="40">&nbsp;
 								<input type="submit" name="submit" value="CARI" class="btn btn-info">&nbsp;
 								<input type="submit" name="print" value="Excel" class="btn btn-success">&nbsp;
 								<input type="submit" name="print" value="CSV" class="btn btn-warning">
@@ -65,22 +59,20 @@
 					<thead>
 						<tr>
 							<th width="5%"><b>No</b></th>
-							<th><b>Username</b></th>
 							<th><b>Name</b></th>
 							<th colspan="2"><b>Status</b></th>
 							<th><b>#</b></th>
 						</tr>
 					</thead>
 					<tbody>
-					{% if !users %}
+					{% if !page.items %}
 						<tr>
-							<td colspan="9">No Members List</td>
+							<td colspan="5">No Members List</td>
 						</tr>
 					{% else %}
-						{% for user in users %}
+						{% for user in page.items %}
 						<tr>
 							<td>{{ user.no }}</td>
-							<td><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.username }}</a></td>
 							<td>
 								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
 								<br>
@@ -95,7 +87,7 @@
 								{% endif %}
 							</td>
 							<td>
-								Reg Date:&nbsp;{{ date_format(user.created_at, '%d %B %Y') }}<br>
+								Reg Date:&nbsp;{{ date('d B Y', strtotime(user.created_at)) }}<br>
 								<i class="fa fa-user"></i>&nbsp;
 								{% if !user.premium %}
 								<b><font color="#000099">FREE</font></b>
@@ -107,15 +99,15 @@
 								Total Poin: {{ number_format(user.buy_point) }}
 							</td>
 							<td>
-								{% if user.status == 'hold' %}
+								{% if user.status == hold %}
 								<a href="javascript:confirm('Anda yakin aktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/activate')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
 								<b><font color="#FF0000">HOLD</font></b> ({$listMembers[i].Item.vAktif|no_value})&nbsp;
 								<a href="javascript:open_window('/admin/emails/new?user_id={{ user.id }}')" title="send email"><img src="/backend/images/send-email-small.png" border="0"></a>
 								{% else %}
-								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/deactivate')" title="Hold"><img src="assets/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
+								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/deactivate')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
 								{% endif %}
 								<br><br>
-								{% if user.status == 'active' and !user.verified_at %}
+								{% if user.status == active and !user.verified_at %}
 								<a href="javascript:confirm('Anda yakin ingin melakukan verifikasi terhadap member ini ?')&&(location.href='/admin/users/{{ user.id }}/verify')" title="Verify Progress"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;
 								<b><font color="#000000">VERIFIED</font></b>
 								{% else %}
@@ -131,15 +123,14 @@
 					{% endif %}
 					</tbody>
 				</table>
-				{% if users %}
+				{% if multi_page %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
-						{% if !memberLink %}
-						<i>None</i>
-						{% else %}
-						{{ memberLink }}
-						{% endif %}
+						<a href="/admin/users">1</a>
+						<a href="/admin/users?page={{ page.before }}">{{ page.before }}</a>
+						<a href="/admin/users?page={{ page.next }}">{{ page.next }}</a>
+						<a href="/admin/users?page={{ page.last }}">{{ page.last }}</a>
 					</p>
 				</div>
 				{% endif %}
