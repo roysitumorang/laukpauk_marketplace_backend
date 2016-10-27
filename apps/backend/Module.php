@@ -4,11 +4,16 @@ namespace Application\Backend;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Phalcon\Loader;
-use Phalcon\Mvc\View;
+use Exception;
+use Phalcon\Dispatcher;
 use Phalcon\DiInterface;
-use Phalcon\Mvc\Dispatcher;
+use Phalcon\Events\Event;
+use Phalcon\Events\Manager as EventsManager;
+use Phalcon\Loader;
+use Phalcon\Mvc\Dispatcher as MvcDispatcher;
+use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt;
 use Application\Models\User;
 
@@ -47,9 +52,21 @@ class Module implements ModuleDefinitionInterface {
 
 		// Registering a dispatcher
 		$di->set('dispatcher', function() {
-			$dispatcher = new Dispatcher();
+			// Create an EventsManager
+			$dispatcher    = new MvcDispatcher;
+			$eventsManager = new EventsManager;
 			$dispatcher->setDefaultNamespace('Application\Backend\Controllers');
-
+			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, Exception $exception) {
+				if ($exception instanceof DispatchException || in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
+					$dispatcher->forward([
+						'controller' => 'Home',
+						'action'     => 'route404',
+					]);
+					return false;
+				}
+				return true;
+			});
+			$dispatcher->setEventsManager($eventsManager);
 			return $dispatcher;
 		});
 
