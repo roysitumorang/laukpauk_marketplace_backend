@@ -1,0 +1,66 @@
+/* modified by pogosNET - All rights reserved @2005 */
+
+.font_8 { font-family: verdana; font-color: #000000; font-size: 8pt }
+.font_7 { font-family: verdana; font-color: #000000; font-size: 7pt }
+.font_9 { font-family: verdana; font-color: #000000; font-size: 9pt }
+.font_10 { font-family: verdana; font-color: #000000; font-size: 10pt }
+
+.tableborder_1 {
+	BORDER-RIGHT: #000000 2px solid;
+	BORDER-LEFT: #000000 2px solid;
+	BORDER-BOTTOM: #000000 2px solid;
+	BORDER-TOP: #000000 2px solid;
+}
+
+.tableborder_2 {
+	BORDER-RIGHT: #000000 2px solid;
+	BORDER-LEFT: #000000 2px solid;
+	BORDER-BOTTOM: #000000 2px solid;
+	BORDER-TOP: #000000 2px solid;
+}
+
+.tableborder_3 {
+	BORDER-RIGHT: #ffffff 4px solid;
+	BORDER-TOP: #ffffff 4px solid;
+	BORDER-LEFT: #ffffff 4px solid;
+	BORDER-BOTTOM: #ffffff 4px solid;
+}
+
+.tableborder_4 {
+	BORDER-RIGHT: #CCCCCC 1px solid;
+	BORDER-TOP: #CCCCCC 1px solid;
+	BORDER-LEFT: #CCCCCC 1px solid;
+	BORDER-BOTTOM: #CCCCCC 1px solid;
+}
+
+.tableborder_5 {
+	BORDER-RIGHT: #FFFFFF 4px solid;
+	BORDER-TOP: #FFFFFF 4px solid;
+	BORDER-LEFT: #FFFFFF 4px solid;
+	BORDER-BOTTOM: #FFFFFF 4px solid;
+}
+
+A.main:link {font-family: verdana; text-decoration: none}
+A.main:visited {font-family: verdana; text-decoration: none}
+A.main:active {font-family: verdana; text-decoration: none}
+A.main:hover {font-family: verdana; text-decoration: underline}
+
+A.menu_black:link {font-family: verdana; color:#000000; text-decoration: none}
+A.menu_black:visited {font-family: verdana; color:#000000; text-decoration: none}
+A.menu_black:active {font-family: verdana; color:#000000; text-decoration: none}
+A.menu_black:hover {font-family: verdana; color:#000000; text-decoration: underline}
+
+.form-20 { width: 20%; display: inline; }
+.form-20-block { width: 20%; }
+
+.form-30 { width: 30%; display: inline; }
+.form-30-block { width: 30%; }
+
+.form-40 { width: 40%; display: inline; }
+.form-40-block { width: 40%; }
+
+.form-50 { width: 50%; display: inline; }
+.form-50-block { width: 50%; }
+
+.form-60 { width: 60%; display: inline; }
+.form-60-block { width: 60%; }

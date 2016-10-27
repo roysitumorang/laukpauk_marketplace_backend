@@ -2,6 +2,8 @@
 
 namespace Application\Backend\Controllers;
 
+use Phalcon\Mvc\View;
+
 class HomeController extends BaseController {
 	function indexAction() {
 		$this->view->menu = $this->_menu();
@@ -9,7 +11,6 @@ class HomeController extends BaseController {
 
 	function route404Action() {
 		$this->response->setStatusCode(404, 'Not Found');
-		$this->view->pick(['_layouts/error-404']);
-		$this->response->send();
+		$this->view->setRenderLevel(View::LEVEL_ACTION_VIEW);
 	}
 }
