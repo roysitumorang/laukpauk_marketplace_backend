@@ -23,4 +23,8 @@ return new Config([
 	],
 	'timezone' => 'Asia/Jakarta',
 	'per_page' => 10,
+	'upload'   => [
+		'max_size' => 2097152,
+		'path'     => APP_PATH . 'public/assets/images/'
+	],
 ]);

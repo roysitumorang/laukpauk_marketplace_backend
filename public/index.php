@@ -5,19 +5,20 @@ declare(strict_types=1);
 use Phalcon\Debug;
 use Phalcon\Mvc\Application;
 use Phalcon\Di\FactoryDefault;
+use Throwable;
 
 define('APP_PATH', realpath('..') . '/');
 
 /**
  * Enable framework debugger
  */
-$debug = new Debug();
+$debug = new Debug;
 $debug->listen();
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
  */
-$di = new FactoryDefault();
+$di = new FactoryDefault;
 
 /**
  * Read the configuration
@@ -53,8 +54,6 @@ try {
 	$response = $application->handle();
 
 	$response->send();
-} catch (\Throwable $e) {
-	echo $e->getMessage();
-} catch (\Exception $e) {
+} catch (Throwable $e) {
 	echo $e->getMessage();
 }

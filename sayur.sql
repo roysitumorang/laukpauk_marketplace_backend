@@ -928,39 +928,6 @@ LOCK TABLES `emails` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `images` */
-
-DROP TABLE IF EXISTS `images`;
-
-CREATE TABLE `images` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `parent_id` bigint(20) DEFAULT NULL,
-  `reference_name` varchar(20) NOT NULL,
-  `reference_id` bigint(20) NOT NULL,
-  `name` char(36) NOT NULL,
-  `width` smallint(6) NOT NULL,
-  `height` smallint(6) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `parent_id` (`parent_id`),
-  KEY `name` (`name`),
-  KEY `width` (`width`),
-  KEY `height` (`height`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`),
-  KEY `reference_id` (`reference_id`),
-  KEY `reference_name` (`reference_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `images` */
-
-LOCK TABLES `images` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `invoices` */
 
 DROP TABLE IF EXISTS `invoices`;
@@ -1524,7 +1491,8 @@ CREATE TABLE `product_categories` (
   `parent_id` bigint(20) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `permalink` varchar(50) NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `picture` char(36) DEFAULT NULL,
+  `published` tinyint(1) NOT NULL,
   `description` text,
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(250) DEFAULT NULL,
@@ -1535,11 +1503,12 @@ CREATE TABLE `product_categories` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `permalink` (`permalink`),
+  UNIQUE KEY `picture` (`picture`),
   KEY `parent_id` (`parent_id`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
-  KEY `show` (`show`),
-  KEY `name` (`name`)
+  KEY `name` (`name`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `product_categories` */
@@ -9188,6 +9157,35 @@ CREATE TABLE `testimonies` (
 /*Data for the table `testimonies` */
 
 LOCK TABLES `testimonies` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `thumbnails` */
+
+DROP TABLE IF EXISTS `thumbnails`;
+
+CREATE TABLE `thumbnails` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `reference_type` varchar(20) NOT NULL,
+  `reference_id` bigint(20) NOT NULL,
+  `width` smallint(6) NOT NULL,
+  `height` smallint(6) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reference_type` (`reference_type`,`reference_id`,`width`,`height`),
+  KEY `width` (`width`),
+  KEY `height` (`height`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  KEY `reference_id` (`reference_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `thumbnails` */
+
+LOCK TABLES `thumbnails` WRITE;
 
 UNLOCK TABLES;
 

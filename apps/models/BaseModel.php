@@ -17,7 +17,7 @@ class BaseModel extends Model {
 	}
 
 	function beforeCreate() {
-		$this->updated_by = $this->getDI()->getSession()->get('user_id');
+		$this->created_by = $this->getDI()->getSession()->get('user_id');
 		$this->created_at = $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s.u');
 	}
 

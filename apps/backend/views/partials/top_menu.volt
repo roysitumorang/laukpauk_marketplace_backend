@@ -10,9 +10,8 @@
 	<!-- start: search & user box -->
 	<div class="header-right">
 		<form action="/admin/products" class="search nav-form" method="GET">
-			<input type="hidden" name="vCompare" value="vName">
 			<div class="input-group input-search">
-				<input type="text" class="form-control" name="q" id="q" placeholder="Cari Produk">
+				<input type="text" name="keyword" id="keyword" value="{{ product_keyword }}" placeholder="Cari Produk" class="form-control">
 				<span class="input-group-btn">
 					<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
 				</span>

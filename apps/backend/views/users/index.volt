@@ -1,6 +1,6 @@
 <section class="body">
 	<!-- start: header -->
-	{include file='top_menu.html'}
+	{{ partial('partials/top_menu') }}
 	<!-- end: header -->
 	<div class="inner-wrapper">
 		<!-- start: sidebar -->
