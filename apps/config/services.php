@@ -4,6 +4,7 @@ use Phalcon\Logger;
 use Phalcon\Logger\Adapter\File;
 use Phalcon\Assets\Manager as AssetsManager;
 use Phalcon\Db\Adapter\Pdo\Mysql;
+use Phalcon\Db\Adapter\Pdo\Postgresql;
 use Phalcon\Mvc\Model\Transaction\Transaction as TransactionManager;
 use Phalcon\Mvc\Model\Metadata\Memory;
 use Phalcon\Mvc\Url;
@@ -28,14 +29,14 @@ $di->set('config', function() use($config) {
  * A component that allows manage static resources such as css stylesheets or javascript libraries in a web application
  */
 $di->set('assets', function() {
-	return new AssetsManager();
+	return new AssetsManager;
 }, true);
 
 /**
  * The URL component is used to generate all kind of urls in the application
  */
 $di->set('url', function() use($config) {
-	$url = new Url();
+	$url = new Url;
 	$url->setBaseUri($config->application->baseUri);
 	return $url;
 }, true);
@@ -44,24 +45,28 @@ $di->set('url', function() use($config) {
  * Database connection is created based in the parameters defined in the configuration file
  */
 $di->set('db', function() use($config) {
-	return new Mysql([
+	$params = [
 		'host'       => $config->database->host,
 		'dbname'     => $config->database->dbname,
 		'username'   => $config->database->username,
 		'password'   => $config->database->password,
 		'persistent' => $config->database->persistent,
-	]);
+	];
+	if ($config->database->adapter == 'Mysql') {
+		return new Mysql($params);
+	}
+	return new Postgresql($params);
 });
 
 $di->set('transactionManager', function() {
-	return new TransactionManager();
+	return new TransactionManager;
 });
 
 /**
  * If the configuration specify the use of metadata adapter use it or use memory otherwise
  */
 $di->set('modelsMetadata', function() {
-	return new Memory();
+	return new Memory;
 });
 
 /**
