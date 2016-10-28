@@ -60,9 +60,9 @@
 							<td colspan="8"><i>Belum ada Category</i></td>
 						</tr>
 						{% else %}
-						{% for category in page.items %}
+						{% for i, category in page.items %}
 							<tr>
-								<td>{{ category.rank }}</td>
+								<td>{{ offset + i }}</td>
 								<td>
 									{% if category.picture %}
 										<a class="image-popup-no-margins" href="/assets/images/{{ category.picture }}">

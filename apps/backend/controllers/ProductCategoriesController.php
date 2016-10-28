@@ -13,13 +13,30 @@ class ProductCategoriesController extends BaseController {
 		$thumb_width  = 120;
 		$thumb_height = 120;
 		$builder      = $this->modelsManager->createBuilder()
-						->columns("c.id, c.parent_id, c.name, c.permalink, c.picture, c.published, c.description, c.meta_title, c.meta_desc, c.meta_keyword, c.created_by, c.created_at, c.updated_by, c.updated_at, NULL AS rank, CONCAT(t.id, '.jpg') AS thumbnail, COUNT(DISTINCT p.id) AS total_products, COUNT(DISTINCT s.id) AS total_children")
-						->from(['c' => 'Application\Models\ProductCategory'])
-						->leftJoin('Application\Models\Thumbnail', "t.reference_type = 'product_category' AND c.id = t.reference_id AND t.width = {$thumb_width} AND t.height = {$thumb_height}", 't')
-						->leftJoin('Application\Models\Product', 'c.id = p.product_category_id', 'p')
-						->leftJoin('Application\Models\ProductCategory', 'c.id = s.parent_id', 's')
-						->groupBy('c.id')
-						->orderBy('c.id DESC');
+				->columns([
+					'id'             => 'c.id',
+					'parent_id'      => 'c.parent_id',
+					'name'           => 'c.name',
+					'permalink'      => 'c.permalink',
+					'picture'        => 'c.picture',
+					'published'      => 'c.published',
+					'description'    => 'c.description',
+					'meta_title'     => 'c.meta_title',
+					'meta_desc'      => 'c.meta_desc',
+					'meta_keyword'   => 'c.meta_keyword',
+					'created_by'     => 'c.created_by',
+					'created_at'     => 'c.created_at',
+					'updated_by'     => 'c.updated_by',
+					'updated_at'     => 'c.updated_at',
+					'thumbnail'      => "CONCAT(t.id, '.jpg')",
+					'total_products' => 'COUNT(DISTINCT p.id)',
+					'total_children' => 'COUNT(DISTINCT s.id)',
+				])->from(['c' => 'Application\Models\ProductCategory'])
+				->leftJoin('Application\Models\Thumbnail', "t.reference_type = 'product_category' AND c.id = t.reference_id AND t.width = {$thumb_width} AND t.height = {$thumb_height}", 't')
+				->leftJoin('Application\Models\Product', 'c.id = p.product_category_id', 'p')
+				->leftJoin('Application\Models\ProductCategory', 'c.id = s.parent_id', 's')
+				->groupBy('c.id')
+				->orderBy('c.id DESC');
 		if ($keyword) {
 			$builder->where('c.name LIKE :name:', ['name' => "%{$keyword}%"]);
 		}
@@ -41,6 +58,7 @@ class ProductCategoriesController extends BaseController {
 		$this->view->menu                     = $this->_menu('Products');
 		$this->view->product_category_keyword = $keyword;
 		$this->view->page                     = $paginator->getPaginate();
+		$this->view->offset                   = $offset;
 	}
 
 	function showAction(ProductCategory $category) {
