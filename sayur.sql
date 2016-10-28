@@ -75,7 +75,7 @@ CREATE TABLE `banners` (
   `name` varchar(50) NOT NULL,
   `link` varchar(150) DEFAULT NULL,
   `type` char(5) NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `file_url` varchar(100) DEFAULT NULL,
   `file_name` char(36) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -86,8 +86,8 @@ CREATE TABLE `banners` (
   KEY `banner_category_id` (`banner_category_id`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
-  KEY `show` (`show`),
-  KEY `type` (`type`)
+  KEY `type` (`type`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `banners` */
@@ -742,7 +742,7 @@ CREATE TABLE `coupons` (
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(250) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `permalink` varchar(200) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -753,10 +753,10 @@ CREATE TABLE `coupons` (
   UNIQUE KEY `permalink` (`permalink`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
-  KEY `show` (`show`),
   KEY `status` (`status`),
   KEY `effective_date` (`effective_date`),
-  KEY `expiry_date` (`expiry_date`)
+  KEY `expiry_date` (`expiry_date`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `coupons` */
@@ -826,7 +826,7 @@ CREATE TABLE `discounts` (
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(250) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `permalink` varchar(200) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -836,10 +836,10 @@ CREATE TABLE `discounts` (
   UNIQUE KEY `permalink` (`permalink`),
   KEY `effective_date` (`effective_date`),
   KEY `expiry_date` (`expiry_date`),
-  KEY `show` (`show`),
   KEY `status` (`status`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `discounts` */
@@ -1016,16 +1016,16 @@ CREATE TABLE `memos` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `body` text NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  KEY `show` (`show`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `memos` */
@@ -1340,7 +1340,7 @@ CREATE TABLE `pages` (
   `meta_title` varchar(100) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `position` int(11) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -1352,8 +1352,8 @@ CREATE TABLE `pages` (
   KEY `created_by` (`created_by`),
   KEY `parent_id` (`parent_id`),
   KEY `position` (`position`),
-  KEY `show` (`show`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `pages` */
@@ -1394,7 +1394,7 @@ CREATE TABLE `point_categories` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `permalink` varchar(50) NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `description` text,
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
@@ -1406,9 +1406,9 @@ CREATE TABLE `point_categories` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `permalink` (`permalink`),
-  KEY `show` (`show`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `point_categories` */
@@ -1643,34 +1643,6 @@ LOCK TABLES `product_rates` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_reviews` */
-
-DROP TABLE IF EXISTS `product_reviews`;
-
-CREATE TABLE `product_reviews` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
-  `body` text NOT NULL,
-  `rank` int(11) NOT NULL,
-  `approved` tinyint(1) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `product_id` (`product_id`),
-  KEY `approved` (`approved`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`),
-  KEY `rank` (`rank`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_reviews` */
-
-LOCK TABLES `product_reviews` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `product_variants` */
 
 DROP TABLE IF EXISTS `product_variants`;
@@ -1679,7 +1651,7 @@ CREATE TABLE `product_variants` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `stock` int(11) NOT NULL,
   `extra_price` int(11) DEFAULT NULL,
   `classification` varchar(10) NOT NULL,
@@ -1692,8 +1664,8 @@ CREATE TABLE `product_variants` (
   KEY `classification` (`classification`),
   KEY `created_by` (`created_by`),
   KEY `name` (`name`),
-  KEY `show` (`show`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `product_variants` */
@@ -1715,7 +1687,7 @@ CREATE TABLE `products` (
   `description` text,
   `price` decimal(10,0) NOT NULL,
   `weight` int(11) NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `status` smallint(6) NOT NULL,
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
@@ -1734,10 +1706,10 @@ CREATE TABLE `products` (
   KEY `created_by` (`created_by`),
   KEY `name` (`name`),
   KEY `product_category_id` (`product_category_id`),
-  KEY `show` (`show`),
   KEY `status` (`status`),
   KEY `updated_by` (`updated_by`),
-  KEY `brand_id` (`brand_id`)
+  KEY `brand_id` (`brand_id`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `products` */
@@ -1805,6 +1777,36 @@ insert  into `provinces`(`id`,`name`,`created_by`,`created_at`,`updated_by`,`upd
 
 UNLOCK TABLES;
 
+/*Table structure for table `reviews` */
+
+DROP TABLE IF EXISTS `reviews`;
+
+CREATE TABLE `reviews` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `reference_type` varchar(20) NOT NULL,
+  `reference_id` bigint(20) NOT NULL,
+  `body` text NOT NULL,
+  `rating` tinyint(1) NOT NULL,
+  `approved` tinyint(1) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `approved` (`approved`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  KEY `reference_id` (`reference_id`),
+  KEY `reference_type` (`reference_type`),
+  KEY `rating` (`rating`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `reviews` */
+
+LOCK TABLES `reviews` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `roles` */
 
 DROP TABLE IF EXISTS `roles`;
@@ -1849,7 +1851,7 @@ CREATE TABLE `searches` (
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `permalink` varchar(200) DEFAULT NULL,
   `show_at` text,
   `created_by` bigint(20) DEFAULT NULL,
@@ -1861,9 +1863,9 @@ CREATE TABLE `searches` (
   KEY `hits` (`hits`),
   KEY `keyword` (`keyword`),
   KEY `permalink` (`permalink`),
-  KEY `show` (`show`),
   KEY `source` (`source`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `searches` */
@@ -1980,7 +1982,7 @@ CREATE TABLE `shipping_services` (
   `shipping_courier_id` bigint(20) NOT NULL,
   `code` varchar(20) NOT NULL,
   `description` varchar(30) DEFAULT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -2057,7 +2059,7 @@ CREATE TABLE `slot_products` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `slot_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
-  `show` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -2065,9 +2067,9 @@ CREATE TABLE `slot_products` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `slot_id` (`slot_id`,`product_id`),
   KEY `created_by` (`created_by`),
-  KEY `show` (`show`),
   KEY `updated_by` (`updated_by`),
-  KEY `product_id` (`product_id`)
+  KEY `product_id` (`product_id`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `slot_products` */
@@ -2089,7 +2091,7 @@ CREATE TABLE `slots` (
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
-  `show` tinyint(1) DEFAULT NULL,
+  `published` tinyint(1) DEFAULT NULL,
   `displayed_at_home` tinyint(1) DEFAULT NULL,
   `position` int(11) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -2103,8 +2105,8 @@ CREATE TABLE `slots` (
   KEY `created_by` (`created_by`),
   KEY `displayed_at_home` (`displayed_at_home`),
   KEY `position` (`position`),
-  KEY `show` (`show`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `slots` */
@@ -9141,7 +9143,7 @@ DROP TABLE IF EXISTS `testimonies`;
 CREATE TABLE `testimonies` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `body` text NOT NULL,
-  `rank` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
   `approved` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -9149,9 +9151,9 @@ CREATE TABLE `testimonies` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `approved` (`approved`),
-  KEY `rank` (`rank`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `rating` (`rating`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `testimonies` */
