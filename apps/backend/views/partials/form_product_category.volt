@@ -30,7 +30,7 @@
 					<img src="/assets/images/{{ category.thumbnail }}" border="0">
 				</a>
 				<br>
-				<a href="javascript:confirm('Anda yakin menghapus gambar ini ?')&&($(this).closest('form').next('form').submit())">
+				<a href="#" onclick="confirm('Anda yakin menghapus gambar ini ?')&&($(this).closest('form').next('form').submit())">
 					<i class="fa fa-trash-o fa-2x"></i>
 				</a>
 			</td>
