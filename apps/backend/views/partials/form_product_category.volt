@@ -30,9 +30,21 @@
 					<img src="/assets/images/{{ category.thumbnail }}" border="0">
 				</a>
 				<br>
-				<a href="#" onclick="confirm('Anda yakin menghapus gambar ini ?')&&($(this).closest('form').next('form').submit())">
+				<a href="javascript:void(0)" class="delete" data-id="{{ category.id }}">
 					<i class="fa fa-trash-o fa-2x"></i>
 				</a>
+				<script>
+					document.querySelector('.delete').onclick = function() {
+						if (!confirm('Anda yakin menghapus gambar ini ?')) {
+							return !1
+						}
+						var form = document.createElement('form');
+						form.method = 'POST',
+						form.action = '/admin/product_categories/update/' + this.dataset.id + '/delete_picture',
+						document.body.appendChild(form),
+						form.submit()
+					}
+				</script>
 			</td>
 		</tr>
 		{% endif %}
@@ -69,6 +81,3 @@
 		</tr>
 	</table>
 </form>
-{% if category.picture %}
-<form method="POST" action="/admin/product_categories/update/{{ category.id }}/delete_picture" style="display:none"></form>
-{% endif %}
