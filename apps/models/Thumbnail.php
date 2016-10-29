@@ -60,7 +60,7 @@ class Thumbnail extends BaseModel {
 		$image->save($file, 100);
 	}
 
-	function before_delete() {
+	function beforeDelete() {
 		$file = $this->_upload_config->path . $this->name();
 		if (is_readable($file)) {
 			unlink($file);

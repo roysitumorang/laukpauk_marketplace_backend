@@ -66,82 +66,64 @@ class ProductCategoriesController extends BaseController {
 		$this->view->category = $category;
 	}
 
-	function newAction() {
-		if ($this->request->isGet()) {
-			$category  = new ProductCategory;
-			$parent_id = $this->request->getQuery('parent_id', 'int');
-			if ($parent_id && ProductCategory::findFirst($parent_id)) {
-				$category->parent_id = $parent_id;
-			}
-			$this->view->category = $category;
-		}
-		$this->view->menu = $this->_menu('Products');
-	}
-
 	function createAction() {
 		$category = new ProductCategory;
-		$category->setParentId($this->request->getPost('parent_id'));
-		$category->setName($this->request->getPost('name'));
-		$category->setNewPermalink($this->request->getPost('new_permalink'));
-		$category->setPublished($this->request->getPost('published'));
-		$category->setDescription($this->request->getPost('description'));
-		$category->setMetaTitle($this->request->getPost('meta_title'));
-		$category->setMetaDesc($this->request->getPost('meta_desc'));
-		$category->setMetaKeyword($this->request->getPost('meta_keyword'));
-		$category->setNewPicture($_FILES['picture']);
-		if (!$category->validation() || !$category->save()) {
+		if ($this->request->isPost()) {
+			$category->setParentId($this->request->getPost('parent_id'));
+			$category->setName($this->request->getPost('name'));
+			$category->setNewPermalink($this->request->getPost('new_permalink'));
+			$category->setPublished($this->request->getPost('published'));
+			$category->setDescription($this->request->getPost('description'));
+			$category->setMetaTitle($this->request->getPost('meta_title'));
+			$category->setMetaDesc($this->request->getPost('meta_desc'));
+			$category->setMetaKeyword($this->request->getPost('meta_keyword'));
+			$category->setNewPicture($_FILES['picture']);
+			if ($category->validation() && $category->create()) {
+				$this->flashSession->success('Penambahan data berhasil.');
+				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
+			}
 			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
-			$this->view->category = $category;
-			return $this->dispatcher->forward([
-				'controller' => 'product_categories',
-				'action'     => 'new',
-			]);
-		}
-		$this->flashSession->success('Penambahan data berhasil.');
-		return $this->response->redirect("/admin/product_categories/edit/{$category->id}");
-	}
-
-	function editAction(int $id) {
-		if ($this->request->isGet()) {
-			$category             = ProductCategory::findFirst($id);
-			if ($category->picture && !$category->thumbnail) {
-				$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
+		} else {
+			$parent_id = $this->request->getQuery('parent_id', 'int');
+			if ($parent_id && ProductCategory::findFirst($parent_id)) {
+				$category->parent_id = $parent_id;
 			}
-			$this->view->category = $category;
 		}
-		$this->view->menu = $this->_menu('Products');
+		$this->view->category = $category;
+		$this->view->menu     = $this->_menu('Products');
 	}
 
-	function updateAction(int $id) {
-		$category = ProductCategory::findFirst($id);
-		$category->setName($this->request->getPost('name'));
-		$category->setNewPermalink($this->request->getPost('new_permalink'));
-		$category->setPublished($this->request->getPost('published'));
-		$category->setDescription($this->request->getPost('description'));
-		$category->setMetaTitle($this->request->getPost('meta_title'));
-		$category->setMetaDesc($this->request->getPost('meta_desc'));
-		$category->setMetaKeyword($this->request->getPost('meta_keyword'));
-		$category->setNewPicture($_FILES['picture']);
-		if (!$category->validation() || !$category->save()) {
+	function updateAction($id) {
+		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->dispatcher->forward('product_categories');
+		}
+		if ($category->picture) {
+			$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
+		}
+		if ($this->request->isPost()) {
+			$category->setName($this->request->getPost('name'));
+			$category->setNewPermalink($this->request->getPost('new_permalink'));
+			$category->setPublished($this->request->getPost('published'));
+			$category->setDescription($this->request->getPost('description'));
+			$category->setMetaTitle($this->request->getPost('meta_title'));
+			$category->setMetaDesc($this->request->getPost('meta_desc'));
+			$category->setMetaKeyword($this->request->getPost('meta_keyword'));
+			$category->setNewPicture($_FILES['picture']);
+			if ($category->validation() && $category->save()) {
+				$this->flashSession->success('Update data berhasil.');
+				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
+			}
 			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
-			if ($category->picture && !$category->thumbnail) {
-				$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
-			}
-			$this->view->category = $category;
-			return $this->dispatcher->forward([
-				'controller' => 'product_categories',
-				'action'     => 'edit',
-				'id'         => $category->id,
-			]);
 		}
-		$this->flashSession->success('Update data berhasil.');
-		return $this->response->redirect("/admin/product_categories/edit/{$category->id}");
+		$this->view->category = $category;
+		$this->view->menu     = $this->_menu('Products');
 	}
 
 	function deleteAction() {}

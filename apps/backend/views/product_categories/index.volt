@@ -34,7 +34,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_categories/new">New Category</a></p>
+				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_categories/create">New Category</a></p>
 				<table class="table table-striped">
 					<tr>
 						<td>
@@ -82,7 +82,7 @@
 								</td>
 								<td>
 									<a class="popup-with-form" href="#open_{{ category.id }}"><i class="fa fa-info-circle fa-2x"></i></a><br>
-									<a href="/admin/product_categories/edit/{{ category.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+									<a href="/admin/product_categories/update/{{ category.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 									{% if !category.total_children %}
 									<br><a href="javascript:confirm('Anda yakin ingin menghapus kategori ini ?')&&(location.href='/admin/product_categories/delete/{{ category.id }}')" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 									{% endif %}
