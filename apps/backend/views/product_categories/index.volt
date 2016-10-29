@@ -66,7 +66,7 @@
 									<br>
 								{% endif %}
 								<b><font size="4"><a href="/admin/product_categories/{{ category.id }}/products" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a></font></b>
-								<a href="#{{ category.id }}" class="published" data-id="{{ category.id }}">
+								<a href="javascript:void(0)" class="published" data-id="{{ category.id }}">
 									<img src="/backend/images/bullet-{% if category.published %}green{% else %}red{% endif %}.png" border="0">
 								</a>
 								<br>(<i>{{ category.permalink }}</i>)<br><br>
@@ -77,7 +77,7 @@
 								<a class="popup-with-form" href="#open_{{ category.id }}"><i class="fa fa-info-circle fa-2x"></i></a><br>
 								<a href="/admin/product_categories/update/{{ category.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 								{% if !category.total_children %}
-								<br><a href="#{{ category.id }}" class="delete" data-id="{{ category.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+								<br><a href="javascript:void(0)" class="delete" data-id="{{ category.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 								{% endif %}
 							</td>
 						</tr>
@@ -135,24 +135,18 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	for (var items = document.getElementsByClassName('published'), i = 0, n = items.length; i < n; i++) {
+	for (var items = document.querySelectorAll('.published,.delete'), i = items.length; i--; ) {
 		items[i].onclick = function() {
+			if ('delete' === this.className && !confirm('Anda yakin ingin menghapus kategori ini ?')) {
+				return !1
+			}
 			var form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/product_categories/update/' + this.getAttribute('data-id') + '/published?next=' + window.location.href.split('#')[0] + '#' + this.getAttribute('data-id'),
+			form.action = 'delete' === this.className
+			? '/admin/product_categories/delete/' + this.dataset.id
+			: '/admin/product_categories/update/' + this.dataset.id + '/published?next=' + window.location.href.split('#')[0] + '#' + this.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
-		}
-	}
-	for (var items = document.getElementsByClassName('delete'), i = 0, n = items.length; i < n; i++) {
-		items[i].onclick = function() {
-			if (confirm('Anda yakin ingin menghapus kategori ini ?')) {
-				var form = document.createElement('form');
-				form.method = 'POST',
-				form.action = '/admin/product_categories/delete/' + this.getAttribute('data-id'),
-				document.body.appendChild(form),
-				form.submit()
-			}
 		}
 	}
 </script>
