@@ -21,7 +21,7 @@
 .form-500 { width: 500px; }
 .form-600 { width: 600px; }
 
- /* Wee Paging */ 	 
+ /* Wee Paging */
 	.weepaging {background: #f2f2f2;color:#666;padding: 4px 2px 4px 7px;border: 1px solid #ddd;margin: 0 0 1.5em}
 	.weepaging p { font-size:14px;}
 	.weepaging p a:link, .weepaging p a:visited, .weepaging p a:hover, .weepaging p a:active { font-size:14px; color:#101AA7;text-decoration:none;background:#fff;padding:2px 5px;border: 1px solid #ccc; margin-right:1px; font-weight:normal;}
@@ -32,3 +32,4 @@
 
 .label12 { margin-top: -20px; }
 .table-striped { color: #000000; }
+.form-control { height: auto; }
