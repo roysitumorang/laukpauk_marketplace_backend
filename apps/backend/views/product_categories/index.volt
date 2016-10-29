@@ -139,7 +139,7 @@
 		items[i].onclick = function() {
 			var form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/product_categories/update/' + this.id + '?published=1&next=' + window.location.href.split('#')[0] + '#' + this.id,
+			form.action = '/admin/product_categories/update/' + this.id + '/published?next=' + window.location.href.split('#')[0] + '#' + this.id,
 			document.body.appendChild(form),
 			form.submit()
 		}

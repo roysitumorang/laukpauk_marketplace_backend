@@ -105,11 +105,11 @@ class ProductCategoriesController extends BaseController {
 			$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
 		}
 		if ($this->request->isPost()) {
-			if ($this->request->hasQuery('delete_picture')) {
+			if ($this->dispatcher->getParam(1) == 'delete_picture') {
 				$category->deletePicture();
 				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
 			}
-			if ($this->request->hasQuery('published')) {
+			if ($this->dispatcher->getParam(1) == 'published') {
 				$category->save(['published' => $category->published ? 0 : 1]);
 				return $this->response->redirect($this->request->getQuery('next'));
 			}

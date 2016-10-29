@@ -70,5 +70,5 @@
 	</table>
 </form>
 {% if category.picture %}
-<form method="POST" action="/admin/product_categories/update/{{ category.id }}?delete_picture=1" style="display:none"></form>
+<form method="POST" action="/admin/product_categories/update/{{ category.id }}/delete_picture" style="display:none"></form>
 {% endif %}
