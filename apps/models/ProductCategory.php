@@ -159,6 +159,9 @@ class ProductCategory extends BaseModel {
 	}
 
 	function beforeDelete() {
+		if (!$this->picture) {
+			return;
+		}
 		$file = $this->_upload_config->path . $this->picture;
 		if (is_readable($file)) {
 			unlink($file);
@@ -166,6 +169,11 @@ class ProductCategory extends BaseModel {
 		foreach ($this->thumbnails as $thumbnail) {
 			$thumbnail->delete();
 		}
+	}
+
+	function deletePicture() {
+		$this->beforeDelete();
+		$this->save(['picture' => null]);
 	}
 
 	private function _newPictureIsValid() {

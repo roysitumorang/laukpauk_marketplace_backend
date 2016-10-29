@@ -105,6 +105,10 @@ class ProductCategoriesController extends BaseController {
 			$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
 		}
 		if ($this->request->isPost()) {
+			if ($this->request->hasQuery('delete_picture')) {
+				$category->deletePicture();
+				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
+			}
 			$category->setName($this->request->getPost('name'));
 			$category->setNewPermalink($this->request->getPost('new_permalink'));
 			$category->setPublished($this->request->getPost('published'));
@@ -126,11 +130,5 @@ class ProductCategoriesController extends BaseController {
 		$this->view->menu     = $this->_menu('Products');
 	}
 
-	function deleteAction() {}
-
-	function publishAction() {}
-
-	function unpublishAction() {}
-
-	function deletePictureAction() {}
+	function deleteAction($id) {}
 }
