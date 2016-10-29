@@ -55,67 +55,65 @@
 						</tr>
 					</thead>
 					<tbody>
-						{% if !page.items %}
+					{% for i, category in page.items %}
 						<tr>
-							<td colspan="8"><i>Belum ada Category</i></td>
-						</tr>
-						{% else %}
-						{% for i, category in page.items %}
-							<tr>
-								<td>{{ offset + i }}</td>
-								<td>
-									{% if category.picture %}
-										<a class="image-popup-no-margins" href="/assets/images/{{ category.picture }}">
-											<img src="/assets/images/{{ category.thumbnail }}" border="0">
-										</a>
-										<br>
-									{% endif %}
-									<b><font size="4"><a href="/admin/product_categories/{{ category.id }}/products" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a></font></b>
-									<a href="#{{ category.id }}" class="published" id="{{ category.id }}">
-										<img src="/backend/images/bullet-{% if category.published %}green{% else %}red{% endif %}.png" border="0">
+							<td>{{ offset + i }}</td>
+							<td>
+								{% if category.picture %}
+									<a class="image-popup-no-margins" href="/assets/images/{{ category.picture }}">
+										<img src="/assets/images/{{ category.thumbnail }}" border="0">
 									</a>
-									<br>(<i>{{ category.permalink }}</i>)<br><br>
-									<a href="/admin/product_categories/create?parent_id={{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
-									({{ category.total_children }} Sub Category)</a>
-								</td>
-								<td>
-									<a class="popup-with-form" href="#open_{{ category.id }}"><i class="fa fa-info-circle fa-2x"></i></a><br>
-									<a href="/admin/product_categories/update/{{ category.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
-									{% if !category.total_children %}
-									<br><a href="javascript:confirm('Anda yakin ingin menghapus kategori ini ?')&&(location.href='/admin/product_categories/delete/{{ category.id }}')" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
-									{% endif %}
-								</td>
-							</tr>
-							<!-- Div -->
-							<div id="open_{{ category.id }}" class="white-popup-block mfp-hide form-horizontal">
-								<div class="form-group mt-lg">
-									<label class="col-sm-3 control-label"><strong>Deskripsi:</strong></label>
-									<div class="col-sm-9">
-										{{ category.description }}
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="col-sm-3 control-label"><strong>Meta Title:</strong></label>
-									<div class="col-sm-9">
-										{{ category.meta_title }}
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="col-sm-3 control-label"><strong>Meta Desc:</strong></label>
-									<div class="col-sm-9">
-										{{ category.meta_desc }}
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="col-sm-3 control-label"><strong>Meta Keyword:</strong></label>
-									<div class="col-sm-9">
-										{{ category.meta_keyword }}
-									</div>
+									<br>
+								{% endif %}
+								<b><font size="4"><a href="/admin/product_categories/{{ category.id }}/products" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a></font></b>
+								<a href="#{{ category.id }}" class="published" id="{{ category.id }}">
+									<img src="/backend/images/bullet-{% if category.published %}green{% else %}red{% endif %}.png" border="0">
+								</a>
+								<br>(<i>{{ category.permalink }}</i>)<br><br>
+								<a href="/admin/product_categories/create?parent_id={{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
+								({{ category.total_children }} Sub Category)</a>
+							</td>
+							<td>
+								<a class="popup-with-form" href="#open_{{ category.id }}"><i class="fa fa-info-circle fa-2x"></i></a><br>
+								<a href="/admin/product_categories/update/{{ category.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+								{% if !category.total_children %}
+								<br><a href="javascript:confirm('Anda yakin ingin menghapus kategori ini ?')&&(location.href='/admin/product_categories/delete/{{ category.id }}')" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+								{% endif %}
+							</td>
+						</tr>
+						<!-- Div -->
+						<div id="open_{{ category.id }}" class="white-popup-block mfp-hide form-horizontal">
+							<div class="form-group mt-lg">
+								<label class="col-sm-3 control-label"><strong>Deskripsi:</strong></label>
+								<div class="col-sm-9">
+									{{ category.description }}
 								</div>
 							</div>
-							<!-- Div -->
-						{% endfor %}
-						{% endif %}
+							<div class="form-group">
+								<label class="col-sm-3 control-label"><strong>Meta Title:</strong></label>
+								<div class="col-sm-9">
+									{{ category.meta_title }}
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label"><strong>Meta Desc:</strong></label>
+								<div class="col-sm-9">
+									{{ category.meta_desc }}
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label"><strong>Meta Keyword:</strong></label>
+								<div class="col-sm-9">
+									{{ category.meta_keyword }}
+								</div>
+							</div>
+						</div>
+						<!-- Div -->
+					{% elsefor %}
+						<tr>
+							<td colspan="3"><i>Belum ada Category</i></td>
+						</tr>
+					{% endfor %}
 					</tbody>
 				</table>
 				<form method="POST" id="hidden_form" style="display:none"></form>
