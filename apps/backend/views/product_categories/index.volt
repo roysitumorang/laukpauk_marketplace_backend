@@ -116,16 +116,6 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				<form method="POST" id="hidden_form" style="display:none"></form>
-				<script>
-					var items = document.getElementsByClassName('published'), i = 0, n = items.length, form = document.getElementById('hidden_form');
-					for (; i < n; i++) {
-						items[i].onclick = function() {
-							form.setAttribute('action', '/admin/product_categories/update/' + this.id + '?published=1&next=' + window.location);
-							form.submit();
-						}
-					}
-				</script>
 				{% if page.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
@@ -144,3 +134,14 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	for (var items = document.getElementsByClassName('published'), i = 0, n = items.length; i < n; i++) {
+		items[i].onclick = function() {
+			var form = document.createElement('form');
+			form.method = 'POST',
+			form.action = '/admin/product_categories/update/' + this.id + '?published=1&next=' + window.location.href.split('#')[0] + '#' + this.id,
+			document.body.appendChild(form),
+			form.submit()
+		}
+	}
+</script>
