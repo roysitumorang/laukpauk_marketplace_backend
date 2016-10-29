@@ -109,6 +109,10 @@ class ProductCategoriesController extends BaseController {
 				$category->deletePicture();
 				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
 			}
+			if ($this->request->hasQuery('published')) {
+				$category->save(['published' => $category->published ? 0 : 1]);
+				return $this->response->redirect($this->request->getQuery('next'));
+			}
 			$category->setName($this->request->getPost('name'));
 			$category->setNewPermalink($this->request->getPost('new_permalink'));
 			$category->setPublished($this->request->getPost('published'));

@@ -71,13 +71,11 @@
 										<br>
 									{% endif %}
 									<b><font size="4"><a href="/admin/product_categories/{{ category.id }}/products" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a></font></b>
-									{% if category.show %}
-									<a href="/admin/product_categories/{{ category.id }}/unpublish" title="Sembunyikan"><img src="/backend/images/bullet-green.png" border="0"></a>
-									{% else %}
-									<a href="/admin/product_categories/{{ category.id }}/publish" title="Tampilkan"><img src="/backend/images/bullet-red.png" border="0"></a>
-									{% endif %}
+									<a href="#{{ category.id }}" class="published" id="{{ category.id }}">
+										<img src="/backend/images/bullet-{% if category.published %}green{% else %}red{% endif %}.png" border="0">
+									</a>
 									<br>(<i>{{ category.permalink }}</i>)<br><br>
-									<a href="/admin/product_categories/new?parent_id={{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
+									<a href="/admin/product_categories/create?parent_id={{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
 									({{ category.total_children }} Sub Category)</a>
 								</td>
 								<td>
@@ -120,6 +118,16 @@
 						{% endif %}
 					</tbody>
 				</table>
+				<form method="POST" id="hidden_form" style="display:none"></form>
+				<script>
+					var items = document.getElementsByClassName('published'), i = 0, n = items.length, form = document.getElementById('hidden_form');
+					for (; i < n; i++) {
+						items[i].onclick = function() {
+							form.setAttribute('action', '/admin/product_categories/update/' + this.id + '?published=1&next=' + window.location);
+							form.submit();
+						}
+					}
+				</script>
 				{% if page.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
