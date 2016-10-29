@@ -111,7 +111,7 @@ class ProductCategoriesController extends BaseController {
 			}
 			if ($this->request->hasQuery('published')) {
 				$category->save(['published' => $category->published ? 0 : 1]);
-				return $this->response->redirect($this->request->getQuery('next'));
+				return $this->response->redirect($this->request->getQuery('next') . '#' . $category->id);
 			}
 			$category->setName($this->request->getPost('name'));
 			$category->setNewPermalink($this->request->getPost('new_permalink'));
