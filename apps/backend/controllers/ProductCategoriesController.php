@@ -16,7 +16,7 @@ class ProductCategoriesController extends BaseController {
 				->columns([
 					'id'             => 'c.id',
 					'parent_id'      => 'c.parent_id',
-					'name'           => 'c.name',
+					'c.name',
 					'permalink'      => 'c.permalink',
 					'picture'        => 'c.picture',
 					'published'      => 'c.published',
