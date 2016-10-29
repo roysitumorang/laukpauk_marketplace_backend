@@ -31,7 +31,8 @@ class ProductCategoriesController extends BaseController {
 					'thumbnail'      => "CONCAT(t.id, '.jpg')",
 					'total_products' => 'COUNT(DISTINCT p.id)',
 					'total_children' => 'COUNT(DISTINCT s.id)',
-				])->from(['c' => 'Application\Models\ProductCategory'])
+				])
+				->from(['c' => 'Application\Models\ProductCategory'])
 				->leftJoin('Application\Models\Thumbnail', "t.reference_type = 'product_category' AND c.id = t.reference_id AND t.width = {$thumb_width} AND t.height = {$thumb_height}", 't')
 				->leftJoin('Application\Models\Product', 'c.id = p.product_category_id', 'p')
 				->leftJoin('Application\Models\ProductCategory', 'c.id = s.parent_id', 's')
@@ -79,17 +80,16 @@ class ProductCategoriesController extends BaseController {
 
 	function createAction() {
 		$category = new ProductCategory;
-		$data     = $this->request->getPost();
-		$category->setParentId($data['parent_id'])
-			->setName($data['name'])
-			->setPermalink($data['permalink'])
-			->setPublished($data['published'])
-			->setDescription($data['description'])
-			->setMetaTitle($data['meta_title'])
-			->setMetaDesc($data['meta_desc'])
-			->setMetaKeyword($data['meta_keyword'])
-			->setPicture($this->request->getUploadedFiles()[0]);
-		if ($category->getMessages() || !$category->create()) {
+		$category->setParentId($this->request->getPost('parent_id'));
+		$category->setName($this->request->getPost('name'));
+		$category->setNewPermalink($this->request->getPost('new_permalink'));
+		$category->setPublished($this->request->getPost('published'));
+		$category->setDescription($this->request->getPost('description'));
+		$category->setMetaTitle($this->request->getPost('meta_title'));
+		$category->setMetaDesc($this->request->getPost('meta_desc'));
+		$category->setMetaKeyword($this->request->getPost('meta_keyword'));
+		$category->setNewPicture($_FILES['picture']);
+		if (!$category->validation() || !$category->save()) {
 			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
 				$this->flashSession->error($error);
@@ -117,19 +117,21 @@ class ProductCategoriesController extends BaseController {
 
 	function updateAction(int $id) {
 		$category = ProductCategory::findFirst($id);
-		$data     = $this->request->getPost();
-		$category->setName($data['name'])
-			->setPermalink($data['permalink'])
-			->setPublished($data['published'])
-			->setDescription($data['description'])
-			->setMetaTitle($data['meta_title'])
-			->setMetaDesc($data['meta_desc'])
-			->setMetaKeyword($data['meta_keyword'])
-			->setPicture($this->request->getUploadedFiles()[0]);
-		if (!$category->update()) {
+		$category->setName($this->request->getPost('name'));
+		$category->setNewPermalink($this->request->getPost('new_permalink'));
+		$category->setPublished($this->request->getPost('published'));
+		$category->setDescription($this->request->getPost('description'));
+		$category->setMetaTitle($this->request->getPost('meta_title'));
+		$category->setMetaDesc($this->request->getPost('meta_desc'));
+		$category->setMetaKeyword($this->request->getPost('meta_keyword'));
+		$category->setNewPicture($_FILES['picture']);
+		if (!$category->validation() || !$category->save()) {
 			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
 				$this->flashSession->error($error);
+			}
+			if ($category->picture && !$category->thumbnail) {
+				$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
 			}
 			$this->view->category = $category;
 			return $this->dispatcher->forward([

@@ -2,28 +2,32 @@
 
 namespace Application\Models;
 
-use Phalcon\Http\Request\File;
 use Phalcon\Image\Adapter\Gd;
-use Phalcon\Mvc\Model\Message;
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\Image;
+use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Uniqueness;
 
 class ProductCategory extends BaseModel {
 	public $id;
 	public $parent_id;
 	public $name;
 	public $permalink;
+	public $new_permalink;
 	public $picture;
+	public $new_picture;
 	public $published;
 	public $description;
 	public $meta_title;
-	public $meta_desc;
 	public $meta_keyword;
+	public $meta_desc;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
 	public $updated_at;
 
 	private $_upload_config;
-	private $_tmp_file;
+	private $_filter;
 
 	function getSource() {
 		return 'product_categories';
@@ -31,14 +35,23 @@ class ProductCategory extends BaseModel {
 
 	function onConstruct() {
 		$this->_upload_config = $this->getDI()->getConfig()->upload;
+		$this->_filter        = $this->getDI()->getFilter();
 	}
 
 	function initialize() {
 		parent::initialize();
 		$this->skipAttributesOnUpdate(['parent_id']);
 		$this->keepSnapshots(true);
-		$this->belongsTo('parent_id', 'Application\Models\ProductCategory', 'id', ['alias' => 'parent']);
-		$this->hasMany('id', 'Application\Models\ProductCategory', 'parent_id', ['alias' => 'sub_categories']);
+		$this->belongsTo('parent_id', 'Application\Models\ProductCategory', 'id', [
+			'alias'    => 'parent',
+			'reusable' => true,
+		]);
+		$this->hasMany('id', 'Application\Models\ProductCategory', 'parent_id', [
+			'alias'      => 'sub_categories',
+			'foreignKey' => [
+				'message' => 'kategori tidak dapat dihapus karena memiliki sub kategori',
+			],
+		]);
 		$this->hasMany('id', 'Application\Models\Thumbnail', 'reference_id', [
 			'alias'  => 'thumbnails',
 			'params' => [
@@ -49,115 +62,100 @@ class ProductCategory extends BaseModel {
 	}
 
 	function setParentId(int $parent_id = null) {
-		if (!$parent_id) {
-			return $this;
-		}
-		$params = ['id = ?1', 'bind' => [1 => $parent_id]];
-		if ($this->id) {
-			$params[0]         .= ' AND id != ?2';
-			$params['bind'][2]  = $this->id;
-		}
-		if (!static::findFirst($params)) {
-			$this->appendMessage(new Message('kategori parent tidak valid', 'parent_id', 'InvalidValue'));
-		}
-		return $this;
+		$this->parent_id = $parent_id;
 	}
 
-	function setName($name) {
-		$this->name = $name;
-		if (!$name) {
-			$this->appendMessage(new Message('nama harus diisi', 'name', 'InvalidValue'));
-			return $this;
-		}
-		$params = ['name = ?1', 'bind' => [1 => $name]];
-		if ($this->id) {
-			$params[0]         .= ' AND id != ?2';
-			$params['bind'][2]  = $this->id;
-		}
-		if (static::findFirst($params)) {
-			$this->appendMessage(new Message('nama sudah ada', 'name', 'InvalidValue'));
-		}
-		return $this;
+	function setName(string $name) {
+		$this->name = $this->_filter->sanitize($name, ['string', 'trim']);
 	}
 
-	function setPermalink($permalink) {
-		$this->permalink = $permalink ?: preg_replace('/[^a-z0-9-]+/', '-', strtolower($this->name));
-		$params          = ['permalink = ?1', 'bind' => [1 => $permalink]];
-		if ($this->id) {
-			$params[0]         .= ' AND id != ?2';
-			$params['bind'][2]  = $this->id;
-		}
-		if (static::findFirst($params)) {
-			$this->appendMessage(new Message('permalink sudah ada', 'permalink', 'InvalidValue'));
-		}
-		return $this;
+	function setNewPermalink(string $new_permalink) {
+		$this->new_permalink = $new_permalink;
 	}
 
-	function setPicture(File $picture = null) {
-		if (!$picture || !$picture->getTempName() || $picture->getError()) {
-			return $this;
-		}
-		$max_size  = $this->_upload_config->max_size;
-		$mime_type = exif_imagetype($picture->getTempName());
-		if ($picture->getSize() > $max_size) {
-			$this->appendMessage(new Message('ukuran gambar maksimum 2 MB', 'picture', 'InvalidValue'));
-			return $this;
-		}
-		if ($mime_type != IMAGETYPE_JPEG && $mime_type != IMAGETYPE_PNG) {
-			$this->appendMessage(new Message('format gambar harus JPG atau PNG', 'picture', 'InvalidValue'));
-			return $this;
-		}
-		$this->_tmp_file = $picture;
-		$image           = new Gd($picture->getTempName());
-		$this->width     = $image->getWidth();
-		$this->height    = $image->getHeight();
-		if (!$this->picture) {
-			do {
-				$this->picture = bin2hex(random_bytes(16)) . '.jpg';
-				if (!is_readable($this->_upload_config->path . $this->picture) && !static::findFirst("picture = '{$this->picture}'")) {
-					break;
-				}
-			} while (1);
-		}
-		return $this;
+	function setNewPicture(array $new_picture) {
+		$this->new_picture = $new_picture;
 	}
 
-	function setPublished(int $published) {
+	function setPublished(int $published = null) {
 		$this->published = $published ?? 1;
-		return $this;
 	}
 
-	function setDescription($description) {
-		$this->description = $description;
-		return $this;
+	function setDescription(string $description) {
+		$this->description = $this->_filter->sanitize($description, 'string');
 	}
 
-	function setMetaTitle($meta_title) {
-		$this->meta_title = $meta_title ?: $this->name;
-		return $this;
+	function setMetaTitle(string $meta_title) {
+		$this->meta_title = $this->_filter->sanitize($meta_title ?: $this->name, ['string', 'trim']);
 	}
 
-	function setMetaDesc($meta_desc) {
-		$this->meta_desc = substr(strip_tags(str_replace(['\r', '\n'], ['', ' '], $meta_desc)), 0, 160);
-		return $this;
+	function setMetaKeyword(string $meta_keyword) {
+		$this->meta_keyword = $this->_filter->sanitize($meta_keyword ?: $this->name, ['string', 'trim']);
 	}
 
-	function setMetaKeyword($meta_keyword) {
-		$this->meta_keyword = $meta_keyword ?: $this->name;
-		return $this;
+	function setMetaDesc(string $meta_desc) {
+		$this->meta_desc = substr(str_replace(['\r', '\n'], ['', ' '], $this->_filter->sanitize($meta_desc, ['string', 'trim'])), 0, 160);
+	}
+
+	function validation() {
+		$validator = new Validation;
+		$validator->add('name', new PresenceOf([
+			'message' => 'nama harus diisi',
+		]));
+		$validator->add('name', new Uniqueness([
+			'model'   => $this,
+			'convert' => function(array $values) : array {
+				$values['name'] = strtolower($values['name']);
+				return $values;
+			},
+			'message' => 'nama sudah ada',
+		]));
+		if (!$this->id || $this->new_permalink) {
+			$validator->add('new_permalink', new Uniqueness([
+				'model'     => $this,
+				'attribute' => 'permalink',
+				'message'   => 'permalink sudah ada',
+			]));
+		}
+		if ($this->new_picture) {
+			$max_size = $this->_upload_config->max_size;
+			$validator->add('new_picture', new Image([
+				'max_size'     => $max_size,
+				'message_size' => 'ukuran file maksimal ' . $max_size,
+				'message_type' => 'format gambar harus JPG atau PNG',
+				'allowEmpty'   => true,
+			]));
+		}
+		return $this->validate($validator);
+	}
+
+	function beforeValidation() {
+		$this->permalink = preg_replace('/\s+/', '-', $this->new_permalink ? $this->_filter->sanitize($this->new_permalink, ['string', 'trim', 'lower']) : strtolower($this->name));
+	}
+
+	function beforeSave() {
+		if (!$this->_newPictureIsValid() || $this->picture) {
+			return true;
+		}
+		do {
+			$this->picture = bin2hex(random_bytes(16)) . '.jpg';
+			if (!is_readable($this->_upload_config->path . $this->picture) && !static::findFirst("picture = '{$this->picture}'")) {
+				break;
+			}
+		} while (1);
 	}
 
 	function afterSave() {
-		if (!$this->_tmp_file) {
+		if (!$this->_newPictureIsValid()) {
 			return true;
 		}
 		foreach ($this->thumbnails as $thumbnail) {
 			$thumbnail->delete();
 		}
-		$file = $this->_upload_config->path . $this->picture;
-		$this->_tmp_file->moveTo($file);
-		$image = new Gd($file);
-		$image->save($file, 100);
+		$picture = $this->_upload_config->path . $this->picture;
+		$gd      = new Gd($this->new_picture['tmp_name']);
+		$gd->save($picture, 100);
+		unlink($this->new_picture['tmp_name']);
 	}
 
 	function beforeDelete() {
@@ -168,5 +166,9 @@ class ProductCategory extends BaseModel {
 		foreach ($this->thumbnails as $thumbnail) {
 			$thumbnail->delete();
 		}
+	}
+
+	private function _newPictureIsValid() {
+		return $this->new_picture['tmp_name'] && !$this->new_picture['error'] && $this->new_picture['size'];
 	}
 }

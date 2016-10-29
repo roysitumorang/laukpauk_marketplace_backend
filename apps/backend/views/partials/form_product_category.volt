@@ -1,6 +1,6 @@
 {{ flashSession.output() }}
 <form method="POST" action="{{ action }}" enctype="multipart/form-data">
-	{% if category.parent_id %}
+	{% if !category.id and category.parent_id %}
 	<input type="hidden" name="parent_id" value="{{ category.parent_id }}">
 	{% endif %}
 	<table class="table table-striped">
@@ -12,9 +12,9 @@
 			<td><input type="text" name="name" value="{{ category.name }}" class="form form-control form-60" size="40"></td>
 		</tr>
 		<tr>
-			<td><b>Permalink</b> {{ error_message_on_permalink }}</td>
+			<td><b>Permalink</b> {{ error_message_on_new_permalink }}</td>
 			<td>
-				<input type="text" name="permalink" value="{{ category.permalink }}" class="form form-control form-60" size="40"><br>
+				<input type="text" name="new_permalink" value="{{ category.new_permalink }}" class="form form-control form-60" size="40"><br>
 				<i>Kosongkan jika Anda ingin system mengisi permalink secara otomatis</i>
 			</td>
 		</tr>
@@ -30,7 +30,7 @@
 					<img src="/assets/images/{{ category.thumbnail }}" border="0">
 				</a>
 				<br>
-				<a href="javascript:confirm('Anda yakin menghapus gambar ini ?')&&(location.href='/admin/product_categories/delete_picture/{{ category.id }}?keyword={{ keyword }}&page={{ page }}')">
+				<a href="javascript:confirm('Anda yakin menghapus gambar ini ?')&&($(this).closest('form').next('form').submit())">
 					<i class="fa fa-trash-o fa-2x"></i>
 				</a>
 			</td>
@@ -69,3 +69,6 @@
 		</tr>
 	</table>
 </form>
+{% if category.picture %}
+<form method="POST" action="/admin/product_categories/delete_picture/{{ category.id }}" style="display:none"></form>
+{% endif %}
