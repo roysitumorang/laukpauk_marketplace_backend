@@ -1,9 +1,10 @@
+<!doctype html>
 <html>
 <head>
 	<title>404 - Sorry! Page Not Found</title>
 	<meta name="robots" content="noindex, nofollow">
-	<link rel="stylesheet" href="/backend/stylesheets/bootstrap.min.css">
-	<link rel="stylesheet" href="/backend/stylesheets/sase.css">
+	<link rel="stylesheet" href="/backend/vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/backend/stylesheets/sase.min.css">
 </head>
 <body style="padding:15px">
 	<center>

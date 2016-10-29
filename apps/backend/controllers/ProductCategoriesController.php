@@ -2,7 +2,9 @@
 
 namespace Application\Backend\Controllers;
 
+use Exception;
 use Application\Models\ProductCategory;
+use Application\Models\Product;
 use Application\Models\Thumbnail;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
@@ -62,8 +64,11 @@ class ProductCategoriesController extends BaseController {
 		$this->view->offset                   = $offset;
 	}
 
-	function showAction(ProductCategory $category) {
-		$this->view->category = $category;
+	function showAction($id) {
+		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->dispatcher->forward('product_categories');
+		}
 	}
 
 	function createAction() {
@@ -134,5 +139,20 @@ class ProductCategoriesController extends BaseController {
 		$this->view->menu     = $this->_menu('Products');
 	}
 
-	function deleteAction($id) {}
+	function deleteAction($id) {
+		try {
+			if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
+				throw new Exception('Data tidak ditemukan.');
+			}
+			if (ProductCategory::findFirstByParentId($category->id) || Product::findFirstByProductCategoryId($category->id)) {
+				throw new Exception('Data tidak dapat dihapus karena memilik sub kategori / product');
+			}
+			$category->delete();
+			$this->flashSession->success('Data berhasil dihapus');
+		} catch (Exception $e) {
+			$this->flashSession->error($e->getMessage());
+		} finally {
+			return $this->response->redirect('/admin/product_categories');
+		}
+	}
 }
