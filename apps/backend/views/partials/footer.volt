@@ -1,5 +1,5 @@
 		<!-- Vendor -->
-		<script src="/backend/vendor/jquery.browser.mobile/jquery.browser.mobile.js"></script>
+		<script src="/backend/vendor/jquery-browser-mobile/jquery.browser.mobile.js"></script>
 		<script src="/backend/vendor/bootstrap/js/bootstrap.min.js"></script>
 		<script src="/backend/vendor/nanoscroller/nanoscroller.js"></script>
 		<script src="/backend/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
