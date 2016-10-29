@@ -65,7 +65,7 @@
 									</a>
 									<br>
 								{% endif %}
-								<b><font size="4"><a href="/admin/product_categories/{{ category.id }}/products" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a></font></b>
+								<b><font size="4"><a href="/admin/products/index/product_category_id:{{ category.id }}" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a></font></b>
 								<a href="javascript:void(0)" class="published" data-id="{{ category.id }}">
 									<img src="/backend/images/bullet-{% if category.published %}green{% else %}red{% endif %}.png" border="0">
 								</a>
@@ -144,7 +144,7 @@
 			form.method = 'POST',
 			form.action = 'delete' === this.className
 			? '/admin/product_categories/delete/' + this.dataset.id
-			: '/admin/product_categories/update/' + this.dataset.id + '/published?next=' + window.location.href.split('#')[0] + '#' + this.dataset.id,
+			: '/admin/product_categories/update/' + this.dataset.id + '/published:1?next=' + window.location.href.split('#')[0] + '#' + this.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}

@@ -40,7 +40,7 @@
 						}
 						var form = document.createElement('form');
 						form.method = 'POST',
-						form.action = '/admin/product_categories/update/' + this.dataset.id + '/delete_picture',
+						form.action = '/admin/product_categories/update/' + this.dataset.id + '/delete_picture:1',
 						document.body.appendChild(form),
 						form.submit()
 					}
