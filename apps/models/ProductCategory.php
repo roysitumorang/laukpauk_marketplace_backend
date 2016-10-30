@@ -77,7 +77,7 @@ class ProductCategory extends BaseModel {
 	}
 
 	function setPublished(int $published = null) {
-		$this->published = $published ?? 1;
+		$this->published = $published ?? 0;
 	}
 
 	function setDescription(string $description) {
