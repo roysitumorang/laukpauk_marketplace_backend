@@ -55,9 +55,9 @@
 						</tr>
 					</thead>
 					<tbody>
-					{% for i, category in page.items %}
+					{% for category in categories %}
 						<tr id="{{ category.id }}">
-							<td>{{ offset + i }}</td>
+							<td>{{ category.rank }}</td>
 							<td>
 								{% if category.picture %}
 									<a class="image-popup-no-margins" href="/assets/images/{{ category.picture }}">
@@ -120,10 +120,13 @@
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
-						<a href="/admin/product_categories">1</a>
-						<a href="/admin/product_categories?page={{ page.before }}">{{ page.before }}</a>
-						<a href="/admin/product_categories?page={{ page.next }}">{{ page.next }}</a>
-						<a href="/admin/product_categories?page={{ page.last }}">{{ page.last }}</a>
+						{% for i in pages %}
+							{% if i == page.current %}
+							<b>{{ i }}</b>
+							{% else %}
+							<a href="/admin/product_categories/index/page:{{ i }}{% if product_category_keyword %}?keyword={{ product_category_keyword }}{% endif %}">{{ i }}</a>
+							{% endif %}
+						{% endfor %}
 					</p>
 				</div>
 				{% endif %}

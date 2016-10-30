@@ -16,6 +16,7 @@ class ProductCategory extends BaseModel {
 	public $new_permalink;
 	public $picture;
 	public $new_picture;
+	public $thumbnails;
 	public $published;
 	public $description;
 	public $meta_title;
@@ -52,12 +53,6 @@ class ProductCategory extends BaseModel {
 				'message' => 'kategori tidak dapat dihapus karena memiliki sub kategori',
 			],
 		]);
-		$this->hasMany('id', 'Application\Models\Thumbnail', 'reference_id', [
-			'alias'  => 'thumbnails',
-			'params' => [
-				'conditions' => "[Application\Models\Thumbnail].reference_type = 'product_category'",
-			],
-		]);
 		$this->hasMany('id', 'Application\Models\Product', 'product_category_id', ['alias'  => 'products']);
 	}
 
@@ -75,6 +70,10 @@ class ProductCategory extends BaseModel {
 
 	function setNewPicture(array $new_picture) {
 		$this->new_picture = $new_picture;
+	}
+
+	function setThumbnails(array $thumbnails = null) {
+		$this->thumbnails = json_encode(array_filter($thumbnails ?? []));
 	}
 
 	function setPublished(int $published = null) {
@@ -149,31 +148,60 @@ class ProductCategory extends BaseModel {
 		if (!$this->_newPictureIsValid()) {
 			return true;
 		}
-		foreach ($this->thumbnails as $thumbnail) {
-			$thumbnail->delete();
-		}
 		$picture = $this->_upload_config->path . $this->picture;
 		$gd      = new Gd($this->new_picture['tmp_name']);
 		$gd->save($picture, 100);
 		unlink($this->new_picture['tmp_name']);
 	}
 
+	function beforeUpdate() {
+		if (!$this->_newPictureIsValid()) {
+			return true;
+		}
+		foreach ($this->thumbnails as $thumbnail) {
+			unlink($this->_upload_config->path . $thumbnail);
+		}
+		$this->setThumbnails([]);
+	}
+
 	function beforeDelete() {
 		if (!$this->picture) {
 			return;
 		}
-		$file = $this->_upload_config->path . $this->picture;
-		if (is_readable($file)) {
-			unlink($file);
-		}
+		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
-			$thumbnail->delete();
+			unlink($this->_upload_config->path . $thumbnail);
 		}
+	}
+
+	function afterFetch() {
+		$this->thumbnails = json_decode($this->thumbnails);
+	}
+
+	function getThumbnail(int $width, int $height, string $default_picture = null) {
+		$picture = $this->picture ?? $default_picture;
+		if (!$picture) {
+			return null;
+		}
+		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $picture);
+		if (!in_array($thumbnail, $this->thumbnails)) {
+			$gd = new Gd($this->_upload_config->path . $picture);
+			$gd->resize($width, $height);
+			$gd->save($this->_upload_config->path . $thumbnail, 100);
+		}
+		if ($this->picture) {
+			$this->thumbnails[] = $thumbnail;
+			$this->setThumbnails($this->thumbnails);
+			$this->save();
+		}
+		return $thumbnail;
 	}
 
 	function deletePicture() {
 		$this->beforeDelete();
-		$this->save(['picture' => null]);
+		$this->picture = null;
+		$this->setThumbnails([]);
+		$this->save();
 	}
 
 	private function _newPictureIsValid() {

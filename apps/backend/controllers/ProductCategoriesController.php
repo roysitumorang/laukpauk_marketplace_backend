@@ -2,66 +2,75 @@
 
 namespace Application\Backend\Controllers;
 
-use Exception;
 use Application\Models\ProductCategory;
 use Application\Models\Product;
-use Application\Models\Thumbnail;
-use Phalcon\Paginator\Adapter\QueryBuilder;
+use Exception;
+use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
+use stdClass;
 
 class ProductCategoriesController extends BaseController {
+	private $_thumb;
+
+	function initialize() {
+		parent::initialize();
+		$this->_thumb                  = new stdClass;
+		$this->_thumb->width           = 120;
+		$this->_thumb->height          = 120;
+		$this->_thumb->default_picture = null;
+	}
+
 	function indexAction() {
-		$keyword      = $this->request->getQuery('keyword', 'string');
-		$current_page = $this->request->getQuery('page', 'int') ?: 1;
-		$thumb_width  = 120;
-		$thumb_height = 120;
-		$builder      = $this->modelsManager->createBuilder()
-				->columns([
-					'id'             => 'c.id',
-					'parent_id'      => 'c.parent_id',
-					'c.name',
-					'permalink'      => 'c.permalink',
-					'picture'        => 'c.picture',
-					'published'      => 'c.published',
-					'description'    => 'c.description',
-					'meta_title'     => 'c.meta_title',
-					'meta_desc'      => 'c.meta_desc',
-					'meta_keyword'   => 'c.meta_keyword',
-					'created_by'     => 'c.created_by',
-					'created_at'     => 'c.created_at',
-					'updated_by'     => 'c.updated_by',
-					'updated_at'     => 'c.updated_at',
-					'thumbnail'      => "CONCAT(t.id, '.jpg')",
-					'total_products' => 'COUNT(DISTINCT p.id)',
-					'total_children' => 'COUNT(DISTINCT s.id)',
-				])
-				->from(['c' => 'Application\Models\ProductCategory'])
-				->leftJoin('Application\Models\Thumbnail', "t.reference_type = 'product_category' AND c.id = t.reference_id AND t.width = {$thumb_width} AND t.height = {$thumb_height}", 't')
-				->leftJoin('Application\Models\Product', 'c.id = p.product_category_id', 'p')
-				->leftJoin('Application\Models\ProductCategory', 'c.id = s.parent_id', 's')
-				->groupBy('c.id')
-				->orderBy('c.id DESC');
-		if ($keyword) {
-			$builder->where('c.name LIKE :name:', ['name' => "%{$keyword}%"]);
-		}
 		$limit        = $this->config->per_page;
+		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new QueryBuilder([
+		$keyword      = $this->request->getQuery('keyword', 'string');
+		$builder      = $this->modelsManager->createBuilder()
+			->columns([
+				'id'             => 'a.id',
+				'parent_id'      => 'a.parent_id',
+				'a.name',
+				'permalink'      => 'a.permalink',
+				'picture'        => 'a.picture',
+				'published'      => 'a.published',
+				'description'    => 'a.description',
+				'meta_title'     => 'a.meta_title',
+				'meta_desc'      => 'a.meta_desc',
+				'meta_keyword'   => 'a.meta_keyword',
+				'created_by'     => 'a.created_by',
+				'created_at'     => 'a.created_at',
+				'updated_by'     => 'a.updated_by',
+				'updated_at'     => 'a.updated_at',
+				'total_children' => 'COUNT(DISTINCT b.id)',
+				'total_products' => 'COUNT(DISTINCT c.id)',
+			])
+			->from(['a' => 'Application\Models\ProductCategory'])
+			->leftJoin('Application\Models\ProductCategory', 'a.id = b.parent_id', 'b')
+			->leftJoin('Application\Models\Product', 'a.id = c.product_category_id', 'c')
+			->groupBy('a.id')
+			->orderBy('id DESC');
+		if ($keyword) {
+			$builder->where('a.name LIKE :name:', ['name' => "%{$keyword}%"]);
+		}
+		$paginator  = new PaginatorQueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page         = $paginator->getPaginate();
-		foreach ($page->items as $i => $item) {
-			if ($page->items[$i]->picture && !$page->items[$i]->thumbnail) {
-				$page->items[$i]->thumbnail = Thumbnail::generate('product_category', $page->items[$i]->id, $page->items[$i]->picture, $thumb_width, $thumb_height)->name();
-			}
-			$page->items[$i]->rank           = ++$offset;
-			$page->items[$i]->total_children = $this->db->fetchColumn("SELECT COUNT(1) FROM product_categories WHERE parent_id = {$page->items[$i]->id}") ?: 0;
+		$page       = $paginator->getPaginate();
+		$pages      = $this->_setPaginationRange($page);
+		$categories = [];
+		foreach ($page->items as $item) {
+			$category  = ProductCategory::findFirst($item->id);
+			$thumbnail = $category->getThumbnail($this->_thumb->width, $this->_thumb->height, $this->_thumb->default_picture);
+			$item->writeAttribute('rank', ++$offset);
+			$item->writeAttribute('thumbnail', $thumbnail);
+			$categories[] = $item;
 		}
 		$this->view->menu                     = $this->_menu('Products');
 		$this->view->product_category_keyword = $keyword;
+		$this->view->categories               = $categories;
 		$this->view->page                     = $paginator->getPaginate();
-		$this->view->offset                   = $offset;
+		$this->view->pages                    = $pages;
 	}
 
 	function showAction($id) {
@@ -85,7 +94,7 @@ class ProductCategoriesController extends BaseController {
 			$category->setNewPicture($_FILES['picture']);
 			if ($category->validation() && $category->create()) {
 				$this->flashSession->success('Penambahan data berhasil.');
-				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
+				return $this->response->redirect('/admin/product_categories');
 			}
 			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
@@ -106,9 +115,7 @@ class ProductCategoriesController extends BaseController {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->dispatcher->forward('product_categories');
 		}
-		if ($category->picture) {
-			$category->thumbnail = Thumbnail::generate('product_category', $category->id, $category->picture, 120, 120)->name();
-		}
+		$category->thumbnail = $category->getThumbnail($this->_thumb->width, $this->_thumb->height, $this->_thumb->default_picture);
 		if ($this->request->isPost()) {
 			if ($this->dispatcher->hasParam('delete_picture')) {
 				$category->deletePicture();

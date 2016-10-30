@@ -1,6 +1,8 @@
 <?php
 
 namespace Application\Backend\Controllers;
+
+use Ds\Vector;
 use Phalcon\Mvc\Controller;
 use Phalcon\Text;
 
@@ -130,5 +132,33 @@ class BaseController extends Controller {
 				'icon'      => 'sign-out',
 			],
 		];
+	}
+
+	protected function _setPaginationRange($page) : array {
+		$paging_limit   = 10;
+		$paging_total   = ceil($page->last / $paging_limit);
+		$paging_current = ceil($page->current / $paging_limit);
+		$start          = 1;
+		$end            = $page->last;
+		if ($paging_current <= $paging_total) {
+			$offset = ($paging_current - 1) * $paging_limit;
+			$start  = $offset + 1;
+			$end    = max($offset + $paging_limit, $page->last);
+		}
+		$pages = new Vector(range($start, $end));
+		if ($start > 2) {
+			$pages->insert(0, $start - 1);
+		}
+		if ($start > 1) {
+			$pages->insert(0, 1);
+		}
+		$next = $end + 1;
+		if ($next < $page->last) {
+			$pages->push($next);
+		}
+		if ($end < $page->last) {
+			$pages->push($page->last);
+		}
+		return $pages->toArray();
 	}
 }
