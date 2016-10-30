@@ -73,7 +73,7 @@ class ProductCategory extends BaseModel {
 	}
 
 	function setThumbnails(array $thumbnails = null) {
-		$this->thumbnails = json_encode(array_filter($thumbnails ?? []));
+		$this->thumbnails = array_filter($thumbnails ?? []);
 	}
 
 	function setPublished(int $published = null) {
@@ -138,7 +138,7 @@ class ProductCategory extends BaseModel {
 		}
 		do {
 			$this->picture = bin2hex(random_bytes(16)) . '.jpg';
-			if (!is_readable($this->_upload_config->path . $this->picture) && !static::findFirst("picture = '{$this->picture}'")) {
+			if (!is_readable($this->_upload_config->path . $this->picture) && !static::findFirstByPicture($this->picture)) {
 				break;
 			}
 		} while (1);
@@ -155,13 +155,13 @@ class ProductCategory extends BaseModel {
 	}
 
 	function beforeUpdate() {
-		if (!$this->_newPictureIsValid()) {
-			return true;
+		if ($this->_newPictureIsValid()) {
+			foreach ($this->thumbnails as $thumbnail) {
+				unlink($this->_upload_config->path . $thumbnail);
+			}
+			$this->thumbnail = [];
 		}
-		foreach ($this->thumbnails as $thumbnail) {
-			unlink($this->_upload_config->path . $thumbnail);
-		}
-		$this->setThumbnails([]);
+		$this->thumbnails = json_encode($this->thumbnails);
 	}
 
 	function beforeDelete() {
@@ -188,11 +188,11 @@ class ProductCategory extends BaseModel {
 			$gd = new Gd($this->_upload_config->path . $picture);
 			$gd->resize($width, $height);
 			$gd->save($this->_upload_config->path . $thumbnail, 100);
-		}
-		if ($this->picture) {
-			$this->thumbnails[] = $thumbnail;
-			$this->setThumbnails($this->thumbnails);
-			$this->save();
+			if ($this->picture) {
+				$this->thumbnails[] = $thumbnail;
+				$this->setThumbnails($this->thumbnails);
+				$this->save();
+			}
 		}
 		return $thumbnail;
 	}
