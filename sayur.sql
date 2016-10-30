@@ -105,6 +105,7 @@ CREATE TABLE `brands` (
   `name` varchar(50) NOT NULL,
   `permalink` varchar(50) NOT NULL,
   `picture` char(36) NOT NULL,
+  `thumbnails` text,
   `description` text,
   `meta_title` varchar(200) DEFAULT NULL,
   `meta_desc` varchar(250) DEFAULT NULL,
@@ -1548,7 +1549,7 @@ DROP TABLE IF EXISTS `product_dimensions`;
 CREATE TABLE `product_dimensions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
-  `item` varchar(20) NOT NULL,
+  `parameter` varchar(20) NOT NULL,
   `size` decimal(10,0) NOT NULL,
   `stock_keeping_unit` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -1556,10 +1557,10 @@ CREATE TABLE `product_dimensions` (
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `item` (`item`,`product_id`),
-  KEY `product_id` (`product_id`),
+  UNIQUE KEY `product_id` (`product_id`,`parameter`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `parameter` (`parameter`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `product_dimensions` */
@@ -1616,6 +1617,34 @@ LOCK TABLES `product_notifications` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `product_pictures` */
+
+DROP TABLE IF EXISTS `product_pictures`;
+
+CREATE TABLE `product_pictures` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `name` char(36) NOT NULL,
+  `thumbnails` text,
+  `position` tinyint(4) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_id` (`product_id`,`position`),
+  UNIQUE KEY `name` (`name`),
+  KEY `position` (`position`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `product_pictures` */
+
+LOCK TABLES `product_pictures` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `product_rates` */
 
 DROP TABLE IF EXISTS `product_rates`;
@@ -1651,22 +1680,22 @@ DROP TABLE IF EXISTS `product_variants`;
 CREATE TABLE `product_variants` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `published` tinyint(1) NOT NULL,
+  `parameter` varchar(10) NOT NULL,
+  `value` varchar(100) NOT NULL,
   `stock` int(11) NOT NULL,
-  `extra_price` int(11) DEFAULT NULL,
-  `classification` varchar(10) NOT NULL,
+  `extra_price` int(11) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `product_id` (`product_id`),
-  KEY `classification` (`classification`),
+  UNIQUE KEY `product_id` (`product_id`,`parameter`,`value`),
   KEY `created_by` (`created_by`),
-  KEY `name` (`name`),
   KEY `updated_by` (`updated_by`),
-  KEY `published` (`published`)
+  KEY `published` (`published`),
+  KEY `parameter` (`parameter`),
+  KEY `value` (`value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `product_variants` */
