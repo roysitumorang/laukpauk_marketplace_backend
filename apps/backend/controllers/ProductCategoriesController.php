@@ -101,7 +101,7 @@ class ProductCategoriesController extends BaseController {
 				$this->flashSession->error($error);
 			}
 		} else {
-			$parent_id = $this->request->getQuery('parent_id', 'int');
+			$parent_id = $this->dispatcher->getParam('parent_id', 'int');
 			if ($parent_id && ProductCategory::findFirst($parent_id)) {
 				$category->parent_id = $parent_id;
 			}

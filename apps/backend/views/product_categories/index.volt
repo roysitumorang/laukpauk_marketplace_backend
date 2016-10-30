@@ -70,7 +70,7 @@
 									<img src="/backend/images/bullet-{% if category.published %}green{% else %}red{% endif %}.png" border="0">
 								</a>
 								<br>(<i>{{ category.permalink }}</i>)<br><br>
-								<a href="/admin/product_categories/create?parent_id={{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
+								<a href="/admin/product_categories/create/parent_id:{{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
 								({{ category.total_children }} Sub Category)</a>
 							</td>
 							<td>

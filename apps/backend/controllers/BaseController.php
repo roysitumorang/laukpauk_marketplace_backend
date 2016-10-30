@@ -10,7 +10,7 @@ class BaseController extends Controller {
 	function initialize() {
 		$url = $this->request->getQuery('_url');
 		if ($this->session->get('user_id')) {
-			$this->view->current_user = $this->currentUser;
+			$this->view->current_user    = $this->currentUser;
 			$this->view->unread_messages = $this->currentUser->unread_messages;
 		} else if (!Text::startsWith($url, '/admin/sessions')) {
 			$this->response->redirect('/admin/sessions/new');
@@ -143,7 +143,7 @@ class BaseController extends Controller {
 		if ($paging_current <= $paging_total) {
 			$offset = ($paging_current - 1) * $paging_limit;
 			$start  = $offset + 1;
-			$end    = max($offset + $paging_limit, $page->last);
+			$end    = min($offset + $paging_limit, $page->last);
 		}
 		$pages = new Vector(range($start, $end));
 		if ($start > 2) {
