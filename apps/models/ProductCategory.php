@@ -144,16 +144,6 @@ class ProductCategory extends BaseModel {
 		} while (1);
 	}
 
-	function afterSave() {
-		if (!$this->_newPictureIsValid()) {
-			return true;
-		}
-		$picture = $this->_upload_config->path . $this->picture;
-		$gd      = new Gd($this->new_picture['tmp_name']);
-		$gd->save($picture, 100);
-		unlink($this->new_picture['tmp_name']);
-	}
-
 	function beforeUpdate() {
 		parent::beforeUpdate();
 		if ($this->_newPictureIsValid()) {
@@ -163,6 +153,16 @@ class ProductCategory extends BaseModel {
 			$this->thumbnail = [];
 		}
 		$this->thumbnails = json_encode($this->thumbnails);
+	}
+
+	function afterSave() {
+		if (!$this->_newPictureIsValid()) {
+			return true;
+		}
+		$picture = $this->_upload_config->path . $this->picture;
+		$gd      = new Gd($this->new_picture['tmp_name']);
+		$gd->save($picture, 100);
+		unlink($this->new_picture['tmp_name']);
 	}
 
 	function beforeDelete() {
