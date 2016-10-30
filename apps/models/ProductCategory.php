@@ -155,6 +155,7 @@ class ProductCategory extends BaseModel {
 	}
 
 	function beforeUpdate() {
+		parent::beforeUpdate();
 		if ($this->_newPictureIsValid()) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
@@ -191,6 +192,7 @@ class ProductCategory extends BaseModel {
 			if ($this->picture) {
 				$this->thumbnails[] = $thumbnail;
 				$this->setThumbnails($this->thumbnails);
+				$this->skipAttributes(['updated_by', 'updated_at']);
 				$this->save();
 			}
 		}
