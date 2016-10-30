@@ -1492,6 +1492,7 @@ CREATE TABLE `product_categories` (
   `name` varchar(50) NOT NULL,
   `permalink` varchar(50) NOT NULL,
   `picture` char(36) DEFAULT NULL,
+  `thumbnails` text,
   `published` tinyint(1) NOT NULL,
   `description` text,
   `meta_title` varchar(200) DEFAULT NULL,
@@ -9159,35 +9160,6 @@ CREATE TABLE `testimonies` (
 /*Data for the table `testimonies` */
 
 LOCK TABLES `testimonies` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `thumbnails` */
-
-DROP TABLE IF EXISTS `thumbnails`;
-
-CREATE TABLE `thumbnails` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `reference_type` varchar(20) NOT NULL,
-  `reference_id` bigint(20) NOT NULL,
-  `width` smallint(6) NOT NULL,
-  `height` smallint(6) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `reference_type` (`reference_type`,`reference_id`,`width`,`height`),
-  KEY `width` (`width`),
-  KEY `height` (`height`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`),
-  KEY `reference_id` (`reference_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `thumbnails` */
-
-LOCK TABLES `thumbnails` WRITE;
 
 UNLOCK TABLES;
 
