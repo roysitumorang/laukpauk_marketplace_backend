@@ -104,7 +104,7 @@ CREATE TABLE `brands` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
   `permalink` varchar(50) NOT NULL,
-  `picture` char(36) NOT NULL,
+  `picture` char(36) DEFAULT NULL,
   `thumbnails` text,
   `description` text,
   `meta_title` varchar(200) DEFAULT NULL,
