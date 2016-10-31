@@ -150,7 +150,7 @@ class ProductCategory extends BaseModel {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
-			$this->thumbnail = [];
+			$this->thumbnails = [];
 		}
 		$this->thumbnails = json_encode($this->thumbnails);
 	}
