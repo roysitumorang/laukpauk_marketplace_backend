@@ -2,6 +2,12 @@
 
 namespace Application\Models;
 
+use Phalcon\Image\Adapter\Gd;
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\Image;
+use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Uniqueness;
+
 class Brand extends BaseModel {
 	public $id;
 	public $name;
@@ -19,22 +25,20 @@ class Brand extends BaseModel {
 	public $updated_by;
 	public $updated_at;
 
+	private $_upload_config;
+
 	function getSource() {
 		return 'brands';
 	}
 
 	function onConstruct() {
-		$this->_filter = $this->getDI()->getFilter();
+		$this->_filter        = $this->getDI()->getFilter();
+		$this->_upload_config = $this->getDI()->getConfig()->upload;
 	}
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\Product', 'brand_id', [
-			'alias'      => 'products',
-			'foreignKey' => [
-				'message' => 'kategori tidak dapat dihapus karena memiliki sub kategori',
-			],
-		]);
+		$this->hasMany('id', 'Application\Models\Product', 'brand_id', ['alias' => 'products']);
 	}
 
 	function setName(string $name) {
@@ -123,7 +127,7 @@ class Brand extends BaseModel {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
-			$this->thumbnail = [];
+			$this->thumbnails = [];
 		}
 		$this->thumbnails = json_encode($this->thumbnails);
 	}
@@ -139,6 +143,10 @@ class Brand extends BaseModel {
 	}
 
 	function beforeDelete() {
+		$this->thumbnails[] = $this->picture;
+		foreach ($this->thumbnails as $thumbnail) {
+			unlink($this->_upload_config->path . $thumbnail);
+		}
 		foreach ($this->products as $product) {
 			$product->save(['brand_id' => null]);
 		}
@@ -166,6 +174,13 @@ class Brand extends BaseModel {
 			}
 		}
 		return $thumbnail;
+	}
+
+	function deletePicture() {
+		$this->beforeDelete();
+		$this->picture = null;
+		$this->setThumbnails([]);
+		$this->save();
 	}
 
 	private function _newPictureIsValid() {
