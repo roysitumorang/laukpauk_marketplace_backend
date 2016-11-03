@@ -33,9 +33,9 @@ class BaseController extends Controller {
 				'icon'      => 'envelope',
 				'expanded'  => $expanded == 'Mailbox',
 				'sub_items' => [
-					['label' => 'Inbox',       'link' => 'messages/unread'],
-					['label' => 'Outbox',      'link' => 'messages/read'],
-					['label' => 'Kirim Pesan', 'link' => 'messages/new'],
+					['label' => 'Inbox',       'link' => 'messages/index/unread:1'],
+					['label' => 'Outbox',      'link' => 'messages/index/read:1'],
+					['label' => 'Kirim Pesan', 'link' => 'messages/create'],
 					['label' => 'Semua Pesan', 'link' => 'message'],
 				],
 			], [
@@ -57,7 +57,7 @@ class BaseController extends Controller {
 				'expanded'  => $expanded == 'Members',
 				'sub_items' => [
 					['label' => 'Member List',                    'link' => 'users'],
-					['label' => 'Tambah Member',                  'link' => 'users/new'],
+					['label' => 'Tambah Member',                  'link' => 'users/create'],
 					['label' => 'Export Email Member',            'link' => 'users/export_email'],
 					['label' => 'Invoice',                        'link' => 'invoices'],
 					['label' => 'Transaksi',                      'link' => 'transactions'],
@@ -77,7 +77,7 @@ class BaseController extends Controller {
 					['label' => 'Category Meta'        , 'link' => 'product_category_metas'],
 					['label' => 'Brand Produk'         , 'link' => 'brands'],
 					['label' => 'Brand Meta'           , 'link' => 'product_metas'],
-					['label' => 'Tambah Produk Baru'   , 'link' => 'products/new'],
+					['label' => 'Tambah Produk Baru'   , 'link' => 'products/create'],
 					['label' => 'Produk List'          , 'link' => 'products'],
 					['label' => 'Slot Category'        , 'link' => 'slot_categories'],
 					['label' => 'Slot Meta'            , 'link' => 'slot_metas'],
@@ -99,7 +99,7 @@ class BaseController extends Controller {
 				'icon'      => 'shopping-cart',
 				'expanded'  => $expanded == 'Order',
 				'sub_items' => [
-					['label' => 'Buat Order Baru'                 , 'link' => 'orders/new'],
+					['label' => 'Buat Order Baru'                 , 'link' => 'orders/create'],
 					['label' => 'Order List'                      , 'link' => 'orders'],
 					['label' => 'Data Propinsi / Kota / Kecamatan', 'link' => 'provinces'],
 					['label' => 'Kota Asal Pengiriman'            , 'link' => 'shipping_origins'],

@@ -2,7 +2,9 @@
 
 namespace Application\Models;
 
+use Phalcon\Validation;
 use Phalcon\Validation\Validator\Digit;
+use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -57,40 +59,56 @@ class Product extends BaseModel {
 		$this->hasMany('id', 'Application\Models\ProductDimension', 'reference_id', ['alias' => 'dimensions']);
 	}
 
-	function setProductCategoryId(int $product_category_id) {
-		$this->product_category_id = $product_category_id;
+	function setCode($code) {
+		$this->code = $this->_filter->sanitize($code, ['string', 'trim']);
 	}
 
-	function setCode(string $code = null) {
-		$this->code = $code;
+	function setName($name) {
+		$this->name = $this->_filter->sanitize($name, ['string', 'trim']);
 	}
 
-	function setName(string $name) {
-		$this->name = $name;
+	function setStock($stock) {
+		$this->stock = $this->_filter->sanitize($stock, 'int') ?: 0;
 	}
 
-	function setNewPermalink(string $new_permalink) {
-		$this->new_permalink = $new_permalink;
+	function setProductCategoryId($product_category_id) {
+		$this->product_category_id = $this->_filter->sanitize($product_category_id, 'int');
 	}
 
-	function setDescription(string $description = null) {
-		$this->description = $description;
+	function setBrandId($brand_id) {
+		$this->brand_id = $this->_filter->sanitize($brand_id, 'int');
 	}
 
-	function setPrice(int $price = 0) {
-		$this->price = $price;
+	function setPrice($price) {
+		$this->price = $this->_filter->sanitize($price, 'int') ?: 0;
 	}
 
-	function setWeight(int $weight = 0) {
-		$this->weight = $weight;
+	function setWeight($weight) {
+		$this->weight = $this->_filter->sanitize($weight, 'float') ?: 0.0;
 	}
 
-	function setPublished(int $published = null) {
-		$this->published = $published ?? 0;
+	function setDescription($description) {
+		$this->description = $this->_filter->sanitize($description, 'string');
 	}
 
-	function setStatus(int $status = null) {
-		$this->status = isset(static::STATUS[$status]) ? $status : 0;
+	function setNewPermalink($new_permalink) {
+		$this->new_permalink = $this->_filter->sanitize($new_permalink, 'string');
+	}
+
+	function setPublished($published) {
+		$this->published = $this->_filter->sanitize($published, 'int');
+	}
+
+	function setStatus($status) {
+		$this->status = $this->_filter->sanitize($status, 'int');
+	}
+
+	function setBuyPoint($buy_point) {
+		$this->buy_point = $this->_filter->sanitize($buy_point, 'int') ?: 0;
+	}
+
+	function setAffiliatePoint($affiliate_point) {
+		$this->affiliate_point = $this->_filter->sanitize($affiliate_point, 'int') ?: 0;
 	}
 
 	function setMetaTitle(string $meta_title) {
@@ -103,22 +121,6 @@ class Product extends BaseModel {
 
 	function setMetaDesc(string $meta_desc) {
 		$this->meta_desc = substr(str_replace(['\r', '\n'], ['', ' '], $this->_filter->sanitize($meta_desc, ['string', 'trim'])), 0, 160);
-	}
-
-	function setStock(int $stock = 0) {
-		$this->stock = $stock;
-	}
-
-	function setBrandId(int $brand_id = null) {
-		$this->brand_id = $brand_id;
-	}
-
-	function setBuyPoint(int $buy_point = null) {
-		$this->buy_point = $buy_point;
-	}
-
-	function setAffiliatePoint(int $affiliate_point = null) {
-		$this->affiliate_point = $affiliate_point;
 	}
 
 	function validation() {
@@ -144,12 +146,14 @@ class Product extends BaseModel {
 				'message' => 'kode sudah ada',
 			]));
 		}
-		$validator->add(['price', 'weight', 'stock'], new Digit([
+		$validator->add(['price', 'stock'], new Digit([
 			'message' => [
-				'price'  => 'harga dalam bentuk angka',
-				'weight' => 'berat dalam bentuk angka',
-				'stock'  => 'stok dalam bentuk angka',
+				'price'  => 'harga harus diisi dalam bentuk angka',
+				'stock'  => 'stok harus diisi dalam bentuk angka',
 			],
+		]));
+		$validator->add('weight', new Numericality([
+			'message' => 'berat harus diisi dalam bentuk desimal',
 		]));
 		if (!$this->id || $this->new_permalink) {
 			$validator->add('new_permalink', new Uniqueness([
