@@ -76,7 +76,7 @@
 					<b><font color="#000099">Gambar Produk ({{ i + 1 }})</font></b>
 					<br>
 					<input type="hidden" name="product_pictures[{{ i }}][id]" value="{{ product_picture[i].id }}">
-					<input type="file" name="product_pictures[{{ i }}][new_picture]" size="50" class="form form-control form-40">
+					<input type="file" name="product_pictures[{{ i }}]" size="50" class="form form-control form-40">
 					{% if product_pictures[i].id %}
 					<br>
 					<a class="image-popup-no-margins" href="/assets/images/{{ product_pictures[i].name }}"><img src="/assets/images/{{ product_pictures[i].thumbnail }}" border="0"></a>

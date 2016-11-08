@@ -54,13 +54,13 @@ class Product extends BaseModel {
 			'alias'    => 'brand',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\ProductPicture', 'reference_id', ['alias' => 'pictures']);
-		$this->hasMany('id', 'Application\Models\ProductVariant', 'reference_id', ['alias' => 'variants']);
-		$this->hasMany('id', 'Application\Models\ProductDimension', 'reference_id', ['alias' => 'dimensions']);
+		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
+		$this->hasMany('id', 'Application\Models\ProductVariant', 'product_id', ['alias' => 'variants']);
+		$this->hasMany('id', 'Application\Models\ProductDimension', 'product_id', ['alias' => 'dimensions']);
 	}
 
 	function setCode($code) {
-		$this->code = $this->_filter->sanitize($code, ['string', 'trim']);
+		$this->code = $this->_filter->sanitize($code, ['string', 'trim']) ?: null;
 	}
 
 	function setName($name) {
@@ -140,7 +140,7 @@ class Product extends BaseModel {
 			$validator->add('code', new Uniqueness([
 				'model'   => $this,
 				'convert' => function(array $values) : array {
-					$values['code'] = strtolower($values['name']);
+					$values['code'] = strtolower($values['code']);
 					return $values;
 				},
 				'message' => 'kode sudah ada',

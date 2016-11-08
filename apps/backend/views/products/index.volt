@@ -85,20 +85,20 @@ form-control form-30">
 						{% else %}
 							{% set background = ' style="opacity:0.4;filter:alpha(opacity=40)"' %}
 						{% endif %}
-						<tr>
+						<tr id="{{ product.id }}">
 							<td{{ background }}>{{ product.rank }}</td>
 							<td{{ background }} width="5%">
-								{if $list[i].Item.vGambar1 == ''}
-								<img src="assets/images/no_picture_120.png" border="0">
-								{else}
-								<a class="image-popup-no-margins" href="{$dirProducts}{$list[i].Item.vGambar1}"><img src="{$relativePath}thumb.php?src={$relativePath}{$dirProducts}{$list[i].Item.vGambar1}&w=120&h=100&zc=1" width="120" height="100" border="0"></a>
-								{/if}
+								{% if !product.thumbnail %}
+								<img src="/assets/images/no_picture_120.png" border="0">
+								{% else %}
+								<a class="image-popup-no-margins" href="/assets/images/{{ product.pictures[0].name }}"><img src="/assets/images/{{ product.thumbnail }}" width="120" height="100" border="0"></a>
+								{% endif %}
 							</td>
 							<td{{ background }}>
-								<a href="/admin/products/show/{{ product.id }}"> title="{{ product.name }}">
+								<a href="/admin/products/show/{{ product.id }}" title="{{ product.name }}">
 									<font size="4">#{{ product.code }} - {{ product.name }}</font>
 								</a>
-								<a href="/admin/products/update/{{ product.id }}/published:1">
+								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}">
 									{% if product.published %}
 									<i class="fa fa-eye fa-2x"></i>
 									{% else %}
@@ -161,14 +161,16 @@ form-control form-30">
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	for (var items = document.querySelectorAll('.delete'), i = items.length; i--; ) {
+	for (var items = document.querySelectorAll('.published,.delete'), i = items.length; i--; ) {
 		items[i].onclick = function() {
-			if (!confirm('Anda yakin ingin menghapus brand ini ?')) {
+			if ('delete' === this.className && !confirm('Anda yakin ingin menghapus product ini ?')) {
 				return !1
 			}
 			var form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/products/delete/' + this.dataset.id,
+			form.action = 'delete' === this.className
+			? '/admin/products/delete/' + this.dataset.id
+			: '/admin/products/update/' + this.dataset.id + '/published:1?next=' + window.location.href.split('#')[0] + '#' + this.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}

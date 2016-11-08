@@ -98,6 +98,10 @@ class ProductPicture extends BaseModel {
 		$this->thumbnails = json_encode($this->thumbnails);
 	}
 
+	function save($data = null, $white_list = null) {
+		return $this->_newFileIsValid() ? parent::save($data, $white_list) : true;
+	}
+
 	function afterSave() {
 		if (!$this->_newFileIsValid()) {
 			return true;

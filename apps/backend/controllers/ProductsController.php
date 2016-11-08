@@ -4,6 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Product;
 use Application\Models\ProductCategory;
+use Application\Models\ProductPicture;
 use Exception;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
@@ -62,15 +63,19 @@ class ProductsController extends BaseController {
 		]);
 		$page          = $paginator->getPaginate();
 		$pages         = $this->_setPaginationRange($page);
+		$products      = [];
 		foreach ($page->items as $item) {
-			$thumbnail = $item->getThumbnail(120, 100, 'no_picture_120.png');
 			$item->writeAttribute('rank', ++$offset);
-			$item->writeAttribute('thumbnail', $thumbnail);
+			if ($item->pictures[0]) {
+				$item->writeAttribute('thumbnail', $item->pictures[0]->getThumbnail(120, 100));
+			}
+			$products[] = $item;
 		}
 		$this->view->menu                = $this->_menu('Products');
 		$this->view->keyword             = $keyword;
 		$this->view->page                = $paginator->getPaginate();
 		$this->view->pages               = $pages;
+		$this->view->products            = $products;
 		$this->view->search_fields       = $search_fields;
 		$this->view->field               = $field;
 		$this->view->product_categories  = $product_categories;
@@ -107,6 +112,20 @@ class ProductsController extends BaseController {
 			$product->setMetaTitle($this->request->getPost('meta_title'));
 			$product->setMetaDesc($this->request->getPost('meta_desc'));
 			$product->setMetaKeyword($this->request->getPost('meta_keyword'));
+			$pictures = [];
+			for ($i = 0, $n = count($_FILES['product_pictures']); $i < $n; $i++) {
+				$picture = new ProductPicture;
+				$picture->setNewFile([
+					'name'     => $_FILES['product_pictures']['name'][$i],
+					'type'     => $_FILES['product_pictures']['type'][$i],
+					'tmp_name' => $_FILES['product_pictures']['tmp_name'][$i],
+					'error'    => $_FILES['product_pictures']['error'][$i],
+					'size'     => $_FILES['product_pictures']['size'][$i],
+				]);
+				$picture->setPosition($i + 1);
+				$pictures[] = $picture;
+			}
+			$product->pictures = $pictures;
 			if ($product->validation() && $product->create()) {
 				$this->flashSession->success('Penambahan data berhasil.');
 				return $this->response->redirect('/admin/products');
