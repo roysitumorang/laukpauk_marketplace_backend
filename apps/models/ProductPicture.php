@@ -70,7 +70,7 @@ class ProductPicture extends BaseModel {
 		$validator->add('position', new PresenceOf([
 			'message' => 'urutan harus diisi',
 		]));
-		$validator->add('position', new Uniqueness([
+		$validator->add(['product_id', 'position'], new Uniqueness([
 			'model'   => $this,
 			'field'   => ['product_id', 'position'],
 			'message' => 'urutan sudah ada',
