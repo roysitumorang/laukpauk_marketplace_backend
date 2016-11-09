@@ -27,16 +27,16 @@ class ProductsController extends BaseController {
 			'published'   => 'Show (tampil / sembunyi)',
 		];
 		$this->_prepare_categories_and_brands();
-		if ($keyword && $field && array_key_exists($search_fields, $field)) {
+		if ($keyword && $field && array_key_exists($field, $search_fields)) {
 			$parameter['conditions']      = "{$field} LIKE :keyword:";
 			$parameter['bind']['keyword'] = "%{$keyword}%";
 		}
 		if ($product_category_id) {
-			$parameter['conditions']                  = ($parameter['conditions'] ? ' AND ' : '') . "product_category_id = :product_category_id:";
+			$parameter['conditions']                 .= ($parameter['conditions'] ? ' AND ' : '') . "product_category_id = :product_category_id:";
 			$parameter['bind']['product_category_id'] = $product_category_id;
 		}
 		if ($brand_id) {
-			$parameter['conditions']       = ($parameter['conditions'] ? ' AND ' : '') . "brand_id = :brand_id:";
+			$parameter['conditions']      .= ($parameter['conditions'] ? ' AND ' : '') . "brand_id = :brand_id:";
 			$parameter['bind']['brand_id'] = $brand_id;
 		}
 		$paginator = new PaginatorModel([
