@@ -57,7 +57,7 @@ class ProductsController extends BaseController {
 		}
 		$this->view->menu                = $this->_menu('Products');
 		$this->view->keyword             = $keyword;
-		$this->view->page                = $paginator->getPaginate();
+		$this->view->page                = $page;
 		$this->view->pages               = $pages;
 		$this->view->products            = $products;
 		$this->view->search_fields       = $search_fields;
