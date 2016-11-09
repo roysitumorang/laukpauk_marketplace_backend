@@ -133,7 +133,7 @@ form-control form-30">
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="4"><i>Belum ada produk</i></td>
+							<td colspan="5"><i>Belum ada produk</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>

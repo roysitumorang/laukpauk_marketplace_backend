@@ -33,7 +33,8 @@ class ProductPicture extends BaseModel {
 	function initialize() {
 		parent::initialize();
 		$this->skipAttributesOnUpdate(['product_id']);
-		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
+		$this->keepSnapshots(true);
+		$this->belongsTo('product_id', 'Product', 'id', [
 			'alias'    => 'product',
 			'reusable' => true,
 		]);
@@ -53,6 +54,15 @@ class ProductPicture extends BaseModel {
 
 	function setPosition(int $position) {
 		$this->position = $position;
+	}
+
+	function beforeValidationOnCreate() {
+		do {
+			$this->name = bin2hex(random_bytes(16)) . '.jpg';
+			if (!is_readable($this->_upload_config->path . $this->name) && !static::findFirstByName($this->name)) {
+				break;
+			}
+		} while (1);
 	}
 
 	function validation() {
@@ -77,29 +87,18 @@ class ProductPicture extends BaseModel {
 		return $this->validate($validator);
 	}
 
-	function beforeCreate() {
-		parent::beforeCreate();
-		do {
-			$this->name = bin2hex(random_bytes(16)) . '.jpg';
-			if (!is_readable($this->_upload_config->path . $this->name) && !static::findFirstByName($this->name)) {
-				break;
-			}
-		} while (1);
-	}
-
 	function beforeUpdate() {
-		parent::beforeUpdate();
 		if ($this->_newFileIsValid()) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
-			$this->thumbnail = [];
+			$this->thumbnails = [];
 		}
 		$this->thumbnails = json_encode($this->thumbnails);
 	}
 
 	function save($data = null, $white_list = null) {
-		return $this->_newFileIsValid() ? parent::save($data, $white_list) : true;
+		return $this->_newFileIsValid() || ($this->id && $this->hasChanged('thumbnails')) ? parent::save($data, $white_list) : true;
 	}
 
 	function afterSave() {
@@ -125,7 +124,7 @@ class ProductPicture extends BaseModel {
 
 	function getThumbnail(int $width, int $height, string $default_file = null) {
 		$file = $this->name ?? $default_file;
-		if (!$file) {
+		if (!$this->id || !$file) {
 			return null;
 		}
 		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $file);
@@ -136,7 +135,7 @@ class ProductPicture extends BaseModel {
 			$this->thumbnails[] = $thumbnail;
 			$this->setThumbnails($this->thumbnails);
 			$this->skipAttributes(['updated_by', 'updated_at']);
-			$this->save();
+			$this->update();
 		}
 		return $thumbnail;
 	}

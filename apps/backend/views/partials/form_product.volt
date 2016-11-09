@@ -18,8 +18,8 @@
 				<b><font color="#000099">Category</font></b>
 				<br>
 				<select name="product_category_id" class="form form-control">
-				{% for product_category in product_categories %}
-					<option value="{{ product_category.id }}"{% if product_category.id == product.product_category_id %} selected{% endif %}>{% if product_category.parent_id %}--{% endif %}{{ product_category.name }} ({{ product_category.total_products }})</option>
+				{% for category in categories %}
+					<option value="{{ category.id }}"{% if category.id == product.product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
 				{% endfor %}
 				</select>
 			</td>
@@ -53,12 +53,14 @@
 			<td colspan="4">
 				<b><font color="#000099">Gambar Produk (1)</font></b>
 				<br>
+				<input type="hidden" name="product_pictures[0][id]" value="{{ pictures[0].id }}">
+				<input type="hidden" name="product_pictures[0][position]" value="{{ pictures[0].position }}">
 				<input type="file" name="product_pictures[0]" size="50" class="form form-control form-40">
-				{% if product_pictures[0] %}
+				{% if pictures[0] %}
 				<br>
-				<a class="image-popup-no-margins" href="/assets/images/{{ product_pictures[0].name }}"><img src="/assets/images/{{ product_pictures[0].thumbnail }}" border="0"></a>
+				<a class="image-popup-no-margins" href="/assets/images/{{ pictures[0].name }}"><img src="/assets/images/{{ pictures[0].thumbnail }}" border="0"></a>
 				<br>
-				<a href="javascript:void(0)" class="delete" data-id="{{ product_pictures[0].id }}"><i class="fa fa-trash-o fa-2x"></i></a>
+				<a href="javascript:void(0)" class="delete" data-product-id="{{ product.id }}" data-id="{{ pictures[0].id }}"><i class="fa fa-trash-o fa-2x"></i></a>
 				<br>
 				{% endif %}
 				Besar file gambar harus di bawah 200 Kb
@@ -75,13 +77,14 @@
 				<td>
 					<b><font color="#000099">Gambar Produk ({{ i + 1 }})</font></b>
 					<br>
-					<input type="hidden" name="product_pictures[{{ i }}][id]" value="{{ product_picture[i].id }}">
+					<input type="hidden" name="product_pictures[{{ i }}][id]" value="{{ pictures[i].id }}">
+					<input type="hidden" name="product_pictures[{{ i }}][position]" value="{{ pictures[i].position }}">
 					<input type="file" name="product_pictures[{{ i }}]" size="50" class="form form-control form-40">
-					{% if product_pictures[i].id %}
+					{% if pictures[i].id %}
 					<br>
-					<a class="image-popup-no-margins" href="/assets/images/{{ product_pictures[i].name }}"><img src="/assets/images/{{ product_pictures[i].thumbnail }}" border="0"></a>
+					<a class="image-popup-no-margins" href="/assets/images/{{ pictures[i].name }}"><img src="/assets/images/{{ pictures[i].thumbnail }}" border="0"></a>
 					<br>
-					<a href="javascript:void(0)" class="delete" data-id="{{ product_pictures[i].id }}"><i class="fa fa-trash-o fa-2x"></i></a>
+					<a href="javascript:void(0)" class="delete" data-product-id="{{ product.id }}" data-id="{{ pictures[i].id }}"><i class="fa fa-trash-o fa-2x"></i></a>
 					<br>
 					{% endif %}
 					Besar file gambar harus di bawah 200 Kb
@@ -255,3 +258,17 @@
 		</tr>
 	</table>
 </form>
+<script>
+	for (var items = document.querySelectorAll('.delete'), i = items.length; i--; ) {
+		items[i].onclick = function() {
+			if (!confirm('Anda yakin menghapus gambar ini ?')) {
+				return !1
+			}
+			var form = document.createElement('form');
+			form.method = 'POST',
+			form.action = '/admin/products/update/' + this.dataset.productId + '/delete_picture:' + this.dataset.id,
+			document.body.appendChild(form),
+			form.submit()
+		}
+	}
+</script>
