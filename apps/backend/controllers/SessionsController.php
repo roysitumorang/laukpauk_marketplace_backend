@@ -44,7 +44,7 @@ class SessionsController extends BaseController {
 					$this->session->set('user_id', $user->id);
 					return $this->response->redirect($next_url ?: '/admin/home');
 				}
-				$this->flashSession->error('Email dan/atau password salah');
+				$errors[] = 'Email dan/atau password salah';
 			}
 			foreach ($errors as $error) {
 				$this->flashSession->error($error);
