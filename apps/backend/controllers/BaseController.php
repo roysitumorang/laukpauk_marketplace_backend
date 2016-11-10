@@ -9,12 +9,11 @@ use Phalcon\Text;
 class BaseController extends Controller {
 	function initialize() {
 		$url = $this->request->getQuery('_url');
-		if ($this->session->get('user_id')) {
-			$this->view->current_user    = $this->currentUser;
-			$this->view->unread_messages = $this->currentUser->unread_messages;
-		} else if (!Text::startsWith($url, '/admin/sessions')) {
-			$this->response->redirect('/admin/sessions/new');
+		if (!$this->session->get('user_id') && !Text::startsWith($url, '/admin/sessions')) {
+			return $this->response->redirect('/admin/sessions/create?next=' . $url);
 		}
+		$this->view->current_user    = $this->currentUser;
+		$this->view->unread_messages = $this->currentUser->unread_messages;
 	}
 
 	function notFoundAction() {

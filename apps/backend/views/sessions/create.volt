@@ -10,12 +10,12 @@
 			</div>
 			<div class="panel-body">
 				{{ flashSession.output() }}
-				{{ form('/admin/sessions/create', 'method': 'POST') }}
+				<form method="POST" action="/admin/sessions/create{% if next_url %}?next={{ next_url }}{% endif %}">
 					<input type="hidden" name="{{ token_key }}" value="{{ token }}">
 					<div class="form-group mb-lg">
 						<label>Email</label>
 						<div class="input-group input-group-icon">
-							{{ text_field('email', 'class': 'form-control input-lg') }}
+							<input type="text" name="email" value="{{ email }}" class="form-control input-lg">
 							<span class="input-group-addon">
 								<span class="icon icon-lg">
 									<i class="fa fa-user"></i>
@@ -28,7 +28,7 @@
 							<label class="pull-left">Password</label>
 						</div>
 						<div class="input-group input-group-icon">
-							{{ password_field('password', 'value': '', 'class': 'form-control input-lg') }}
+							<input type="password" name="password" class="form-control input-lg">
 							<span class="input-group-addon">
 								<span class="icon icon-lg">
 									<i class="fa fa-lock"></i>
@@ -39,7 +39,7 @@
 					<div class="row">
 						<div class="col-sm-8"></div>
 						<div class="col-sm-4 text-right">
-							{{ submit_button('LOGIN', 'class': 'btn btn-primary hidden-xs') }}
+							<button type="submit" class="btn btn-primary hidden-xs">LOGIN</button>
 						</div>
 					</div>
 				</form>
