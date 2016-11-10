@@ -37,7 +37,7 @@ class SessionsController extends BaseController {
 						'email'       => $email,
 						'super_admin' => Role::SUPER_ADMIN,
 						'admin'       => Role::ADMIN,
-						'status'      => User::STATUS_ACTIVE,
+						'status'      => User::STATUS['ACTIVE'],
 					],
 				]);
 				if ($user && password_verify($password, $user->password)) {

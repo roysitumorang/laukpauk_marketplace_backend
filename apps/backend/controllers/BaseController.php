@@ -3,6 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Ds\Vector;
+use Phalcon\Db;
 use Phalcon\Mvc\Controller;
 use Phalcon\Text;
 
@@ -14,6 +15,27 @@ class BaseController extends Controller {
 		}
 		$this->view->current_user    = $this->currentUser;
 		$this->view->unread_messages = $this->currentUser->unread_messages;
+		if (!apcu_exists('provinces')) {
+			$provinces        = [];
+			$result_provinces = $this->db->query('SELECT id, name FROM provinces ORDER BY name');
+			$result_provinces->setFetchMode(Db::FETCH_OBJ);
+			while ($province = $result_provinces->fetch()) {
+				$province->cities = [];
+				$result_cities    = $this->db->query("SELECT id, type, name FROM cities WHERE province_id = {$province->id} ORDER BY CONCAT(type, name)");
+				$result_cities->setFetchMode(Db::FETCH_OBJ);
+				while ($city = $result_cities->fetch()) {
+					$city->subdistricts  = [];
+					$result_subdistricts = $this->db->query("SELECT id, name FROM subdistricts WHERE city_id = {$city->id} ORDER BY name");
+					$result_subdistricts->setFetchMode(Db::FETCH_OBJ);
+					while ($subdistrict = $result_subdistricts->fetch()) {
+						$city->subdistricts[] = $subdistrict;
+					}
+					$province->cities[$city->id] = $city;
+				}
+				$provinces[$province->id] = $province;
+			}
+			apcu_add('provinces', $provinces);
+		}
 	}
 
 	function notFoundAction() {

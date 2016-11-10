@@ -28,7 +28,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/new" title="Tambah Member">Members Add</a><br><br>
+				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/create" title="Tambah Member">Members Add</a><br><br>
 				<div style="padding:10px;background:#e5f2ff;font-size:14px;color:#333333">
 					<strong>Total Members:</strong>&nbsp;{{ total_users }} members /
 					<font size="2">
@@ -40,15 +40,15 @@
 					<tr>
 						<td>
 							<!-- Main Content //-->
-							<form action="/admin/members" method="GET">
+							<form action="/admin/users" method="GET">
 								<b>Cari berdasarkan:</b>
-								<select name="based_on" class="form form-control form-20">
-									{% for value, label in search_options %}
-									<option value="{{ value }}"{% if based_on == value %} selected{% endif %}>{{ label }}</option>
+								<select name="parameter" class="form form-control form-20">
+									{% for value, label in search_parameters %}
+									<option value="{{ value }}"{% if parameter == value %} selected{% endif %}>{{ label }}</option>
 									{% endfor %}
 								</select>&nbsp;&nbsp;
 								<input type="text" name="keyword" value="{{ keyword }}" class="form form-control form-40" size="40">&nbsp;
-								<input type="submit" name="submit" value="CARI" class="btn btn-info">&nbsp;
+								<button type="submit" class="btn btn-info">CARI</button>
 								<input type="submit" name="print" value="Excel" class="btn btn-success">&nbsp;
 								<input type="submit" name="print" value="CSV" class="btn btn-warning">
 							</form>
@@ -77,7 +77,7 @@
 								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
 								<br>
 								<i class="fa fa-envelope"></i>&nbsp; <a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
-								<i class="fa fa-phone-square"></i>&nbsp;&nbsp;<a href="/admin/sms/new?user_id={{ user.id }}" target="_blank">{{ user.mobile }}</a><br>
+								<i class="fa fa-phone-square"></i>&nbsp;&nbsp;<a href="/admin/sms/create/user_id:{{ user.id }}" target="_blank">{{ user.phone }}</a><br>
 								<a href="/admin/users/{{ user.id }}/emails" title="email log"><i class="fa fa-envelope"></i>&nbsp;{{ count(user.emails) }} emails</a>
 								<br><i class="fa fa-sign-in"></i>&nbsp;
 								{% if !user.last_login %}
@@ -87,7 +87,7 @@
 								{% endif %}
 							</td>
 							<td>
-								Reg Date:&nbsp;{{ date('d B Y', strtotime(user.created_at)) }}<br>
+								Reg Date:&nbsp;{{ date('d M Y', strtotime(user.created_at)) }}<br>
 								<i class="fa fa-user"></i>&nbsp;
 								{% if !user.premium %}
 								<b><font color="#000099">FREE</font></b>
@@ -101,7 +101,7 @@
 							<td>
 								{% if user.status == hold %}
 								<a href="javascript:confirm('Anda yakin aktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/activate')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
-								<b><font color="#FF0000">HOLD</font></b> ({$listMembers[i].Item.vAktif|no_value})&nbsp;
+								<b><font color="#FF0000">HOLD</font></b> ({{ user.status }})&nbsp;
 								<a href="javascript:open_window('/admin/emails/new?user_id={{ user.id }}')" title="send email"><img src="/backend/images/send-email-small.png" border="0"></a>
 								{% else %}
 								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/deactivate')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
