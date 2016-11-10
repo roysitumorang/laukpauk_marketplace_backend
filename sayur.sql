@@ -1,6 +1,6 @@
 /*
 SQLyog Ultimate
-MySQL - 10.1.18-MariaDB : Database - sayur
+MySQL - 10.1.19-MariaDB : Database - sayur
 *********************************************************************
 */
 
@@ -9257,6 +9257,8 @@ CREATE TABLE `users` (
   `date_of_birth` date DEFAULT NULL,
   `buy_point` decimal(10,0) NOT NULL,
   `affiliate_point` decimal(10,0) NOT NULL,
+  `avatar` char(36) DEFAULT NULL,
+  `thumbnails` text,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -9268,6 +9270,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `google_id` (`google_id`),
   UNIQUE KEY `password_reset_token` (`password_reset_token`),
   UNIQUE KEY `twitter_id` (`twitter_id`),
+  UNIQUE KEY `avatar` (`avatar`),
   KEY `activated_at` (`activated_at`),
   KEY `created_by` (`created_by`),
   KEY `date_of_birth` (`date_of_birth`),
@@ -9283,8 +9286,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'0',NULL,NULL,NULL,'::1',NULL,NULL,NULL,'0','Pria','1981-07-06','0','0',1,'2016-10-25 01:07:27',NULL,NULL);
+insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'0',NULL,NULL,NULL,'::1',NULL,NULL,NULL,'0','Pria','1981-07-06','0','0',NULL,NULL,1,'2016-10-25 01:07:27',NULL,NULL);
 
 UNLOCK TABLES;
 
