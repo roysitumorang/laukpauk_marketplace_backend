@@ -88,7 +88,9 @@ class Product extends BaseModel {
 	}
 
 	function setDescription($description) {
-		$this->description = $this->_filter->sanitize($description, 'string');
+		if ($description) {
+			$this->description = $this->_filter->sanitize($description, ['string', 'trim']);
+		}
 	}
 
 	function setNewPermalink($new_permalink) {
@@ -111,15 +113,15 @@ class Product extends BaseModel {
 		$this->affiliate_point = $this->_filter->sanitize($affiliate_point, 'int') ?: 0;
 	}
 
-	function setMetaTitle(string $meta_title) {
+	function setMetaTitle($meta_title) {
 		$this->meta_title = $this->_filter->sanitize($meta_title ?: $this->name, ['string', 'trim']);
 	}
 
-	function setMetaKeyword(string $meta_keyword) {
+	function setMetaKeyword($meta_keyword) {
 		$this->meta_keyword = $this->_filter->sanitize($meta_keyword ?: $this->name, ['string', 'trim']);
 	}
 
-	function setMetaDesc(string $meta_desc) {
+	function setMetaDesc($meta_desc) {
 		$this->meta_desc = substr(str_replace(['\r', '\n'], ['', ' '], $this->_filter->sanitize($meta_desc, ['string', 'trim'])), 0, 160);
 	}
 
@@ -129,21 +131,23 @@ class Product extends BaseModel {
 			'message' => 'nama harus diisi',
 		]));
 		$validator->add('name', new Uniqueness([
-			'model'   => $this,
-			'convert' => function(array $values) : array {
+			'model'     => $this,
+			'attribute' => 'id',
+			'convert'   => function(array $values) : array {
 				$values['name'] = strtolower($values['name']);
 				return $values;
 			},
-			'message' => 'nama sudah ada',
+			'message'   => 'nama sudah ada',
 		]));
 		if ($this->code) {
 			$validator->add('code', new Uniqueness([
-				'model'   => $this,
-				'convert' => function(array $values) : array {
+				'model'     => $this,
+				'attribute' => 'id',
+				'convert'   => function(array $values) : array {
 					$values['code'] = strtolower($values['code']);
 					return $values;
 				},
-				'message' => 'kode sudah ada',
+				'message'   => 'kode sudah ada',
 			]));
 		}
 		$validator->add(['price', 'stock'], new Digit([
@@ -167,10 +171,6 @@ class Product extends BaseModel {
 
 	function beforeValidation() {
 		$this->permalink = preg_replace('/\s+/', '-', $this->new_permalink ? $this->_filter->sanitize($this->new_permalink, ['string', 'trim', 'lower']) : strtolower($this->name));
-	}
-
-	function beforeSave() {
-		$this->brand_id = $this->brand_id ?: null;
 	}
 
 	function beforeDelete() {

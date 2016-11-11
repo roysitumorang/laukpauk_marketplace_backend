@@ -147,7 +147,7 @@ form-control form-30">
 							<b>{{ i }}</b>
 							{% else %}
 							<input type="button" name="button" onclick="location.href='/admin/product_prices/page:{{ i }}'" value="Update Harga dan Berat" class="btn btn-warning">
-							<a href="/admin/product_categories/index/page:{{ i }}?{% if product_keyword %}keyword={{ product_keyword }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}">{{ i }}</a>
+							<a href="/admin/products/index/page:{{ i }}{% if product_keyword or brand %}?{% endif %}{% if product_keyword %}keyword={{ product_keyword }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

@@ -2,6 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
+use Application\Models\Brand;
 use Application\Models\Product;
 use Application\Models\ProductCategory;
 use Application\Models\ProductPicture;
@@ -169,11 +170,11 @@ class ProductsController extends BaseController {
 	}
 
 	private function _set_model_attributes(&$product) {
+		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
+		$product->brand    = Brand::findFirst($this->request->getPost('brand_id'));
 		$product->setCode($this->request->getPost('code'));
 		$product->setName($this->request->getPost('name'));
 		$product->setStock($this->request->getPost('stock'));
-		$product->setProductCategoryId($this->request->getPost('product_category_id'));
-		$product->setBrandId($this->request->getPost('brand_id'));
 		$product->setPrice($this->request->getPost('price'));
 		$product->setWeight($this->request->getPost('weight'));
 		$product->setDescription($this->request->getPost('description'));
