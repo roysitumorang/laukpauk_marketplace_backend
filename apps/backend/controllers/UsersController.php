@@ -5,13 +5,11 @@ namespace Application\Backend\Controllers;
 use Application\Models\Role;
 use Application\Models\User;
 use Phalcon\Db;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class UsersController extends BaseController {
 	function indexAction() {
-		$parameter          = $this->request->get('parameter');
-		$keyword            = $this->request->get('keyword');
-		$search_parameters  = [
+		$search_parameters = [
 			'name'         => 'Nama',
 			'email'        => 'Email',
 			'city'         => 'Kota',
@@ -21,19 +19,92 @@ class UsersController extends BaseController {
 			'activated_at' => 'Tanggal Aktivasi (YYYY-mm-dd)',
 			'status'       => 'Status',
 		];
-		$current_page       = filter_var($this->request->get('page'), FILTER_VALIDATE_INT) ?? 1;
-		$users              = User::find();
-		$limit              = 10;
-		$paginator          = new PaginatorModel([
-			'data'  => $users,
-			'limit' => $limit,
-			'page'  => $current_page,
+		$limit             = $this->config->per_page;
+		$current_page      = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset            = ($current_page - 1) * $limit;
+		$parameter         = $this->request->get('parameter', 'string');
+		$keyword           = $this->request->getQuery('keyword', 'string');
+		$builder           = $this->modelsManager->createBuilder()
+			->columns([
+				'id' => 'a.id',
+				'a.role_id',
+				'a.name',
+				'a.email',
+				'a.password',
+				'a.address',
+				'a.zip_code',
+				'a.subdistrict_id',
+				'a.phone',
+				'a.mobile',
+				'a.premium',
+				'a.affiliate_link',
+				'a.status',
+				'a.activated_at',
+				'a.activation_token',
+				'a.password_reset_token',
+				'a.last_seen',
+				'a.deposit',
+				'a.ktp',
+				'a.company',
+				'a.npwp',
+				'a.registration_ip',
+				'a.twitter_id',
+				'a.google_id',
+				'a.facebook_id',
+				'a.reward',
+				'a.gender',
+				'a.date_of_birth',
+				'a.buy_point',
+				'a.affiliate_point',
+				'a.avatar',
+				'a.thumbnails',
+				'a.created_by',
+				'a.created_at',
+				'a.updated_by',
+				'a.updated_at',
+			])
+			->from(['a' => 'Application\Models\User'])
+			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
+			->leftJoin('Application\Models\Subdistrict', 'a.subdistrict_id = c.id', 'c')
+			->leftJoin('Application\Models\City', 'c.city_id = d.id', 'd')
+			->orderBy('id DESC');
+		if ($keyword) {
+			if ($parameter == 'name') {
+				$builder->where('a.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'email') {
+				$builder->where('a.email LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'city') {
+				$builder->where('d.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'zip_code') {
+				$builder->where('a.zip_code LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'role') {
+				$builder->where('b.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'created_at') {
+				$builder->where('a.created_at LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'activated_at') {
+				$builder->where('a.activated_at LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			} else if ($parameter == 'status') {
+				$builder->where('a.status = :keyword:', ['keyword' => $keyword]);
+			}
+		}
+		$paginator = new PaginatorQueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
+		$page      = $paginator->getPaginate();
+		$pages     = $this->_setPaginationRange($page);
+		$users     = [];
+		foreach ($page->items as $item) {
+			$item->writeAttribute('rank', ++$offset);
+			$users[] = $item;
+		}
 		$this->view->menu                = $this->_menu('Member');
+		$this->view->users               = $users;
 		$this->view->page                = $paginator->getPaginate();
 		$this->view->multi_page          = count($users) / $limit > 1;
 		$this->view->search_parameters   = $search_parameters;
-		$this->view->parameter           = array_key_exists($parameter, $search_options) ? $parameter : array_keys($search_parameters)[0];
+		$this->view->parameter           = $parameter;
 		$this->view->keyword             = $keyword;
 		$this->view->hold                = User::STATUS['HOLD'];
 		$this->view->active              = User::STATUS['ACTIVE'];

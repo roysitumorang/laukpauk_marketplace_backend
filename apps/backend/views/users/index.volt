@@ -65,14 +65,9 @@
 						</tr>
 					</thead>
 					<tbody>
-					{% if !page.items %}
+						{% for user in users %}
 						<tr>
-							<td colspan="5">No Members List</td>
-						</tr>
-					{% else %}
-						{% for user in page.items %}
-						<tr>
-							<td>{{ user.no }}</td>
+							<td>{{ user.rank }}</td>
 							<td>
 								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
 								<br>
@@ -119,8 +114,11 @@
 								<a href="javascript:void(0)" class="delete" data-id="{{ user.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 							</td>
 						</tr>
+						{% elsefor %}
+						<tr>
+							<td colspan="5">No Members List</td>
+						</tr>
 						{% endfor %}
-					{% endif %}
 					</tbody>
 				</table>
 				{% if multi_page %}
@@ -128,9 +126,9 @@
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						<a href="/admin/users">1</a>
-						<a href="/admin/users?page={{ page.before }}">{{ page.before }}</a>
-						<a href="/admin/users?page={{ page.next }}">{{ page.next }}</a>
-						<a href="/admin/users?page={{ page.last }}">{{ page.last }}</a>
+						<a href="/admin/users/index/page={{ page.before }}{% if keyword %}?parameter={{ parameter }}&keyword={{ keyword }}{% endif %}">{{ page.before }}</a>
+						<a href="/admin/users/index/page={{ page.next }}{% if keyword %}?parameter={{ parameter }}&keyword={{ keyword }}{% endif %}">{{ page.next }}</a>
+						<a href="/admin/users/index/page={{ page.last }}{% if keyword %}?parameter={{ parameter }}&keyword={{ keyword }}{% endif %}">{{ page.last }}</a>
 					</p>
 				</div>
 				{% endif %}
