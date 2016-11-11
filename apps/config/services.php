@@ -5,7 +5,7 @@ use Phalcon\Logger\Adapter\File;
 use Phalcon\Assets\Manager as AssetsManager;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Db\Adapter\Pdo\Postgresql;
-use Phalcon\Mvc\Model\Transaction\Transaction as TransactionManager;
+use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
 use Phalcon\Mvc\Model\Metadata\Memory;
 use Phalcon\Mvc\Url;
 use Phalcon\Flash\Direct;

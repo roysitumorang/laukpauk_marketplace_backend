@@ -14,27 +14,39 @@ class BaseController extends Controller {
 			return $this->response->redirect('/admin/sessions/create?next=' . $url);
 		}
 		$this->view->current_user    = $this->currentUser;
-		$this->view->unread_messages = $this->currentUser->unread_messages;
+		// $this->view->unread_messages = $this->currentUser->unread_messages;
 		if (!apcu_exists('provinces')) {
-			$provinces        = [];
-			$result_provinces = $this->db->query('SELECT id, name FROM provinces ORDER BY name');
-			$result_provinces->setFetchMode(Db::FETCH_OBJ);
-			while ($province = $result_provinces->fetch()) {
-				$province->cities = [];
-				$result_cities    = $this->db->query("SELECT id, type, name FROM cities WHERE province_id = {$province->id} ORDER BY CONCAT(type, name)");
-				$result_cities->setFetchMode(Db::FETCH_OBJ);
-				while ($city = $result_cities->fetch()) {
-					$city->subdistricts  = [];
-					$result_subdistricts = $this->db->query("SELECT id, name FROM subdistricts WHERE city_id = {$city->id} ORDER BY name");
-					$result_subdistricts->setFetchMode(Db::FETCH_OBJ);
-					while ($subdistrict = $result_subdistricts->fetch()) {
-						$city->subdistricts[] = $subdistrict;
-					}
-					$province->cities[$city->id] = $city;
-				}
-				$provinces[$province->id] = $province;
+			$provinces = [];
+			$result    = $this->db->query('SELECT id, name FROM provinces ORDER BY name');
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($item = $result->fetch()) {
+				$provinces[] = $item;
 			}
 			apcu_add('provinces', $provinces);
+		}
+		if (!apcu_exists('cities')) {
+			$cities = [];
+			$result = $this->db->query('SELECT id, province_id, type, name FROM cities ORDER BY CONCAT(type, name)');
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($item = $result->fetch()) {
+				isset($cities[$item->province_id]) || $cities[$item->province_id] = [];
+				$city = clone $item;
+				unset($city->province_id);
+				$cities[$item->province_id][] = $city;
+			}
+			apcu_add('cities', $cities);
+		}
+		if (!apcu_exists('subdistricts')) {
+			$subdistricts = [];
+			$result       = $this->db->query('SELECT id, city_id, name FROM subdistricts ORDER BY name');
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($item = $result->fetch()) {
+				isset($subdistricts[$item->city_id]) || $subdistricts[$item->city_id] = [];
+				$subdistrict = clone $item;
+				unset($subdistrict->city_id);
+				$subdistricts[$item->city_id][] = $subdistrict;
+			}
+			apcu_add('subdistricts', $subdistricts);
 		}
 	}
 

@@ -3,10 +3,13 @@
 namespace Application\Models;
 
 use Application\Models\BaseModel;
+use Phalcon\Image\Adapter\Gd;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Confirmation;
+use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\Email;
+use Phalcon\Validation\Validator\Image;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -51,6 +54,9 @@ class User extends BaseModel {
 	public $date_of_birth;
 	public $buy_point;
 	public $affiliate_point;
+	public $avatar;
+	public $new_avatar;
+	public $thumbnails;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -61,7 +67,8 @@ class User extends BaseModel {
 	}
 
 	function onConstruct() {
-		$this->_filter = $this->getDI()->getFilter();
+		$this->_upload_config = $this->getDI()->getConfig()->upload;
+		$this->_filter        = $this->getDI()->getFilter();
 	}
 
 	function initialize() {
@@ -173,7 +180,9 @@ class User extends BaseModel {
 	}
 
 	function setGender($gender) {
-		$this->gender = $this->_filter->sanitize($gender, 'alphanum');
+		if (in_array($gender, static::GENDERS)) {
+			$this->gender = $gender;
+		}
 	}
 
 	function setDateOfBirth($date_of_birth) {
@@ -188,16 +197,24 @@ class User extends BaseModel {
 		$this->affiliate_point = $this->_filter->sanitize($affiliate_point, 'int') ?? 0;
 	}
 
+	function setNewAvatar(array $new_avatar) {
+		$this->new_avatar = $new_avatar;
+	}
+
+	function setThumbnails(array $thumbnails = null) {
+		$this->thumbnails = array_filter($thumbnails ?? []);
+	}
+
 	function beforeValidationOnCreate() {
 		$this->status           = static::STATUS['HOLD'];
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
-		$this->password         = password_hash($this->new_password, PASSWORD_DEFAULT);
-		do {
-			$this->activation_token = bin2hex(random_bytes(32));
-			if (!static::findByActivationToken($this->activation_token)) {
-				break;
-			}
-		} while (1);
+		$this->activation_token = bin2hex(random_bytes(32));
+	}
+
+	function beforeValidation() {
+		if (!$this->id || $this->new_password) {
+			$this->password = password_hash($this->new_password, PASSWORD_DEFAULT);
+		}
 	}
 
 	function validation() {
@@ -236,6 +253,12 @@ class User extends BaseModel {
 			},
 			'message' => 'email sudah ada',
 		]));
+		if ($this->date_of_birth) {
+			$validator->add('date_of_birth', new Date([
+				'format'  => 'Y-m-d',
+				'message' => 'tanggal lahir tidak valid',
+			]));
+		}
 		$validator->add(['deposit', 'reward', 'buy_point', 'affiliate_point'], new Digit([
 			'message' => [
 				'deposit'         => 'deposit harus dalam bentuk angka',
@@ -249,6 +272,108 @@ class User extends BaseModel {
 				'message' => 'post code harus dalam bentuk 5 angka',
 			]));
 		}
+		if ($this->new_avatar) {
+			$max_size = $this->_upload_config->max_size;
+			$validator->add('new_avatar', new Image([
+				'max_size'     => $max_size,
+				'message_size' => 'ukuran file maksimal ' . $max_size,
+				'message_type' => 'format gambar harus JPG atau PNG',
+				'allowEmpty'   => true,
+			]));
+		}
 		return $this->validate($validator);
+	}
+
+	function beforeSave() {
+		$this->address        = $this->address ?: null;
+		$this->zip_code       = $this->zip_code ?: null;
+		$this->subdistrict_id = $this->subdistrict_id ?: null;
+		$this->mobile         = $this->mobile ?: null;
+		$this->affiliate_link = $this->affiliate_link ?: null;
+		$this->activated_at   = $this->activated_at ?: null;
+		$this->last_seen      = $this->last_seen ?: null;
+		$this->ktp            = $this->ktp ?: null;
+		$this->company        = $this->company ?: null;
+		$this->npwp           = $this->npwp ?: null;
+		$this->twitter_id     = $this->twitter_id ?: null;
+		$this->google_id      = $this->google_id ?: null;
+		$this->facebook_id    = $this->facebook_id ?: null;
+		$this->date_of_birth  = $this->date_of_birth ?: null;
+		$this->avatar         = $this->avatar ?: null;
+		if (!$this->_newAvatarIsValid()) {
+			return true;
+		}
+		do {
+			$this->avatar = bin2hex(random_bytes(16)) . '.jpg';
+			if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
+				break;
+			}
+		} while (1);
+	}
+
+	function beforeUpdate() {
+		parent::beforeUpdate();
+		if ($this->_newAvatarIsValid()) {
+			foreach ($this->thumbnails as $thumbnail) {
+				unlink($this->_upload_config->path . $thumbnail);
+			}
+			$this->thumbnails = [];
+		}
+		$this->thumbnails = json_encode($this->thumbnails);
+	}
+
+	function afterSave() {
+		if (!$this->_newAvatarIsValid()) {
+			return true;
+		}
+		$avatar = $this->_upload_config->path . $this->avatar;
+		$gd     = new Gd($this->new_avatar['tmp_name']);
+		$gd->save($avatar, 100);
+		unlink($this->new_avatar['tmp_name']);
+	}
+
+	function beforeDelete() {
+		if (!$this->avatar) {
+			return;
+		}
+		$this->thumbnails[] = $this->avatar;
+		foreach ($this->thumbnails as $thumbnail) {
+			unlink($this->_upload_config->path . $thumbnail);
+		}
+	}
+
+	function afterFetch() {
+		$this->thumbnails = json_decode($this->thumbnails);
+	}
+
+	function getThumbnail(int $width, int $height, string $default_avatar = null) {
+		$avatar = $this->avatar ?? $default_avatar;
+		if (!$avatar) {
+			return null;
+		}
+		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $avatar);
+		if (!in_array($thumbnail, $this->thumbnails)) {
+			$gd = new Gd($this->_upload_config->path . $avatar);
+			$gd->resize($width, $height);
+			$gd->save($this->_upload_config->path . $thumbnail, 100);
+			if ($this->avatar) {
+				$this->thumbnails[] = $thumbnail;
+				$this->setThumbnails($this->thumbnails);
+				$this->skipAttributes(['updated_by', 'updated_at']);
+				$this->update();
+			}
+		}
+		return $thumbnail;
+	}
+
+	function deleteAvatar() {
+		$this->beforeDelete();
+		$this->avatar = null;
+		$this->setThumbnails([]);
+		$this->save();
+	}
+
+	private function _newAvatarIsValid() {
+		return $this->new_avatar['tmp_name'] && !$this->new_avatar['error'] && $this->new_avatar['size'];
 	}
 }

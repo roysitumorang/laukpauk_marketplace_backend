@@ -169,7 +169,7 @@
 		<tr>
 			<td>
 				Kode Aktivasi:<br>
-				{{ user.activation_code }}
+				{{ user.activation_token }}
 			</td>
 		</tr>
 		{% endif %}
@@ -178,7 +178,7 @@
 				Avatar:<br>
 				<input type="file" name="avatar" size="30" class="form form-control form-30">
 				{% if user.avatar %}
-				<br><img src="{{ user.thumbnail }}" border="0"><br>
+				<br><img src="/assets/images/{{ user.avatar }}" border="0"><br>
 				<a href="javascript:void(0)" data-id="{{ user.id }}" class="main delete-avatar" title="Delete Avatar">Delete Avatar</a>
 				{% endif %}
 			</td>
@@ -203,19 +203,19 @@
 		<tr>
 			<td>
 				Twitter ID:<br>
-				{{ user.twitter_id }}
+				{{ user.twitter_id|default('-') }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Google ID:<br>
-				{{ user.google_id }}
+				{{ user.google_id|default('-') }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Facebook ID:<br>
-				{{ user.facebook_id }}
+				{{ user.facebook_id|default('-') }}
 			</td>
 		</tr>
 		{% endif %}
@@ -227,23 +227,33 @@
 	</table>
 </form>
 <script>
-	var provinces = {{ regions }}, province = document.getElementById('province_id'), city = document.getElementById('city_id'), subdistrict = document.getElementById('subdistrict_id');
+	var provinces = {{ provinces_json }}, cities = {{ cities_json }}, subdistricts = {{ subdistricts_json }}, province = document.getElementById('province_id'), city = document.getElementById('city_id'), subdistrict = document.getElementById('subdistrict_id');
 	province.onchange = function() {
-		var cities = provinces[this.value].cities, subdistricts = cities[Object.keys(cities)[0]].subdistricts, city_options = '', subdistrict_options = '';
-		for (var item in cities) {
-			city_options += '<option value="' + cities[item].id + '">' + cities[item].type + ' ' + cities[item].name  + '</option>';
+		var city_options = '', subdistrict_options = '', current_cities = cities[this.value], current_subdistricts = subdistricts[current_cities[0].id];
+		for (var item in current_cities) {
+			city_options += '<option value="' + current_cities[item].id + '">' + current_cities[item].type + ' ' + current_cities[item].name + '</option>';
 		}
-		for (var item in subdistricts) {
-			subdistrict_options += '<option value="' + subdistricts[item].id + '">' + subdistricts[item].name  + '</option>';
+		for (var item in current_subdistricts) {
+			subdistrict_options += '<option value="' + current_subdistricts[item].id + '">' + current_subdistricts[item].name + '</option>';
 		}
 		city.innerHTML = city_options;
 		subdistrict.innerHTML = subdistrict_options;
 	}
 	city.onchange = function() {
-		var cities = provinces[province.value].cities, subdistricts = cities[this.value].subdistricts, subdistrict_options = '';
-		for (var item in subdistricts) {
-			subdistrict_options += '<option value="' + subdistricts[item].id + '">' + subdistricts[item].name  + '</option>';
+		var current_subdistricts = subdistricts[this.value], subdistrict_options = '';
+		for (var item in current_subdistricts) {
+			subdistrict_options += '<option value="' + current_subdistricts[item].id + '">' + current_subdistricts[item].name + '</option>';
 		}
 		subdistrict.innerHTML = subdistrict_options;
+	}
+	document.querySelector('.delete-avatar').onclick = function() {
+		if (!confirm('Anda yakin menghapus gambar ini ?')) {
+			return !1
+		}
+		var form = document.createElement('form');
+		form.method = 'POST',
+		form.action = '/admin/users/update/' + this.dataset.id + '/delete_avatar:1',
+		document.body.appendChild(form),
+		form.submit()
 	}
 </script>
