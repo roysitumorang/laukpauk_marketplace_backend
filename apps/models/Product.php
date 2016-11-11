@@ -128,6 +128,14 @@ class Product extends BaseModel {
 		$validator->add('name', new PresenceOf([
 			'message' => 'nama harus diisi',
 		]));
+		$validator->add('name', new Uniqueness([
+			'model'   => $this,
+			'convert' => function(array $values) : array {
+				$values['name'] = strtolower($values['name']);
+				return $values;
+			},
+			'message' => 'nama sudah ada',
+		]));
 		if ($this->code) {
 			$validator->add('code', new Uniqueness([
 				'model'   => $this,
@@ -159,6 +167,10 @@ class Product extends BaseModel {
 
 	function beforeValidation() {
 		$this->permalink = preg_replace('/\s+/', '-', $this->new_permalink ? $this->_filter->sanitize($this->new_permalink, ['string', 'trim', 'lower']) : strtolower($this->name));
+	}
+
+	function beforeSave() {
+		$this->brand_id = $this->brand_id ?: null;
 	}
 
 	function beforeDelete() {
