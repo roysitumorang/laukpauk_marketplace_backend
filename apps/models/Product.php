@@ -94,7 +94,7 @@ class Product extends BaseModel {
 	}
 
 	function setNewPermalink($new_permalink) {
-		$this->new_permalink = $this->_filter->sanitize($new_permalink, 'string');
+		$this->new_permalink = $this->_filter->sanitize($new_permalink, ['string', 'trim']);
 	}
 
 	function setPublished($published) {
@@ -122,7 +122,13 @@ class Product extends BaseModel {
 	}
 
 	function setMetaDesc($meta_desc) {
-		$this->meta_desc = substr(str_replace(['\r', '\n'], ['', ' '], $this->_filter->sanitize($meta_desc, ['string', 'trim'])), 0, 160);
+		if ($meta_desc) {
+			$this->meta_desc = substr(str_replace(['\r', '\n'], ['', ' '], $this->_filter->sanitize($meta_desc, ['string', 'trim'])), 0, 160);
+		}
+	}
+
+	function beforeValidation() {
+		$this->permalink = trim(preg_replace(['/[^\w\d\-\ ]/', '/ /', '/\-{2,}/'], ['', '-', '-'], strtolower($this->new_permalink ?: $this->name)), '-');
 	}
 
 	function validation() {
@@ -130,47 +136,52 @@ class Product extends BaseModel {
 		$validator->add('name', new PresenceOf([
 			'message' => 'nama harus diisi',
 		]));
-		$validator->add('name', new Uniqueness([
-			'model'     => $this,
-			'attribute' => 'id',
-			'convert'   => function(array $values) : array {
+		$name_params = [
+			'model'   => $this,
+			'convert' => function(array $values) : array {
 				$values['name'] = strtolower($values['name']);
 				return $values;
 			},
-			'message'   => 'nama sudah ada',
-		]));
+			'message' => 'nama sudah ada',
+		];
+		if ($this->id) {
+			$name_params['attribute'] = 'id';
+		}
+		$validator->add('name', new Uniqueness($name_params));
 		if ($this->code) {
-			$validator->add('code', new Uniqueness([
-				'model'     => $this,
-				'attribute' => 'id',
-				'convert'   => function(array $values) : array {
+			$code_params = [
+				'model'   => $this,
+				'convert' => function(array $values) : array {
 					$values['code'] = strtolower($values['code']);
 					return $values;
 				},
-				'message'   => 'kode sudah ada',
-			]));
+				'message' => 'kode sudah ada',
+			];
+			if ($this->id) {
+				$code_params['attribute'] = 'id';
+			}
+			$validator->add('code', new Uniqueness($code_params));
 		}
 		$validator->add(['price', 'stock'], new Digit([
 			'message' => [
-				'price'  => 'harga harus diisi dalam bentuk angka',
-				'stock'  => 'stok harus diisi dalam bentuk angka',
+				'price' => 'harga harus diisi dalam bentuk angka',
+				'stock' => 'stok harus diisi dalam bentuk angka',
 			],
 		]));
 		$validator->add('weight', new Numericality([
 			'message' => 'berat harus diisi dalam bentuk desimal',
 		]));
 		if (!$this->id || $this->new_permalink) {
-			$validator->add('new_permalink', new Uniqueness([
-				'model'     => $this,
-				'attribute' => 'permalink',
-				'message'   => 'permalink sudah ada',
-			]));
+			$permalink_params = [
+				'model'   => $this,
+				'message' => 'permalink sudah ada',
+			];
+			if ($this->id) {
+				$permalink_params['attribute'] = 'id';
+			}
+			$validator->add('permalink', new Uniqueness($permalink_params));
 		}
 		return $this->validate($validator);
-	}
-
-	function beforeValidation() {
-		$this->permalink = preg_replace('/\s+/', '-', $this->new_permalink ? $this->_filter->sanitize($this->new_permalink, ['string', 'trim', 'lower']) : strtolower($this->name));
 	}
 
 	function beforeDelete() {
