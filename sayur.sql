@@ -1681,20 +1681,22 @@ DROP TABLE IF EXISTS `product_rates`;
 
 CREATE TABLE `product_rates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
   `price` int(11) NOT NULL,
   `quantity` decimal(10,0) NOT NULL,
-  `stock_keeping_unit` varchar(10) NOT NULL,
+  `unit_of_measure` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `product_id` (`product_id`,`quantity`,`stock_keeping_unit`),
+  UNIQUE KEY `product_id` (`product_id`,`quantity`,`unit_of_measure`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
   KEY `quantity` (`quantity`),
-  KEY `stock_keeping_unit` (`stock_keeping_unit`)
+  KEY `stock_keeping_unit` (`unit_of_measure`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `product_rates` */
@@ -2057,6 +2059,31 @@ CREATE TABLE `seo_templates` (
 /*Data for the table `seo_templates` */
 
 LOCK TABLES `seo_templates` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `service_areas` */
+
+DROP TABLE IF EXISTS `service_areas`;
+
+CREATE TABLE `service_areas` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `zip_code` char(5) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `zip_code` (`zip_code`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `service_areas` */
+
+LOCK TABLES `service_areas` WRITE;
 
 UNLOCK TABLES;
 
