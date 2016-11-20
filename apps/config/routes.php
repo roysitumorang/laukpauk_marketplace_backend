@@ -24,6 +24,25 @@ $di->set('router', function() {
 		'params'     => 3
 	]);
 
+	$router->add('/api', [
+		'module'     => 'api',
+		'controller' => 'home',
+		'action'     => 'index'
+	]);
+
+	$router->add('/api/:controller', [
+		'module'     => 'api',
+		'controller' => 1,
+		'action'     => 'index'
+	]);
+
+	$router->add('/api/:controller/:action/:params', [
+		'module'     => 'api',
+		'controller' => 1,
+		'action'     => 2,
+		'params'     => 3
+	]);
+
 	$router->add('/admin', [
 		'module'     => 'backend',
 		'controller' => 'home',

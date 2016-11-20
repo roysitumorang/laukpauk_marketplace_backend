@@ -1,5 +1,7 @@
 <?php
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Phalcon\Logger;
 use Phalcon\Logger\Adapter\File;
 use Phalcon\Assets\Manager as AssetsManager;
@@ -92,4 +94,9 @@ $di->set('flashSession', function() {
 
 $di->set('request', function() {
 	return new Request;
+});
+
+$di->set('currentDatetime', function() use($di) {
+	$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
+	return $current_datetime->setTimezone(new DateTimeZone($di->getConfig()->timezone));
 });

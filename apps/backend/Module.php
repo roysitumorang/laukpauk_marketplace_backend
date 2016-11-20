@@ -2,8 +2,6 @@
 
 namespace Application\Backend;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use Exception;
 use Phalcon\Dispatcher;
 use Phalcon\DiInterface;
@@ -110,11 +108,6 @@ class Module implements ModuleDefinitionInterface {
 
 		$di->set('currentUser', function() use($di) {
 			return User::findFirst($di->getSession()->get('user_id'));
-		});
-
-		$di->set('currentDatetime', function() use($di) {
-			$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
-			return $current_datetime->setTimezone(new DateTimeZone($di->getConfig()->timezone));
 		});
 	}
 }
