@@ -1581,7 +1581,7 @@ CREATE TABLE `product_dimensions` (
   `product_id` bigint(20) NOT NULL,
   `parameter` varchar(20) NOT NULL,
   `size` decimal(10,0) NOT NULL,
-  `stock_keeping_unit` varchar(10) NOT NULL,
+  `unit_of_measure` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,

@@ -150,9 +150,9 @@
 					<td><input type="text" name="product_dimensions[{{ i }}][parameter]" value="{{ product_dimensions[i].parameter }}" class="form form-control" size="30"></td>
 					<td><input type="text" name="product_dimensions[{{ i }}][size]" value="{{ product_dimensions[i].size }}" class="form form-control" size="20"></td>
 					<td>
-						<select name="product_dimensions[{{ i }}][stock_keeping_unit]" class="form form-control">
-						{% for stok_keeping_unit in stock_keeping_units %}
-							<option value="{{ stock_keeping_unit }}"{% if stock_keeping_unit == product_dimensions[i].stock_keeping_unit %} selected{% endif %}>{{ stock_keeping_unit }}</option>
+						<select name="product_dimensions[{{ i }}][unit_of_measure]" class="form form-control">
+						{% for stok_keeping_unit in unit_of_measures %}
+							<option value="{{ unit_of_measure }}"{% if unit_of_measure == product_dimensions[i].unit_of_measure %} selected{% endif %}>{{ unit_of_measure }}</option>
 						{% endfor %}
 						</select>
 					</td>
