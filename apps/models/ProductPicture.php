@@ -71,7 +71,6 @@ class ProductPicture extends BaseModel {
 			'message' => 'urutan harus diisi',
 		]));
 		$validator->add(['product_id', 'position'], new Uniqueness([
-			'model'   => $this,
 			'field'   => ['product_id', 'position'],
 			'message' => 'urutan sudah ada',
 		]));

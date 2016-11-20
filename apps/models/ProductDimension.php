@@ -54,7 +54,6 @@ class ProductDimension extends BaseModel {
 			],
 		]));
 		$validator->add(['product_id', 'parameter'], new Uniqueness([
-			'model'   => $this,
 			'message' => 'parameter sudah ada',
 		]));
 		$validator->add('size', new Numericality([

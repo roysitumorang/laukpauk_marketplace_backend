@@ -75,7 +75,6 @@ class ProductVariant extends BaseModel {
 			],
 		]));
 		$validator->add(['product_id', 'parameter', 'value'], new Uniqueness([
-			'model'   => $this,
 			'message' => 'parameter dan nama sudah ada',
 		]));
 		return $this->validate($validator);

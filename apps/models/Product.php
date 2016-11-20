@@ -137,7 +137,6 @@ class Product extends BaseModel {
 			'message' => 'nama harus diisi',
 		]));
 		$name_params = [
-			'model'   => $this,
 			'convert' => function(array $values) : array {
 				$values['name'] = strtolower($values['name']);
 				return $values;
@@ -150,7 +149,6 @@ class Product extends BaseModel {
 		$validator->add('name', new Uniqueness($name_params));
 		if ($this->code) {
 			$code_params = [
-				'model'   => $this,
 				'convert' => function(array $values) : array {
 					$values['code'] = strtolower($values['code']);
 					return $values;
@@ -173,7 +171,6 @@ class Product extends BaseModel {
 		]));
 		if (!$this->id || $this->new_permalink) {
 			$permalink_params = [
-				'model'   => $this,
 				'message' => 'permalink sudah ada',
 			];
 			if ($this->id) {

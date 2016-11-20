@@ -246,7 +246,6 @@ class User extends BaseModel {
 			'message' => 'email tidak valid',
 		]));
 		$validator->add('email', new Uniqueness([
-			'model'   => $this,
 			'convert' => function(array $values) : array {
 				$values['email'] = strtolower($values['email']);
 				return $values;
