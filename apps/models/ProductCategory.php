@@ -53,7 +53,7 @@ class ProductCategory extends BaseModel {
 				'message' => 'kategori tidak dapat dihapus karena memiliki sub kategori',
 			],
 		]);
-		$this->hasMany('id', 'Application\Models\Product', 'product_category_id', ['alias'  => 'products']);
+		$this->hasMany('id', 'Application\Models\Product', 'product_category_id', ['alias' => 'products']);
 	}
 
 	function setParentId(int $parent_id = null) {
@@ -204,6 +204,10 @@ class ProductCategory extends BaseModel {
 		$this->picture = null;
 		$this->setThumbnails([]);
 		$this->save();
+	}
+
+	function getProducts($parameters = null) {
+		return $this->getRelated('products', $parameters);
 	}
 
 	private function _newPictureIsValid() {
