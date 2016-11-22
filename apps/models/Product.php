@@ -46,6 +46,7 @@ class Product extends BaseModel {
 
 	function initialize() {
 		parent::initialize();
+		$this->keepSnapshots(true);
 		$this->belongsTo('product_category_id', 'Application\Models\ProductCategory', 'id', [
 			'alias'    => 'category',
 			'reusable' => true,
@@ -69,14 +70,6 @@ class Product extends BaseModel {
 
 	function setStock($stock) {
 		$this->stock = $this->_filter->sanitize($stock, 'int') ?: 0;
-	}
-
-	function setProductCategoryId($product_category_id) {
-		$this->product_category_id = $this->_filter->sanitize($product_category_id, 'int');
-	}
-
-	function setBrandId($brand_id) {
-		$this->brand_id = $this->_filter->sanitize($brand_id, 'int');
 	}
 
 	function setPrice($price) {
@@ -136,29 +129,23 @@ class Product extends BaseModel {
 		$validator->add('name', new PresenceOf([
 			'message' => 'nama harus diisi',
 		]));
-		$name_params = [
-			'convert' => function(array $values) : array {
-				$values['name'] = strtolower($values['name']);
-				return $values;
-			},
-			'message' => 'nama sudah ada',
-		];
-		if ($this->id) {
-			$name_params['attribute'] = 'id';
+		if ($this->getSnapshotData()['name'] != $this->name) {
+			$validator->add('name', new Uniqueness([
+				'convert' => function(array $values) : array {
+					$values['name'] = strtolower($values['name']);
+					return $values;
+				},
+				'message' => 'nama sudah ada',
+			]));
 		}
-		$validator->add('name', new Uniqueness($name_params));
-		if ($this->code) {
-			$code_params = [
+		if ($this->getSnapshotData()['code'] != $this->code) {
+			$validator->add('code', new Uniqueness([
 				'convert' => function(array $values) : array {
 					$values['code'] = strtolower($values['code']);
 					return $values;
 				},
 				'message' => 'kode sudah ada',
-			];
-			if ($this->id) {
-				$code_params['attribute'] = 'id';
-			}
-			$validator->add('code', new Uniqueness($code_params));
+			]));
 		}
 		$validator->add(['price', 'stock'], new Digit([
 			'message' => [
@@ -169,14 +156,11 @@ class Product extends BaseModel {
 		$validator->add('weight', new Numericality([
 			'message' => 'berat harus diisi dalam bentuk desimal',
 		]));
-		if (!$this->id || $this->new_permalink) {
-			$permalink_params = [
-				'message' => 'permalink sudah ada',
-			];
-			if ($this->id) {
-				$permalink_params['attribute'] = 'id';
-			}
-			$validator->add('permalink', new Uniqueness($permalink_params));
+		if ($this->new_permalink) {
+			$validator->add('permalink', new Uniqueness([
+				'attribute' => 'permalink',
+				'message'   => 'permalink sudah ada',
+			]));
 		}
 		return $this->validate($validator);
 	}

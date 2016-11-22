@@ -19,7 +19,7 @@
 				<br>
 				<select name="product_category_id" class="form form-control">
 				{% for category in categories %}
-					<option value="{{ category.id }}"{% if category.id == product.product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
+					<option value="{{ category.id }}"{% if category.id == product.category.id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
 				{% endfor %}
 				</select>
 			</td>
@@ -28,7 +28,7 @@
 				<br>
 				<select name="brand_id" class="form form-control">
 				{% for brand in brands %}
-					<option value="{{ brand.id }}"{% if brand.id == product.brand_id %} selected{% endif %}>{{ brand.name }}</option>
+					<option value="{{ brand.id }}"{% if brand.id == product.brand.id %} selected{% endif %}>{{ brand.name }}</option>
 				{% endfor %}
 				</select>
 			</td>
