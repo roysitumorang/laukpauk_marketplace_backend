@@ -21,5 +21,11 @@ class Subdistrict extends BaseModel {
 			'alias'    => 'city',
 			'reusable' => true,
 		]);
+		$this->hasMany('id', 'Application\Models\Village', 'subdistrict_id', [
+			'alias'      => 'villages',
+			'foreignKey' => [
+				'message' => 'kecamatan tidak dapat dihapus karena memiliki kelurahan / desa',
+			],
+		]);
 	}
 }
