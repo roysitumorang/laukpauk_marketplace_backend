@@ -5,6 +5,8 @@ namespace Application\Api\Controllers;
 use Application\Models\AccessToken;
 
 class AccessTokensController extends BaseController {
+	function initialize() {}
+
 	function createAction() {
 		$access_token = new AccessToken;
 		$access_token->create();
