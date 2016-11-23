@@ -2,7 +2,7 @@
 
 namespace Application\Api\Controllers;
 
-use Application\Model\AccessToken;
+use Application\Models\AccessToken;
 use Exception;
 use Phalcon\Mvc\Controller;
 
