@@ -66,7 +66,7 @@
 					</thead>
 					<tbody>
 						{% for user in users %}
-						<tr>
+						<tr id="user.id">
 							<td>{{ user.rank }}</td>
 							<td>
 								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
@@ -95,18 +95,22 @@
 							</td>
 							<td>
 								{% if user.status == hold %}
-								<a href="javascript:confirm('Anda yakin aktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/activate')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
-								<b><font color="#FF0000">HOLD</font></b> ({{ user.status }})&nbsp;
-								<a href="javascript:open_window('/admin/emails/new?user_id={{ user.id }}')" title="send email"><img src="/backend/images/send-email-small.png" border="0"></a>
+								<a href="javascript:confirm('Anda yakin mengaktifkan member ini ?')&&(location.href='/admin/users/activate/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
+								<b><font color="#FF0000">HOLD</font></b>&nbsp;
+								<a href="javascript:open_window('/admin/emails/create?user_id={{ user.id }}')" title="send email"><img src="/backend/images/send-email-small.png" border="0"></a>
+								{% elseif user.status == active %}
+								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&&(location.href='/admin/users/suspend/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
 								{% else %}
-								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&&(location.href='/admin/users/{{ user.id }}/deactivate')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
+								<a href="javascript:confirm('Anda yakin mengaktifkan kembali member ini ?')&&(location.href='/admin/users/reactivate/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Reactivated"><img src="/backend/images/bullet-red.png" border="0"></a>
+								<b><font color="#FF0000">SUSPENDED</font></b>
 								{% endif %}
 								<br><br>
-								{% if user.status == active and !user.verified_at %}
-								<a href="javascript:confirm('Anda yakin ingin melakukan verifikasi terhadap member ini ?')&&(location.href='/admin/users/{{ user.id }}/verify')" title="Verify Progress"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;
+								{% if user.verified_at %}
+								<img src="/backend/images/bullet-green.png" border="0">&nbsp;
 								<b><font color="#000000">VERIFIED</font></b>
-								{% else %}
-								<a href="javascript:confirm('Anda yakin sudah memverifikasi member ini ?')&&(location.href='/admin/users/{{ user.id }}/unverify')" title="Verify Member Ini"><img src="/backend/images/bullet-red.png" border="0"></a>&nbsp;<font color="#FF0000"><b>VERIFY IN PROGRESS</b></font>
+								{% elseif user.status == active %}
+								<a href="javascript:confirm('Anda yakin ingin melakukan verifikasi terhadap member ini ?')&&(location.href='/admin/users/verify/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Verify"><img src="/backend/images/bullet-red.png" border="0"></a>&nbsp;
+								<b><font color="#FF0000">VERIFICATION IN PROGRESS</font></b>
 								{% endif %}
 							</td>
 							<td>

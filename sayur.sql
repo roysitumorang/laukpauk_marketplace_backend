@@ -9401,6 +9401,7 @@ CREATE TABLE `users` (
   `affiliate_link` varchar(200) DEFAULT NULL,
   `status` smallint(6) NOT NULL,
   `activated_at` datetime DEFAULT NULL,
+  `verified_at` datetime DEFAULT NULL,
   `activation_token` char(32) DEFAULT NULL,
   `password_reset_token` char(32) DEFAULT NULL,
   `last_seen` datetime DEFAULT NULL,
@@ -9446,8 +9447,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,NULL);
+insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,NULL);
 
 UNLOCK TABLES;
 

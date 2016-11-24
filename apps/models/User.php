@@ -37,6 +37,7 @@ class User extends BaseModel {
 	public $affiliate_link;
 	public $status;
 	public $activated_at;
+	public $verified_at;
 	public $activation_token;
 	public $password_reset_token;
 	public $last_seen;
@@ -126,6 +127,10 @@ class User extends BaseModel {
 
 	function setActivatedAt($activated_at) {
 		$this->activated_at = $this->_filter->sanitize($activated_at, ['string', 'trim']);
+	}
+
+	function setVerifiedAt($verified_at) {
+		$this->verified_at = $this->_filter->sanitize($verified_at, ['string', 'trim']);
 	}
 
 	function setActivationToken($activation_token) {
@@ -282,6 +287,7 @@ class User extends BaseModel {
 		$this->mobile         = $this->mobile ?: null;
 		$this->affiliate_link = $this->affiliate_link ?: null;
 		$this->activated_at   = $this->activated_at ?: null;
+		$this->verified_at    = $this->verified_at ?: null;
 		$this->last_seen      = $this->last_seen ?: null;
 		$this->ktp            = $this->ktp ?: null;
 		$this->company        = $this->company ?: null;

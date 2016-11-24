@@ -5,7 +5,6 @@ namespace Application\Backend\Controllers;
 use Application\Models\Role;
 use Application\Models\Village;
 use Application\Models\User;
-use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class UsersController extends BaseController {
@@ -39,6 +38,7 @@ class UsersController extends BaseController {
 				'a.affiliate_link',
 				'a.status',
 				'a.activated_at',
+				'a.verified_at',
 				'a.activation_token',
 				'a.password_reset_token',
 				'a.last_seen',
@@ -97,18 +97,23 @@ class UsersController extends BaseController {
 			$item->writeAttribute('rank', ++$offset);
 			$users[] = $item;
 		}
-		$this->view->menu                = $this->_menu('Member');
-		$this->view->users               = $users;
-		$this->view->page                = $paginator->getPaginate();
-		$this->view->multi_page          = count($users) / $limit > 1;
-		$this->view->search_parameters   = $search_parameters;
-		$this->view->parameter           = $parameter;
-		$this->view->keyword             = $keyword;
-		$this->view->hold                = User::STATUS['HOLD'];
-		$this->view->active              = User::STATUS['ACTIVE'];
-		$this->view->total_users         = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
-		$this->view->total_active_users  = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE `status` = ?', [User::STATUS['ACTIVE']]);
-		$this->view->total_pending_users = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE `status` = ?', [User::STATUS['HOLD']]);
+		$status_hold                       = array_search('HOLD', User::STATUS);
+		$status_active                     = array_search('ACTIVE', User::STATUS);
+		$status_suspended                  = array_search('SUSPENDED', User::STATUS);
+		$this->view->menu                  = $this->_menu('Member');
+		$this->view->users                 = $users;
+		$this->view->page                  = $paginator->getPaginate();
+		$this->view->multi_page            = count($users) / $limit > 1;
+		$this->view->search_parameters     = $search_parameters;
+		$this->view->parameter             = $parameter;
+		$this->view->keyword               = $keyword;
+		$this->view->hold                  = $status_hold;
+		$this->view->active                = $status_active;
+		$this->view->suspended             = $status_suspended;
+		$this->view->total_users           = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
+		$this->view->total_pending_users   = $this->db->fetchColumn("SELECT COUNT(1) FROM users WHERE `status` = {$status_hold}");
+		$this->view->total_active_users    = $this->db->fetchColumn("SELECT COUNT(1) FROM users WHERE `status` = {$status_active}");
+		$this->view->total_suspended_users = $this->db->fetchColumn("SELECT COUNT(1) FROM users WHERE `status` = {$status_suspended}");
 	}
 
 	function createAction() {
@@ -138,7 +143,7 @@ class UsersController extends BaseController {
 	function updateAction($id) {
 		if (!$user = User::findFirst($id)) {
 			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward('users');
+			return $this->response->redirect('/admin/users');
 		}
 		$user->subdistrict_id = null;
 		if ($user->village_id) {
@@ -165,9 +170,83 @@ class UsersController extends BaseController {
 		$this->_prepare_form_datas($user);
 	}
 
-	function activateAction() {}
+	function activateAction($id) {
+		$status_hold   = array_search('HOLD', User::STATUS);
+		$status_active = array_search('ACTIVE', User::STATUS);
+		$user          = User::findFirst([
+			'conditions' => 'id = ?1 AND status = ?2',
+			'bind'       => [
+				1 => $id,
+				2 => $status_hold,
+			]
+		]);
+		if (!$user) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->response->redirect('/admin/users');
+		}
+		$user->update([
+			'status'           => $status_active,
+			'activation_token' => null,
+			'activated_at'     => $this->currentDatetime->format('Y-m-d H:i:s'),
+		]);
+		$this->flashSession->success('Aktivasi member berhasil.');
+		return $this->response->redirect($this->request->getQuery('next'));
+	}
 
-	function suspendAction() {}
+	function suspendAction($id) {
+		$status_active    = array_search('ACTIVE', User::STATUS);
+		$status_suspended = array_search('SUSPENDED', User::STATUS);
+		$user             = User::findFirst([
+			'conditions' => 'id = ?1 AND status = ?2',
+			'bind'       => [
+				1 => $id,
+				2 => $status_active,
+			]
+		]);
+		if (!$user) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->response->redirect('/admin/users');
+		}
+		$user->update(['status' => $status_suspended]);
+		$this->flashSession->success('Member berhasil dinonaktifkan.');
+		return $this->response->redirect($this->request->getQuery('next'));
+	}
+
+	function reactivateAction($id) {
+		$status_suspended = array_search('SUSPENDED', User::STATUS);
+		$status_active    = array_search('ACTIVE', User::STATUS);
+		$user             = User::findFirst([
+			'conditions' => 'id = ?1 AND status = ?2',
+			'bind'       => [
+				1 => $id,
+				2 => $status_suspended,
+			]
+		]);
+		if (!$user) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->response->redirect('/admin/users');
+		}
+		$user->update(['status' => $status_active]);
+		$this->flashSession->success('Member berhasil diaktifkan kembali.');
+		return $this->response->redirect($this->request->getQuery('next'));
+	}
+
+	function verifyAction($id) {
+		$user = User::findFirst([
+			'conditions' => 'id = ?1 AND status = ?2 AND verified_at IS NULL',
+			'bind'       => [
+				1 => $id,
+				2 => array_search('ACTIVE', User::STATUS),
+			]
+		]);
+		if (!$user) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->response->redirect('/admin/users');
+		}
+		$user->update(['verified_at' => $this->currentDatetime->format('Y-m-d H:i:s')]);
+		$this->flashSession->success('Verifikasi member berhasil.');
+		return $this->response->redirect($this->request->getQuery('next'));
+	}
 
 	private function _prepare_form_datas($user) {
 		$subdistricts              = apcu_fetch('subdistricts');
