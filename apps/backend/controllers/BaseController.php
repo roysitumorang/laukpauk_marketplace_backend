@@ -2,12 +2,10 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\City;
 use Ds\Vector;
 use Phalcon\Db;
 use Phalcon\Mvc\Controller;
 use Phalcon\Text;
-use stdClass;
 
 class BaseController extends Controller {
 	function initialize() {
