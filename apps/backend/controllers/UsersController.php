@@ -141,7 +141,14 @@ class UsersController extends BaseController {
 	function showAction() {}
 
 	function updateAction($id) {
-		if (!$user = User::findFirst($id)) {
+		$user = User::findFirst([
+			'conditions' => 'id = ?1 AND status = ?2',
+			'bind'       => [
+				1 => $id,
+				2 => array_search('ACTIVE', User::STATUS),
+			]
+		]);
+		if (!$user) {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->response->redirect('/admin/users');
 		}

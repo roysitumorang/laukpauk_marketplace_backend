@@ -114,8 +114,12 @@
 								{% endif %}
 							</td>
 							<td>
+								{% if user.status == active %}
 								<a href="/admin/users/update/{{ user.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
+								{% endif %}
+								{#
 								<a href="javascript:void(0)" class="delete" data-id="{{ user.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+								#}
 							</td>
 						</tr>
 						{% elsefor %}
