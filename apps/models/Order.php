@@ -67,7 +67,7 @@ class OrderItem extends BaseModel {
 	}
 
 	function beforeValidationOnCreate() {
-		$this->status     = array_search(static::STATUS, 'HOLD');
+		$this->status     = array_search('HOLD', static::STATUS);
 		$this->ip_address = $this->getDI()->getRequest()->getClientAddress();
 		$this->admin_fee  = static::ADMIN_FEE;
 	}
