@@ -71,30 +71,20 @@
 		</tr>
 		<tr>
 			<td>
-				Propinsi<br>
-				<select name="province_id" id="province_id">
-				{% for province in provinces %}
-					<option value="{{ province.id }}"{% if user.province_id == province.id %} selected{% endif %}>{{ province.name }}</option>
-				{% endfor %}
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Kota<br>
-				<select name="city_id" id="city_id">
-				{% for city in cities %}
-					<option value="{{ city.id }}"{% if user.city_id == city.id %} selected{% endif %}>{{ city.type }} {{ city.name }}</option>
-				{% endfor %}
-				</select>
-			</td>
-		</tr>
-		<tr>
-			<td>
 				Kecamatan<br>
 				<select name="subdistrict_id" id="subdistrict_id">
 				{% for subdistrict in subdistricts %}
 					<option value="{{ subdistrict.id }}"{% if user.subdistrict_id == subdistrict.id %} selected{% endif %}>{{ subdistrict.name }}</option>
+				{% endfor %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Kelurahan<br>
+				<select name="village_id" id="village_id">
+				{% for village in villages %}
+					<option value="{{ village.id }}"{% if user.village_id == village.id %} selected{% endif %}>{{ village.name }}</option>
 				{% endfor %}
 				</select>
 			</td>
@@ -136,7 +126,7 @@
 		<tr>
 			<td>
 				Status Keaktifan (*):<br>
-				{% for label, value in status %}
+				{% for value, label in status %}
 				<input type="radio" name="status" value="{{ value }}"{% if user.status == value %} checked{% endif %}> {{ label }}&nbsp;&nbsp;
 				{% endfor %}
 			</td>
@@ -227,24 +217,13 @@
 	</table>
 </form>
 <script>
-	var provinces = {{ provinces_json }}, cities = {{ cities_json }}, subdistricts = {{ subdistricts_json }}, province = document.getElementById('province_id'), city = document.getElementById('city_id'), subdistrict = document.getElementById('subdistrict_id');
-	province.onchange = function() {
-		var city_options = '', subdistrict_options = '', current_cities = cities[this.value], current_subdistricts = subdistricts[current_cities[0].id];
-		for (var item in current_cities) {
-			city_options += '<option value="' + current_cities[item].id + '">' + current_cities[item].type + ' ' + current_cities[item].name + '</option>';
+	var villages = {{ villages_json }}, subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id');
+	subdistrict.onchange = function() {
+		var current_villages = villages[this.value], new_options = '';
+		for (var item in current_villages) {
+			new_options += '<option value="' + current_villages[item].id + '">' + current_villages[item].name + '</option>';
 		}
-		for (var item in current_subdistricts) {
-			subdistrict_options += '<option value="' + current_subdistricts[item].id + '">' + current_subdistricts[item].name + '</option>';
-		}
-		city.innerHTML = city_options;
-		subdistrict.innerHTML = subdistrict_options;
-	}
-	city.onchange = function() {
-		var current_subdistricts = subdistricts[this.value], subdistrict_options = '';
-		for (var item in current_subdistricts) {
-			subdistrict_options += '<option value="' + current_subdistricts[item].id + '">' + current_subdistricts[item].name + '</option>';
-		}
-		subdistrict.innerHTML = subdistrict_options;
+		village.innerHTML = new_options;
 	}
 	document.querySelector('.delete-avatar').onclick = function() {
 		if (!confirm('Anda yakin menghapus gambar ini ?')) {

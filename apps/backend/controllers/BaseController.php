@@ -2,10 +2,12 @@
 
 namespace Application\Backend\Controllers;
 
+use Application\Models\City;
 use Ds\Vector;
 use Phalcon\Db;
 use Phalcon\Mvc\Controller;
 use Phalcon\Text;
+use stdClass;
 
 class BaseController extends Controller {
 	function initialize() {
@@ -13,40 +15,27 @@ class BaseController extends Controller {
 		if (!$this->session->get('user_id') && !Text::startsWith($url, '/admin/sessions')) {
 			return $this->response->redirect('/admin/sessions/create?next=' . $url);
 		}
-		$this->view->current_user    = $this->currentUser;
-		// $this->view->unread_messages = $this->currentUser->unread_messages;
-		if (!apcu_exists('provinces')) {
-			$provinces = [];
-			$result    = $this->db->query('SELECT id, name FROM provinces ORDER BY name');
-			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($item = $result->fetch()) {
-				$provinces[] = $item;
-			}
-			apcu_add('provinces', $provinces);
-		}
-		if (!apcu_exists('cities')) {
-			$cities = [];
-			$result = $this->db->query('SELECT id, province_id, type, name FROM cities ORDER BY CONCAT(type, name)');
-			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($item = $result->fetch()) {
-				isset($cities[$item->province_id]) || $cities[$item->province_id] = [];
-				$city = clone $item;
-				unset($city->province_id);
-				$cities[$item->province_id][] = $city;
-			}
-			apcu_add('cities', $cities);
-		}
+		$this->view->current_user = $this->currentUser;
 		if (!apcu_exists('subdistricts')) {
 			$subdistricts = [];
-			$result       = $this->db->query('SELECT id, city_id, name FROM subdistricts ORDER BY name');
+			$result       = $this->db->query("SELECT a.id, a.name FROM subdistricts a JOIN cities b ON a.city_id = b.id WHERE b.name = 'Medan' ORDER BY a.name");
 			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($item = $result->fetch()) {
-				isset($subdistricts[$item->city_id]) || $subdistricts[$item->city_id] = [];
-				$subdistrict = clone $item;
-				unset($subdistrict->city_id);
-				$subdistricts[$item->city_id][] = $subdistrict;
+			while ($subdistrict = $result->fetch()) {
+				$subdistricts[] = $subdistrict;
 			}
 			apcu_add('subdistricts', $subdistricts);
+		}
+		if (!apcu_exists('villages')) {
+			$villages = [];
+			$result   = $this->db->query('SELECT id, subdistrict_id, name FROM villages ORDER BY subdistrict_id, name');
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($item = $result->fetch()) {
+				isset($villages[$item->subdistrict_id]) || $villages[$item->subdistrict_id] = [];
+				$village = clone $item;
+				unset($village->subdistrict_id);
+				$villages[$item->subdistrict_id][] = $village;
+			}
+			apcu_add('villages', $villages);
 		}
 	}
 

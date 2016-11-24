@@ -3,6 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Role;
+use Application\Models\Village;
 use Application\Models\User;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
@@ -13,7 +14,6 @@ class UsersController extends BaseController {
 			'name'         => 'Nama',
 			'email'        => 'Email',
 			'city'         => 'Kota',
-			'zip_code'     => 'Kode Pos',
 			'role'         => 'Role',
 			'created_at'   => 'Tanggal Pendaftaran (YYYY-mm-dd)',
 			'activated_at' => 'Tanggal Aktivasi (YYYY-mm-dd)',
@@ -32,8 +32,7 @@ class UsersController extends BaseController {
 				'a.email',
 				'a.password',
 				'a.address',
-				'a.zip_code',
-				'a.subdistrict_id',
+				'a.village_id',
 				'a.phone',
 				'a.mobile',
 				'a.premium',
@@ -65,8 +64,9 @@ class UsersController extends BaseController {
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
-			->leftJoin('Application\Models\Subdistrict', 'a.subdistrict_id = c.id', 'c')
-			->leftJoin('Application\Models\City', 'c.city_id = d.id', 'd')
+			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
+			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
+			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
 			->orderBy('id DESC');
 		if ($keyword) {
 			if ($parameter == 'name') {
@@ -74,9 +74,7 @@ class UsersController extends BaseController {
 			} else if ($parameter == 'email') {
 				$builder->where('a.email LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
 			} else if ($parameter == 'city') {
-				$builder->where('d.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'zip_code') {
-				$builder->where('a.zip_code LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+				$builder->where('e.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
 			} else if ($parameter == 'role') {
 				$builder->where('b.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
 			} else if ($parameter == 'created_at') {
@@ -119,8 +117,7 @@ class UsersController extends BaseController {
 		$user->reward          = 0;
 		$user->buy_point       = 0;
 		$user->affiliate_point = 0;
-		$user->city_id         = null;
-		$user->province_id     = null;
+		$user->subdistrict_id  = null;
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->create()) {
@@ -131,8 +128,7 @@ class UsersController extends BaseController {
 			foreach ($user->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
-			$user->province_id = $this->request->getPost('province_id', 'int');
-			$user->city_id     = $this->request->getPost('city_id', 'int');
+			$user->subdistrict_id = $this->request->getPost('subdistrict_id', 'int');
 		}
 		$this->_prepare_form_datas($user);
 	}
@@ -144,12 +140,10 @@ class UsersController extends BaseController {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->dispatcher->forward('users');
 		}
-		$user->province_id = null;
-		$user->city_id     = null;
-		if ($user->subdistrict_id) {
-			$city              = $this->db->fetchOne("SELECT b.id, b.province_id FROM subdistricts a JOIN cities b ON a.city_id = b.id WHERE a.id = {$user->subdistrict_id}", Db::FETCH_OBJ);
-			$user->province_id = $city->province_id;
-			$user->city_id     = $city->id;
+		$user->subdistrict_id = null;
+		if ($user->village_id) {
+			$village              = Village::findFirst($user->village_id);
+			$user->subdistrict_id = $village->subdistrict->id;
 		}
 		if ($this->request->isPost()) {
 			if ($this->dispatcher->hasParam('delete_avatar')) {
@@ -176,20 +170,16 @@ class UsersController extends BaseController {
 	function suspendAction() {}
 
 	private function _prepare_form_datas($user) {
-		$provinces                     = apcu_fetch('provinces');
-		$cities                        = apcu_fetch('cities');
-		$subdistricts                  = apcu_fetch('subdistricts');
-		$this->view->menu              = $this->_menu('Members');
-		$this->view->user              = $user;
-		$this->view->status            = User::STATUS;
-		$this->view->genders           = User::GENDERS;
-		$this->view->memberships       = User::MEMBERSHIPS;
-		$this->view->provinces         = $provinces;
-		$this->view->cities            = $cities[$user->province_id ?? $provinces[0]->id];
-		$this->view->subdistricts      = $subdistricts[$user->city_id ?? $cities[$provinces[0]->id][0]->id];
-		$this->view->provinces_json    = json_encode($provinces, JSON_NUMERIC_CHECK);
-		$this->view->cities_json       = json_encode($cities, JSON_NUMERIC_CHECK);
-		$this->view->subdistricts_json = json_encode($subdistricts, JSON_NUMERIC_CHECK);
+		$subdistricts              = apcu_fetch('subdistricts');
+		$villages                  = apcu_fetch('villages');
+		$this->view->menu          = $this->_menu('Members');
+		$this->view->user          = $user;
+		$this->view->status        = User::STATUS;
+		$this->view->genders       = User::GENDERS;
+		$this->view->memberships   = User::MEMBERSHIPS;
+		$this->view->subdistricts  = $subdistricts;
+		$this->view->villages      = $villages[$user->subdistrict_id ?? $subdistricts[0]->id];
+		$this->view->villages_json = json_encode($villages, JSON_NUMERIC_CHECK);
 	}
 
 	private function _set_model_attributes(&$user) {
@@ -199,8 +189,7 @@ class UsersController extends BaseController {
 		$user->setNewPassword($this->request->getPost('new_password'));
 		$user->setNewPasswordConfirmation($this->request->getPost('new_password_confirmation'));
 		$user->setAddress($this->request->getPost('address'));
-		$user->setZipCode($this->request->getPost('zip_code'));
-		$user->setSubdistrictId($this->request->getPost('subdistrict_id'));
+		$user->setVillageId($this->request->getPost('village_id'));
 		$user->setPhone($this->request->getPost('phone'));
 		$user->setMobile($this->request->getPost('mobile'));
 		$user->setPremium($this->request->getPost('premium'));

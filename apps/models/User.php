@@ -15,9 +15,9 @@ use Phalcon\Validation\Validator\Uniqueness;
 
 class User extends BaseModel {
 	const STATUS      = [
-		'HOLD'      =>  0,
-		'ACTIVE'    =>  1,
-		'SUSPENDED' => -1,
+		0  => 'HOLD',
+		1  => 'ACTIVE',
+		-1 => 'SUSPENDED',
 	];
 	const GENDERS     = ['Pria', 'Wanita'];
 	const MEMBERSHIPS = ['Free', 'Premium'];
@@ -83,7 +83,9 @@ class User extends BaseModel {
 	}
 
 	function setEmail($email) {
-		$this->email = $this->_filter->sanitize($email, ['string', 'trim']);
+		if ($email) {
+			$this->email = $this->_filter->sanitize($email, ['string', 'trim']);
+		}
 	}
 
 	function setNewPassword($new_password) {
@@ -201,7 +203,7 @@ class User extends BaseModel {
 	}
 
 	function beforeValidationOnCreate() {
-		$this->status           = static::STATUS['HOLD'];
+		$this->status           = array_search('HOLD', static::STATUS);
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
 		$this->activation_token = bin2hex(random_bytes(32));
 	}
@@ -214,10 +216,9 @@ class User extends BaseModel {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'email', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point'], new PresenceOf([
+		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point'], new PresenceOf([
 			'message' => [
 				'name'            => 'nama harus diisi',
-				'email'           => 'email harus diisi',
 				'phone'           => 'phone number harus diisi',
 				'deposit'         => 'deposit harus diisi',
 				'reward'          => 'reward harus diisi',
@@ -237,16 +238,18 @@ class User extends BaseModel {
 				'message' => 'password pertama dan kedua harus sama',
 			]));
 		}
-		$validator->add('email', new Email([
-			'message' => 'email tidak valid',
-		]));
-		$validator->add('email', new Uniqueness([
-			'convert' => function(array $values) : array {
-				$values['email'] = strtolower($values['email']);
-				return $values;
-			},
-			'message' => 'email sudah ada',
-		]));
+		if ($this->email) {
+			$validator->add('email', new Email([
+				'message' => 'email tidak valid',
+			]));
+			$validator->add('email', new Uniqueness([
+				'convert' => function(array $values) : array {
+					$values['email'] = strtolower($values['email']);
+					return $values;
+				},
+				'message' => 'email sudah ada',
+			]));
+		}
 		if ($this->date_of_birth) {
 			$validator->add('date_of_birth', new Date([
 				'format'  => 'Y-m-d',
@@ -261,11 +264,6 @@ class User extends BaseModel {
 				'affiliate_point' => 'poin affiliasi harus dalam bentuk angka',
 			],
 		]));
-		if ($this->zip_code) {
-			$validator->add('zip_code', new Digit([
-				'message' => 'post code harus dalam bentuk 5 angka',
-			]));
-		}
 		if ($this->new_avatar) {
 			$max_size = $this->_upload_config->max_size;
 			$validator->add('new_avatar', new Image([
