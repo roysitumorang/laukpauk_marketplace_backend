@@ -1244,15 +1244,19 @@ LOCK TABLES `notifications` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `order_products` */
+/*Table structure for table `order_items` */
 
-DROP TABLE IF EXISTS `order_products`;
+DROP TABLE IF EXISTS `order_items`;
 
-CREATE TABLE `order_products` (
+CREATE TABLE `order_items` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `order_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
-  `quantity` smallint(6) NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `unit_price` int(11) NOT NULL,
+  `unit_size` decimal(10,0) NOT NULL,
+  `unit_of_measure` varchar(10) NOT NULL,
+  `quantity` decimal(10,0) NOT NULL,
   `buy_point` decimal(10,0) NOT NULL,
   `affiliate_point` decimal(10,0) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -1261,14 +1265,12 @@ CREATE TABLE `order_products` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `order_id` (`order_id`,`product_id`),
-  KEY `product_id` (`product_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `product_id` (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `order_products` */
+/*Data for the table `order_items` */
 
-LOCK TABLES `order_products` WRITE;
+LOCK TABLES `order_items` WRITE;
 
 UNLOCK TABLES;
 
@@ -1282,20 +1284,21 @@ CREATE TABLE `orders` (
   `name` varchar(80) NOT NULL,
   `email` varchar(80) NOT NULL,
   `address` varchar(200) NOT NULL,
-  `subdistrict_id` bigint(20) NOT NULL,
-  `zip_code` char(5) NOT NULL,
+  `village_id` bigint(20) NOT NULL,
   `phone` varchar(20) NOT NULL,
   `mobile` varchar(20) DEFAULT NULL,
   `tracking_number` varchar(20) DEFAULT NULL,
   `payment` text,
   `final_bill` decimal(10,0) NOT NULL,
-  `status` varchar(20) NOT NULL,
-  `buyer_id` bigint(20) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL,
+  `merchant_id` bigint(20) NOT NULL,
+  `buyer_id` bigint(20) NOT NULL,
   `admin_fee` decimal(10,0) NOT NULL,
   `original_bill` decimal(10,0) NOT NULL,
   `ip_address` varchar(41) DEFAULT NULL,
   `affiliate_user_id` bigint(20) DEFAULT NULL,
   `shipping_fee` decimal(10,0) DEFAULT NULL,
+  `shipping_line` varchar(255) DEFAULT NULL,
   `detail` text,
   `coupon_id` bigint(20) DEFAULT NULL,
   `estimated_delivery` datetime NOT NULL,
@@ -1309,11 +1312,11 @@ CREATE TABLE `orders` (
   KEY `affiliate_user_id` (`affiliate_user_id`),
   KEY `buyer_id` (`buyer_id`),
   KEY `coupon_id` (`coupon_id`),
-  KEY `created_by` (`created_by`),
   KEY `status` (`status`),
-  KEY `subdistrict_id` (`subdistrict_id`),
   KEY `updated_by` (`updated_by`),
-  KEY `actual_delivery` (`actual_delivery`)
+  KEY `actual_delivery` (`actual_delivery`),
+  KEY `village_id` (`village_id`),
+  KEY `merchant_id` (`merchant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `orders` */
@@ -1683,19 +1686,18 @@ CREATE TABLE `product_rates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
-  `price` int(11) NOT NULL,
-  `quantity` decimal(10,0) NOT NULL,
+  `unit_price` int(11) NOT NULL,
+  `unit_size` decimal(10,0) NOT NULL,
   `unit_of_measure` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `product_id` (`product_id`,`quantity`,`unit_of_measure`),
+  UNIQUE KEY `product_id` (`product_id`,`unit_size`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
-  KEY `quantity` (`quantity`),
-  KEY `stock_keeping_unit` (`unit_of_measure`),
+  KEY `quantity` (`unit_size`),
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -9392,8 +9394,7 @@ CREATE TABLE `users` (
   `email` varchar(80) NOT NULL,
   `password` char(60) NOT NULL,
   `address` varchar(150) DEFAULT NULL,
-  `zip_code` char(5) DEFAULT NULL,
-  `subdistrict_id` bigint(20) DEFAULT NULL,
+  `village_id` bigint(20) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `mobile` varchar(20) DEFAULT NULL,
   `premium` tinyint(1) NOT NULL,
@@ -9437,16 +9438,16 @@ CREATE TABLE `users` (
   KEY `name` (`name`),
   KEY `premium` (`premium`),
   KEY `status` (`status`),
-  KEY `subdistrict_id` (`subdistrict_id`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `village_id` (`village_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users` */
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`zip_code`,`subdistrict_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan','20134',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,NULL);
+insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,NULL);
 
 UNLOCK TABLES;
 

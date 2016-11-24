@@ -30,8 +30,7 @@ class User extends BaseModel {
 	public $new_password;
 	public $new_password_confirmation;
 	public $address;
-	public $zip_code;
-	public $subdistrict_id;
+	public $village_id;
 	public $phone;
 	public $mobile;
 	public $premium;
@@ -99,12 +98,8 @@ class User extends BaseModel {
 		$this->address = $this->_filter->sanitize($address, ['string', 'trim']);
 	}
 
-	function setZipCode($zip_code) {
-		$this->zip_code = $this->_filter->sanitize($zip_code, 'int');
-	}
-
-	function setSubdistrictId($subdistrict_id) {
-		$this->subdistrict_id = $this->_filter->sanitize($subdistrict_id, 'int');
+	function setVillageId($village_id) {
+		$this->village_id = $this->_filter->sanitize($village_id, 'int');
 	}
 
 	function setPhone($phone) {
@@ -285,8 +280,7 @@ class User extends BaseModel {
 
 	function beforeSave() {
 		$this->address        = $this->address ?: null;
-		$this->zip_code       = $this->zip_code ?: null;
-		$this->subdistrict_id = $this->subdistrict_id ?: null;
+		$this->village_id     = $this->village_id ?: null;
 		$this->mobile         = $this->mobile ?: null;
 		$this->affiliate_link = $this->affiliate_link ?: null;
 		$this->activated_at   = $this->activated_at ?: null;
