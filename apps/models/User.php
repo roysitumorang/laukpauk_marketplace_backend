@@ -77,6 +77,12 @@ class User extends BaseModel {
 			'alias'    => 'role',
 			'reusable' => true,
 		]);
+		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', [
+			'alias'      => 'login_history',
+			'foreignKey' => [
+				'message' => 'user tidak dapat dihapus karena memiliki login history',
+			],
+		]);
 	}
 
 	function setName($name) {

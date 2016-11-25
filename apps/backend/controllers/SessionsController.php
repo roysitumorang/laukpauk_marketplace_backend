@@ -1,6 +1,8 @@
 <?php
 
 namespace Application\Backend\Controllers;
+
+use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
 
@@ -41,6 +43,9 @@ class SessionsController extends BaseController {
 					],
 				]);
 				if ($user && password_verify($password, $user->password)) {
+					$login_history       = new LoginHistory;
+					$login_history->user = $user;
+					$login_history->create();
 					$this->session->set('user_id', $user->id);
 					return $this->response->redirect($next_url ?: '/admin/home');
 				}
