@@ -1209,11 +1209,16 @@ CREATE TABLE `notification_templates` (
   UNIQUE KEY `name` (`name`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 /*Data for the table `notification_templates` */
 
 LOCK TABLES `notification_templates` WRITE;
+
+insert  into `notification_templates`(`id`,`name`,`subject`,`url`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,'new order','Order Baru','/admin/order/show/',1,'2016-11-25 18:35:34',NULL,NULL),
+(2,'order delivered','Order Diterima','/admin/order/show/',1,'2016-11-25 18:37:03',NULL,NULL),
+(3,'order cancelled','Order Dibatalkan','/admin/order/show/',1,'2016-11-25 18:37:37',NULL,NULL);
 
 UNLOCK TABLES;
 
@@ -2111,10 +2116,6 @@ CREATE TABLE `sessions` (
 /*Data for the table `sessions` */
 
 LOCK TABLES `sessions` WRITE;
-
-insert  into `sessions`(`id`,`user_id`,`ip_address`,`user_agent`,`data`,`last_activity`) values
-('4p5g2e0t4p73ooca7c9fi00573',NULL,'127.0.0.1','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0','$PHALCON/CSRF/KEY$|s:32:\"NytSVXZkQ3ZnTmNHcE5wVys3eU4yQT09\";$PHALCON/CSRF$|s:32:\"aDRBbEg3SkZRS2pxZVZkN0xjaXloUT09\";',1480061693),
-('9sui9i2ps1kfd5qenbn6dkjhc3',NULL,'127.0.0.1','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0','',1480061693);
 
 UNLOCK TABLES;
 
@@ -9455,7 +9456,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 
 insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 15:14:53',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',1,'2016-10-25 01:07:27',NULL,'2016-11-25 15:14:53');
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 18:40:31',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',1,'2016-10-25 01:07:27',NULL,'2016-11-25 18:40:31');
 
 UNLOCK TABLES;
 
