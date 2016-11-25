@@ -70,7 +70,7 @@ class Module implements ModuleDefinitionInterface {
 			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, Exception $exception) {
 				if ($exception instanceof DispatchException || in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
-						'controller' => 'Home',
+						'controller' => 'home',
 						'action'     => 'route404',
 					]);
 					return false;
@@ -83,7 +83,7 @@ class Module implements ModuleDefinitionInterface {
 
 		// Registering the view component
 		$di->set('view', function() {
-			$view = new View();
+			$view = new View;
 			$view->setViewsDir(APP_PATH . 'apps/backend/views/');
 			$view->registerEngines([
 				'.volt' => function($view, $di) {
