@@ -77,6 +77,7 @@ class UsersController extends BaseController {
 				'total_completed_orders' => 'COUNT(DISTINCT f.id)',
 				'total_cancelled_orders' => 'COUNT(DISTINCT h.id)',
 				'total_products'         => 'COUNT(DISTINCT i.product_id)',
+				'total_service_areas'    => 'COUNT(DISTINCT j.id)',
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
@@ -87,6 +88,7 @@ class UsersController extends BaseController {
 			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', g.merchant_id, g.buyer_id) AND g.status = ' . array_search('COMPLETED', Order::STATUS), 'g')
 			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', h.merchant_id, h.buyer_id) AND h.status = ' . array_search('CANCELLED', Order::STATUS), 'h')
 			->leftJoin('Application\Models\ProductPrice', 'a.role_id = ' . Role::MERCHANT . ' AND a.id = i.user_id AND i.published = 1', 'i')
+			->leftJoin('Application\Models\ServiceArea', 'a.id = j.user_id', 'j')
 			->groupBy('a.id')
 			->orderBy('a.id DESC');
 		$builder->where('a.status = ' . $current_status);

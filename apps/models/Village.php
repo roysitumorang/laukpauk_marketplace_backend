@@ -22,5 +22,6 @@ class Village extends BaseModel {
 			'alias'    => 'subdistrict',
 			'reusable' => true,
 		]);
+		$this->hasMany('id', 'Application\Models\ServiceArea', 'village_id', ['alias' => 'service_areas']);
 	}
 }

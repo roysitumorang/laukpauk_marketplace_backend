@@ -112,6 +112,7 @@
 								{% endif %}
 								{% if user.role == 'Merchant' %}
 								<br><a href="/admin/product_prices?user_id={{ user.id }}">Products: {{ user.total_products }}</a>
+								<br><a href="/admin/service_areas?user_id={{ user.id }}">Service Areas: {{ user.total_service_areas }}</a>
 								{% endif %}
 							</td>
 							<td>

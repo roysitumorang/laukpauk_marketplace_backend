@@ -80,6 +80,7 @@ class User extends BaseModel {
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyer_orders']);
 		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchant_orders']);
 		$this->hasMany('id', 'Application\Models\ProductPrice', 'user_id', ['alias' => 'product_prices']);
+		$this->hasMany('id', 'Application\Models\ServiceArea', 'user_id', ['alias' => 'service_areas']);
 	}
 
 	function setName($name) {

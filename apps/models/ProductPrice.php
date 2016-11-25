@@ -43,7 +43,7 @@ class ProductPrice extends BaseModel {
 			'alias'    => 'user',
 			'reusable' => true,
 		]);
-		$this->belongsTo('product_id', 'Application\Models\Product', 'product_id', [
+		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
 			'alias'    => 'product',
 			'reusable' => true,
 		]);
