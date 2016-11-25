@@ -9,19 +9,26 @@ use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class UsersController extends BaseController {
 	function indexAction() {
-		$search_parameters = [
-			'name'         => 'Nama',
-			'email'        => 'Email',
-			'city'         => 'Kota',
-			'role'         => 'Role',
-			'created_at'   => 'Tanggal Pendaftaran (YYYY-mm-dd)',
-			'activated_at' => 'Tanggal Aktivasi (YYYY-mm-dd)',
-			'status'       => 'Status',
-		];
 		$limit             = $this->config->per_page;
 		$current_page      = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset            = ($current_page - 1) * $limit;
-		$parameter         = $this->request->get('parameter', 'string');
+		$status            = User::STATUS;
+		$roles             = [];
+		$current_status    = $this->request->getQuery('status', 'int');
+		if ($current_status === null || !array_key_exists($current_status, $status)) {
+			$current_status = array_search('ACTIVE', $status);
+		}
+		$role_items        = Role::find([
+			'conditions' => 'id > ' . Role::ANONYMOUS,
+			'columns'    => 'id, name',
+		]);
+		foreach ($role_items as $role) {
+			$roles[$role->id] = $role;
+		}
+		$current_role      = $this->request->getQuery('role_id', 'int');
+		if ($current_role && !array_key_exists($current_role, $roles)) {
+			$current_role = null;
+		}
 		$keyword           = $this->request->getQuery('keyword', 'string');
 		$builder           = $this->modelsManager->createBuilder()
 			->columns([
@@ -63,27 +70,21 @@ class UsersController extends BaseController {
 				'a.updated_at',
 			])
 			->from(['a' => 'Application\Models\User'])
-			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
 			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
 			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
 			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
 			->orderBy('id DESC');
+		$builder->where('a.status = ' . $current_status);
+		if ($current_role) {
+			$builder->andWhere('a.role_id = ' . $current_role);
+		}
 		if ($keyword) {
-			if ($parameter == 'name') {
-				$builder->where('a.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'email') {
-				$builder->where('a.email LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'city') {
-				$builder->where('e.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'role') {
-				$builder->where('b.name LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'created_at') {
-				$builder->where('a.created_at LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'activated_at') {
-				$builder->where('a.activated_at LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
-			} else if ($parameter == 'status') {
-				$builder->where('a.status = :keyword:', ['keyword' => $keyword]);
-			}
+			$keyword_placeholder = "%{$keyword}%";
+			$builder->andWhere('a.name LIKE ?1 OR a.email LIKE ?2 OR phone LIKE ?3', [
+				1 => $keyword_placeholder,
+				2 => $keyword_placeholder,
+				3 => $keyword_placeholder,
+			]);
 		}
 		$paginator = new PaginatorQueryBuilder([
 			'builder' => $builder,
@@ -95,21 +96,21 @@ class UsersController extends BaseController {
 		$users     = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
+			$item->writeAttribute('status', $status[$item->status]);
 			$users[] = $item;
 		}
-		$status_hold                       = array_search('HOLD', User::STATUS);
-		$status_active                     = array_search('ACTIVE', User::STATUS);
-		$status_suspended                  = array_search('SUSPENDED', User::STATUS);
+		$status_hold                       = array_search('HOLD', $status);
+		$status_active                     = array_search('ACTIVE', $status);
+		$status_suspended                  = array_search('SUSPENDED', $status);
 		$this->view->menu                  = $this->_menu('Member');
 		$this->view->users                 = $users;
+		$this->view->pages                 = $pages;
 		$this->view->page                  = $paginator->getPaginate();
-		$this->view->multi_page            = count($users) / $limit > 1;
-		$this->view->search_parameters     = $search_parameters;
-		$this->view->parameter             = $parameter;
+		$this->view->status                = $status;
+		$this->view->current_status        = $current_status;
+		$this->view->roles                 = $roles;
+		$this->view->current_role          = $current_role;
 		$this->view->keyword               = $keyword;
-		$this->view->hold                  = $status_hold;
-		$this->view->active                = $status_active;
-		$this->view->suspended             = $status_suspended;
 		$this->view->total_users           = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
 		$this->view->total_pending_users   = $this->db->fetchColumn("SELECT COUNT(1) FROM users WHERE `status` = {$status_hold}");
 		$this->view->total_active_users    = $this->db->fetchColumn("SELECT COUNT(1) FROM users WHERE `status` = {$status_active}");

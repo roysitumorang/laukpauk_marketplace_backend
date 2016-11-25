@@ -1989,7 +1989,7 @@ CREATE TABLE `roles` (
   UNIQUE KEY `name` (`name`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 /*Data for the table `roles` */
 
@@ -1999,7 +1999,8 @@ insert  into `roles`(`id`,`name`,`description`,`created_by`,`created_at`,`update
 (0,'Anonymous','Tamu.',1,'2016-10-25 00:46:11',NULL,NULL),
 (1,'Super Administrator','Administrator dengan hak akses tidak terbatas.',1,'2016-10-25 00:41:25',NULL,NULL),
 (2,'Administrator','Administrator dengan hak akses terbatas.',1,'2016-10-25 00:41:57',NULL,NULL),
-(3,'Merchant','Penjual.',1,'2016-10-25 00:43:33',NULL,NULL);
+(3,'Merchant','Penjual.',1,'2016-10-25 00:43:33',NULL,NULL),
+(4,'Buyer','Pembeli.',1,'2016-11-25 13:11:06',NULL,NULL);
 
 UNLOCK TABLES;
 

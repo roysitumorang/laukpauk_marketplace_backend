@@ -14,6 +14,7 @@ class BaseController extends Controller {
 			return $this->response->redirect('/admin/sessions/create?next=' . $url);
 		}
 		$this->view->current_user = $this->currentUser;
+		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 		if (!apcu_exists('subdistricts')) {
 			$subdistricts = [];
 			$result       = $this->db->query("SELECT a.id, a.name FROM subdistricts a JOIN cities b ON a.city_id = b.id WHERE b.name = 'Medan' ORDER BY a.name");

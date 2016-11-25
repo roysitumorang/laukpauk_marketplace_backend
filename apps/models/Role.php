@@ -9,6 +9,7 @@ class Role extends BaseModel {
 	const SUPER_ADMIN = 1;
 	const ADMIN       = 2;
 	const MERCHANT    = 3;
+	const BUYER       = 4;
 
 	public $id;
 	public $name;
