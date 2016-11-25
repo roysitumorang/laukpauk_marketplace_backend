@@ -2,14 +2,13 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class OrderItem extends BaseModel {
+class Order extends BaseModel {
 	public $id;
 	public $code;
 	public $name;

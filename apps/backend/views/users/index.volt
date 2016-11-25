@@ -78,20 +78,24 @@
 							<td>
 								<font size="4"><a href="/admin/users/show/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
 								<br>
+								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}<br>
 								{% if user.email %}
-								<i class="fa fa-envelope"></i>&nbsp; <a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
+								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 								{% endif %}
 								<i class="fa fa-phone-square"></i>&nbsp;&nbsp;<a href="/admin/sms/create/user_id:{{ user.id }}" target="_blank">{{ user.phone }}</a><br>
-								<a href="/admin/users/emails/{{ user.id }}" title="email log"><i class="fa fa-envelope"></i>&nbsp;{{ count(user.emails) }} emails</a>
-								<br><i class="fa fa-sign-in"></i>&nbsp;
+								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="/admin/users/emails/{{ user.id }}" title="email log">{{ count(user.emails) }} emails</a><br>
+								<i class="fa fa-sign-in"></i>&nbsp;
 								{% if !user.last_seen %}
 								No login yet
 								{% else %}
 								<a href="/admin/users/login_history/{{ user.id }}">{{ user.last_seen }}</a>
 								{% endif %}
+								{% if user.village %}
+								<br><i class="fa fa-home"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}
+								{% endif %}
 							</td>
 							<td>
-								Reg Date:&nbsp;{{ date('d M Y', strtotime(user.created_at)) }}<br>
+								Reg Date {{ date('d M Y', strtotime(user.created_at)) }}<br>
 								<i class="fa fa-user"></i>&nbsp;
 								{% if !user.premium %}
 								<b><font color="#000099">FREE</font></b>
@@ -99,8 +103,16 @@
 								<b><font color="#009900">PREMIUM</font></b>
 								{% endif %}
 								<br><i class="fa fa-money"></i>&nbsp;Rp. {{ number_format(user.deposit) }}
-								<br>
-								Total Poin: {{ number_format(user.buy_point) }}
+								<br>Points: {{ number_format(user.buy_point) }}
+								{% if user.role == 'Merchant' or user_role == 'Buyer' %}
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}">Orders: {{ user.total_orders }}</a>
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&status=0">Pending Orders: {{ user.total_pending_orders }} / Rp. {{ number_format(user.total_pending_bill) }}</a>
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&status=1">Completed Orders: {{ user.total_completed_orders }} / Rp. {{ number_format(user.total_completed_bill) }}</a>
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
+								{% endif %}
+								{% if user.role == 'Merchant' %}
+								<br><a href="/admin/product_prices?user_id={{ user.id }}">Products: {{ user.total_products }}</a>
+								{% endif %}
 							</td>
 							<td>
 								{% if user.status == 'HOLD' %}

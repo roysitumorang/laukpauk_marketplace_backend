@@ -2,6 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
+use Application\Models\Order;
 use Application\Models\Role;
 use Application\Models\Village;
 use Application\Models\User;
@@ -32,7 +33,7 @@ class UsersController extends BaseController {
 		$keyword           = $this->request->getQuery('keyword', 'string');
 		$builder           = $this->modelsManager->createBuilder()
 			->columns([
-				'id' => 'a.id',
+				'a.id',
 				'a.role_id',
 				'a.name',
 				'a.email',
@@ -68,12 +69,26 @@ class UsersController extends BaseController {
 				'a.created_at',
 				'a.updated_by',
 				'a.updated_at',
+				'role'                   => 'b.name',
+				'village'                => 'c.name',
+				'subdistrict'            => 'd.name',
+				'total_orders'           => 'COUNT(DISTINCT e.id)',
+				'total_pending_orders'   => 'COUNT(DISTINCT f.id)',
+				'total_completed_orders' => 'COUNT(DISTINCT f.id)',
+				'total_cancelled_orders' => 'COUNT(DISTINCT h.id)',
+				'total_products'         => 'COUNT(DISTINCT i.product_id)',
 			])
 			->from(['a' => 'Application\Models\User'])
+			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
 			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
 			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
-			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
-			->orderBy('id DESC');
+			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', e.merchant_id, e.buyer_id)', 'e')
+			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', f.merchant_id, f.buyer_id) AND f.status = ' . array_search('HOLD', Order::STATUS), 'f')
+			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', g.merchant_id, g.buyer_id) AND g.status = ' . array_search('COMPLETED', Order::STATUS), 'g')
+			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', h.merchant_id, h.buyer_id) AND h.status = ' . array_search('CANCELLED', Order::STATUS), 'h')
+			->leftJoin('Application\Models\ProductPrice', 'a.role_id = ' . Role::MERCHANT . ' AND a.id = i.user_id AND i.published = 1', 'i')
+			->groupBy('a.id')
+			->orderBy('a.id DESC');
 		$builder->where('a.status = ' . $current_status);
 		if ($current_role) {
 			$builder->andWhere('a.role_id = ' . $current_role);
@@ -97,6 +112,10 @@ class UsersController extends BaseController {
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('status', $status[$item->status]);
+			if ($item->role == 'Buyer' || $item->role == 'Merchant') {
+				$item->writeAttribute('total_pending_bill', $this->db->fetchColumn("SELECT SUM(final_bill) FROM orders WHERE status = 0 AND " . ($item->role == 'Merchant' ? 'merchant_id' : 'buyer_id') . "= {$item->id}"));
+				$item->writeAttribute('total_completed_bill', $this->db->fetchColumn("SELECT SUM(final_bill) FROM orders WHERE status = 1 AND " . ($item->role == 'Merchant' ? 'merchant_id' : 'buyer_id') . "= {$item->id}"));
+			}
 			$users[] = $item;
 		}
 		$status_hold                       = array_search('HOLD', $status);
@@ -281,7 +300,6 @@ class UsersController extends BaseController {
 		$user->setMobile($this->request->getPost('mobile'));
 		$user->setPremium($this->request->getPost('premium'));
 		$user->setAffiliateLink($this->request->getPost('affiliate_link'));
-		$user->setStatus($this->request->getPost('status'));
 		$user->setDeposit($this->request->getPost('deposit'));
 		$user->setKtp($this->request->getPost('ktp'));
 		$user->setCompany($this->request->getPost('company'));

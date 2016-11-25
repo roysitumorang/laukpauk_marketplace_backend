@@ -1678,16 +1678,17 @@ LOCK TABLES `product_pictures` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_rates` */
+/*Table structure for table `product_prices` */
 
-DROP TABLE IF EXISTS `product_rates`;
+DROP TABLE IF EXISTS `product_prices`;
 
-CREATE TABLE `product_rates` (
+CREATE TABLE `product_prices` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
-  `unit_price` int(11) NOT NULL,
+  `value` int(11) NOT NULL,
   `unit_size` decimal(10,0) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1697,12 +1698,13 @@ CREATE TABLE `product_rates` (
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
   KEY `quantity` (`unit_size`),
-  KEY `user_id` (`user_id`)
+  KEY `user_id` (`user_id`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `product_rates` */
+/*Data for the table `product_prices` */
 
-LOCK TABLES `product_rates` WRITE;
+LOCK TABLES `product_prices` WRITE;
 
 UNLOCK TABLES;
 
@@ -2109,6 +2111,10 @@ CREATE TABLE `sessions` (
 /*Data for the table `sessions` */
 
 LOCK TABLES `sessions` WRITE;
+
+insert  into `sessions`(`id`,`user_id`,`ip_address`,`user_agent`,`data`,`last_activity`) values
+('4p5g2e0t4p73ooca7c9fi00573',NULL,'127.0.0.1','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0','$PHALCON/CSRF/KEY$|s:32:\"NytSVXZkQ3ZnTmNHcE5wVys3eU4yQT09\";$PHALCON/CSRF$|s:32:\"aDRBbEg3SkZRS2pxZVZkN0xjaXloUT09\";',1480061693),
+('9sui9i2ps1kfd5qenbn6dkjhc3',NULL,'127.0.0.1','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0','',1480061693);
 
 UNLOCK TABLES;
 
@@ -9449,7 +9455,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 
 insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,NULL);
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 15:14:53',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',1,'2016-10-25 01:07:27',NULL,'2016-11-25 15:14:53');
 
 UNLOCK TABLES;
 

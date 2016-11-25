@@ -91,12 +91,6 @@
 		</tr>
 		<tr>
 			<td>
-				Post Code:<br>
-				<input type="text" name="zip_code" value="{{ user.zip_code }}" class="form form-control form-30" size="5">
-			</td>
-		</tr>
-		<tr>
-			<td>
 				Phone Number (*):<br>
 				<input type="text" name="phone" value="{{ user.phone }}" class="form form-control form-40" size="40">
 			</td>
@@ -120,14 +114,6 @@
 				Membership (*):<br>
 				{% for value, label in memberships %}
 				<input type="radio" name="premium" value="{{ value }}"{% if user.premium == value %} checked{% endif %}> {{ label }}&nbsp;&nbsp;
-				{% endfor %}
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Status Keaktifan (*):<br>
-				{% for value, label in status %}
-				<input type="radio" name="status" value="{{ value }}"{% if user.status == value %} checked{% endif %}> {{ label }}&nbsp;&nbsp;
 				{% endfor %}
 			</td>
 		</tr>

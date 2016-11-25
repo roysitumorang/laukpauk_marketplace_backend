@@ -2,7 +2,6 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Confirmation;
@@ -77,12 +76,10 @@ class User extends BaseModel {
 			'alias'    => 'role',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', [
-			'alias'      => 'login_history',
-			'foreignKey' => [
-				'message' => 'user tidak dapat dihapus karena memiliki login history',
-			],
-		]);
+		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', ['alias' => 'login_history']);
+		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyer_orders']);
+		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchant_orders']);
+		$this->hasMany('id', 'Application\Models\ProductPrice', 'user_id', ['alias' => 'product_prices']);
 	}
 
 	function setName($name) {

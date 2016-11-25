@@ -59,6 +59,7 @@ class Product extends BaseModel {
 		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
 		$this->hasMany('id', 'Application\Models\ProductVariant', 'product_id', ['alias' => 'variants']);
 		$this->hasMany('id', 'Application\Models\ProductDimension', 'product_id', ['alias' => 'dimensions']);
+		$this->hasMany('id', 'Application\Models\ProductPrice', 'user_id', ['alias' => 'prices']);
 	}
 
 	function setCode($code) {

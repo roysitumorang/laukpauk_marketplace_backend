@@ -2,7 +2,6 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
