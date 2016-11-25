@@ -2074,16 +2074,16 @@ DROP TABLE IF EXISTS `service_areas`;
 CREATE TABLE `service_areas` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
-  `zip_code` char(5) NOT NULL,
+  `village_id` bigint(20) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  KEY `zip_code` (`zip_code`),
+  UNIQUE KEY `user_id` (`user_id`,`village_id`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `village_id` (`village_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `service_areas` */
