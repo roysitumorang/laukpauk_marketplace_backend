@@ -27,6 +27,7 @@ class Product extends BaseModel {
 	public $brand_id;
 	public $buy_point;
 	public $affiliate_point;
+	public $unit_of_measure;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -120,14 +121,21 @@ class Product extends BaseModel {
 		}
 	}
 
+	function setUnitOfMeasure($unit_of_measure) {
+		$this->unit_of_measure = $this->_filter->sanitize($unit_of_measure ?: $this->name, ['string', 'trim']);
+	}
+
 	function beforeValidation() {
 		$this->permalink = trim(preg_replace(['/[^\w\d\-\ ]/', '/ /', '/\-{2,}/'], ['', '-', '-'], strtolower($this->new_permalink ?: $this->name)), '-');
 	}
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add('name', new PresenceOf([
-			'message' => 'nama harus diisi',
+		$validator->add(['name', 'unit_of_measure'], new PresenceOf([
+			'message' => [
+				'name'            => 'nama harus diisi',
+				'unit_of_measure' => 'satuan harus diisi',
+			]
 		]));
 		if ($this->getSnapshotData()['name'] != $this->name) {
 			$validator->add('name', new Uniqueness([

@@ -1,13 +1,22 @@
 <form method="POST" action="{{ action }}" enctype="multipart/form-data">
 	<table class="table table-striped">
 		<tr>
-			<td colspan="3">
+			<td bgcolor="#CCCC33">
+				<b><font color="#000099">Kode Produk</font></b>
+				<br>
+				<input type="text" name="code" value="{{ product.code }}" placeholder="Kode Produk" size="30" class="form form-control">
+			</td>
+			<td bgcolor="#cce5ff">
 				<b><font color="#000099">Nama Produk</font></b>
 				<br>
-				<input type="text" name="code" value="{{ product.code }}" placeholder="Kode Produk" size="30" class="form form-control form-30">
-				<input type="text" name="name" value="{{ product.name }}" placeholder="Nama Produk" size="30" class="form form-control form-60">
+				<input type="text" name="name" value="{{ product.name }}" placeholder="Nama Produk" size="30" class="form form-control">
 			</td>
-			<td>
+			<td bgcolor="#CCFFCC">
+				<b><font color="#000099">Satuan Produk</font></b>
+				<br>
+				<input type="text" name="unit_of_measure" value="{{ product.unit_of_measure }}" placeholder="Satuan Produk" size="30" class="form form-control">
+			</td>
+			<td bgcolor="#99CC33">
 				<b><font color="#000099">Stok Produk</font></b>
 				<br>
 				<input type="text" name="stock" value="{{ product.stock }}" placeholder="Stok Produk" size="10" class="form form-control">
