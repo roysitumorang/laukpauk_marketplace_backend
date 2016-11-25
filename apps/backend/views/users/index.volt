@@ -73,7 +73,7 @@
 					</thead>
 					<tbody>
 						{% for user in users %}
-						<tr id="user.id">
+						<tr id="{{ user.id }}">
 							<td>{{ user.rank }}</td>
 							<td>
 								<font size="4"><a href="/admin/users/show/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
@@ -106,9 +106,9 @@
 								<br>Points: {{ number_format(user.buy_point) }}
 								{% if user.role == 'Merchant' or user_role == 'Buyer' %}
 								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}">Orders: {{ user.total_orders }}</a>
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&status=0">Pending Orders: {{ user.total_pending_orders }} / Rp. {{ number_format(user.total_pending_bill) }}</a>
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&status=1">Completed Orders: {{ user.total_completed_orders }} / Rp. {{ number_format(user.total_completed_bill) }}</a>
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=0">Pending Orders: {{ user.total_pending_orders }} / Rp. {{ number_format(user.total_pending_bill) }}</a>
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=1">Completed Orders: {{ user.total_completed_orders }} / Rp. {{ number_format(user.total_completed_bill) }}</a>
+								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
 								{% endif %}
 								{% if user.role == 'Merchant' %}
 								<br><a href="/admin/product_prices?user_id={{ user.id }}">Products: {{ user.total_products }}</a>
@@ -116,13 +116,13 @@
 							</td>
 							<td>
 								{% if user.status == 'HOLD' %}
-								<a href="javascript:confirm('Anda yakin mengaktifkan member ini ?')&&(location.href='/admin/users/activate/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
+								<a href="javascript:confirm('Anda yakin mengaktifkan member ini ?')&amp;&amp;(location.href='/admin/users/activate/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
 								<b><font color="#FF0000">HOLD</font></b>&nbsp;
 								<a href="javascript:open_window('/admin/emails/create?user_id={{ user.id }}')" title="send email"><img src="/backend/images/send-email-small.png" border="0"></a>
 								{% elseif user.status == 'ACTIVE' %}
-								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&&(location.href='/admin/users/suspend/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
+								<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&amp;&amp;(location.href='/admin/users/suspend/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
 								{% else %}
-								<a href="javascript:confirm('Anda yakin mengaktifkan kembali member ini ?')&&(location.href='/admin/users/reactivate/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Reactivated"><img src="/backend/images/bullet-red.png" border="0"></a>
+								<a href="javascript:confirm('Anda yakin mengaktifkan kembali member ini ?')&amp;&amp;(location.href='/admin/users/reactivate/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Reactivated"><img src="/backend/images/bullet-red.png" border="0"></a>
 								<b><font color="#FF0000">SUSPENDED</font></b>
 								{% endif %}
 								<br><br>
@@ -130,7 +130,7 @@
 								<img src="/backend/images/bullet-green.png" border="0">&nbsp;
 								<b><font color="#000000">VERIFIED</font></b>
 								{% elseif user.status == 'ACTIVE' %}
-								<a href="javascript:confirm('Anda yakin ingin melakukan verifikasi terhadap member ini ?')&&(location.href='/admin/users/verify/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Verify"><img src="/backend/images/bullet-red.png" border="0"></a>&nbsp;
+								<a href="javascript:confirm('Anda yakin ingin melakukan verifikasi terhadap member ini ?')&amp;&amp;(location.href='/admin/users/verify/{{ user.id }}?next='+location.href.replace(location.hash,'')+'#{{ user.id }}')" title="Verify"><img src="/backend/images/bullet-red.png" border="0"></a>&nbsp;
 								<b><font color="#FF0000">VERIFICATION IN PROGRESS</font></b>
 								{% endif %}
 							</td>
@@ -158,7 +158,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/users/index/page:{{ i }}{% if current_status or current_role or keyword %}?{% endif %}{% if current_status %}status={{ current_status }}{% endif %}{% if current_role %}&role_id={{ current_role }}{% endif %}{% if keyword %}&keyword={{ keyword }}{% endif %}">{{ i }}</a>
+							<a href="/admin/users/index/page:{{ i }}{% if current_status or current_role or keyword %}?{% endif %}{% if current_status %}status={{ current_status }}{% endif %}{% if current_role %}&amp;role_id={{ current_role }}{% endif %}{% if keyword %}&amp;keyword={{ keyword }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
