@@ -3,10 +3,11 @@
 namespace Application\Models;
 
 use Application\Models\BaseModel;
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\PresenceOf;
 
 class Message extends BaseModel {
 	public $id;
-	public $user_id;
 	public $subject;
 	public $body;
 	public $created_by;
@@ -18,8 +19,31 @@ class Message extends BaseModel {
 		return 'messages';
 	}
 
+	function onConstruct() {
+		$this->_filter = $this->getDI()->getFilter();
+	}
+
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', ['alias' => 'user']);
+		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'message_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'users']);
+	}
+
+	function setSubject($subject) {
+		$this->subject = $this->_filter->sanitize($subject, ['string', 'trim']);
+	}
+
+	function setBody($body) {
+		$this->body = $this->_filter->sanitize($body, ['string', 'trim']);
+	}
+
+	function validation() {
+		$validator = new Validation;
+		$validator->add(['subject', 'body'], new PresenceOf([
+			'message' => [
+				'subject' => 'judul harus diisi',
+				'body'    => 'pesan harus diisi',
+			],
+		]));
+		return $this->validate($validator);
 	}
 }

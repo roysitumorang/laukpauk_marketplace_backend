@@ -1065,12 +1065,14 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `message_recipients`;
 
 CREATE TABLE `message_recipients` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `message_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
   `read_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`message_id`,`user_id`),
-  KEY `user_id` (`user_id`),
-  KEY `read_at` (`read_at`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`message_id`),
+  KEY `read_at` (`read_at`),
+  KEY `message_id` (`message_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `message_recipients` */
