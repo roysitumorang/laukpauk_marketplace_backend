@@ -1,6 +1,6 @@
 <header class="header">
 	<div class="logo-container">
-		<a href="main.php" class="logo">
+		<a href="/admin" class="logo">
 			<img src="/backend/images/logo.png" height="35" alt="Ikoma-Home Admin">
 		</a>
 		<div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
@@ -23,7 +23,7 @@
 			<li>
 				<a href="#" class="dropdown-toggle notification-icon" data-toggle="dropdown">
 					<i class="fa fa-envelope"></i>
-					{% if unread_messages > 0 %}
+					{% if unread_messages %}
 					<span class="badge">{{ count(unread_messages) }}</span>
 					{% endif %}
 				</a>
@@ -34,23 +34,21 @@
 					</div>
 					<div class="content">
 						<ul>
-						{% if !unread_messages %}
+						{% for message in unread_messages %}
+							<li>
+								<a href="/admin/messages/show/{{ message.id }}" class="clearfix">
+									<span class="title">{{ message.subject }}</span>
+									<span class="message truncate">{{ message.body }}</span>
+								</a>
+							</li>
+						{% elsefor %}
 							<li>
 								<a href="/admin/messages" class="clearfix">
 									<span class="title">Maaf</span>
 									<span class="message">Belum ada pesan baru</span>
 								</a>
 							</li>
-						{% else %}
-							{% for message in unread_messages %}
-							<li>
-								<a href="/admin/messages/{{ message.id }}" class="clearfix">
-									<span class="title">{{ message.subject }}</span>
-									<span class="message truncate">{{ message.body }}</span>
-								</a>
-							</li>
-							{% endfor %}
-						{% endif %}
+						{% endfor %}
 						</ul>
 						<hr>
 						<div class="text-right">
@@ -73,23 +71,21 @@
 					</div>
 					<div class="content">
 						<ul>
-						{% if !unread_notifications %}
+						{% for notification in unread_notifications %}
+							<li>
+								<a href="{{ notifications.link }}" class="clearfix">
+									<span class="title">{{ notification.created_at }}</span>
+									<span class="message">{{ notification.subject }}</span>
+								</a>
+							</li>
+						{% elsefor %}
 							<li>
 								<a href="/admin/notifications" class="clearfix">
 									<span class="title">Maaf</span>
 									<span class="message">Belum ada notifikasi</span>
 								</a>
 							</li>
-						{% else %}
-							{% for notification in unread_notifications %}
-							<li>
-								<a href="{{ notifications.link }}" class="clearfix">
-									<span class="title">{{ notification.created_at }}</span>
-									<span class="message">{{ notification.body }}</span>
-								</a>
-							</li>
-							{% endfor %}
-						{% endif %}
+						{% endfor %}
 						</ul>
 						<hr>
 						<div class="text-right">

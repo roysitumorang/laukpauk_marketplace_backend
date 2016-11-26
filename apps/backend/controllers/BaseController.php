@@ -13,7 +13,6 @@ class BaseController extends Controller {
 		if (!$this->session->get('user_id') && !Text::startsWith($url, '/admin/sessions')) {
 			return $this->response->redirect('/admin/sessions/create?next=' . $url);
 		}
-		$this->view->current_user = $this->currentUser;
 		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 		if (!apcu_exists('subdistricts')) {
 			$subdistricts = [];
@@ -36,6 +35,17 @@ class BaseController extends Controller {
 			}
 			apcu_add('villages', $villages);
 		}
+		$this->view->current_user         = $this->currentUser;
+		$this->view->unread_notifications = $this->currentUser->getRelated('notifications', [
+			'conditions' => 'read_at IS NULL',
+			'columns'    => 'id, subject, link',
+			'order'      => 'id DESC',
+		])->toArray();
+		$this->view->unread_messages      = $this->currentUser->getRelated('messages', [
+			'conditions' => 'Application\Models\MessageRecipient.read_at IS NULL',
+			'columns'    => 'Application\Models\Message.id, Application\Models\Message.subject, Application\Models\Message.body',
+			'order'      => 'Application\Models\Message.id DESC',
+		])->toArray();
 	}
 
 	function notFoundAction() {
