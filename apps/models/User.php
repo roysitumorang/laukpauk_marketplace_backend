@@ -82,6 +82,7 @@ class User extends BaseModel {
 		$this->hasMany('id', 'Application\Models\ProductPrice', 'user_id', ['alias' => 'product_prices']);
 		$this->hasMany('id', 'Application\Models\ServiceArea', 'user_id', ['alias' => 'service_areas']);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
+		$this->hasMany('id', 'Application\Models\Notification', 'user_id', ['alias' => 'notifications']);
 	}
 
 	function setName($name) {
