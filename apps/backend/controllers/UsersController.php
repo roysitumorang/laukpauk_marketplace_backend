@@ -145,6 +145,7 @@ class UsersController extends BaseController {
 		$user->buy_point       = 0;
 		$user->affiliate_point = 0;
 		$user->subdistrict_id  = null;
+		$user->role            = Role::findFirst(Role::BUYER);
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->create()) {
@@ -281,6 +282,10 @@ class UsersController extends BaseController {
 		$subdistricts              = apcu_fetch('subdistricts');
 		$villages                  = apcu_fetch('villages');
 		$this->view->menu          = $this->_menu('Members');
+		$this->view->roles         = Role::find([
+			'id > ' . Role::SUPER_ADMIN,
+			'order' => 'name',
+		]);
 		$this->view->user          = $user;
 		$this->view->status        = User::STATUS;
 		$this->view->genders       = User::GENDERS;
@@ -291,7 +296,7 @@ class UsersController extends BaseController {
 	}
 
 	private function _set_model_attributes(&$user) {
-		$user->role = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::MERCHANT);
+		$user->role = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
 		$user->setName($this->request->getPost('name'));
 		$user->setEmail($this->request->getPost('email'));
 		$user->setNewPassword($this->request->getPost('new_password'));

@@ -21,6 +21,14 @@
 		</tr>
 		<tr>
 			<td>
+				Role (*):<br>
+				{% for role in roles %}
+				<input type="radio" name="role" value="{{ role_id }}"{% if user.role.id == role.id %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
+				{% endfor %}
+			</td>
+		</tr>
+		<tr>
+			<td>
 				Nama (*):<br>
 				<input type="text" name="name" value="{{ user.name }}" class="form form-control form-50" size="40">
 			</td>
