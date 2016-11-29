@@ -9430,6 +9430,9 @@ CREATE TABLE `users` (
   `affiliate_point` decimal(10,0) NOT NULL,
   `avatar` char(36) DEFAULT NULL,
   `thumbnails` text,
+  `business_days` varchar(15) DEFAULT NULL,
+  `business_opening_hour` char(5) DEFAULT NULL,
+  `business_closing_hour` char(5) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -9457,8 +9460,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 18:40:31',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',1,'2016-10-25 01:07:27',NULL,'2016-11-25 18:40:31');
+insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 18:40:31',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-11-25 18:40:31');
 
 UNLOCK TABLES;
 

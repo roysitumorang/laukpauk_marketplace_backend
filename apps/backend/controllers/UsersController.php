@@ -65,6 +65,9 @@ class UsersController extends BaseController {
 				'a.affiliate_point',
 				'a.avatar',
 				'a.thumbnails',
+				'a.business_days',
+				'a.business_opening_hour',
+				'a.business_closing_hour',
 				'a.created_by',
 				'a.created_at',
 				'a.updated_by',
@@ -293,6 +296,7 @@ class UsersController extends BaseController {
 		$this->view->subdistricts  = $subdistricts;
 		$this->view->villages      = $villages[$user->subdistrict_id ?? $subdistricts[0]->id];
 		$this->view->villages_json = json_encode($villages, JSON_NUMERIC_CHECK);
+		$this->view->business_days = User::BUSINESS_DAYS;
 	}
 
 	private function _set_model_attributes(&$user) {
@@ -317,5 +321,8 @@ class UsersController extends BaseController {
 		$user->setBuyPoint($this->request->getPost('buy_point'));
 		$user->setAffiliatePoint($this->request->getPost('affiliate_point'));
 		$user->setNewAvatar($_FILES['avatar']);
+		$user->setBusinessDays($this->request->getPost('business_days'));
+		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
+		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
 	}
 }

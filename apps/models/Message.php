@@ -25,6 +25,10 @@ class Message extends BaseModel {
 
 	function initialize() {
 		parent::initialize();
+		$this->belongsTo('created_by', 'Application\Models\User', 'id', [
+			'alias'    => 'sender',
+			'reusable' => true,
+		]);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'message_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'users']);
 	}
 

@@ -97,7 +97,8 @@ class Module implements ModuleDefinitionInterface {
 						->addFunction('count', 'count')
 						->addFunction('number_format', 'number_format')
 						->addFunction('date', 'date')
-						->addFunction('strtotime', 'strtotime');
+						->addFunction('strtotime', 'strtotime')
+						->addFunction('in_array', 'in_array');
 
 					return $volt;
 				},

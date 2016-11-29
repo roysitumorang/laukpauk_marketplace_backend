@@ -35,6 +35,18 @@
 		</tr>
 		<tr>
 			<td>
+				Phone Number (*):<br>
+				<input type="text" name="phone" value="{{ user.phone }}" class="form form-control form-40" size="40">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Mobile Number:<br>
+				<input type="text" name="mobile" value="{{ user.mobile }}" class="form form-control form-40" size="40">
+			</td>
+		</tr>
+		<tr>
+			<td>
 				Jenis Kelamin:<br>
 				{% for gender in genders %}
 				<input type="radio" name="gender" value={{ gender }}{% if user.gender == gender %} checked{% endif %}> {{ gender }}&nbsp;&nbsp;
@@ -99,14 +111,16 @@
 		</tr>
 		<tr>
 			<td>
-				Phone Number (*):<br>
-				<input type="text" name="phone" value="{{ user.phone }}" class="form form-control form-40" size="40">
+				Hari Operasional (* untuk merchant):<br>
+				{% for i, day in business_days %}
+				<input type="checkbox" name="business_days[]" value="{{ i }}"{% if in_array(i, user.business_days) %} checked{% endif %}> {{ day }}&nbsp;&nbsp;
+				{% endfor %}
 			</td>
 		</tr>
 		<tr>
 			<td>
-				Mobile Number:<br>
-				<input type="text" name="mobile" value="{{ user.mobile }}" class="form form-control form-40" size="40">
+				Jam Operasional (* untuk merchant):<br>
+				<input type="text" name="business_opening_hour" value="{{ user.business_opening_hour }}" class="form form-control form-20 text-center" size="5"> - <input type="text" name="business_closing_hour" value="{{ user.business_closing_hour }}" class="form form-control form-20 text-center" size="5">
 			</td>
 		</tr>
 		{% if user.id %}

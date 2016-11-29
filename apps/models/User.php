@@ -13,13 +13,22 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class User extends BaseModel {
-	const STATUS      = [
+	const STATUS        = [
 		0  => 'HOLD',
 		1  => 'ACTIVE',
 		-1 => 'SUSPENDED',
 	];
-	const GENDERS     = ['Pria', 'Wanita'];
-	const MEMBERSHIPS = ['Free', 'Premium'];
+	const GENDERS       = ['Pria', 'Wanita'];
+	const MEMBERSHIPS   = ['Free', 'Premium'];
+	const BUSINESS_DAYS = [
+		'Minggu',
+		'Senin',
+		'Selasa',
+		'Rabu',
+		'Kamis',
+		'Jumat',
+		'Sabtu',
+	];
 
 	public $id;
 	public $role_id;
@@ -56,6 +65,9 @@ class User extends BaseModel {
 	public $avatar;
 	public $new_avatar;
 	public $thumbnails;
+	public $business_days;
+	public $business_opening_hour;
+	public $business_closing_hour;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -213,6 +225,18 @@ class User extends BaseModel {
 		$this->thumbnails = array_filter($thumbnails ?? []);
 	}
 
+	function setBusinessDays(array $business_days = null) {
+		$this->business_days = $business_days;
+	}
+
+	function setBusinessOpeningHour($business_opening_hour) {
+		$this->business_opening_hour = $business_opening_hour;
+	}
+
+	function setBusinessClosingHour($business_closing_hour) {
+		$this->business_closing_hour = $business_closing_hour;
+	}
+
 	function beforeValidationOnCreate() {
 		$this->status           = array_search('HOLD', static::STATUS);
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
@@ -288,21 +312,24 @@ class User extends BaseModel {
 	}
 
 	function beforeSave() {
-		$this->address        = $this->address ?: null;
-		$this->village_id     = $this->village_id ?: null;
-		$this->mobile         = $this->mobile ?: null;
-		$this->affiliate_link = $this->affiliate_link ?: null;
-		$this->activated_at   = $this->activated_at ?: null;
-		$this->verified_at    = $this->verified_at ?: null;
-		$this->last_seen      = $this->last_seen ?: null;
-		$this->ktp            = $this->ktp ?: null;
-		$this->company        = $this->company ?: null;
-		$this->npwp           = $this->npwp ?: null;
-		$this->twitter_id     = $this->twitter_id ?: null;
-		$this->google_id      = $this->google_id ?: null;
-		$this->facebook_id    = $this->facebook_id ?: null;
-		$this->date_of_birth  = $this->date_of_birth ?: null;
-		$this->avatar         = $this->avatar ?: null;
+		$this->address                = $this->address ?: null;
+		$this->village_id             = $this->village_id ?: null;
+		$this->mobile                 = $this->mobile ?: null;
+		$this->affiliate_link         = $this->affiliate_link ?: null;
+		$this->activated_at           = $this->activated_at ?: null;
+		$this->verified_at            = $this->verified_at ?: null;
+		$this->last_seen              = $this->last_seen ?: null;
+		$this->ktp                    = $this->ktp ?: null;
+		$this->company                = $this->company ?: null;
+		$this->npwp                   = $this->npwp ?: null;
+		$this->twitter_id             = $this->twitter_id ?: null;
+		$this->google_id              = $this->google_id ?: null;
+		$this->facebook_id            = $this->facebook_id ?: null;
+		$this->date_of_birth          = $this->date_of_birth ?: null;
+		$this->avatar                 = $this->avatar ?: null;
+		$this->business_days          = $this->business_days ? json_encode($this->business_days, JSON_NUMERIC_CHECK) : null;
+		$this->business_opening_hours = $this->business_opening_hours ?: null;
+		$this->business_closing_hours = $this->business_closing_hours ?: null;
 		if (!$this->_newAvatarIsValid()) {
 			return true;
 		}
@@ -346,7 +373,8 @@ class User extends BaseModel {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = json_decode($this->thumbnails);
+		$this->thumbnails    = json_decode($this->thumbnails);
+		$this->business_days = $this->business_days ? json_decode($this->business_days) : [];
 	}
 
 	function getThumbnail(int $width, int $height, string $default_avatar = null) {
