@@ -45,7 +45,7 @@ class ServiceArea extends BaseModel {
 			]
 		]));
 		$validator->add(['user_id', 'village_id'], new Uniqueness([
-			'message' => 'kelurahan sudah dilayani penjual yang lain',
+			'message' => 'kelurahan sudah ada',
 		]));
 		return $this->validate($validator);
 	}

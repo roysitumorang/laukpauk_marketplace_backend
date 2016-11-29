@@ -5,6 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Order;
 use Application\Models\Role;
 use Application\Models\Village;
+use Application\Models\ServiceArea;
 use Application\Models\User;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
@@ -153,7 +154,7 @@ class UsersController extends BaseController {
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->create()) {
 				$this->flashSession->success('Penambahan member berhasil.');
-				return $this->response->redirect('/admin/users');
+				return $this->response->redirect('/admin/users?status=0');
 			}
 			$this->flashSession->error('Penambahan member tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($user->getMessages() as $error) {
@@ -188,8 +189,11 @@ class UsersController extends BaseController {
 				$user->deleteAvatar();
 				return $this->response->redirect("/admin/users/update/{$user->id}");
 			}
-			$this->_set_model_attributes($user);
+			$existing_service_areas = $this->_set_model_attributes($user);
 			if ($user->validation() && $user->update()) {
+				$user->getRelated('service_areas')->delete(function($service_areas) use($existing_service_areas) {
+					return !in_array($service_areas->village_id, $existing_service_areas);
+				});
 				$this->flashSession->success('Update member berhasil.');
 				return $this->response->redirect('/admin/users');
 			}
@@ -204,64 +208,54 @@ class UsersController extends BaseController {
 	}
 
 	function activateAction($id) {
-		$status_hold   = array_search('HOLD', User::STATUS);
-		$status_active = array_search('ACTIVE', User::STATUS);
-		$user          = User::findFirst([
-			'conditions' => 'id = ?1 AND status = ?2',
-			'bind'       => [
+		$user = User::findFirst([
+			'id = ?1 AND status = ?2',
+			'bind' => [
 				1 => $id,
-				2 => $status_hold,
+				2 => array_search('HOLD', User::STATUS),
 			]
 		]);
 		if (!$user) {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->response->redirect('/admin/users');
 		}
-		$user->update([
-			'status'           => $status_active,
-			'activation_token' => null,
-			'activated_at'     => $this->currentDatetime->format('Y-m-d H:i:s'),
-		]);
+		$user->activate();
 		$this->flashSession->success('Aktivasi member berhasil.');
-		return $this->response->redirect($this->request->getQuery('next'));
+		return $this->response->redirect('/admin/users?status=1#' . $user->id);
 	}
 
 	function suspendAction($id) {
-		$status_active    = array_search('ACTIVE', User::STATUS);
-		$status_suspended = array_search('SUSPENDED', User::STATUS);
-		$user             = User::findFirst([
-			'conditions' => 'id = ?1 AND status = ?2',
-			'bind'       => [
+		$user = User::findFirst([
+			'id = ?1 AND status = ?2',
+			'bind' => [
 				1 => $id,
-				2 => $status_active,
+				2 => array_search('ACTIVE', User::STATUS),
 			]
 		]);
 		if (!$user) {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->response->redirect('/admin/users');
 		}
-		$user->update(['status' => $status_suspended]);
+		$user->suspend();
 		$this->flashSession->success('Member berhasil dinonaktifkan.');
-		return $this->response->redirect($this->request->getQuery('next'));
+		return $this->response->redirect('/admin/users?status=-1#' . $user->id);
 	}
 
 	function reactivateAction($id) {
-		$status_suspended = array_search('SUSPENDED', User::STATUS);
-		$status_active    = array_search('ACTIVE', User::STATUS);
-		$user             = User::findFirst([
-			'conditions' => 'id = ?1 AND status = ?2',
-			'bind'       => [
+		$user = User::findFirst([
+			'id = ?1 AND status = ?2',
+			'bind' => [
 				1 => $id,
-				2 => $status_suspended,
+				2 => array_search('SUSPENDED', User::STATUS),
 			]
 		]);
 		if (!$user) {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->response->redirect('/admin/users');
 		}
-		$user->update(['status' => $status_active]);
+		$user->reactivate();
 		$this->flashSession->success('Member berhasil diaktifkan kembali.');
-		return $this->response->redirect($this->request->getQuery('next'));
+		return $this->response->redirect('/admin/users?status=1#' . $user->id);
 	}
 
 	function verifyAction($id) {
@@ -278,28 +272,37 @@ class UsersController extends BaseController {
 		}
 		$user->update(['verified_at' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 		$this->flashSession->success('Verifikasi member berhasil.');
-		return $this->response->redirect($this->request->getQuery('next'));
+		return $this->response->redirect('/admin/users?status=1#' . $user->id);
 	}
 
 	private function _prepare_form_datas($user) {
-		$subdistricts              = apcu_fetch('subdistricts');
-		$villages                  = apcu_fetch('villages');
-		$this->view->menu          = $this->_menu('Members');
-		$this->view->roles         = Role::find([
+		$subdistricts                 = apcu_fetch('subdistricts');
+		$villages                     = apcu_fetch('villages');
+		$this->view->menu             = $this->_menu('Members');
+		$this->view->roles            = Role::find([
 			'id > ' . Role::SUPER_ADMIN,
 			'order' => 'name',
 		]);
-		$this->view->user          = $user;
-		$this->view->status        = User::STATUS;
-		$this->view->genders       = User::GENDERS;
-		$this->view->memberships   = User::MEMBERSHIPS;
-		$this->view->subdistricts  = $subdistricts;
-		$this->view->villages      = $villages[$user->subdistrict_id ?? $subdistricts[0]->id];
-		$this->view->villages_json = json_encode($villages, JSON_NUMERIC_CHECK);
-		$this->view->business_days = User::BUSINESS_DAYS;
+		$this->view->user             = $user;
+		$this->view->status           = User::STATUS;
+		$this->view->genders          = User::GENDERS;
+		$this->view->memberships      = User::MEMBERSHIPS;
+		$this->view->subdistricts     = $subdistricts;
+		$this->view->villages         = $villages;
+		$this->view->current_villages = $villages[$user->subdistrict_id ?? $subdistricts[0]->id];
+		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
+		$this->view->business_days    = User::BUSINESS_DAYS;
+		$service_areas                = [];
+		foreach ($user->service_areas as $service_area) {
+			$service_areas[] = $service_area->village_id;
+		}
+		$this->view->service_areas    = $service_areas;
 	}
 
 	private function _set_model_attributes(&$user) {
+		$existing_service_areas = [];
+		$new_service_areas      = [];
+		$service_areas          = $this->request->getPost('service_areas');
 		$user->role = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
 		$user->setName($this->request->getPost('name'));
 		$user->setEmail($this->request->getPost('email'));
@@ -324,5 +327,18 @@ class UsersController extends BaseController {
 		$user->setBusinessDays($this->request->getPost('business_days'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
+		if ($service_areas) {
+			foreach (Village::find(['id IN ({ids:array})', 'bind' => ['ids' => $service_areas]]) as $village) {
+				$service_area = $user->getRelated('service_areas', ['conditions' => 'village_id = :village_id:', 'bind' => ['village_id' => $village->id]])->getFirst();
+				if (!$service_area) {
+					$service_area          = new ServiceArea;
+					$service_area->village = $village;
+				}
+				$new_service_areas[$village->id] = $service_area;
+				$existing_service_areas[]        = $village->id;
+			}
+		}
+		$user->service_areas = $new_service_areas;
+		return $existing_service_areas;
 	}
 }

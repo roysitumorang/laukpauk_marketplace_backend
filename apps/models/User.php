@@ -404,6 +404,26 @@ class User extends BaseModel {
 		$this->save();
 	}
 
+	function activate() {
+		return $this->update([
+			'status'           => array_search('ACTIVE', static::STATUS),
+			'activation_token' => null,
+			'activated_at'     => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
+		]);
+	}
+
+	function suspend() {
+		return $this->update([
+			'status' => array_search('SUSPENDED', static::STATUS),
+		]);
+	}
+
+	function reactivate() {
+		return $this->update([
+			'status' => array_search('ACTIVE', static::STATUS),
+		]);
+	}
+
 	private function _newAvatarIsValid() {
 		return $this->new_avatar['tmp_name'] && !$this->new_avatar['error'] && $this->new_avatar['size'];
 	}

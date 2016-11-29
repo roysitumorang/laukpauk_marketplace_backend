@@ -103,7 +103,7 @@
 			<td>
 				Kelurahan<br>
 				<select name="village_id" id="village_id">
-				{% for village in villages %}
+				{% for village in current_villages %}
 					<option value="{{ village.id }}"{% if user.village_id == village.id %} selected{% endif %}>{{ village.name }}</option>
 				{% endfor %}
 				</select>
@@ -121,6 +121,16 @@
 			<td>
 				Jam Operasional (* untuk merchant):<br>
 				<input type="text" name="business_opening_hour" value="{{ user.business_opening_hour }}" class="form form-control form-20 text-center" size="5"> - <input type="text" name="business_closing_hour" value="{{ user.business_closing_hour }}" class="form form-control form-20 text-center" size="5">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Area Operasional (* untuk merchant):<br>
+				{% for subdistrict in subdistricts %}
+					{% for village in villages[subdistrict.id] %}
+					<input type="checkbox" name="service_areas[]" value="{{ village.id }}"{% if in_array(village.id, service_areas) %} checked{% endif %}> {{ subdistrict.name }} &raquo; {{ village.name }}&nbsp;&nbsp;
+					{% endfor %}
+				{% endfor %}
 			</td>
 		</tr>
 		{% if user.id %}
