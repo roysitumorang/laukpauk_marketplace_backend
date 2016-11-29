@@ -22,6 +22,7 @@ class Village extends BaseModel {
 			'alias'    => 'subdistrict',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\ServiceArea', 'village_id', ['alias' => 'service_areas']);
+		$this->hasMany('id', 'Application\Models\User', 'village_id', ['alias' => 'users']);
+		$this->hasManyToMany('id', 'Application\Models\ServiceArea', 'village_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
 	}
 }

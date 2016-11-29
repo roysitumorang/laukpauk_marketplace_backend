@@ -148,7 +148,6 @@ class UsersController extends BaseController {
 		$user->reward          = 0;
 		$user->buy_point       = 0;
 		$user->affiliate_point = 0;
-		$user->subdistrict_id  = null;
 		$user->role            = Role::findFirst(Role::BUYER);
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($user);
@@ -160,7 +159,6 @@ class UsersController extends BaseController {
 			foreach ($user->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
-			$user->subdistrict_id = $this->request->getPost('subdistrict_id', 'int');
 		}
 		$this->_prepare_form_datas($user);
 	}
@@ -178,11 +176,6 @@ class UsersController extends BaseController {
 		if (!$user) {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->response->redirect('/admin/users');
-		}
-		$user->subdistrict_id = null;
-		if ($user->village_id) {
-			$village              = Village::findFirst($user->village_id);
-			$user->subdistrict_id = $village->subdistrict->id;
 		}
 		if ($this->request->isPost()) {
 			if ($this->dispatcher->hasParam('delete_avatar')) {
@@ -289,7 +282,7 @@ class UsersController extends BaseController {
 		$this->view->memberships      = User::MEMBERSHIPS;
 		$this->view->subdistricts     = $subdistricts;
 		$this->view->villages         = $villages;
-		$this->view->current_villages = $villages[$user->subdistrict_id ?? $subdistricts[0]->id];
+		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
 		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
 		$this->view->business_days    = User::BUSINESS_DAYS;
 		$service_areas                = [];
@@ -303,13 +296,16 @@ class UsersController extends BaseController {
 		$existing_service_areas = [];
 		$new_service_areas      = [];
 		$service_areas          = $this->request->getPost('service_areas');
-		$user->role = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
+		$user->role             = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
+		$village_id             = $this->request->getPost('village_id', 'int');
+		if ($village_id) {
+			$user->village = Village::findFirst($village_id);
+		}
 		$user->setName($this->request->getPost('name'));
 		$user->setEmail($this->request->getPost('email'));
 		$user->setNewPassword($this->request->getPost('new_password'));
 		$user->setNewPasswordConfirmation($this->request->getPost('new_password_confirmation'));
 		$user->setAddress($this->request->getPost('address'));
-		$user->setVillageId($this->request->getPost('village_id'));
 		$user->setPhone($this->request->getPost('phone'));
 		$user->setMobile($this->request->getPost('mobile'));
 		$user->setPremium($this->request->getPost('premium'));

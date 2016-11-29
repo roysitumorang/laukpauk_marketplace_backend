@@ -94,7 +94,7 @@
 				Kecamatan<br>
 				<select name="subdistrict_id" id="subdistrict_id">
 				{% for subdistrict in subdistricts %}
-					<option value="{{ subdistrict.id }}"{% if user.subdistrict_id == subdistrict.id %} selected{% endif %}>{{ subdistrict.name }}</option>
+					<option value="{{ subdistrict.id }}"{% if user.village.subdistrict.id == subdistrict.id %} selected{% endif %}>{{ subdistrict.name }}</option>
 				{% endfor %}
 				</select>
 			</td>
@@ -104,7 +104,7 @@
 				Kelurahan<br>
 				<select name="village_id" id="village_id">
 				{% for village in current_villages %}
-					<option value="{{ village.id }}"{% if user.village_id == village.id %} selected{% endif %}>{{ village.name }}</option>
+					<option value="{{ village.id }}"{% if user.village.id == village.id %} selected{% endif %}>{{ village.name }}</option>
 				{% endfor %}
 				</select>
 			</td>

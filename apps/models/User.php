@@ -88,6 +88,10 @@ class User extends BaseModel {
 			'alias'    => 'role',
 			'reusable' => true,
 		]);
+		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
+			'alias'    => 'village',
+			'reusable' => true,
+		]);
 		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', ['alias' => 'login_history']);
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyer_orders']);
 		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchant_orders']);
@@ -119,10 +123,6 @@ class User extends BaseModel {
 		$this->address = $this->_filter->sanitize($address, ['string', 'trim']);
 	}
 
-	function setVillageId($village_id) {
-		$this->village_id = $this->_filter->sanitize($village_id, 'int');
-	}
-
 	function setPhone($phone) {
 		$this->phone = $this->_filter->sanitize($phone, 'int');
 	}
@@ -152,11 +152,11 @@ class User extends BaseModel {
 	}
 
 	function setActivationToken($activation_token) {
-		$this->activation_token = $this->_filter->sanitize($activation_token, 'alphanum');
+		$this->activation_token = $activation_token;
 	}
 
 	function setPasswordResetToken($password_reset_token) {
-		$this->password_reset_token = $this->_filter->sanitize($password_reset_token, 'alphanum');
+		$this->password_reset_token = $password_reset_token;
 	}
 
 	function setLastSeen($last_seen) {
@@ -313,7 +313,6 @@ class User extends BaseModel {
 
 	function beforeSave() {
 		$this->address                = $this->address ?: null;
-		$this->village_id             = $this->village_id ?: null;
 		$this->mobile                 = $this->mobile ?: null;
 		$this->affiliate_link         = $this->affiliate_link ?: null;
 		$this->activated_at           = $this->activated_at ?: null;
