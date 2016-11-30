@@ -63,17 +63,18 @@
 									</thead>
 									<tbody>
 									{% for service_area in service_areas %}
-									<tr id="{{ service_area.id }}">
-										<td>{{ service_area.rank }}</td>
-										<td>{{ service_area.subdistrict }}</td>
-										<td>{{ service_area.village }}</td>
-										<td><a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ service_area.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a></td>
-									</tr>
+										<tr>
+											<td>{{ service_area.rank }}</td>
+											<td>{{ service_area.subdistrict }}</td>
+											<td>{{ service_area.village }}</td>
+											<td><a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ service_area.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a></td>
+										</tr>
 									{% elsefor %}
-									<tr>
-										<td colspan="4"><i>Belum ada area operasional</i></td>
-									</tr>
+										<tr>
+											<td colspan="4"><i>Belum ada area operasional</i></td>
+										</tr>
 									{% endfor %}
+									</tbody>
 								</table>
 							</form>
 						</div>
@@ -87,7 +88,7 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	var villages = {{ villages_json }}, subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id');
+	var villages = {{ villages_json }}, subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id'), items = document.querySelectorAll('.delete');
 	subdistrict.onchange = function() {
 		var current_villages = villages[this.value], new_options = '';
 		for (var item in current_villages) {
@@ -95,14 +96,16 @@
 		}
 		village.innerHTML = new_options;
 	}
-	document.querySelector('.delete').onclick = function() {
-		if (!confirm('Anda yakin menghapus area operasional ini ?')) {
-			return !1
+	for (var i = items.length; i--; ) {
+		items[i].onclick = function() {
+			if (!confirm('Anda yakin menghapus data ini ?')) {
+				return !1
+			}
+			var form = document.createElement('form');
+			form.method = 'POST',
+			form.action = '/admin/service_areas/delete/' + this.dataset.id + '/user_id:' + this.dataset.userId,
+			document.body.appendChild(form),
+			form.submit()
 		}
-		var form = document.createElement('form');
-		form.method = 'POST',
-		form.action = '/admin/service_areas/delete/' + this.dataset.id + '/user_id:' + this.dataset.userId,
-		document.body.appendChild(form),
-		form.submit()
 	}
 </script>
