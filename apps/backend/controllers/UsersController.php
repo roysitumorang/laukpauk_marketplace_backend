@@ -167,7 +167,7 @@ class UsersController extends BaseController {
 
 	function updateAction($id) {
 		$user = User::findFirst([
-			'conditions' => 'id = ?1 AND status = ?2',
+			'id = ?1 AND status = ?2',
 			'bind'       => [
 				1 => $id,
 				2 => array_search('ACTIVE', User::STATUS),
@@ -182,11 +182,8 @@ class UsersController extends BaseController {
 				$user->deleteAvatar();
 				return $this->response->redirect("/admin/users/update/{$user->id}");
 			}
-			$existing_service_areas = $this->_set_model_attributes($user);
+			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->update()) {
-				$user->getRelated('service_areas')->delete(function($service_areas) use($existing_service_areas) {
-					return !in_array($service_areas->village_id, $existing_service_areas);
-				});
 				$this->flashSession->success('Update member berhasil.');
 				return $this->response->redirect('/admin/users');
 			}
@@ -281,23 +278,14 @@ class UsersController extends BaseController {
 		$this->view->genders          = User::GENDERS;
 		$this->view->memberships      = User::MEMBERSHIPS;
 		$this->view->subdistricts     = $subdistricts;
-		$this->view->villages         = $villages;
 		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
 		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
 		$this->view->business_days    = User::BUSINESS_DAYS;
-		$service_areas                = [];
-		foreach ($user->service_areas as $service_area) {
-			$service_areas[] = $service_area->village_id;
-		}
-		$this->view->service_areas    = $service_areas;
 	}
 
 	private function _set_model_attributes(&$user) {
-		$existing_service_areas = [];
-		$new_service_areas      = [];
-		$service_areas          = $this->request->getPost('service_areas');
-		$user->role             = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
-		$village_id             = $this->request->getPost('village_id', 'int');
+		$user->role = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
+		$village_id = $this->request->getPost('village_id', 'int');
 		if ($village_id) {
 			$user->village = Village::findFirst($village_id);
 		}
@@ -323,18 +311,5 @@ class UsersController extends BaseController {
 		$user->setBusinessDays($this->request->getPost('business_days'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
-		if ($service_areas) {
-			foreach (Village::find(['id IN ({ids:array})', 'bind' => ['ids' => $service_areas]]) as $village) {
-				$service_area = $user->getRelated('service_areas', ['conditions' => 'village_id = :village_id:', 'bind' => ['village_id' => $village->id]])->getFirst();
-				if (!$service_area) {
-					$service_area          = new ServiceArea;
-					$service_area->village = $village;
-				}
-				$new_service_areas[$village->id] = $service_area;
-				$existing_service_areas[]        = $village->id;
-			}
-		}
-		$user->service_areas = $new_service_areas;
-		return $existing_service_areas;
 	}
 }
