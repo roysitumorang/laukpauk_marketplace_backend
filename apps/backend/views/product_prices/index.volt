@@ -123,9 +123,17 @@
 		for (var item in current_products) {
 			new_options += '<option value="' + current_products[item].id + '">' + current_products[item].name + '</option>';
 		}
-		product.innerHTML = new_options;
-		unit_of_measure.innerText = current_products[0].unit_of_measure;
-	}
+		product.innerHTML = new_options,
+		unit_of_measure.innerText = current_products[0].unit_of_measure,
+		product.onchange = function() {
+			for (var item in current_products) {
+				if (current_products[item].id == product.value) {
+					unit_of_measure.innerText = current_products[item].unit_of_measure;
+					break;
+				}
+			}
+		}
+	};
 	for (var i = items.length; i--; ) {
 		items[i].onclick = function() {
 			if (!confirm('Anda yakin menghapus data ini ?')) {
