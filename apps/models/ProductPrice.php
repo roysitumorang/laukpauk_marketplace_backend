@@ -81,12 +81,4 @@ class ProductPrice extends BaseModel {
 		]));
 		return $this->validate($validator);
 	}
-
-	function publish() {
-		return $this->update(['published' => 1]);
-	}
-
-	function unpublish() {
-		return $this->update(['published' => 0]);
-	}
 }

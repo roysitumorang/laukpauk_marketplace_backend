@@ -35,7 +35,7 @@ class ProductPricesController extends BaseController {
 			$categories[]            = $category;
 			$products[$category->id] = $category_products;
 		}
-		$result = $this->db->query("SELECT a.id, a.product_id, b.name AS product, c.name AS category, a.value, a.unit_size, b.unit_of_measure FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
+		$result = $this->db->query("SELECT a.id, a.product_id, b.name AS product, c.name AS category, a.value, a.unit_size, b.unit_of_measure, a.published FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		$i      = 0;
 		while ($price = $result->fetch()) {
@@ -71,6 +71,23 @@ class ProductPricesController extends BaseController {
 				$price->create();
 				$this->flashSession->success('Penambahan produk berhasil');
 			}
+		} catch (Exception $e) {
+			$this->flashSession->error($e->getMessage());
+		}
+		return $this->response->redirect("/admin/product_prices/index/user_id:{$this->_user->id}");
+	}
+
+	function updateAction($id) {
+		try {
+			if (!$this->request->isPost()) {
+				throw new Exception('Request tidak valid');
+			}
+			$price = $this->_user->getRelated('product_prices', ['id = :id:', 'bind' => ['id' => $id]])->getFirst();
+			if (!$price) {
+				throw new Exception('Data tidak ditemukan');
+			}
+			$price->writeAttribute('published', $price->published ? 0 : 1);
+			$price->update();
 		} catch (Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		}

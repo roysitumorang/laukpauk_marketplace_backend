@@ -96,7 +96,10 @@
 											<td>{{ price.category }}</td>
 											<td>{{ price.product }}</td>
 											<td>Rp. {{ number_format(price.value) }} @ {{ price.unit_size }} {{ price.unit_of_measure }}</td>
-											<td><a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a></td>
+											<td>
+												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="publish">{% if !price.published %}<font color="#FF0000">{% endif %}<i class="fa fa-eye fa-2x">{% if !price.published %}</font>{% endif %}</i></a>
+												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+											</td>
 										</tr>
 									{% elsefor %}
 										<tr>
@@ -117,7 +120,7 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	var products = {{ products_json }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), unit_of_measure = document.getElementById('unit_of_measure'), items = document.querySelectorAll('.delete');
+	var products = {{ products_json }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), unit_of_measure = document.getElementById('unit_of_measure');
 	category.onchange = function() {
 		var current_products = products[this.value], new_options = '';
 		for (var item in current_products) {
@@ -134,7 +137,7 @@
 			}
 		}
 	};
-	for (var i = items.length; i--; ) {
+	for (var items = document.querySelectorAll('.delete'), i = items.length; i--; ) {
 		items[i].onclick = function() {
 			if (!confirm('Anda yakin menghapus data ini ?')) {
 				return !1
@@ -142,6 +145,15 @@
 			var form = document.createElement('form');
 			form.method = 'POST',
 			form.action = '/admin/product_prices/delete/' + this.dataset.id + '/user_id:' + this.dataset.userId,
+			document.body.appendChild(form),
+			form.submit()
+		}
+	}
+	for (var items = document.querySelectorAll('.publish'), i = items.length; i--; ) {
+		items[i].onclick = function() {
+			var form = document.createElement('form');
+			form.method = 'POST',
+			form.action = '/admin/product_prices/update/' + this.dataset.id + '/user_id:' + this.dataset.userId,
 			document.body.appendChild(form),
 			form.submit()
 		}
