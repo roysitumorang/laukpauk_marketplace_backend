@@ -148,7 +148,6 @@ class UsersController extends BaseController {
 		$user->reward          = 0;
 		$user->buy_point       = 0;
 		$user->affiliate_point = 0;
-		$user->role            = Role::findFirst(Role::BUYER);
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->create()) {
@@ -284,7 +283,9 @@ class UsersController extends BaseController {
 	}
 
 	private function _set_model_attributes(&$user) {
-		$user->role = Role::findFirst($this->request->getPost('role_id', 'int') ?: Role::BUYER);
+		$role = Role::findFirst($this->request->getPost('role_id', 'int'));
+		$role || $role = Role::findFirst(Role::BUYER);
+		$user->role = $role;
 		$village_id = $this->request->getPost('village_id', 'int');
 		if ($village_id) {
 			$user->village = Village::findFirst($village_id);
