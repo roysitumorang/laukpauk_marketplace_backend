@@ -3,6 +3,8 @@
 namespace Application\Api\Controllers;
 
 use Application\Models\ProductCategory;
+use Application\Models\Role;
+use Application\Models\User;
 use Phalcon\Db;
 
 class SettingsController extends BaseController {
@@ -51,6 +53,15 @@ class SettingsController extends BaseController {
 		}
 		$this->_response['data']['subdistricts'] = apcu_fetch('subdistricts');
 		$this->_response['data']['villages']     = apcu_fetch('villages');
+		if ($this->_current_user) {
+			$this->_response['data']['merchants'] = [];
+			$result = $this->db->query("SELECT a.id, a.name, a.company FROM users a JOIN service_areas b ON a.id = b.user_id ORDER BY a.name WHERE b.village_id = {$this->_current_user->village_id}");
+			$result->setFetchMode(Db::FETCH_OBJ);
+			$i = 0;
+			while ($merchant = $result->fetch()) {
+				$this->response['data']['merchants'][] = $merchants;
+			}
+		}
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
