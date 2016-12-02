@@ -52,7 +52,6 @@
 												{% endfor %}
 											</select>
 										</td>
-										<td></td>
 									</tr>
 									<tr>
 										<td class="text-right">
@@ -72,6 +71,15 @@
 											</select>&nbsp;
 											<span id="stock_unit">{{ current_products[0].stock_unit  }}</span>
 										</td>
+									</tr>
+									<tr>
+										<td class="text-right">
+											<b>Jam Order Maksimal :</b>
+										</td>
+										<td>
+											<input type="text" name="order_closing_hour" class="form form-control form-30 text-center" size="5">
+										</td>
+										<td class="text-right"></td>
 										<td>
 											<button type="submit" class="btn btn-info">TAMBAH</button>
 										</td>
@@ -86,6 +94,7 @@
 											<th><b>Kategori</b></th>
 											<th><b>Produk</b></th>
 											<th><b>Harga</b></th>
+											<th><b>Jam Order Maksimal</b></th>
 											<th><b>#</b></th>
 										</tr>
 									</thead>
@@ -96,6 +105,7 @@
 											<td>{{ price.category }}</td>
 											<td>{{ price.product }}</td>
 											<td>Rp. {{ number_format(price.value) }} @ {{ price.unit_size }} {{ price.stock_unit }}</td>
+											<td class="text-center">{{ price.order_closing_hour|default('-') }}</td>
 											<td>
 												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="publish">{% if !price.published %}<font color="#FF0000">{% endif %}<i class="fa fa-eye fa-2x">{% if !price.published %}</font>{% endif %}</i></a>
 												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
@@ -103,7 +113,7 @@
 										</tr>
 									{% elsefor %}
 										<tr>
-											<td colspan="5"><i>Belum ada produk</i></td>
+											<td colspan="6"><i>Belum ada produk</i></td>
 										</tr>
 									{% endfor %}
 									</tbody>

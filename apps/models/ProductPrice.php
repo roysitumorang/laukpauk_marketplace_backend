@@ -15,6 +15,7 @@ class ProductPrice extends BaseModel {
 	public $value;
 	public $unit_size;
 	public $published;
+	public $order_closing_hour;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -55,6 +56,12 @@ class ProductPrice extends BaseModel {
 
 	function setUnitSize($unit_size) {
 		$this->unit_size = $this->_filter->sanitize($unit_size, 'float') ?: 1;
+	}
+
+	function setOrderClosingHour($order_closing_hour) {
+		if ($order_closing_hour) {
+			$this->order_closing_hour = $order_closing_hour;
+		}
 	}
 
 	function beforeValidation() {
