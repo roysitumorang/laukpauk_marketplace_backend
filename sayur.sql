@@ -1262,7 +1262,7 @@ CREATE TABLE `order_items` (
   `name` varchar(150) NOT NULL,
   `unit_price` int(11) NOT NULL,
   `unit_size` float NOT NULL,
-  `unit_of_measure` varchar(10) NOT NULL,
+  `stock_unit` varchar(10) NOT NULL,
   `quantity` int(11) NOT NULL,
   `buy_point` float NOT NULL,
   `affiliate_point` float NOT NULL,
@@ -1591,7 +1591,7 @@ CREATE TABLE `product_dimensions` (
   `product_id` bigint(20) NOT NULL,
   `parameter` varchar(20) NOT NULL,
   `size` decimal(10,0) NOT NULL,
-  `unit_of_measure` varchar(10) NOT NULL,
+  `stock_unit` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1696,6 +1696,7 @@ CREATE TABLE `product_prices` (
   `value` int(11) NOT NULL,
   `unit_size` float NOT NULL,
   `published` tinyint(1) NOT NULL,
+  `order_closing_hour` char(5) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1768,7 +1769,7 @@ CREATE TABLE `products` (
   `brand_id` bigint(20) DEFAULT NULL,
   `buy_point` decimal(10,0) NOT NULL,
   `affiliate_point` decimal(10,0) NOT NULL,
-  `unit_of_measure` varchar(10) NOT NULL,
+  `stock_unit` varchar(10) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1789,7 +1790,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 
-insert  into `products`(`id`,`product_category_id`,`code`,`name`,`permalink`,`description`,`price`,`weight`,`published`,`status`,`meta_title`,`meta_desc`,`meta_keyword`,`stock`,`brand_id`,`buy_point`,`affiliate_point`,`unit_of_measure`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+insert  into `products`(`id`,`product_category_id`,`code`,`name`,`permalink`,`description`,`price`,`weight`,`published`,`status`,`meta_title`,`meta_desc`,`meta_keyword`,`stock`,`brand_id`,`buy_point`,`affiliate_point`,`stock_unit`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
 (1,1,NULL,'Bayam','bayam','',0,0,1,0,'Bayam','','Bayam',0,NULL,0,0,'',1,'2016-11-11 14:46:43',1,'2016-11-11 16:58:09'),
 (2,1,NULL,'Kangkung','kangkung','',0,0,1,0,'Kangkung','','Kangkung',0,NULL,0,0,'',1,'2016-11-11 14:48:28',1,'2016-11-11 14:48:31'),
 (3,1,NULL,'Meranti / Leyuh','meranti-leyuh','',0,0,1,0,'Meranti / Leyuh','','Meranti / Leyuh',0,NULL,0,0,'',1,'2016-11-11 14:48:50',1,'2016-11-11 17:10:13'),
