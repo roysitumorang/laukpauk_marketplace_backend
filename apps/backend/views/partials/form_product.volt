@@ -14,7 +14,7 @@
 			<td bgcolor="#CCFFCC">
 				<b><font color="#000099">Satuan Produk</font></b>
 				<br>
-				<input type="text" name="unit_of_measure" value="{{ product.unit_of_measure }}" placeholder="Satuan Produk" size="30" class="form form-control">
+				<input type="text" name="stock_unit" value="{{ product.stock_unit }}" placeholder="Satuan Produk" size="30" class="form form-control">
 			</td>
 			<td bgcolor="#99CC33">
 				<b><font color="#000099">Stok Produk</font></b>
@@ -159,9 +159,9 @@
 					<td><input type="text" name="product_dimensions[{{ i }}][parameter]" value="{{ product_dimensions[i].parameter }}" class="form form-control" size="30"></td>
 					<td><input type="text" name="product_dimensions[{{ i }}][size]" value="{{ product_dimensions[i].size }}" class="form form-control" size="20"></td>
 					<td>
-						<select name="product_dimensions[{{ i }}][unit_of_measure]" class="form form-control">
-						{% for stok_keeping_unit in unit_of_measures %}
-							<option value="{{ unit_of_measure }}"{% if unit_of_measure == product_dimensions[i].unit_of_measure %} selected{% endif %}>{{ unit_of_measure }}</option>
+						<select name="product_dimensions[{{ i }}][stock_unit]" class="form form-control">
+						{% for stock_unit in stock_units %}
+							<option value="{{ stock_unit }}"{% if stock_unit == product_dimensions[i].stock_unit %} selected{% endif %}>{{ stock_unit }}</option>
 						{% endfor %}
 						</select>
 					</td>

@@ -186,7 +186,7 @@ class ProductsController extends BaseController {
 		$product->setMetaTitle($this->request->getPost('meta_title'));
 		$product->setMetaDesc($this->request->getPost('meta_desc'));
 		$product->setMetaKeyword($this->request->getPost('meta_keyword'));
-		$product->setUnitOfMeasure($this->request->getPost('unit_of_measure'));
+		$product->setStockUnit($this->request->getPost('stock_unit'));
 		$pictures = [];
 		for ($i = 0; $i < 5; $i++) {
 			$picture_id = filter_var($_POST['product_pictures'][$i]['id'], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);

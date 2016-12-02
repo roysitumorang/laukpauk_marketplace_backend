@@ -29,13 +29,13 @@ class ProductPricesController extends BaseController {
 		$prices     = [];
 		foreach (ProductCategory::find(['published = 1', 'order' => 'name']) as $category) {
 			$category_products = [];
-			foreach ($category->getProducts(['published = 1', 'columns' => 'id, name, unit_of_measure', 'order' => 'name']) as $product) {
+			foreach ($category->getProducts(['published = 1', 'columns' => 'id, name, stock_unit', 'order' => 'name']) as $product) {
 				$category_products[] = $product;
 			}
 			$categories[]            = $category;
 			$products[$category->id] = $category_products;
 		}
-		$result = $this->db->query("SELECT a.id, a.product_id, b.name AS product, c.name AS category, a.value, a.unit_size, b.unit_of_measure, a.published FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
+		$result = $this->db->query("SELECT a.id, a.product_id, b.name AS product, c.name AS category, a.value, a.unit_size, b.stock_unit, a.published FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		$i      = 0;
 		while ($price = $result->fetch()) {

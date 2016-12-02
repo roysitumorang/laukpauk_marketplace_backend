@@ -13,7 +13,7 @@ class OrderItem extends BaseModel {
 	public $name;
 	public $unit_price;
 	public $unit_size;
-	public $unit_of_measure;
+	public $stock_unit;
 	public $quantity;
 	public $buy_point;
 	public $affiliate_point;
@@ -41,13 +41,13 @@ class OrderItem extends BaseModel {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'unit_price', 'unit_size', 'unit_of_measure', 'quantity'], new PresenceOf([
+		$validator->add(['name', 'unit_price', 'unit_size', 'stock_unit', 'quantity'], new PresenceOf([
 			'message' => [
-				'name'            => 'nama produk harus diisi',
-				'unit_price'      => 'harga satuan harus diisi',
-				'unit_size'       => 'besar satuan harus diisi',
-				'unit_of_measure' => 'satuan harus diisi',
-				'quantity'        => 'jumlah harus diisi',
+				'name'       => 'nama produk harus diisi',
+				'unit_price' => 'harga satuan harus diisi',
+				'unit_size'  => 'besar satuan harus diisi',
+				'stock_unit' => 'satuan harus diisi',
+				'quantity'   => 'jumlah harus diisi',
 			],
 		]));
 		$validator->add(['unit_price', 'unit_size', 'quantity'], new Numericality([

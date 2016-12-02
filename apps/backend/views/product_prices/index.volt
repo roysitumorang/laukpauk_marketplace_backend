@@ -70,7 +70,7 @@
 												<option value="{{ size }}">{{ label }}</option>
 												{% endfor %}
 											</select>&nbsp;
-											<span id="unit_of_measure">{{ current_products[0].unit_of_measure  }}</span>
+											<span id="stock_unit">{{ current_products[0].stock_unit  }}</span>
 										</td>
 										<td>
 											<button type="submit" class="btn btn-info">TAMBAH</button>
@@ -95,7 +95,7 @@
 											<td>{{ price.rank }}</td>
 											<td>{{ price.category }}</td>
 											<td>{{ price.product }}</td>
-											<td>Rp. {{ number_format(price.value) }} @ {{ price.unit_size }} {{ price.unit_of_measure }}</td>
+											<td>Rp. {{ number_format(price.value) }} @ {{ price.unit_size }} {{ price.stock_unit }}</td>
 											<td>
 												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="publish">{% if !price.published %}<font color="#FF0000">{% endif %}<i class="fa fa-eye fa-2x">{% if !price.published %}</font>{% endif %}</i></a>
 												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
@@ -120,18 +120,18 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	var products = {{ products_json }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), unit_of_measure = document.getElementById('unit_of_measure');
+	var products = {{ products_json }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), stock_unit = document.getElementById('stock_unit');
 	category.onchange = function() {
 		var current_products = products[this.value], new_options = '';
 		for (var item in current_products) {
 			new_options += '<option value="' + current_products[item].id + '">' + current_products[item].name + '</option>';
 		}
 		product.innerHTML = new_options,
-		unit_of_measure.innerText = current_products[0].unit_of_measure,
+		stock_unit.innerText = current_products[0].stock_unit,
 		product.onchange = function() {
 			for (var item in current_products) {
 				if (current_products[item].id == product.value) {
-					unit_of_measure.innerText = current_products[item].unit_of_measure;
+					stock_unit.innerText = current_products[item].stock_unit;
 					break;
 				}
 			}

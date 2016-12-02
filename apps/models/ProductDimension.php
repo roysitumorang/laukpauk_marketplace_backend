@@ -12,9 +12,9 @@ class ProductDimension extends BaseModel {
 	public $product_id;
 	public $parameter;
 	public $size;
-	public $unit_of_measure;
+	public $stock_unit;
 
-	const UNIT_OF_MEASURES = ['cm', 'mm', 'liter', 'cl'];
+	const STOCK_UNITS = ['cm', 'mm', 'liter', 'cl'];
 
 	function getSource() {
 		return 'product_dimensions';
@@ -41,8 +41,8 @@ class ProductDimension extends BaseModel {
 		$this->size = $size;
 	}
 
-	function setStockKeepingUnit(string $unit_of_measure = null) {
-		$this->unit_of_measure = $unit_of_measure ?? static::UNIT_OF_MEASURES[0];
+	function setStockUnit(string $stock_unit = null) {
+		$this->stock_unit = $stock_unit ?? static::STOCK_UNITS[0];
 	}
 
 	function validation() {
@@ -59,9 +59,9 @@ class ProductDimension extends BaseModel {
 		$validator->add('size', new Numericality([
 			'message' => 'ukuran dalam bentuk angka, desimal pake titik'
 		]));
-		$validator->add('unit_of_measure', new InclusionIn([
+		$validator->add('stock_unit', new InclusionIn([
 			'message' => 'satuan tidak valid',
-			'domain'  => static::UNIT_OF_MEASURES,
+			'domain'  => static::STOCK_UNITS,
 		]));
 		return $this->validate($validator);
 	}

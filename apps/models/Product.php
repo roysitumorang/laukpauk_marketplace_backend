@@ -27,7 +27,7 @@ class Product extends BaseModel {
 	public $brand_id;
 	public $buy_point;
 	public $affiliate_point;
-	public $unit_of_measure;
+	public $stock_unit;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -122,8 +122,8 @@ class Product extends BaseModel {
 		}
 	}
 
-	function setUnitOfMeasure($unit_of_measure) {
-		$this->unit_of_measure = $this->_filter->sanitize($unit_of_measure ?: $this->name, ['string', 'trim']);
+	function setStockUnit($stock_unit) {
+		$this->stock_unit = $this->_filter->sanitize($stock_unit ?: $this->name, ['string', 'trim']);
 	}
 
 	function beforeValidation() {
@@ -132,10 +132,10 @@ class Product extends BaseModel {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'unit_of_measure'], new PresenceOf([
+		$validator->add(['name', 'stock_unit'], new PresenceOf([
 			'message' => [
-				'name'            => 'nama harus diisi',
-				'unit_of_measure' => 'satuan harus diisi',
+				'name'       => 'nama harus diisi',
+				'stock_unit' => 'satuan harus diisi',
 			]
 		]));
 		if ($this->getSnapshotData()['name'] != $this->name) {
