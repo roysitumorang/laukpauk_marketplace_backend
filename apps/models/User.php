@@ -261,6 +261,9 @@ class User extends BaseModel {
 				'affiliate_point' => 'poin affiliasi harus diisi',
 			],
 		]));
+		$validator->add('phone', new Uniqueness([
+			'message' => 'no telepon sudah ada',
+		]));
 		if (!$this->id || $this->new_password || $this->new_password_confirmation) {
 			$validator->add(['new_password', 'new_password_confirmation'], new PresenceOf([
 				'message' => [
