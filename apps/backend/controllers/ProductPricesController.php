@@ -63,17 +63,12 @@ class ProductPricesController extends BaseController {
 				throw new Exception('Harga harus diisi dengan angka bulat');
 			}
 			if ($product_id && ($product = Product::findFirst(['published = 1 AND id = :id:', 'bind' => ['id' => $product_id]])) && !$this->_user->getRelated('product_prices', ['id = :id:', 'bind' => ['id' => $product->id]])->getFirst() && array_key_exists($unit_size, ProductPrice::SIZES)) {
-				$new_prices = [];
-				foreach ($this->_user->getRelated('product_prices') as $price) {
-					$new_prices[] = $price;
-				}
-				$price                       = new ProductPrice;
-				$price->product              = $product;
-				$price->value                = $value;
-				$price->unit_size            = $unit_size;
-				$new_prices[]                = $price;
-				$this->_user->product_prices = $new_prices;
-				$this->_user->save();
+				$price            = new ProductPrice;
+				$price->product   = $product;
+				$price->value     = $value;
+				$price->unit_size = $unit_size;
+				$price->user      = $this->_user;
+				$price->create();
 				$this->flashSession->success('Penambahan produk berhasil');
 			}
 		} catch (Exception $e) {
