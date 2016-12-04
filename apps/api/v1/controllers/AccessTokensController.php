@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Api\Controllers;
+namespace Application\Api\V1\Controllers;
 
 use Application\Models\AccessToken;
 

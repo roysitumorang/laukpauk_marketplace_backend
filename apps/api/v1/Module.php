@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Api;
+namespace Application\Api\V1;
 
 use Phalcon\Loader;
 use Phalcon\Mvc\View;
@@ -17,10 +17,10 @@ class Module implements ModuleDefinitionInterface {
 		$application = $di->getConfig()->application;
 		$loader      = new Loader;
 		$loader->registerNamespaces([
-			'Application\Api\Controllers' => APP_PATH . 'apps/api/controllers/',
-			'Application\Models'          => $application->modelsDir,
-			'Application\Plugins'         => $application->pluginsDir,
-			'Phalcon'                     => $application->libraryDir,
+			'Application\Api\V1\Controllers' => APP_PATH . 'apps/api/v1/controllers/',
+			'Application\Models'             => $application->modelsDir,
+			'Application\Plugins'            => $application->pluginsDir,
+			'Phalcon'                        => $application->libraryDir,
 		]);
 		$loader->register();
 	}
@@ -32,7 +32,7 @@ class Module implements ModuleDefinitionInterface {
 		// Registering a dispatcher
 		$di->set('dispatcher', function() {
 			$dispatcher = new Dispatcher;
-			$dispatcher->setDefaultNamespace('Application\Api\Controllers');
+			$dispatcher->setDefaultNamespace('Application\Api\V1\Controllers');
 			return $dispatcher;
 		});
 

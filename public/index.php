@@ -44,9 +44,9 @@ try {
 			'className' => 'Application\Frontend\Module',
 			'path'      => APP_PATH . 'apps/frontend/Module.php',
 		],
-		'api' => [
-			'className' => 'Application\Api\Module',
-			'path'      => APP_PATH . 'apps/api/Module.php',
+		'v1' => [
+			'className' => 'Application\Api\V1\Module',
+			'path'      => APP_PATH . 'apps/api/v1/Module.php',
 		],
 		'backend' => [
 			'className' => 'Application\Backend\Module',
@@ -59,5 +59,5 @@ try {
 
 	$response->send();
 } catch (Throwable $e) {
-	echo $e->getMessage();
+	echo $e->getMessage() . ' @file: ' . $e->getFile() . ', line: ' . $e->getLine();
 }

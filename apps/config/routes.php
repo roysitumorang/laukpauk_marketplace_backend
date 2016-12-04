@@ -24,20 +24,20 @@ $di->set('router', function() {
 		'params'     => 3
 	]);
 
-	$router->add('/api', [
-		'module'     => 'api',
+	$router->add('/api/v1', [
+		'module'     => 'v1',
 		'controller' => 'home',
 		'action'     => 'index'
 	]);
 
-	$router->add('/api/:controller', [
-		'module'     => 'api',
+	$router->add('/api/v1/:controller', [
+		'module'     => 'v1',
 		'controller' => 1,
 		'action'     => 'index'
 	]);
 
-	$router->add('/api/:controller/:action/:params', [
-		'module'     => 'api',
+	$router->add('/api/v1/:controller/:action/:params', [
+		'module'     => 'v1',
 		'controller' => 1,
 		'action'     => 2,
 		'params'     => 3

@@ -1,10 +1,8 @@
 <?php
 
-namespace Application\Api\Controllers;
+namespace Application\Api\V1\Controllers;
 
 use Application\Models\ProductCategory;
-use Application\Models\Role;
-use Application\Models\User;
 use Phalcon\Db;
 
 class SettingsController extends BaseController {
