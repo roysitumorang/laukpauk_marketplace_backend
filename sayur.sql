@@ -1339,7 +1339,7 @@ DROP TABLE IF EXISTS `page_categories`;
 CREATE TABLE `page_categories` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `show_new_page_menu` tinyint(1) NOT NULL,
+  `show_create_page_menu` tinyint(1) NOT NULL,
   `show_picture_icon` tinyint(1) NOT NULL,
   `show_content` tinyint(1) NOT NULL,
   `show_url` tinyint(1) NOT NULL,
