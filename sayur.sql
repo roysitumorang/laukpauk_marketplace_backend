@@ -1104,96 +1104,6 @@ LOCK TABLES `messages` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `news` */
-
-DROP TABLE IF EXISTS `news`;
-
-CREATE TABLE `news` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `news_category_id` bigint(20) NOT NULL,
-  `subject` varchar(200) NOT NULL,
-  `permalink` varchar(100) NOT NULL,
-  `custom_link` varchar(200) DEFAULT NULL,
-  `body` text,
-  `meta_title` varchar(100) DEFAULT NULL,
-  `meta_desc` varchar(200) DEFAULT NULL,
-  `meta_keyword` varchar(200) DEFAULT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `permalink` (`permalink`),
-  KEY `created_by` (`created_by`),
-  KEY `created_at` (`created_at`),
-  KEY `news_category_id` (`news_category_id`),
-  KEY `subject` (`subject`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `news` */
-
-LOCK TABLES `news` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `news_categories` */
-
-DROP TABLE IF EXISTS `news_categories`;
-
-CREATE TABLE `news_categories` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `permalink` varchar(100) NOT NULL,
-  `comment_status` tinyint(1) NOT NULL,
-  `moderation_status` tinyint(1) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `permalink` (`permalink`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `news_categories` */
-
-LOCK TABLES `news_categories` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `news_comments` */
-
-DROP TABLE IF EXISTS `news_comments`;
-
-CREATE TABLE `news_comments` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `news_id` bigint(20) NOT NULL,
-  `name` varchar(80) DEFAULT NULL,
-  `email` varchar(60) DEFAULT NULL,
-  `website` varchar(70) DEFAULT NULL,
-  `body` text NOT NULL,
-  `ip_address` varchar(41) NOT NULL,
-  `approved` tinyint(1) NOT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `news_id` (`news_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`),
-  KEY `approved` (`approved`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `news_comments` */
-
-LOCK TABLES `news_comments` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `notification_templates` */
 
 DROP TABLE IF EXISTS `notification_templates`;
@@ -1519,6 +1429,96 @@ CREATE TABLE `points` (
 /*Data for the table `points` */
 
 LOCK TABLES `points` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `post_categories` */
+
+DROP TABLE IF EXISTS `post_categories`;
+
+CREATE TABLE `post_categories` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `permalink` varchar(100) NOT NULL,
+  `allow_comments` tinyint(1) NOT NULL,
+  `comment_moderation` tinyint(1) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `permalink` (`permalink`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `post_categories` */
+
+LOCK TABLES `post_categories` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `post_comments` */
+
+DROP TABLE IF EXISTS `post_comments`;
+
+CREATE TABLE `post_comments` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `post_id` bigint(20) NOT NULL,
+  `name` varchar(80) DEFAULT NULL,
+  `email` varchar(60) DEFAULT NULL,
+  `website` varchar(70) DEFAULT NULL,
+  `body` text NOT NULL,
+  `ip_address` varchar(41) NOT NULL,
+  `approved` tinyint(1) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  KEY `approved` (`approved`),
+  KEY `post_id` (`post_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `post_comments` */
+
+LOCK TABLES `post_comments` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `posts` */
+
+DROP TABLE IF EXISTS `posts`;
+
+CREATE TABLE `posts` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `post_category_id` bigint(20) NOT NULL,
+  `subject` varchar(200) NOT NULL,
+  `permalink` varchar(100) NOT NULL,
+  `custom_link` varchar(200) DEFAULT NULL,
+  `body` text,
+  `meta_title` varchar(100) DEFAULT NULL,
+  `meta_desc` varchar(200) DEFAULT NULL,
+  `meta_keyword` varchar(200) DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permalink` (`permalink`),
+  KEY `created_by` (`created_by`),
+  KEY `created_at` (`created_at`),
+  KEY `subject` (`subject`),
+  KEY `updated_by` (`updated_by`),
+  KEY `post_category_id` (`post_category_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `posts` */
+
+LOCK TABLES `posts` WRITE;
 
 UNLOCK TABLES;
 
