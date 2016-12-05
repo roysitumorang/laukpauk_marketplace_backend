@@ -1339,12 +1339,12 @@ DROP TABLE IF EXISTS `page_categories`;
 CREATE TABLE `page_categories` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `show_create_page_menu` tinyint(1) NOT NULL,
-  `show_picture_icon` tinyint(1) NOT NULL,
-  `show_content` tinyint(1) NOT NULL,
-  `show_url` tinyint(1) NOT NULL,
-  `show_link_target` tinyint(1) NOT NULL,
-  `show_rich_editor` tinyint(1) NOT NULL,
+  `has_create_page_menu` tinyint(1) NOT NULL,
+  `has_picture_icon` tinyint(1) NOT NULL,
+  `has_content` tinyint(1) NOT NULL,
+  `has_url` tinyint(1) NOT NULL,
+  `has_link_target` tinyint(1) NOT NULL,
+  `has_rich_editor` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1367,12 +1367,15 @@ DROP TABLE IF EXISTS `pages`;
 
 CREATE TABLE `pages` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `page_category_id` bigint(20) NOT NULL,
   `parent_id` bigint(20) DEFAULT NULL,
   `name` varchar(200) NOT NULL,
   `permalink` varchar(100) NOT NULL,
   `url` varchar(100) DEFAULT NULL,
   `body` text,
   `url_target` varchar(6) NOT NULL,
+  `picture` char(36) DEFAULT NULL,
+  `thumbnails` text,
   `meta_title` varchar(100) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
@@ -1389,7 +1392,8 @@ CREATE TABLE `pages` (
   KEY `parent_id` (`parent_id`),
   KEY `position` (`position`),
   KEY `updated_by` (`updated_by`),
-  KEY `published` (`published`)
+  KEY `published` (`published`),
+  KEY `page_category_id` (`page_category_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `pages` */
