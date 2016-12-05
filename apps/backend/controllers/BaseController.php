@@ -75,7 +75,6 @@ class BaseController extends Controller {
 				'icon'      => 'copy',
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
-					['label' => 'Pages',        'link' => 'pages'],
 					['label' => 'Page Setting', 'link' => 'page_categories'],
 					['label' => 'Content',      'link' => 'contents'],
 					['label' => 'Banner',       'link' => 'banners'],

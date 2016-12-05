@@ -8,24 +8,23 @@ use Exception;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
 class PagesController extends BaseController {
-	function onConstruct() {
+	private $_page_category;
+	private $_parent;
+
+	function beforeExecuteRoute() {
 		$page_category_id = $this->dispatcher->getParam('page_category_id', 'int');
 		$parent_id        = $this->dispatcher->getParam('parent_id', 'int');
 		try {
 			if (!$page_category_id || !($this->_page_category = PageCategory::findFirst($page_category_id))) {
-				throw new Exception('Data tidak ditemukan');
+				throw new Exception('/admin/page_categories');
 			}
-		} catch (Exception $e) {
-			$this->flashSession->error($e->getMessage());
-			return $this->response->redirect('/admin/page_categories');
-		}
-		try {
 			if ($parent_id && !($this->_parent = $this->_page_category->getRelated('pages', ['conditions' => "id = {$parent_id}"])->getFirst())) {
-				throw new Exception('Data tidak ditemukan');
+				throw new Exception('/admin/pages/index/page_category_id:' . $this->_page_category->id);
 			}
 		} catch (Exception $e) {
-			$this->flashSession->error($e->getMessage());
-			return $this->response->redirect('/admin/pages/index/page_category_id:' . $this->_page_category->id);
+			$this->flashSession->error('Data tidak ditemukan');
+			$this->response->redirect($e->getMessage());
+			$this->response->sendHeaders();
 		}
 	}
 
