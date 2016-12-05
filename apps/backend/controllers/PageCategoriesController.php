@@ -30,7 +30,7 @@ class PageCategoriesController extends BaseController {
 			->leftJoin('Application\Models\Page', 'a.id = b.page_category_id', 'b')
 			->groupBy('a.id')
 			->orderBy('a.name');
-		$paginator  = new PaginatorQueryBuilder([
+		$paginator       = new PaginatorQueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
@@ -45,7 +45,7 @@ class PageCategoriesController extends BaseController {
 		}
 		$this->view->menu            = $this->_menu('Content');
 		$this->view->page_categories = $page_categories;
-		$this->view->page            = $paginator->getPaginate();
+		$this->view->page            = $page;
 		$this->view->pages           = $pages;
 	}
 
