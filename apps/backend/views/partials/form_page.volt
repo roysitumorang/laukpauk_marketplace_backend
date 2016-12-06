@@ -105,8 +105,10 @@
 		</tr>
 	</table>
 </form>
-{% if page.id and page.picture %}
 <script>
+$(function() {
+	$('.summernote').summernote()
+	{% if page.id and page.picture %}
 	document.querySelector('.delete-picture').onclick = function() {
 		if (!confirm('Anda yakin ingin menghapus gambar icon ini ?')) {
 			return !1
@@ -117,5 +119,6 @@
 		document.body.appendChild(form),
 		form.submit()
 	}
+	{% endif %}
+})
 </script>
-{% endif %}

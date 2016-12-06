@@ -18,6 +18,7 @@
 	<link rel="stylesheet" href="/backend/vendor/font-awesome/css/font-awesome.min.css">
 	<link rel="stylesheet" href="/backend/vendor/magnific-popup/magnific-popup.min.css">
 	<link rel="stylesheet" href="/backend/vendor/bootstrap-datepicker/css/bootstrap-datepicker3.min.css">
+	<link rel="stylesheet" href="/backend/vendor/summernote/summernote.css">
 
 	<!-- Theme CSS -->
 	<link rel="stylesheet" href="/backend/stylesheets/theme.min.css">
@@ -31,6 +32,7 @@
 	<!-- Head Libs -->
 	<script src="/backend/vendor/modernizr/modernizr-2.8.3.min.js"></script>
 	<script src="/backend/vendor/jquery/jquery.min.js"></script>
+	<script src="/backend/vendor/summernote/summernote.min.js"></script>
 	<!--
 	<script src="/backend/javascripts/loadinbox.php"></script>
 	-->

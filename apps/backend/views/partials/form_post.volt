@@ -82,8 +82,10 @@
 		</tr>
 	</table>
 </form>
-{% if post.id and post.picture %}
 <script>
+$(function() {
+	$('.summernote').summernote()
+	{% if post.id and post.picture %}
 	document.querySelector('.delete-picture').onclick = function() {
 		if (!confirm('Anda yakin mau menghapus gambar ini ?')) {
 			return !1
@@ -94,5 +96,6 @@
 		document.body.appendChild(form),
 		form.submit()
 	}
+	{% endif %}
+})
 </script>
-{% endif %}
