@@ -35,7 +35,6 @@
 						<td width="30%">
 							{% if page_category.has_picture_icon and page.picture %}
 							<a class="image-popup-no-margins" href="/assets/images/{{ page.picture }}"><img src="/assets/images/{{ page.thumbnail }}" border="0"></a>
-							<a href="javascript:void(0)" class="delete-picture" data-page-category-id="{{ page_category.id }}" data-id="{{ page.id }}" title="Hapus Gambar"><i class="fa fa-trash-o"></i></a>
 							{% else %}
 							<i class="fa fa-file fa-5x"></i>
 							{% endif %}
@@ -110,18 +109,6 @@
 			var form = document.createElement('form');
 			form.method = 'POST',
 			form.action = '/admin/pages/delete/' + this.dataset.id + '/page_category_id:' + this.dataset.pageCategoryId,
-			document.body.appendChild(form),
-			form.submit()
-		}
-	}
-	for (var items = document.querySelectorAll('.delete-picture'), i = items.length; i--; ) {
-		items[i].onclick = function() {
-			if (!confirm('Anda yakin ingin menghapus gambar icon ini ?')) {
-				return !1
-			}
-			var form = document.createElement('form');
-			form.method = 'POST',
-			form.action = '/admin/pages/update/' + this.dataset.id + '/page_category_id:' + this.dataset.pageCategoryId + '/delete_picture:1',
 			document.body.appendChild(form),
 			form.submit()
 		}

@@ -97,7 +97,7 @@ class PagesController extends BaseController {
 				return $this->response->redirect("/admin/pages/index/page_category_id:{$this->_page_category->id}" . ($page->parent ? '/parent_id:' . $page->parent->id : ''));
 			} else if ($this->dispatcher->hasParam('delete_picture')) {
 				$page->deletePicture();
-				return $this->response->redirect("/admin/pages/index/page_category_id:{$this->_page_category->id}" . ($page->parent ? '/parent_id:' . $page->parent->id : ''));
+				return $this->response->redirect("/admin/pages/update/{$page->id}/page_category_id:{$this->_page_category->id}" . ($page->parent ? '/parent_id:' . $page->parent->id : ''));
 			}
 			$this->_set_model_attributes($page);
 			if ($page->validation() && $page->update()) {

@@ -105,3 +105,17 @@
 		</tr>
 	</table>
 </form>
+{% if page.id and page.picture %}
+<script>
+	document.querySelector('.delete-picture').onclick = function() {
+		if (!confirm('Anda yakin ingin menghapus gambar icon ini ?')) {
+			return !1
+		}
+		var form = document.createElement('form');
+		form.method = 'POST',
+		form.action = '/admin/pages/update/' + this.dataset.id + '/page_category_id:' + this.dataset.pageCategoryId + '/delete_picture:1',
+		document.body.appendChild(form),
+		form.submit()
+	}
+</script>
+{% endif %}
