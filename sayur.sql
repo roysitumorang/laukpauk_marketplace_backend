@@ -1298,6 +1298,7 @@ CREATE TABLE `pages` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `permalink` (`permalink`),
+  UNIQUE KEY `picture` (`picture`),
   KEY `created_by` (`created_by`),
   KEY `parent_id` (`parent_id`),
   KEY `position` (`position`),
@@ -1442,6 +1443,7 @@ CREATE TABLE `post_categories` (
   `permalink` varchar(100) NOT NULL,
   `allow_comments` tinyint(1) NOT NULL,
   `comment_moderation` tinyint(1) NOT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1450,7 +1452,8 @@ CREATE TABLE `post_categories` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `permalink` (`permalink`),
   KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`)
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `post_categories` */
@@ -1500,20 +1503,25 @@ CREATE TABLE `posts` (
   `permalink` varchar(100) NOT NULL,
   `custom_link` varchar(200) DEFAULT NULL,
   `body` text,
+  `picture` char(36) DEFAULT NULL,
+  `thumbnails` text,
   `meta_title` varchar(100) DEFAULT NULL,
   `meta_desc` varchar(200) DEFAULT NULL,
   `meta_keyword` varchar(200) DEFAULT NULL,
+  `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `permalink` (`permalink`),
+  UNIQUE KEY `picture` (`picture`),
   KEY `created_by` (`created_by`),
   KEY `created_at` (`created_at`),
   KEY `subject` (`subject`),
   KEY `updated_by` (`updated_by`),
-  KEY `post_category_id` (`post_category_id`)
+  KEY `post_category_id` (`post_category_id`),
+  KEY `published` (`published`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `posts` */

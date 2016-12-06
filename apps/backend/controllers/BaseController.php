@@ -76,7 +76,7 @@ class BaseController extends Controller {
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
 					['label' => 'Page Setting', 'link' => 'page_categories'],
-					['label' => 'Content',      'link' => 'contents'],
+					['label' => 'Content',      'link' => 'post_categories'],
 					['label' => 'Banner',       'link' => 'banners'],
 					['label' => 'File Manager', 'link' => 'files'],
 				],
