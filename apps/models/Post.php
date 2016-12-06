@@ -86,11 +86,11 @@ class Post extends BaseModel {
 	}
 
 	function setMetaTitle($meta_title) {
-		$this->meta_title = $this->_filter->sanitize($meta_title ?: $this->name, ['string', 'trim']);
+		$this->meta_title = $this->_filter->sanitize($meta_title ?: $this->subject, ['string', 'trim']);
 	}
 
 	function setMetaKeyword($meta_keyword) {
-		$this->meta_keyword = $this->_filter->sanitize($meta_keyword ?: $this->name, ['string', 'trim']);
+		$this->meta_keyword = $this->_filter->sanitize($meta_keyword ?: $this->subject, ['string', 'trim']);
 	}
 
 	function setMetaDesc($meta_desc) {
