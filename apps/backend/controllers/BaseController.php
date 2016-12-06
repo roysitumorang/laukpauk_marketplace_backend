@@ -67,7 +67,7 @@ class BaseController extends Controller {
 					['label' => 'Inbox',       'link' => 'messages/index/unread:1'],
 					['label' => 'Outbox',      'link' => 'messages/index/read:1'],
 					['label' => 'Kirim Pesan', 'link' => 'messages/create'],
-					['label' => 'Semua Pesan', 'link' => 'message'],
+					['label' => 'Semua Pesan', 'link' => 'messages'],
 				],
 			], [
 				'label'     => 'Content',
