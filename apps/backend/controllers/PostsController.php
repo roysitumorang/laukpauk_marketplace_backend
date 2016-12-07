@@ -7,7 +7,7 @@ use Application\Models\PostCategory;
 use Exception;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class PostsController extends BaseController {
+class PostsController extends ControllerBase {
 	private $_post_category;
 
 	function beforeExecuteRoute() {

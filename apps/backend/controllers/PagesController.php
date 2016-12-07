@@ -7,7 +7,7 @@ use Application\Models\PageCategory;
 use Exception;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class PagesController extends BaseController {
+class PagesController extends ControllerBase {
 	private $_page_category;
 	private $_parent;
 

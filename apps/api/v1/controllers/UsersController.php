@@ -6,7 +6,7 @@ use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
 
-class UsersController extends BaseController {
+class UsersController extends ControllerBase {
 	function createAction() {
 		if (!$this->request->isPost() || $this->_access_token->user) {
 			$this->_response['message'] = 'Request tidak valid!';

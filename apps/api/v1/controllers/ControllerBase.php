@@ -6,7 +6,7 @@ use Application\Models\AccessToken;
 use Exception;
 use Phalcon\Mvc\Controller;
 
-abstract class BaseController extends Controller {
+abstract class ControllerBase extends Controller {
 	protected $_response = [
 		'status'  => -1,
 		'message' => null,

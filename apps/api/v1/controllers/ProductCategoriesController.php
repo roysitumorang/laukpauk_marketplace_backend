@@ -4,7 +4,7 @@ namespace Application\Api\V1\Controllers;
 
 use Application\Models\ProductCategory;
 
-class ProductCategoriesController extends BaseController {
+class ProductCategoriesController extends ControllerBase {
 	function indexAction() {
 		$this->_response['status'] = 1;
 		$this->_response['data']   = ProductCategory::find([

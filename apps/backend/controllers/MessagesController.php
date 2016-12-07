@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Message;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class MessagesController extends BaseController {
+class MessagesController extends ControllerBase {
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;

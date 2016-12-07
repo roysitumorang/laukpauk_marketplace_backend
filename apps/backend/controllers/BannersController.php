@@ -7,7 +7,7 @@ use Application\Models\BannerCategory;
 use Exception;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class BannersController extends BaseController {
+class BannersController extends ControllerBase {
 	private $_banner_category;
 
 	function beforeExecuteRoute() {

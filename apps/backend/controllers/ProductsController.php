@@ -9,7 +9,7 @@ use Application\Models\ProductPicture;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class ProductsController extends BaseController {
+class ProductsController extends ControllerBase {
 	function indexAction() {
 		$limit               = $this->config->per_page;
 		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;

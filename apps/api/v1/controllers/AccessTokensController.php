@@ -4,7 +4,7 @@ namespace Application\Api\V1\Controllers;
 
 use Application\Models\AccessToken;
 
-class AccessTokensController extends BaseController {
+class AccessTokensController extends ControllerBase {
 	function initialize() {}
 
 	function createAction() {

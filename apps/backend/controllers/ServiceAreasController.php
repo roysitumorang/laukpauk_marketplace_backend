@@ -8,7 +8,7 @@ use Application\Models\User;
 use Exception;
 use Phalcon\Db;
 
-class ServiceAreasController extends BaseController {
+class ServiceAreasController extends ControllerBase {
 	private $_user;
 
 	function onConstruct() {

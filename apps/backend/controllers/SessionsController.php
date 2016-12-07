@@ -6,7 +6,7 @@ use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
 
-class SessionsController extends BaseController {
+class SessionsController extends ControllerBase {
 	function index() {
 		$this->dispatcher->forward([
 			'controller' => 'sessions',

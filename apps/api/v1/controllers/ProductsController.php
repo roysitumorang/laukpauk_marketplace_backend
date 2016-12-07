@@ -4,7 +4,7 @@ namespace Application\Api\V1\Controllers;
 
 use Application\Models\ProductCategory;
 
-class ProductsController extends BaseController {
+class ProductsController extends ControllerBase {
 	function indexAction() {
 		$product_category_id = $this->request->getQuery('product_category_id', 'int');
 		if (!$product_category_id || !($product_category = ProductCategory::findFirst("published = 1 AND id = {$product_category_id}"))) {

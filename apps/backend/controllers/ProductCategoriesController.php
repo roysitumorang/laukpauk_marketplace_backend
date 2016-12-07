@@ -8,7 +8,7 @@ use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 use stdClass;
 
-class ProductCategoriesController extends BaseController {
+class ProductCategoriesController extends ControllerBase {
 	private $_thumb;
 
 	function initialize() {

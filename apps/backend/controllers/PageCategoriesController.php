@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\PageCategory;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
-class PageCategoriesController extends BaseController {
+class PageCategoriesController extends ControllerBase {
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;

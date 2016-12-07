@@ -5,7 +5,7 @@ namespace Application\Api\V1\Controllers;
 use Application\Models\ProductCategory;
 use Phalcon\Db;
 
-class SettingsController extends BaseController {
+class SettingsController extends ControllerBase {
 	function indexAction() {
 		$this->_response['status']                     = 1;
 		$this->_response['data']['product_categories'] = [];

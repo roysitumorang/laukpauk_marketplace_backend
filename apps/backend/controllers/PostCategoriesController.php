@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\PostCategory;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class PostCategoriesController extends BaseController {
+class PostCategoriesController extends ControllerBase {
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;

@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Order;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class OrdersController extends BaseController {
+class OrdersController extends ControllerBase {
 	function indexAction() {
 		$limit          = $this->config->per_page;
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;

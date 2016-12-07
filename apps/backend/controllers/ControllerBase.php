@@ -7,7 +7,7 @@ use Phalcon\Db;
 use Phalcon\Mvc\Controller;
 use Phalcon\Text;
 
-class BaseController extends Controller {
+class ControllerBase extends Controller {
 	function initialize() {
 		$url = $this->request->getQuery('_url');
 		if (!$this->session->get('user_id') && !Text::startsWith($url, '/admin/sessions')) {

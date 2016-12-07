@@ -9,7 +9,7 @@ use Application\Models\ServiceArea;
 use Application\Models\User;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
-class UsersController extends BaseController {
+class UsersController extends ControllerBase {
 	function indexAction() {
 		$limit             = $this->config->per_page;
 		$current_page      = $this->dispatcher->getParam('page', 'int') ?: 1;

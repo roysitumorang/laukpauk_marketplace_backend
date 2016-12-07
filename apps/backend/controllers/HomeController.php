@@ -4,7 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Phalcon\Mvc\View;
 
-class HomeController extends BaseController {
+class HomeController extends ControllerBase {
 	function indexAction() {
 		$this->view->menu = $this->_menu();
 	}

@@ -9,7 +9,7 @@ use Application\Models\User;
 use Exception;
 use Phalcon\Db;
 
-class ProductPricesController extends BaseController {
+class ProductPricesController extends ControllerBase {
 	private $_user;
 
 	function onConstruct() {
