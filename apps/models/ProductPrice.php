@@ -8,7 +8,7 @@ use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class ProductPrice extends BaseModel {
+class ProductPrice extends ModelBase {
 	public $id;
 	public $user_id;
 	public $product_id;

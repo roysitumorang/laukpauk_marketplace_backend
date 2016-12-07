@@ -4,7 +4,7 @@ namespace Application\Models;
 
 use Phalcon\Mvc\Model;
 
-class BaseModel extends Model {
+class ModelBase extends Model {
 	function initialize() {
 		$this->skipAttributesOnCreate([
 			'updated_by',

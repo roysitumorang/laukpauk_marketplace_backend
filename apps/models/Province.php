@@ -2,7 +2,7 @@
 
 namespace Application\Models;
 
-class Province extends BaseModel {
+class Province extends ModelBase {
 	public $id;
 	public $name;
 	public $created_by;

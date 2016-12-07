@@ -7,7 +7,7 @@ use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class ProductVariant extends BaseModel {
+class ProductVariant extends ModelBase {
 	public $id;
 	public $product_id;
 	public $parameter;

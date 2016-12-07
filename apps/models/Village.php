@@ -2,7 +2,7 @@
 
 namespace Application\Models;
 
-class Village extends BaseModel {
+class Village extends ModelBase {
 	public $id;
 	public $subdistrict_id;
 	public $name;

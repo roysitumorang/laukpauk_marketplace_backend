@@ -2,7 +2,7 @@
 
 namespace Application\Models;
 
-class City extends BaseModel {
+class City extends ModelBase {
 	public $id;
 	public $province_id;
 	public $type;

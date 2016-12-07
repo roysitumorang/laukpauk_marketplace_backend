@@ -6,7 +6,7 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class ServiceArea extends BaseModel {
+class ServiceArea extends ModelBase {
 	public $id;
 	public $user_id;
 	public $village_id;

@@ -6,7 +6,7 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class PageCategory extends BaseModel {
+class PageCategory extends ModelBase {
 	public $id;
 	public $name;
 	public $has_create_page_menu;

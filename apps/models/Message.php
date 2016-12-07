@@ -2,11 +2,11 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
+use Application\Models\ModelBase;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class Message extends BaseModel {
+class Message extends ModelBase {
 	public $id;
 	public $subject;
 	public $body;

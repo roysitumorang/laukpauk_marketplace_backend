@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
+use Application\Models\ModelBase;
 
-class Role extends BaseModel {
+class Role extends ModelBase {
 	const ANONYMOUS   = 0;
 	const SUPER_ADMIN = 1;
 	const ADMIN       = 2;

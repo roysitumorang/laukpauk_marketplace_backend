@@ -8,7 +8,7 @@ use Phalcon\Validation\Validator\Image;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class Brand extends BaseModel {
+class Brand extends ModelBase {
 	public $id;
 	public $name;
 	public $permalink;

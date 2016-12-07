@@ -6,7 +6,7 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class OrderItem extends BaseModel {
+class OrderItem extends ModelBase {
 	public $id;
 	public $order_id;
 	public $product_id;

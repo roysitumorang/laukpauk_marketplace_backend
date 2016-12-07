@@ -10,7 +10,7 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 use Phalcon\Validation\Validator\Url;
 
-class Page extends BaseModel {
+class Page extends ModelBase {
 	public $id;
 	public $page_category_id;
 	public $parent_id;

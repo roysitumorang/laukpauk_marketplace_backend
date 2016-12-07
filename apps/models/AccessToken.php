@@ -2,11 +2,11 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
+use Application\Models\ModelBase;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class AccessToken extends BaseModel {
+class AccessToken extends ModelBase {
 	public $id;
 	public $user_id;
 	public $user_agent;

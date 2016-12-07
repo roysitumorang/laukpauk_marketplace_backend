@@ -9,7 +9,7 @@ use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Url;
 
-class Banner extends BaseModel {
+class Banner extends ModelBase {
 	public $id;
 	public $banner_category_id;
 	public $name;

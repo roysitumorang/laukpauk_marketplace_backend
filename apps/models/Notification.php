@@ -2,11 +2,11 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
+use Application\Models\ModelBase;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class Notification extends BaseModel {
+class Notification extends ModelBase {
 	public $id;
 	public $user_id;
 	public $subject;

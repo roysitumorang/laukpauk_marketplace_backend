@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
+use Application\Models\ModelBase;
 
-class MessageRecipient extends BaseModel {
+class MessageRecipient extends ModelBase {
 	public $id;
 	public $message_id;
 	public $user_id;

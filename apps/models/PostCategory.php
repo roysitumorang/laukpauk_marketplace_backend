@@ -6,7 +6,7 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class PostCategory extends BaseModel {
+class PostCategory extends ModelBase {
 	public $id;
 	public $name;
 	public $permalink;

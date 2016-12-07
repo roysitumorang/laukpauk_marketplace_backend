@@ -2,12 +2,12 @@
 
 namespace Application\Models;
 
-use Application\Models\BaseModel;
+use Application\Models\ModelBase;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class NotificationTemplate extends BaseModel {
+class NotificationTemplate extends ModelBase {
 	public $id;
 	public $name;
 	public $subject;

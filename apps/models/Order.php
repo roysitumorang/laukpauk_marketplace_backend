@@ -8,7 +8,7 @@ use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class Order extends BaseModel {
+class Order extends ModelBase {
 	public $id;
 	public $code;
 	public $name;

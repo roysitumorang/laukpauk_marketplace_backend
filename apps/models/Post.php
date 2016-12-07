@@ -9,7 +9,7 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 use Phalcon\Validation\Validator\Url;
 
-class Post extends BaseModel {
+class Post extends ModelBase {
 	public $id;
 	public $post_category_id;
 	public $subject;

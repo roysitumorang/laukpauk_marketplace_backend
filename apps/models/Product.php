@@ -8,7 +8,7 @@ use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class Product extends BaseModel {
+class Product extends ModelBase {
 	public $id;
 	public $product_category_id;
 	public $code;

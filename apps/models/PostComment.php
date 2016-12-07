@@ -7,7 +7,7 @@ use Phalcon\Validation\Validator\Email;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Url;
 
-class PostComment extends BaseModel {
+class PostComment extends ModelBase {
 	public $id;
 	public $post_id;
 	public $name;

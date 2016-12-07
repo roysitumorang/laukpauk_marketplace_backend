@@ -12,7 +12,7 @@ use Phalcon\Validation\Validator\Image;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class User extends BaseModel {
+class User extends ModelBase {
 	const STATUS        = [
 		0  => 'HOLD',
 		1  => 'ACTIVE',

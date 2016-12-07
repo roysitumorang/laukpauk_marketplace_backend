@@ -8,7 +8,7 @@ use Phalcon\Validation\Validator\Image;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class ProductPicture extends BaseModel {
+class ProductPicture extends ModelBase {
 	public $id;
 	public $product_id;
 	public $name;
