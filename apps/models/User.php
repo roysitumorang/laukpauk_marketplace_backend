@@ -251,7 +251,7 @@ class User extends BaseModel {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point'], new PresenceOf([
+		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point', 'village_id'], new PresenceOf([
 			'message' => [
 				'name'            => 'nama harus diisi',
 				'phone'           => 'phone number harus diisi',
@@ -259,6 +259,7 @@ class User extends BaseModel {
 				'reward'          => 'reward harus diisi',
 				'buy_point'       => 'poin buy harus diisi',
 				'affiliate_point' => 'poin affiliasi harus diisi',
+				'village_id'      => 'kelurahan harus diisi',
 			],
 		]));
 		$validator->add('phone', new Uniqueness([

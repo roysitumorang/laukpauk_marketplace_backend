@@ -12,7 +12,7 @@ abstract class BaseController extends Controller {
 		'message' => null,
 		'data'    => [],
 	];
-	protected $_current_user;
+	protected $_access_token;
 
 	function initialize() {
 		try {
@@ -24,7 +24,6 @@ abstract class BaseController extends Controller {
 				throw new Exception('Token expired!');
 			}
 			$access_token->update(['updated_at' => time()]);
-			$this->_current_user = $access_token->user;
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
