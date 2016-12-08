@@ -21,7 +21,7 @@ abstract class ControllerBase extends Controller {
 
 	function beforeExecuteRoute() {
 		try {
-			$this->_access_token = AccessToken::findFirstById($this->request->getServer('Authorization'));
+			$this->_access_token = AccessToken::findFirstById($this->request->get('access_token'));
 			if (!$this->_access_token || $this->_access_token->ip_address != $this->request->getClientAddress() || $this->_access_token->user_agent != $this->request->getUserAgent()) {
 				throw new Exception('Token tidak valid!');
 			}

@@ -48,6 +48,8 @@ class Module implements ModuleDefinitionInterface {
 			$response = new Response;
 			$response->setStatusCode(200, 'OK');
 			$response->setContentType('application/json', 'UTF-8');
+			$response->setHeader('Access-Control-Allow-Origin', '*');
+			$response->setHeader('Access-Control-Allow-Methods', 'POST, GET');
 			return $response;
 		});
 	}
