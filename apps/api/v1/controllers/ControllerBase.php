@@ -13,21 +13,26 @@ abstract class ControllerBase extends Controller {
 		'data'    => [],
 	];
 	protected $_access_token;
+	protected $_input;
 
 	function initialize() {
+		$this->_input = $this->request->getJsonRawBody();
+	}
+
+	function beforeExecuteRoute() {
 		try {
-			$access_token = AccessToken::findFirst($this->request->getServer('Authorization'));
-			if (!$access_token || $access_token->ip_address != $this->request->getClientAddress() || $access_token->user_agent != $this->request->getUserAgent()) {
+			$this->_access_token = AccessToken::findFirstById($this->request->getServer('Authorization'));
+			if (!$this->_access_token || $this->_access_token->ip_address != $this->request->getClientAddress() || $this->_access_token->user_agent != $this->request->getUserAgent()) {
 				throw new Exception('Token tidak valid!');
 			}
-			if ($access_token->expired_at >= time()) {
+			if ($this->_access_token->expired_at >= time()) {
 				throw new Exception('Token expired!');
 			}
-			$access_token->update(['updated_at' => time()]);
+			$this->_access_token->update(['updated_at' => time()]);
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
-			return $this->response;
+			exit($this->response->send());
 		}
 	}
 }

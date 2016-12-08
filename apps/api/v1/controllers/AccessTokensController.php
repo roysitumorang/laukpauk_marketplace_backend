@@ -7,6 +7,8 @@ use Application\Models\AccessToken;
 class AccessTokensController extends ControllerBase {
 	function initialize() {}
 
+	function beforeExecuteRoute() {}
+
 	function createAction() {
 		$access_token = new AccessToken;
 		$access_token->create();

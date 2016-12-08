@@ -85,12 +85,20 @@ class User extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->belongsTo('role_id', 'Application\Models\Role', 'id', [
-			'alias'    => 'role',
-			'reusable' => true,
+			'alias'      => 'role',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'role harus diisi',
+			],
 		]);
 		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
-			'alias'    => 'village',
-			'reusable' => true,
+			'alias'      => 'village',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'kelurahan harus diisi',
+			],
 		]);
 		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', ['alias' => 'login_history']);
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyer_orders']);
@@ -240,10 +248,11 @@ class User extends ModelBase {
 	function beforeValidationOnCreate() {
 		$this->status           = array_search('HOLD', static::STATUS);
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
-		$this->activation_token = bin2hex(random_bytes(32));
+		$this->activation_token = bin2hex(random_bytes(16));
 	}
 
 	function beforeValidation() {
+		$this->role_id = $this->role->id;
 		if (!$this->id || $this->new_password) {
 			$this->password = password_hash($this->new_password, PASSWORD_DEFAULT);
 		}
@@ -251,7 +260,7 @@ class User extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point', 'village_id'], new PresenceOf([
+		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point'], new PresenceOf([
 			'message' => [
 				'name'            => 'nama harus diisi',
 				'phone'           => 'phone number harus diisi',
@@ -259,7 +268,6 @@ class User extends ModelBase {
 				'reward'          => 'reward harus diisi',
 				'buy_point'       => 'poin buy harus diisi',
 				'affiliate_point' => 'poin affiliasi harus diisi',
-				'village_id'      => 'kelurahan harus diisi',
 			],
 		]));
 		$validator->add('phone', new Uniqueness([

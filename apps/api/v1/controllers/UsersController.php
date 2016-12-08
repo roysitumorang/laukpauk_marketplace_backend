@@ -13,18 +13,19 @@ class UsersController extends ControllerBase {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$village_id    = $this->request->getPost('village_id', 'int');
+		$village_id    = filter_var($this->_input->village_id, FILTER_VALIDATE_INT);
 		$user          = new User;
-		$user->role    = Role::find(Role::BUYER);
 		$user->village = Village::findFirst($village_id);
-		$user->setName($this->request->getPost('name'));
-		$user->setNewPassword($this->request->getPost('new_password'));
-		$user->setNewPasswordConfirmation($this->request->getPost('new_password'));
-		$user->setPhone($this->request->getPost('phone'));
+		$user->role_id = Role::BUYER;
+		$user->setName($this->_input->name);
+		$user->setNewPassword($this->_input->new_password);
+		$user->setNewPasswordConfirmation($this->_input->new_password);
+		$user->setPhone($this->_input->phone);
 		$user->setDeposit(0);
 		$user->setBuyPoint(0);
 		$user->setAffiliatePoint(0);
 		$user->setReward(0);
+		$user->setPremium(0);
 		if ($user->validation() && $user->create()) {
 			$this->_response['status']                   = 1;
 			$this->_response['data']['activation_token'] = $user->activation_token;
