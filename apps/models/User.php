@@ -263,7 +263,7 @@ class User extends ModelBase {
 		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point'], new PresenceOf([
 			'message' => [
 				'name'            => 'nama harus diisi',
-				'phone'           => 'phone number harus diisi',
+				'phone'           => 'nomor HP harus diisi',
 				'deposit'         => 'deposit harus diisi',
 				'reward'          => 'reward harus diisi',
 				'buy_point'       => 'poin buy harus diisi',
