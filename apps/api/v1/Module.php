@@ -5,8 +5,11 @@ namespace Application\Api\V1;
 use Phalcon\Loader;
 use Phalcon\Mvc\View;
 use Phalcon\DiInterface;
+use Phalcon\Events\Event;
+use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Http\Response;
 use Phalcon\Mvc\Dispatcher;
+use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 
 class Module implements ModuleDefinitionInterface {
@@ -31,8 +34,24 @@ class Module implements ModuleDefinitionInterface {
 	function registerServices(DiInterface $di) {
 		// Registering a dispatcher
 		$di->set('dispatcher', function() {
-			$dispatcher = new Dispatcher;
+			$dispatcher    = new Dispatcher;
+			$eventsManager = new EventsManager;
 			$dispatcher->setDefaultNamespace('Application\Api\V1\Controllers');
+			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, $exception) {
+				if ($exception instanceof DispatchException && in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
+					$dispatcher->forward([
+						'controller' => 'errors',
+						'action'     => 'notFound',
+					]);
+				} else {
+					$dispatcher->forward([
+						'controller' => 'errors',
+						'action'     => 'uncaughtException',
+					]);
+				}
+				return false;
+			});
+			$dispatcher->setEventsManager($eventsManager);
 			return $dispatcher;
 		});
 

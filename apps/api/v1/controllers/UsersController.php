@@ -60,7 +60,17 @@ class UsersController extends ControllerBase {
 		$this->_access_token->save();
 		$this->_response['status']  = 1;
 		$this->_response['message'] = 'Aktivasi account berhasil!';
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		$this->_response['data']    = [
+			'current_user' => [
+				'id'             => $user->id,
+				'name'           => $user->name,
+				'phone'          => $user->phone,
+				'address'        => $user->address,
+				'subdistrict_id' => $user->village->subdistrict->id,
+				'village_id'     => $user->village->id,
+			]
+		];
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 }
