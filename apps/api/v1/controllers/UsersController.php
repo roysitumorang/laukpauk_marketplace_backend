@@ -15,7 +15,9 @@ class UsersController extends ControllerBase {
 		}
 		$village_id    = filter_var($this->_input->village_id, FILTER_VALIDATE_INT);
 		$user          = new User;
-		$user->village = Village::findFirst($village_id);
+		if ($village_id) {
+			$user->village = Village::findFirst($village_id);
+		}
 		$user->role_id = Role::BUYER;
 		$user->setName($this->_input->name);
 		$user->setNewPassword($this->_input->new_password);
