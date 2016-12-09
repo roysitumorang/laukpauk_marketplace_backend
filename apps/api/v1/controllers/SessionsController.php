@@ -52,4 +52,16 @@ class SessionsController extends ControllerBase {
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
+
+	function deleteAction() {
+		if (!$this->request->isPost() || !$this->_access_token->user) {
+			$this->_response['message'] = 'Request tidak valid!';
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
+		}
+		$this->_access_token->delete();
+		$this->_response['status'] = 1;
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
 }

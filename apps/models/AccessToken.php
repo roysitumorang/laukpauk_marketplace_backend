@@ -24,8 +24,11 @@ class AccessToken extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
+			'alias'      => 'user',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => true,
+			],
 		]);
 	}
 

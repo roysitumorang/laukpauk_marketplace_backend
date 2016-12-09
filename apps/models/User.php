@@ -107,6 +107,7 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\ServiceArea', 'user_id', ['alias' => 'service_areas']);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
 		$this->hasMany('id', 'Application\Models\Notification', 'user_id', ['alias' => 'notifications']);
+		$this->hasMany('id', 'Application\Models\AccessToken', 'user_id', ['alias' => 'access_tokens']);
 	}
 
 	function setName($name) {
