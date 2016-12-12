@@ -111,8 +111,8 @@
 								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
 								{% endif %}
 								{% if user.role == 'Merchant' %}
-								<br><a href="/admin/product_prices?user_id={{ user.id }}">Products: {{ user.total_products }}</a>
-								<br><a href="/admin/service_areas?user_id={{ user.id }}">Service Areas: {{ user.total_service_areas }}</a>
+								<br><a href="/admin/product_prices/index/user_id:{{ user.id }}">Products: {{ user.total_products }}</a>
+								<br><a href="/admin/service_areas/index/user_id:{{ user.id }}">Service Areas: {{ user.total_service_areas }}</a>
 								{% endif %}
 							</td>
 							<td>
