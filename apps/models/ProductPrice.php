@@ -41,12 +41,14 @@ class ProductPrice extends ModelBase {
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
+			'alias'      => 'user',
+			'reusable'   => true,
+			'foreignKey' => ['allowNulls' => false],
 		]);
 		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
-			'alias'    => 'product',
-			'reusable' => true,
+			'alias'      => 'product',
+			'reusable'   => true,
+			'foreignKey' => ['allowNulls' => false],
 		]);
 	}
 
@@ -84,7 +86,7 @@ class ProductPrice extends ModelBase {
 			'message' => 'jumlah satuan harus diantara 1/4, 1/2 atau 1',
 		]));
 		$validator->add(['user_id', 'product_id', 'unit_size'], new Uniqueness([
-			'message' => 'jumlah satuan sudah ada',
+			'message' => 'produk sudah ada',
 		]));
 		return $this->validate($validator);
 	}
