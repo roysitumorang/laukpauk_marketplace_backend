@@ -51,32 +51,30 @@
 									</td>
 								</tr>
 							</table>
-							<form method="POST" action="/admin/service_areas/create/user_id:{{ user.id }}" enctype="multipart/form-data">
-								<table class="table table-striped">
-									<thead>
-										<tr>
-											<th width="5%"><b>No</b></th>
-											<th><b>Kecamatan</b></th>
-											<th><b>Kelurahan</b></th>
-											<th><b>#</b></th>
-										</tr>
-									</thead>
-									<tbody>
-									{% for service_area in service_areas %}
-										<tr>
-											<td>{{ service_area.rank }}</td>
-											<td>{{ service_area.subdistrict }}</td>
-											<td>{{ service_area.village }}</td>
-											<td><a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ service_area.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a></td>
-										</tr>
-									{% elsefor %}
-										<tr>
-											<td colspan="4"><i>Belum ada area operasional</i></td>
-										</tr>
-									{% endfor %}
-									</tbody>
-								</table>
-							</form>
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th width="5%"><b>No</b></th>
+										<th><b>Kecamatan</b></th>
+										<th><b>Kelurahan</b></th>
+										<th><b>#</b></th>
+									</tr>
+								</thead>
+								<tbody>
+								{% for service_area in service_areas %}
+									<tr>
+										<td>{{ service_area.rank }}</td>
+										<td>{{ service_area.subdistrict }}</td>
+										<td>{{ service_area.village }}</td>
+										<td><a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ service_area.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a></td>
+									</tr>
+								{% elsefor %}
+									<tr>
+										<td colspan="4"><i>Belum ada area operasional</i></td>
+									</tr>
+								{% endfor %}
+								</tbody>
+							</table>
 						</div>
 					</div>
 				</div>
