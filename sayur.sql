@@ -1201,7 +1201,7 @@ CREATE TABLE `orders` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `code` varchar(20) NOT NULL,
   `name` varchar(80) NOT NULL,
-  `email` varchar(80) NOT NULL,
+  `email` varchar(80) DEFAULT NULL,
   `address` varchar(200) NOT NULL,
   `village_id` bigint(20) NOT NULL,
   `phone` varchar(20) NOT NULL,
