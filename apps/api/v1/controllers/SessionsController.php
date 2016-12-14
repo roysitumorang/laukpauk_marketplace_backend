@@ -47,7 +47,7 @@ class SessionsController extends ControllerBase {
 				]
 			];
 		} else {
-			$this->_response['message'] = 'Login tidak berhasil';
+			$this->_response['message'] = 'Nomor HP dan/atau password salah!';
 		}
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
