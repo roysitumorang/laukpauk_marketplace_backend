@@ -58,7 +58,7 @@ class OrdersController extends ControllerBase {
 			$order_item->unit_size   = $price->unit_size;
 			$order_item->stock_unit  = $product->stock_unit;
 			$order_item->quantity    = $item->quantity;
-			$order->original_bill   += $price->value * $item->quantity / $price->unit_size;
+			$order->original_bill   += $price->value * $item->quantity;
 			$order_items[]           = $order_item;
 		}
 		$order->final_bill    = $order->original_bill;
