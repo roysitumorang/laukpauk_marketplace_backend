@@ -16,11 +16,11 @@ class MerchantsController extends ControllerBase {
 			$all_categories->setFetchMode(Db::FETCH_OBJ);
 			while ($category = $all_categories->fetch()) {
 				$products     = [];
-				$all_products = $this->db->query("SELECT b.id, b.name, b.stock_unit FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 GROUP BY b.id");
+				$all_products = $this->db->query("SELECT b.id, b.name, b.stock_unit FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.id = {$category->id} GROUP BY b.id");
 				$all_products->setFetchMode(Db::FETCH_OBJ);
 				while ($product = $all_products->fetch()) {
 					$prices     = [];
-					$all_prices = $this->db->query("SELECT a.id, a.value, a.unit_size, a.order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1");
+					$all_prices = $this->db->query("SELECT a.id, a.value, a.unit_size, a.order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.id = {$category->id}");
 					$all_prices->setFetchMode(Db::FETCH_OBJ);
 					while ($price = $all_prices->fetch()) {
 						$prices[$price->id] = [
@@ -48,9 +48,6 @@ class MerchantsController extends ControllerBase {
 		$this->_response['status'] = 1;
 		$this->_response['data']   = [
 			'merchants'  => $merchants,
-			'categories' => $categories,
-			'products'   => $products,
-			'prices'     => $prices,
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
