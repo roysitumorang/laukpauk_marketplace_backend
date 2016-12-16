@@ -33,7 +33,7 @@
 				<b>Satuan :</b>
 			</td>
 			<td>
-				<select name="unit_size" class="form form-control form-20">
+				<select name="unit_size" class="form form-control form-50">
 					{% for size, label in sizes %}
 					<option value="{{ size }}"{% if size == price.unit_size %} selected{% endif %}>{{ label }}</option>
 					{% endfor %}

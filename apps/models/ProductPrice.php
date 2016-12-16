@@ -24,9 +24,9 @@ class ProductPrice extends ModelBase {
 	private $_filter;
 
 	const SIZES = [
-		'1.0'  => '1',
-		'0.5'  => '1/2',
-		'0.25' => '1/4',
+		'1.0'  => 'satu',
+		'0.5'  => 'setengah',
+		'0.25' => 'seperempat',
 	];
 
 	function getSource() {
