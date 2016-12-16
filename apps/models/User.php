@@ -282,9 +282,10 @@ class User extends ModelBase {
 	}
 
 	function beforeValidationOnCreate() {
+		$random                 = new Random;
 		$this->status           = array_search('HOLD', static::STATUS);
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
-		$this->activation_token = bin2hex(random_bytes(16));
+		$this->activation_token = $random->hex(16);
 	}
 
 	function beforeValidation() {
