@@ -24,7 +24,7 @@ class ProductPrice extends ModelBase {
 	private $_filter;
 
 	const SIZES = [
-		'1.0'    => '1',
+		'1.0'  => '1',
 		'0.5'  => '1/2',
 		'0.25' => '1/4',
 	];
