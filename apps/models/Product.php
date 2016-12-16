@@ -49,12 +49,17 @@ class Product extends ModelBase {
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('product_category_id', 'Application\Models\ProductCategory', 'id', [
-			'alias'    => 'category',
-			'reusable' => true,
+			'alias'      => 'category',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'kategori harus diisi',
+			],
 		]);
 		$this->belongsTo('brand_id', 'Application\Models\Brand', 'id', [
-			'alias'    => 'brand',
-			'reusable' => true,
+			'alias'      => 'brand',
+			'reusable'   => true,
+			'foreignKey' => ['allowNulls' => true],
 		]);
 		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
 		$this->hasMany('id', 'Application\Models\ProductVariant', 'product_id', ['alias' => 'variants']);
