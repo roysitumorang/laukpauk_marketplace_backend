@@ -10,7 +10,41 @@ use Application\Models\User;
 use Application\Models\Village;
 
 class OrdersController extends ControllerBase {
-	function index() {}
+	function indexAction() {
+		$orders = [];
+		foreach ($this->_access_token->user->buyer_orders as $order) {
+			$items    = [];
+			$village  = Village::findFirst($order->village_id);
+			$merchant = User::findFirst($order->merchant_id);
+			foreach ($order->items as $item) {
+				$items[$item->id] = [
+					'name'       => $item->name,
+					'stock_unit' => $item->stock_unit,
+					'unit_size'  => $item->unit_size,
+					'unit_price' => $item->unit_price,
+					'quantity'   => $item->quantity,
+				];
+			}
+			$orders[$order->id] = [
+				'code'               => $order->code,
+				'status'             => $order->status,
+				'name'               => $order->name,
+				'phone'              => $order->phone,
+				'address'            => $order->address,
+				'village'            => $village->name,
+				'subdistrict'        => $village->subdistrict->name,
+				'final_bill'         => $order->final_bill,
+				'original_bill'      => $order->original_bill,
+				'estimated_delivery' => str_replace(' ', 'T', $order->estimated_delivery),
+				'merchant'           => $merchant->company ?: $merchant->name,
+				'items'              => $items,
+			];
+		}
+		$this->_response['status']         = 1;
+		$this->_response['data']['orders'] = $orders;
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
 
 	function createAction() {
 		if (!$this->request->isPost() || !$this->_access_token->user) {
@@ -65,38 +99,8 @@ class OrdersController extends ControllerBase {
 		$order->final_bill    = $order->original_bill;
 		$order->items         = $order_items;
 		if ($order->validation() && $order->create()) {
-			$orders = [];
-			foreach ($this->_access_token->user->buyer_orders as $order) {
-				$items    = [];
-				$village  = Village::findFirst($order->village_id);
-				$merchant = User::findFirst($order->merchant_id);
-				foreach ($order->items as $item) {
-					$items[$item->id] = [
-						'name'       => $item->name,
-						'stock_unit' => $item->stock_unit,
-						'unit_size'  => $item->unit_size,
-						'unit_price' => $item->unit_price,
-						'quantity'   => $item->quantity,
-					];
-				}
-				$orders[$order->id] = [
-					'code'               => $order->code,
-					'status'             => $order->status,
-					'name'               => $order->name,
-					'phone'              => $order->phone,
-					'address'            => $order->address,
-					'village'            => $village->name,
-					'subdistrict'        => $village->subdistrict->name,
-					'final_bill'         => $order->final_bill,
-					'original_bill'      => $order->original_bill,
-					'estimated_delivery' => str_replace(' ', 'T', $order->estimated_delivery),
-					'merchant'           => $merchant->company ?: $merchant->name,
-					'items'              => $items,
-				];
-			}
-			$this->_response['status']         = 1;
-			$this->_response['message']        = 'Pemesanan berhasil!';
-			$this->_response['data']['orders'] = $orders;
+			$this->_response['status']  = 1;
+			$this->_response['message'] = 'Pemesanan berhasil!';
 		} else {
 			$errors = [];
 			foreach ($order->getMessages() as $error) {
