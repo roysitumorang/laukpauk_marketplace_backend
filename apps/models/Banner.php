@@ -3,8 +3,9 @@
 namespace Application\Models;
 
 use Phalcon\Image\Adapter\Gd;
+use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Image;
+use Phalcon\Validation\Validator\File as FileValidator;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Url;
@@ -43,8 +44,12 @@ class Banner extends ModelBase {
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('banner_category_id', 'Application\Models\BannerCategory', 'id', [
-			'alias'    => 'category',
-			'reusable' => true,
+			'alias'      => 'category',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'id kategori harus diisi',
+			],
 		]);
 	}
 
@@ -73,7 +78,9 @@ class Banner extends ModelBase {
 	}
 
 	function setNewFile(array $new_file) {
-		$this->new_file = $new_file;
+		if ($new_file['tmp_name'] && $new_file['size'] && !$new_file['error']) {
+			$this->new_file = $new_file;
+		}
 	}
 
 	function setThumbnails(array $thumbnails = null) {
@@ -103,23 +110,24 @@ class Banner extends ModelBase {
 		}
 		if ($this->new_file) {
 			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_file', new Image([
-				'max_size'     => $max_size,
-				'message_size' => 'ukuran file maksimal ' . $max_size,
-				'message_type' => 'format gambar harus JPG atau PNG',
-				'allowEmpty'   => true,
+			$validator->add('new_file', new FileValidator([
+				'maxSize'      => $max_size,
+				'messageSize'  => 'ukuran file maksimal ' . $max_size,
+				'allowedTypes' => ['image/jpeg', 'image/png'],
+				'messageType'  => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		return $this->validate($validator);
 	}
 
 	function beforeSave() {
-		if (!$this->_newPictureIsValid() || $this->file_name) {
+		if (!$this->new_file || $this->file_name) {
 			return true;
 		}
+		$random = new Random;
 		do {
-			$this->file_name = bin2hex(random_bytes(16)) . '.jpg';
-			if (!is_readable($this->_upload_config->path . $this->file_name) && !static::findFirst(['conditions' => "file_name = '{$this->file_name}'"])) {
+			$this->file_name = $random->hex(16) . '.jpg';
+			if (!static::findFirst(['conditions' => "file_name = '{$this->file_name}'"])) {
 				break;
 			}
 		} while (1);
@@ -127,7 +135,7 @@ class Banner extends ModelBase {
 
 	function beforeUpdate() {
 		parent::beforeUpdate();
-		if ($this->_newPictureIsValid()) {
+		if ($this->new_file) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
@@ -137,7 +145,7 @@ class Banner extends ModelBase {
 	}
 
 	function afterSave() {
-		if (!$this->_newPictureIsValid()) {
+		if (!$this->new_file) {
 			return true;
 		}
 		$file_name = $this->_upload_config->path . $this->file_name;
@@ -181,9 +189,5 @@ class Banner extends ModelBase {
 		$this->file_name = null;
 		$this->setThumbnails([]);
 		$this->save();
-	}
-
-	private function _newPictureIsValid() {
-		return $this->new_file['tmp_name'] && !$this->new_file['error'] && $this->new_file['size'];
 	}
 }
