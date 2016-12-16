@@ -5,7 +5,6 @@ namespace Application\Backend\Controllers;
 use Application\Models\Order;
 use Application\Models\Role;
 use Application\Models\Village;
-use Application\Models\ServiceArea;
 use Application\Models\User;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 

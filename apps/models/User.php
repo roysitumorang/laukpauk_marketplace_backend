@@ -122,15 +122,21 @@ class User extends ModelBase {
 	}
 
 	function setNewPassword($new_password) {
-		$this->new_password = $this->_filter->sanitize($new_password, ['string', 'trim']);
+		if ($new_password) {
+			$this->new_password = $this->_filter->sanitize($new_password, ['string', 'trim']);
+		}
 	}
 
 	function setNewPasswordConfirmation($new_password_confirmation) {
-		$this->new_password_confirmation = $this->_filter->sanitize($new_password_confirmation, ['string', 'trim']);
+		if ($new_password_confirmation) {
+			$this->new_password_confirmation = $this->_filter->sanitize($new_password_confirmation, ['string', 'trim']);
+		}
 	}
 
 	function setAddress($address) {
-		$this->address = $this->_filter->sanitize($address, ['string', 'trim']);
+		if ($address) {
+			$this->address = $this->_filter->sanitize($address, ['string', 'trim']);
+		}
 	}
 
 	function setPhone($phone) {
@@ -138,7 +144,9 @@ class User extends ModelBase {
 	}
 
 	function setMobile($mobile) {
-		$this->mobile = $this->_filter->sanitize($mobile, 'int');
+		if ($mobile) {
+			$this->mobile = $this->_filter->sanitize($mobile, 'int');
+		}
 	}
 
 	function setPremium($premium) {
@@ -146,7 +154,9 @@ class User extends ModelBase {
 	}
 
 	function setAffiliateLink($affiliate_link) {
-		$this->affiliate_link = $this->_filter->sanitize($affiliate_link, ['string', 'trim']);
+		if ($affiliate_link) {
+			$this->affiliate_link = $this->_filter->sanitize($affiliate_link, ['string', 'trim']);
+		}
 	}
 
 	function setStatus($status) {
@@ -154,11 +164,15 @@ class User extends ModelBase {
 	}
 
 	function setActivatedAt($activated_at) {
-		$this->activated_at = $this->_filter->sanitize($activated_at, ['string', 'trim']);
+		if ($activated_at) {
+			$this->activated_at = $this->_filter->sanitize($activated_at, ['string', 'trim']);
+		}
 	}
 
 	function setVerifiedAt($verified_at) {
-		$this->verified_at = $this->_filter->sanitize($verified_at, ['string', 'trim']);
+		if ($verified_at) {
+			$this->verified_at = $this->_filter->sanitize($verified_at, ['string', 'trim']);
+		}
 	}
 
 	function setActivationToken($activation_token) {
@@ -170,7 +184,9 @@ class User extends ModelBase {
 	}
 
 	function setLastSeen($last_seen) {
-		$this->last_seen = $this->_filter->sanitize($last_seen, ['string', 'trim']);
+		if ($last_seen) {
+			$this->last_seen = $this->_filter->sanitize($last_seen, ['string', 'trim']);
+		}
 	}
 
 	function setDeposit($deposit) {
@@ -178,31 +194,39 @@ class User extends ModelBase {
 	}
 
 	function setKtp($ktp) {
-		$this->ktp = $this->_filter->sanitize($ktp, ['string', 'trim']);
+		if ($ktp) {
+			$this->ktp = $this->_filter->sanitize($ktp, ['string', 'trim']);
+		}
 	}
 
 	function setCompany($company) {
-		$this->company = $this->_filter->sanitize($company, ['string', 'trim']);
+		if ($company) {
+			$this->company = $this->_filter->sanitize($company, ['string', 'trim']);
+		}
 	}
 
 	function setNpwp($npwp) {
-		$this->npwp = $this->_filter->sanitize($npwp, ['string', 'trim']);
-	}
-
-	function setRegistrationIp($registration_ip) {
-		$this->registration_ip = $this->_filter->sanitize($registration_ip, ['string', 'trim']);
+		if ($npwp) {
+			$this->npwp = $this->_filter->sanitize($npwp, ['string', 'trim']);
+		}
 	}
 
 	function setTwitterId($twitter_id) {
-		$this->twitter_id = $this->_filter->sanitize($twitter_id, 'int');
+		if ($twitter_id) {
+			$this->twitter_id = $this->_filter->sanitize($twitter_id, 'int');
+		}
 	}
 
 	function setGoogleId($google_id) {
-		$this->google_id = $this->_filter->sanitize($google_id, 'int');
+		if ($google_id) {
+			$this->google_id = $this->_filter->sanitize($google_id, 'int');
+		}
 	}
 
 	function setFacebookId($facebook_id) {
-		$this->facebook_id = $this->_filter->sanitize($facebook_id, 'int');
+		if ($facebook_id) {
+			$this->facebook_id = $this->_filter->sanitize($facebook_id, 'int');
+		}
 	}
 
 	function setReward($reward) {
@@ -210,13 +234,15 @@ class User extends ModelBase {
 	}
 
 	function setGender($gender) {
-		if (in_array($gender, static::GENDERS)) {
+		if ($gender && in_array($gender, static::GENDERS)) {
 			$this->gender = $gender;
 		}
 	}
 
 	function setDateOfBirth($date_of_birth) {
-		$this->date_of_birth = $this->_filter->sanitize($date_of_birth, ['string', 'trim']);
+		if ($date_of_birth) {
+			$this->date_of_birth = $this->_filter->sanitize($date_of_birth, ['string', 'trim']);
+		}
 	}
 
 	function setBuyPoint($buy_point) {
@@ -238,15 +264,21 @@ class User extends ModelBase {
 	}
 
 	function setBusinessDays(array $business_days = null) {
-		$this->business_days = $business_days;
+		if ($business_days) {
+			$this->business_days = $business_days;
+		}
 	}
 
 	function setBusinessOpeningHour($business_opening_hour) {
-		$this->business_opening_hour = $business_opening_hour;
+		if ($business_opening_hour) {
+			$this->business_opening_hour = $business_opening_hour;
+		}
 	}
 
 	function setBusinessClosingHour($business_closing_hour) {
-		$this->business_closing_hour = $business_closing_hour;
+		if ($business_closing_hour) {
+			$this->business_closing_hour = $business_closing_hour;
+		}
 	}
 
 	function beforeValidationOnCreate() {
@@ -328,23 +360,7 @@ class User extends ModelBase {
 	}
 
 	function beforeSave() {
-		$this->address                = $this->address ?: null;
-		$this->mobile                 = $this->mobile ?: null;
-		$this->affiliate_link         = $this->affiliate_link ?: null;
-		$this->activated_at           = $this->activated_at ?: null;
-		$this->verified_at            = $this->verified_at ?: null;
-		$this->last_seen              = $this->last_seen ?: null;
-		$this->ktp                    = $this->ktp ?: null;
-		$this->company                = $this->company ?: null;
-		$this->npwp                   = $this->npwp ?: null;
-		$this->twitter_id             = $this->twitter_id ?: null;
-		$this->google_id              = $this->google_id ?: null;
-		$this->facebook_id            = $this->facebook_id ?: null;
-		$this->date_of_birth          = $this->date_of_birth ?: null;
-		$this->avatar                 = $this->avatar ?: null;
-		$this->business_days          = $this->business_days ? json_encode($this->business_days, JSON_NUMERIC_CHECK) : null;
-		$this->business_opening_hours = $this->business_opening_hours ?: null;
-		$this->business_closing_hours = $this->business_closing_hours ?: null;
+		$this->business_days = $this->business_days ? json_encode($this->business_days, JSON_NUMERIC_CHECK) : null;
 		if ($this->_new_avatar && !$this->avatar) {
 			$random = new Random;
 			do {
