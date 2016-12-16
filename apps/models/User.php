@@ -3,12 +3,13 @@
 namespace Application\Models;
 
 use Phalcon\Image\Adapter\Gd;
+use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Confirmation;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\Email;
-use Phalcon\Validation\Validator\Image;
+use Phalcon\Validation\Validator\File as FileValidator;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -227,7 +228,9 @@ class User extends ModelBase {
 	}
 
 	function setNewAvatar(array $new_avatar) {
-		$this->new_avatar = $new_avatar;
+		if ($new_avatar['tmp_name'] && $new_avatar['size'] && !$new_avatar['error']) {
+			$this->new_avatar = $new_avatar;
+		}
 	}
 
 	function setThumbnails(array $thumbnails = null) {
@@ -314,11 +317,11 @@ class User extends ModelBase {
 		]));
 		if ($this->new_avatar) {
 			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_avatar', new Image([
-				'max_size'     => $max_size,
-				'message_size' => 'ukuran file maksimal ' . $max_size,
-				'message_type' => 'format gambar harus JPG atau PNG',
-				'allowEmpty'   => true,
+			$validator->add('new_avatar', new FileValidator([
+				'maxSize'      => $max_size,
+				'messageSize'  => 'ukuran file maksimal ' . $max_size,
+				'allowedTypes' => ['image/jpeg', 'image/png'],
+				'messageType'  => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		return $this->validate($validator);
@@ -342,20 +345,20 @@ class User extends ModelBase {
 		$this->business_days          = $this->business_days ? json_encode($this->business_days, JSON_NUMERIC_CHECK) : null;
 		$this->business_opening_hours = $this->business_opening_hours ?: null;
 		$this->business_closing_hours = $this->business_closing_hours ?: null;
-		if (!$this->_newAvatarIsValid()) {
-			return true;
+		if ($this->_new_avatar && !$this->avatar) {
+			$random = new Random;
+			do {
+				$this->avatar = $random->hex(16) . '.jpg';
+				if (!static::findFirstByAvatar($this->avatar)) {
+					break;
+				}
+			} while (1);
 		}
-		do {
-			$this->avatar = bin2hex(random_bytes(16)) . '.jpg';
-			if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
-				break;
-			}
-		} while (1);
 	}
 
 	function beforeUpdate() {
 		parent::beforeUpdate();
-		if ($this->_newAvatarIsValid()) {
+		if ($this->new_avatar) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
@@ -365,7 +368,7 @@ class User extends ModelBase {
 	}
 
 	function afterSave() {
-		if (!$this->_newAvatarIsValid()) {
+		if (!$this->new_avatar) {
 			return true;
 		}
 		$avatar = $this->_upload_config->path . $this->avatar;
@@ -434,9 +437,5 @@ class User extends ModelBase {
 		return $this->update([
 			'status' => array_search('ACTIVE', static::STATUS),
 		]);
-	}
-
-	private function _newAvatarIsValid() {
-		return $this->new_avatar['tmp_name'] && !$this->new_avatar['error'] && $this->new_avatar['size'];
 	}
 }

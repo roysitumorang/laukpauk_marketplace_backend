@@ -308,7 +308,7 @@ class UsersController extends ControllerBase {
 		$user->setDateOfBirth($this->request->getPost('date_of_birth'));
 		$user->setBuyPoint($this->request->getPost('buy_point'));
 		$user->setAffiliatePoint($this->request->getPost('affiliate_point'));
-		$user->setNewAvatar($_FILES['avatar']);
+		$user->setNewAvatar($_FILES['new_avatar']);
 		$user->setBusinessDays($this->request->getPost('business_days'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
