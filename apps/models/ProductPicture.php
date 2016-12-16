@@ -3,8 +3,10 @@
 namespace Application\Models;
 
 use Phalcon\Image\Adapter\Gd;
+use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Image;
+use Phalcon\Validation\Validator\Digit;
+use Phalcon\Validation\Validator\File as FileValidator;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -35,31 +37,34 @@ class ProductPicture extends ModelBase {
 		$this->skipAttributesOnUpdate(['product_id']);
 		$this->keepSnapshots(true);
 		$this->belongsTo('product_id', 'Product', 'id', [
-			'alias'    => 'product',
-			'reusable' => true,
+			'alias'      => 'product',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'id produk harus diisi',
+			],
 		]);
 	}
 
-	function setProductId(int $product_id) {
-		$this->parent_id = $product_id;
-	}
-
 	function setNewFile(array $new_file) {
-		$this->new_file = $new_file;
+		if ($new_file['tmp_name'] && $new_file['size'] && !$new_file['error']) {
+			$this->new_file = $new_file;
+		}
 	}
 
 	function setThumbnails(array $thumbnails = null) {
 		$this->thumbnails = array_filter($thumbnails ?? []);
 	}
 
-	function setPosition(int $position) {
-		$this->position = $position;
+	function setPosition($position) {
+		$this->position = $position ?? 0;
 	}
 
 	function beforeValidationOnCreate() {
+		$random = new Random;
 		do {
-			$this->name = bin2hex(random_bytes(16)) . '.jpg';
-			if (!is_readable($this->_upload_config->path . $this->name) && !static::findFirstByName($this->name)) {
+			$this->name = $random->hex(16) . '.jpg';
+			if (!static::findFirstByName($this->name)) {
 				break;
 			}
 		} while (1);
@@ -70,24 +75,27 @@ class ProductPicture extends ModelBase {
 		$validator->add('position', new PresenceOf([
 			'message' => 'urutan harus diisi',
 		]));
+		$validator->add('position', new Digit([
+			'message' => 'posisi harus dalam bentuk angka',
+		]));
 		$validator->add(['product_id', 'position'], new Uniqueness([
 			'field'   => ['product_id', 'position'],
 			'message' => 'urutan sudah ada',
 		]));
 		if ($this->new_file) {
 			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_file', new Image([
-				'max_size'     => $max_size,
-				'message_size' => 'ukuran file maksimal ' . $max_size,
-				'message_type' => 'format gambar harus JPG atau PNG',
-				'allowEmpty'   => true,
+			$validator->add('new_file', new FileValidator([
+				'maxSize'      => $max_size,
+				'messageSize'  => 'ukuran file maksimal ' . $max_size,
+				'allowedTypes' => ['image/jpeg', 'image/png'],
+				'messageType'  => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		return $this->validate($validator);
 	}
 
 	function beforeUpdate() {
-		if ($this->_newFileIsValid()) {
+		if ($this->new_file) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
@@ -97,11 +105,11 @@ class ProductPicture extends ModelBase {
 	}
 
 	function save($data = null, $white_list = null) {
-		return $this->_newFileIsValid() || ($this->id && $this->hasChanged('thumbnails')) ? parent::save($data, $white_list) : true;
+		return $this->new_file || ($this->id && $this->hasChanged('thumbnails')) ? parent::save($data, $white_list) : true;
 	}
 
 	function afterSave() {
-		if (!$this->_newFileIsValid()) {
+		if ($this->new_file) {
 			return true;
 		}
 		$file = $this->_upload_config->path . $this->name;
@@ -137,9 +145,5 @@ class ProductPicture extends ModelBase {
 			$this->update();
 		}
 		return $thumbnail;
-	}
-
-	private function _newFileIsValid() {
-		return $this->new_file['tmp_name'] && !$this->new_file['error'] && $this->new_file['size'];
 	}
 }
