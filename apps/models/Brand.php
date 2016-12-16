@@ -51,7 +51,9 @@ class Brand extends ModelBase {
 	}
 
 	function setNewPicture(array $new_picture) {
-		$this->new_picture = $new_picture;
+		if ($new_picture['tmp_name'] && $new_picture['size'] && !$new_picture['error']) {
+			$this->new_picture = $new_picture;
+		}
 	}
 
 	function setThumbnails(array $thumbnails = null) {
