@@ -22,21 +22,25 @@ class OrdersController extends ControllerBase {
 		if ($code = $this->request->getQuery('code', 'int')) {
 			$conditions[] = "code = {$code}";
 		}
-		try {
-			$from = (new DateTimeImmutable($this->request->getQuery('from')))->format('Y-m-d');
-		} catch (Exception $e) {
-			unset($from);
+		if ($date = $this->request->getQuery('from')) {
+			try {
+				$from = (new DateTimeImmutable($date))->format('Y-m-d');
+			} catch (Exception $e) {
+				unset($from);
+			}
+			if ($from) {
+				$conditions[] = "DATE(created_at) >= '{$from}'";
+			}
 		}
-		if ($from) {
-			$conditions[] = "DATE(created_at) >= '{$from}'";
-		}
-		try {
-			$to = (new DateTimeImmutable($this->request->getQuery('to')))->format('Y-m-d');
-		} catch (Exception $e) {
-			unset($to);
-		}
-		if ($to) {
-			$conditions[] = "DATE(created_at) <= '{$to}'";
+		if ($date = $this->request->getQuery('to')) {
+			try {
+				$to = (new DateTimeImmutable($this->request->getQuery('to')))->format('Y-m-d');
+			} catch (Exception $e) {
+				unset($to);
+			}
+			if ($to) {
+				$conditions[] = "DATE(created_at) <= '{$to}'";
+			}
 		}
 		if ($conditions) {
 			$parameters[] = implode(' AND ', $conditions);
