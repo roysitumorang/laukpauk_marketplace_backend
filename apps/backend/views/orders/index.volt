@@ -28,15 +28,23 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
+								<br>
 								<b>Cari berdasarkan :</b>
 							</td>
 							<td>
-								<input type="text" name="code" value="{{ code }}" class="form form-control" size="6" placeholder="Nomor Order">
+								Dari Tanggal :<br>
+								<input type="text" name="from" value="{{ from }}" class="form form-control text-center date" size="10" placeholder="Dari Tanggal">
 							</td>
 							<td>
-								Status Order:&nbsp;&nbsp;
+								Sampai Tanggal :<br>
+								<input type="text" name="to" value="{{ to }}" class="form form-control text-center date" size="10" placeholder="Sampai Tanggal">
 							</td>
 							<td>
+								Nomor Order :<br>
+								<input type="text" name="code" value="{{ code }}" class="form form-control text-center" size="6" placeholder="Nomor Order">
+							</td>
+							<td>
+								Status Order :<br>
 								<select name="status" class="form form-control">
 									<option value="">Any Status</option>
 									{% for value, label in status %}
@@ -45,6 +53,7 @@
 								</select>
 							</td>
 							<td>
+								<br>
 								<button type="submit" class="btn btn-info">CARI</button>
 							</td>
 						</tr>
@@ -53,31 +62,35 @@
 				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th width="25"><b>No</b></th>
-							<th><b>No. Order</b></th>
-							<th><b>Tgl Order</b></th>
-							<th><b>Pembeli</b></th>
-							<th><b>Pembayaran</b></th>
-							<th><b>#</b></th>
+							<th class="text-center"><b>No</b></th>
+							<th class="text-center"><b>No. Order</b></th>
+							<th class="text-center"><b>Tgl Order</b></th>
+							<th class="text-center"><b>Pembeli</b></th>
+							<th class="text-center"><b>Supplier</b></th>
+							<th class="text-center"><b>Pembayaran</b></th>
+							<th class="text-center"><b>#</b></th>
 						</tr>
 					</thead>
 					<tbody>
 					{% for order in orders %}
 						<tr id="{{ order.id }}">
-							<td>{{ order.rank }}</td>
+							<td class="text-right">{{ order.rank }}</td>
 							<td{% if order.status == 'HOLD' %} style="background:#FFCCCC"{% elseif order.status == 'COMPLETED' %} style="background:#CCFFCC"{% elseif order.status == 'CANCELLED' %} style="background:#FF0000;color:#FFFFFF"{% endif %}>
-								<font size="3">#{{ order.code }}</font><br><br><strong>{{ order.status }}</strong>
+								<font size="3">#{{ order.code }}</font><br><strong>{{ order.status }}</strong>
 								<br>Pengantaran: {{ date('Y-m-d H:i', strtotime(order.estimated_delivery)) }}
 								{% if order.status == 'COMPLETED' %}
 								<br>Actual delivery: {{ order.actual_delivery }}
 								{% endif %}
 							</td>
-							<td>{{ date('Y-m-d H:i', strtotime(order.created_at)) }}</td>
+							<td class="text-center">{{ date('Y-m-d H:i', strtotime(order.created_at)) }}</td>
 							<td>
-								<font size="5">{{ order.name }}</font> ({{ order.buyer.name }})<br><br>
+								<font size="5">{{ order.name }}</font><br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.phone }}
 							</td>
 							<td>
+								<font size="5">{% if order.merchant.company %}{{ order.merchant.company }}{% else %}{{ order.merchant.name }}{% endif %}</font><br>
+								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant.phone }}
+							<td class="text-right">
 								<font size="4">Rp. {{ number_format(order.final_bill) }}</font><br><br>
 							</td>
 							<td>
@@ -90,7 +103,7 @@
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="6"><i>Belum ada order</i></td>
+							<td colspan="7"><i>Belum ada order</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>
@@ -116,3 +129,8 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	$(function() {
+		$('.date').datepicker({dateFormat:'yy-mm-dd'})
+	})
+</script>

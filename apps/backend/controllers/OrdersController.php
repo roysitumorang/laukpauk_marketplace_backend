@@ -3,6 +3,8 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Order;
+use DateTimeImmutable;
+use Exception;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
 class OrdersController extends ControllerBase {
@@ -19,6 +21,22 @@ class OrdersController extends ControllerBase {
 		}
 		if ($code = $this->request->getQuery('code', 'int')) {
 			$conditions[] = "code = {$code}";
+		}
+		try {
+			$from = (new DateTimeImmutable($this->request->getQuery('from')))->format('Y-m-d');
+		} catch (Exception $e) {
+			unset($from);
+		}
+		if ($from) {
+			$conditions[] = "DATE(created_at) >= '{$from}'";
+		}
+		try {
+			$to = (new DateTimeImmutable($this->request->getQuery('to')))->format('Y-m-d');
+		} catch (Exception $e) {
+			unset($to);
+		}
+		if ($to) {
+			$conditions[] = "DATE(created_at) <= '{$to}'";
 		}
 		if ($conditions) {
 			$parameters[] = implode(' AND ', $conditions);
@@ -41,6 +59,8 @@ class OrdersController extends ControllerBase {
 		$this->view->orders                 = $orders;
 		$this->view->pages                  = $pages;
 		$this->view->page                   = $paginator->getPaginate();
+		$this->view->from                   = $from;
+		$this->view->to                     = $to;
 		$this->view->status                 = $status;
 		$this->view->current_status         = $current_status;
 		$this->view->code                   = $code;
