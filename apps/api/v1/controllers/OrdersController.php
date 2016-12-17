@@ -102,12 +102,13 @@ class OrdersController extends ControllerBase {
 		$order->final_bill    = $order->original_bill;
 		$order->items         = $order_items;
 		if ($order->validation() && $order->create()) {
-			$this->_response['status']   = 1;
-			$this->_response['message']  = 'Pemesanan berhasil!';
-			$admin_new_order_template    = NotificationTemplate::findFirstByName('admin new order');
-			$admin_notification          = new Notification;
-			$admin_notification->subject = $admin_new_order_template->subject;
-			$admin_notification->link    = $admin_new_order_template->url . $order->id;
+			$this->_response['status']      = 1;
+			$this->_response['message']     = 'Pemesanan berhasil!';
+			$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
+			$admin_notification             = new Notification;
+			$admin_notification->subject    = $admin_new_order_template->subject;
+			$admin_notification->link       = $admin_new_order_template->url . $order->id;
+			$admin_notification->created_by = $this->_access_token->user->id;
 			$admins                      = User::find([
 				'conditions' => 'role_id IN ({role_ids:array}) AND status = :status:',
 				'bind'       => [
@@ -124,6 +125,7 @@ class OrdersController extends ControllerBase {
 			$merchant_notification             = new Notification;
 			$merchant_notification->subject    = $merchant_new_order_template->subject;
 			$merchant_notification->link       = $merchant_new_order_template->url . $order->id;
+			$merchant_notification->created_by = $this->_access_token->user->id;
 			$merchant_notification->recipients = [$merchant];
 			$merchant_notification->create();
 		} else {
