@@ -38,7 +38,7 @@ class ControllerBase extends Controller {
 		$this->view->current_user         = $this->currentUser;
 		$this->view->unread_notifications = $this->currentUser->getRelated('notifications', [
 			'conditions' => 'Application\Models\NotificationRecipient.read_at IS NULL',
-			'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.subject, Application\Models\Notification.link',
+			'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.subject, Application\Models\Notification.link, Application\Models\Notification.created_at',
 			'order'      => 'Application\Models\Notification.id DESC',
 		]);
 		$this->view->unread_messages      = $this->currentUser->getRelated('messages', [
