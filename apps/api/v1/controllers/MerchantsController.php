@@ -46,7 +46,7 @@ class MerchantsController extends ControllerBase {
 			];
 		}
 		$this->_response['status'] = 1;
-		if (!count($merchants)) {
+		if (!$merchants) {
 			$this->_response['message'] = 'Maaf, daerah Anda di luar wilayah operasional Kami.';
 		}
 		$this->_response['data']['merchants'] = $merchants;
