@@ -34,7 +34,7 @@ class OrdersController extends ControllerBase {
 		}
 		if ($date = $this->request->getQuery('to')) {
 			try {
-				$to = (new DateTimeImmutable($this->request->getQuery('to')))->format('Y-m-d');
+				$to = (new DateTimeImmutable($date))->format('Y-m-d');
 			} catch (Exception $e) {
 				unset($to);
 			}
