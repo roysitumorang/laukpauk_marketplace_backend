@@ -1144,16 +1144,19 @@ CREATE TABLE `notification_templates` (
   UNIQUE KEY `name` (`name`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 /*Data for the table `notification_templates` */
 
 LOCK TABLES `notification_templates` WRITE;
 
 insert  into `notification_templates`(`id`,`name`,`subject`,`url`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,'new order','Order Baru','/admin/order/show/',1,'2016-11-25 18:35:34',NULL,NULL),
-(2,'order delivered','Order Diterima','/admin/order/show/',1,'2016-11-25 18:37:03',NULL,NULL),
-(3,'order cancelled','Order Dibatalkan','/admin/order/show/',1,'2016-11-25 18:37:37',NULL,NULL);
+(1,'admin new order','Order Baru','/admin/order/show/',1,'2016-11-25 18:35:34',NULL,NULL),
+(2,'admin order delivered','Order Diterima','/admin/order/show/',1,'2016-11-25 18:37:03',NULL,NULL),
+(3,'admin order cancelled','Order Dibatalkan','/admin/order/show/',1,'2016-11-25 18:37:37',NULL,NULL),
+(4,'api new order','Order Baru','/#/tabs/order/',1,'2016-12-18 01:54:01',NULL,NULL),
+(5,'api order delivered','Order Diterima','/#/tabs/order/',1,'2016-12-18 01:54:36',NULL,NULL),
+(6,'api order cancelled','Order Dibatalkan','/#/tabs/order/',1,'2016-12-18 01:55:00',NULL,NULL);
 
 UNLOCK TABLES;
 
@@ -1163,17 +1166,13 @@ DROP TABLE IF EXISTS `notifications`;
 
 CREATE TABLE `notifications` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
   `subject` varchar(200) NOT NULL,
   `link` varchar(200) NOT NULL,
-  `read_at` datetime DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  KEY `read_at` (`read_at`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -9498,7 +9497,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 
 insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',278,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 18:40:31',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-11-25 18:40:31');
+(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 18:40:31',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-11-25 18:40:31');
 
 UNLOCK TABLES;
 

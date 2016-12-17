@@ -2,6 +2,8 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Notification;
+use Application\Models\NotificationTemplate;
 use Application\Models\Order;
 use Application\Models\OrderItem;
 use Application\Models\ProductPrice;
@@ -66,14 +68,15 @@ class OrdersController extends ControllerBase {
 				break;
 			}
 		} while (1);
-		$order->merchant_id = User::findFirst([
+		$merchant                  = User::findFirst([
 			'conditions' => 'status = :status: AND role_id = :role_id: AND id = :id:',
 			'bind'       => [
 				'status'  => array_search('ACTIVE', User::STATUS),
 				'role_id' => Role::MERCHANT,
 				'id'      => $this->_input->merchant_id,
 			],
-		])->id;
+		]);
+		$order->merchant_id        = $merchant->id;
 		$order->name               = $this->_access_token->user->name;
 		$order->phone              = $this->_access_token->user->phone;
 		$order->address            = $this->_input->address;
@@ -99,8 +102,30 @@ class OrdersController extends ControllerBase {
 		$order->final_bill    = $order->original_bill;
 		$order->items         = $order_items;
 		if ($order->validation() && $order->create()) {
-			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Pemesanan berhasil!';
+			$this->_response['status']   = 1;
+			$this->_response['message']  = 'Pemesanan berhasil!';
+			$admin_new_order_template    = NotificationTemplate::findFirstByName('admin new order');
+			$admin_notification          = new Notification;
+			$admin_notification->subject = $admin_new_order_template->subject;
+			$admin_notification->link    = $admin_new_order_template->url . $order->id;
+			$admins                      = User::find([
+				'conditions' => 'role_id IN ({role_ids:array}) AND status = :status:',
+				'bind'       => [
+					'role_ids' => [Role::SUPER_ADMIN, Role::ADMIN],
+					'status'   => array_search('ACTIVE', User::STATUS),
+				],
+			]);
+			foreach ($admins as $admin) {
+				$recipients[] = $admin;
+			}
+			$admin_notification->recipients    = $recipients;
+			$admin_notification->create();
+			$merchant_new_order_template       = NotificationTemplate::findFirstByName('api new order');
+			$merchant_notification             = new Notification;
+			$merchant_notification->subject    = $merchant_new_order_template->subject;
+			$merchant_notification->link       = $merchant_new_order_template->url . $order->id;
+			$merchant_notification->recipients = [$merchant];
+			$merchant_notification->create();
 		} else {
 			$errors = [];
 			foreach ($order->getMessages() as $error) {

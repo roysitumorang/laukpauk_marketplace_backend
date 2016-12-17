@@ -8,10 +8,8 @@ use Phalcon\Validation\Validator\PresenceOf;
 
 class Notification extends ModelBase {
 	public $id;
-	public $user_id;
 	public $subject;
 	public $link;
-	public $read_at;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -27,10 +25,7 @@ class Notification extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
-		]);
+		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'notification_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'recipients']);
 	}
 
 	function setSubject($subject) {
