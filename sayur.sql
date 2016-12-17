@@ -1,6 +1,6 @@
 /*
 SQLyog Ultimate
-MySQL - 10.1.19-MariaDB : Database - sayur
+MySQL - 10.1.20-MariaDB : Database - sayur
 *********************************************************************
 */
 
@@ -1103,6 +1103,27 @@ CREATE TABLE `messages` (
 /*Data for the table `messages` */
 
 LOCK TABLES `messages` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `notification_recipients` */
+
+DROP TABLE IF EXISTS `notification_recipients`;
+
+CREATE TABLE `notification_recipients` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `message_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `read_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`message_id`),
+  KEY `read_at` (`read_at`),
+  KEY `message_id` (`message_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `notification_recipients` */
+
+LOCK TABLES `notification_recipients` WRITE;
 
 UNLOCK TABLES;
 

@@ -4,19 +4,19 @@ namespace Application\Models;
 
 use Application\Models\ModelBase;
 
-class MessageRecipient extends ModelBase {
+class NotificationRecipient extends ModelBase {
 	public $id;
-	public $message_id;
+	public $notification_id;
 	public $user_id;
 	public $read_at;
 
 	function getSource() {
-		return 'message_recipients';
+		return 'notification_recipients';
 	}
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('message_id', 'Application\Models\Message', 'id', [
+		$this->belongsTo('notification_id', 'Application\Models\Notification', 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
