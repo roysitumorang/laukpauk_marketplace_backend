@@ -1112,13 +1112,13 @@ DROP TABLE IF EXISTS `notification_recipients`;
 
 CREATE TABLE `notification_recipients` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `message_id` bigint(20) NOT NULL,
+  `notification_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
   `read_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `user_id` (`user_id`,`message_id`),
+  UNIQUE KEY `user_id` (`user_id`,`notification_id`),
   KEY `read_at` (`read_at`),
-  KEY `message_id` (`message_id`)
+  KEY `notification_id` (`notification_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `notification_recipients` */
