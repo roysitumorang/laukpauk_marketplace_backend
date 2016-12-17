@@ -73,7 +73,7 @@
 						<ul>
 						{% for notification in unread_notifications %}
 							<li>
-								<a href="{{ notification.link }}" class="clearfix">
+								<a href="{{ notification.link }}" class="clearfix notification" data-id="{{ notification.id }}">
 									<span class="title">{{ notification.created_at }}</span>
 									<span class="message">{{ notification.subject }}</span>
 								</a>
@@ -123,3 +123,10 @@
 	</div>
 	<!-- end: search & user box -->
 </header>
+<script>
+	for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
+		notifications[i].onclick = function() {
+			fetch('/admin/notifications/update/' + this.dataset.id + '/read:1', {method: 'POST'})
+		}
+	}
+</script>
