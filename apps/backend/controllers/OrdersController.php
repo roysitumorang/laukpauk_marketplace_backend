@@ -38,7 +38,7 @@ class OrdersController extends ControllerBase {
 			$orders[] = $item;
 		}
 		$this->view->menu                   = $this->_menu('Order');
-		$this->view->users                  = $users;
+		$this->view->orders                 = $orders;
 		$this->view->pages                  = $pages;
 		$this->view->page                   = $paginator->getPaginate();
 		$this->view->status                 = $status;

@@ -66,13 +66,13 @@
 						<tr id="{{ order.id }}">
 							<td>{{ order.rank }}</td>
 							<td{% if order.status == 'HOLD' %} style="background:#FFCCCC"{% elseif order.status == 'COMPLETED' %} style="background:#CCFFCC"{% elseif order.status == 'CANCELLED' %} style="background:#FF0000;color:#FFFFFF"{% endif %}>
-								<font size="3">{{ order.code }}</font><br><br><strong>{{ order.status }}</strong>
-								<br>Estimated delivery: {{ order.estimated_delivery }}
+								<font size="3">#{{ order.code }}</font><br><br><strong>{{ order.status }}</strong>
+								<br>Pengantaran: {{ date('Y-m-d H:i', strtotime(order.estimated_delivery)) }}
 								{% if order.status == 'COMPLETED' %}
 								<br>Actual delivery: {{ order.actual_delivery }}
 								{% endif %}
 							</td>
-							<td>{{ order.created_at }}</td>
+							<td>{{ date('Y-m-d H:i', strtotime(order.created_at)) }}</td>
 							<td>
 								<font size="5">{{ order.name }}</font> ({{ order.buyer.name }})<br><br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.phone }}
