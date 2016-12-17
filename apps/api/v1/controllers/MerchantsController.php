@@ -46,9 +46,10 @@ class MerchantsController extends ControllerBase {
 			];
 		}
 		$this->_response['status'] = 1;
-		$this->_response['data']   = [
-			'merchants'  => $merchants,
-		];
+		if (!count($merchants)) {
+			$this->_response['message'] = 'Maaf, daerah Anda di luar wilayah operasional Kami.';
+		}
+		$this->_response['data']['merchants'] = $merchants;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
