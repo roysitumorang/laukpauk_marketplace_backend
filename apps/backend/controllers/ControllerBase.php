@@ -40,12 +40,12 @@ class ControllerBase extends Controller {
 			'conditions' => 'Application\Models\NotificationRecipient.read_at IS NULL',
 			'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.subject, Application\Models\Notification.link',
 			'order'      => 'Application\Models\Notification.id DESC',
-		])->toArray();
+		]);
 		$this->view->unread_messages      = $this->currentUser->getRelated('messages', [
 			'conditions' => 'Application\Models\MessageRecipient.read_at IS NULL',
 			'columns'    => 'Application\Models\Message.id, Application\Models\Message.subject, Application\Models\Message.body',
 			'order'      => 'Application\Models\Message.id DESC',
-		])->toArray();
+		]);
 	}
 
 	function notFoundAction() {

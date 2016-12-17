@@ -23,7 +23,7 @@
 			<li>
 				<a href="#" class="dropdown-toggle notification-icon" data-toggle="dropdown">
 					<i class="fa fa-envelope"></i>
-					{% if unread_messages %}
+					{% if count(unread_messages) %}
 					<span class="badge">{{ count(unread_messages) }}</span>
 					{% endif %}
 				</a>
@@ -60,7 +60,7 @@
 			<li>
 				<a href="#" class="dropdown-toggle notification-icon" data-toggle="dropdown">
 					<i class="fa fa-bell"></i>
-					{% if unread_notifications %}
+					{% if count(unread_notifications) %}
 					<span class="badge">{{ count(unread_notifications) }}</span>
 					{% endif %}
 				</a>
@@ -73,7 +73,7 @@
 						<ul>
 						{% for notification in unread_notifications %}
 							<li>
-								<a href="{{ notifications.link }}" class="clearfix">
+								<a href="{{ notification.link }}" class="clearfix">
 									<span class="title">{{ notification.created_at }}</span>
 									<span class="message">{{ notification.subject }}</span>
 								</a>
