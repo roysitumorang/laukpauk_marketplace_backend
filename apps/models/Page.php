@@ -3,8 +3,9 @@
 namespace Application\Models;
 
 use Phalcon\Image\Adapter\Gd;
+use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Image;
+use Phalcon\Validation\Validator\File as FileValidator;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
@@ -99,7 +100,9 @@ class Page extends ModelBase {
 	}
 
 	function setNewPicture(array $new_picture) {
-		$this->new_picture = $new_picture;
+		if ($new_picture['tmp_name'] && $new_picture['size'] && !$new_picture['error']) {
+			$this->new_picture = $new_picture;
+		}
 	}
 
 	function setThumbnails(array $thumbnails = null) {
@@ -152,31 +155,31 @@ class Page extends ModelBase {
 		]));
 		if ($this->new_picture) {
 			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_picture', new Image([
-				'max_size'     => $max_size,
-				'message_size' => 'ukuran file maksimal ' . $max_size,
-				'message_type' => 'format gambar harus JPG atau PNG',
-				'allowEmpty'   => true,
+			$validator->add('new_picture', new FileValidator([
+				'maxSize'      => $max_size,
+				'messageSize'  => 'ukuran file maksimal ' . $max_size,
+				'allowedTypes' => ['image/jpeg', 'image/png'],
+				'messageType'  => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		return $this->validate($validator);
 	}
 
 	function beforeSave() {
-		if (!$this->_newPictureIsValid() || $this->picture) {
-			return true;
+		if ($this->new_picture && !$this->picture) {
+			$random = new Random;
+			do {
+				$this->picture = $random->hex(16) . '.jpg';
+				if (!static::findFirstByPicture($this->picture)) {
+					break;
+				}
+			} while (1);
 		}
-		do {
-			$this->picture = bin2hex(random_bytes(16)) . '.jpg';
-			if (!is_readable($this->_upload_config->path . $this->picture) && !static::findFirstByPicture($this->picture)) {
-				break;
-			}
-		} while (1);
 	}
 
 	function beforeUpdate() {
 		parent::beforeUpdate();
-		if ($this->_newPictureIsValid()) {
+		if ($this->new_picture) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
@@ -186,7 +189,7 @@ class Page extends ModelBase {
 	}
 
 	function afterSave() {
-		if (!$this->_newPictureIsValid()) {
+		if (!$this->new_picture) {
 			return true;
 		}
 		$picture = $this->_upload_config->path . $this->picture;
@@ -231,9 +234,5 @@ class Page extends ModelBase {
 		$this->picture = null;
 		$this->setThumbnails([]);
 		$this->save();
-	}
-
-	private function _newPictureIsValid() {
-		return $this->new_picture['tmp_name'] && !$this->new_picture['error'] && $this->new_picture['size'];
 	}
 }
