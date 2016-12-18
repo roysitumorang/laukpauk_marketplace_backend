@@ -15,19 +15,13 @@ class UsersController extends ControllerBase {
 		}
 		$village_id    = filter_var($this->_input->village_id, FILTER_VALIDATE_INT);
 		$user          = new User;
-		if ($village_id) {
-			$user->village = Village::findFirst($village_id);
-		}
-		$user->role_id = Role::BUYER;
+		$user->village = Village::findFirst($village_id);
 		$user->setName($this->_input->name);
 		$user->setNewPassword($this->_input->new_password);
 		$user->setNewPasswordConfirmation($this->_input->new_password);
-		$user->setPhone($this->_input->phone);
+		$user->setMobilePhone($this->_input->mobile_phone);
 		$user->setDeposit(0);
-		$user->setBuyPoint(0);
-		$user->setAffiliatePoint(0);
-		$user->setReward(0);
-		$user->setPremium(0);
+		$user->roles = [Role::findFirstByName('Buyer')];
 		if ($user->validation() && $user->create()) {
 			$this->_response['status']                   = 1;
 			$this->_response['data']['activation_token'] = $user->activation_token;
@@ -64,7 +58,7 @@ class UsersController extends ControllerBase {
 			'current_user' => [
 				'id'             => $user->id,
 				'name'           => $user->name,
-				'phone'          => $user->phone,
+				'mobile_phone'   => $user->mobile_phone,
 				'address'        => $user->address,
 				'subdistrict_id' => $user->village->subdistrict->id,
 				'village_id'     => $user->village->id,
