@@ -1797,7 +1797,7 @@ CREATE TABLE `products` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `stock_unit` (`stock_unit`,`name`),
+  UNIQUE KEY `stock_unit` (`stock_unit`,`name`,`unit_size`),
   KEY `created_by` (`created_by`),
   KEY `product_category_id` (`product_category_id`),
   KEY `updated_by` (`updated_by`),
