@@ -4,7 +4,6 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Product;
 use Application\Models\ProductCategory;
-use Application\Models\ProductPicture;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
@@ -89,16 +88,6 @@ class ProductsController extends ControllerBase {
 			return $this->dispatcher->forward('products');
 		}
 		if ($this->request->isPost()) {
-			if ($this->dispatcher->hasParam('delete_picture')) {
-				$picture_id = $this->dispatcher->getParam('delete_picture');
-				$picture    = $product->pictures->filter(function($picture) use($picture_id) {
-					if ($picture->id == $picture_id) {
-						return $picture;
-					}
-				})[0];
-				$picture && $picture->delete();
-				return $this->response->redirect("/admin/products/update/{$product->id}");
-			}
 			if ($this->dispatcher->hasParam('published')) {
 				$product->save(['published' => $product->published ? 0 : 1]);
 				return $this->response->redirect($this->request->getQuery('next'));
@@ -113,15 +102,9 @@ class ProductsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$pictures = [];
-		foreach ($product->pictures as $picture) {
-			$picture->thumbnail = $picture->getThumbnail(600, 450);
-			$pictures[]         = $picture;
-		}
 		$this->_prepare_categories();
-		$this->view->menu     = $this->_menu('Products');
-		$this->view->product  = $product;
-		$this->view->pictures = $pictures;
+		$this->view->menu    = $this->_menu('Products');
+		$this->view->product = $product;
 	}
 
 	function deleteAction($id) {
@@ -154,37 +137,8 @@ class ProductsController extends ControllerBase {
 
 	private function _set_model_attributes(&$product) {
 		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
-		$product->setCode($this->request->getPost('code'));
 		$product->setName($this->request->getPost('name'));
-		$product->setStock($this->request->getPost('stock'));
-		$product->setWeight($this->request->getPost('weight'));
 		$product->setDescription($this->request->getPost('description'));
-		$product->setNewPermalink($this->request->getPost('new_permalink'));
 		$product->setPublished($this->request->getPost('published'));
-		$product->setStatus($this->request->getPost('status'));
-		$product->setBuyPoint($this->request->getPost('buy_point'));
-		$product->setAffiliatePoint($this->request->getPost('affiliate_point'));
-		$product->setMetaTitle($this->request->getPost('meta_title'));
-		$product->setMetaDesc($this->request->getPost('meta_desc'));
-		$product->setMetaKeyword($this->request->getPost('meta_keyword'));
-		$pictures = [];
-		for ($i = 0; $i < 5; $i++) {
-			$picture_id = filter_var($_POST['product_pictures'][$i]['id'], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-			$picture    = ProductPicture::findFirstById($picture_id) ?: new ProductPicture;
-			$position   = filter_var($_POST['product_pictures'][$i]['position'], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-			$picture->setNewFile([
-				'name'     => $_FILES['product_pictures']['name'][$i],
-				'type'     => $_FILES['product_pictures']['type'][$i],
-				'tmp_name' => $_FILES['product_pictures']['tmp_name'][$i],
-				'error'    => $_FILES['product_pictures']['error'][$i],
-				'size'     => $_FILES['product_pictures']['size'][$i],
-			]);
-			$picture->setPosition($i + 1);
-			if ($picture->id) {
-				$picture->thumbnail = $picture->getThumbnail(600, 450);
-			}
-			$pictures[] = $picture;
-		}
-		$product->pictures = $pictures;
 	}
 }

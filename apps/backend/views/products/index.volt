@@ -78,7 +78,7 @@
 							</td>
 							<td{{ background }}>
 								<a href="/admin/products/show/{{ product.id }}" title="{{ product.name }}">
-									<font size="4">#{{ product.code }} - {{ product.name }}</font>
+									<font size="4">{{ product.name }}</font>
 								</a>
 								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}">
 									{% if product.published %}
