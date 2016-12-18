@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users"><h2>Member List</h2></a>
+				<a href="/admin/users"><h2>Daftar Member</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li>
@@ -16,19 +16,19 @@
 								<i class="fa fa-home"></i>
 							</a>
 						</li>
-						<li><span>Member List</span></li>
+						<li><span>Daftar Member</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Member List</h2>
+				<h2 class="panel-title">Daftar Member</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/create" title="Tambah Member">Members Add</a><br><br>
+				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/create" title="Tambah Member">Tambah Member</a><br><br>
 				<div style="padding:10px;background:#e5f2ff;font-size:14px;color:#333333">
 					<strong>Total Members:</strong>&nbsp;{{ total_users }} members /
 					<font size="2">
@@ -78,7 +78,7 @@
 							<td>
 								<font size="4"><a href="/admin/users/show/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
 								<br>
-								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}<br>
+								<i class="fa fa-users"></i>&nbsp;&nbsp;{% for i, role in user.roles %}{% if i %}, {% endif %}{{ role }}{% endfor %}<br>
 								{% if user.email %}
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 								{% endif %}
@@ -95,22 +95,15 @@
 								{% endif %}
 							</td>
 							<td>
-								Reg Date {{ date('d M Y', strtotime(user.created_at)) }}<br>
-								<i class="fa fa-user"></i>&nbsp;
-								{% if !user.premium %}
-								<b><font color="#000099">FREE</font></b>
-								{% else %}
-								<b><font color="#009900">PREMIUM</font></b>
-								{% endif %}
+								Join Date {{ date('d M Y', strtotime(user.created_at)) }}<br>
 								<br><i class="fa fa-money"></i>&nbsp;Rp. {{ number_format(user.deposit) }}
-								<br>Points: {{ number_format(user.buy_point) }}
-								{% if user.role == 'Merchant' or user_role == 'Buyer' %}
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}">Orders: {{ user.total_orders }}</a>
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=0">Pending Orders: {{ user.total_pending_orders }} / Rp. {{ number_format(user.total_pending_bill) }}</a>
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=1">Completed Orders: {{ user.total_completed_orders }} / Rp. {{ number_format(user.total_completed_bill) }}</a>
-								<br><a href="/admin/orders?{% if user.role == 'Merchant' %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
+								{% if in_array('Merchant', user.roles) or in_array('Buyer', user_roles) %}
+								<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}">Orders: {{ user.total_orders }}</a>
+								<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=0">Pending Orders: {{ user.total_pending_orders }} / Rp. {{ number_format(user.total_pending_bill) }}</a>
+								<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=1">Completed Orders: {{ user.total_completed_orders }} / Rp. {{ number_format(user.total_completed_bill) }}</a>
+								<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
 								{% endif %}
-								{% if user.role == 'Merchant' %}
+								{% if in_array('Merchant', user.roles) %}
 								<br><a href="/admin/product_prices/index/user_id:{{ user.id }}">Products: {{ user.total_products }}</a>
 								<br><a href="/admin/service_areas/index/user_id:{{ user.id }}">Service Areas: {{ user.total_service_areas }}</a>
 								{% endif %}
@@ -139,14 +132,11 @@
 								{% if user.status == 'ACTIVE' %}
 								<a href="/admin/users/update/{{ user.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
 								{% endif %}
-								{#
-								<a href="javascript:void(0)" class="delete" data-id="{{ user.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
-								#}
 							</td>
 						</tr>
 						{% elsefor %}
 						<tr>
-							<td colspan="5">No Members List</td>
+							<td colspan="5">Belum ada member</td>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -159,7 +149,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/users/index/page:{{ i }}{% if current_status or current_role or keyword %}?{% endif %}{% if current_status %}status={{ current_status }}{% endif %}{% if current_role %}&amp;role_id={{ current_role }}{% endif %}{% if keyword %}&amp;keyword={{ keyword }}{% endif %}">{{ i }}</a>
+							<a href="/admin/users/index/page:{{ i }}{% if query_string %}?{{ query_string }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

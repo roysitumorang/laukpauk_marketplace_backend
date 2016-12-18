@@ -27,7 +27,7 @@
 						<td>
 							Role (*) :<br>
 							{% for role in roles %}
-							<input type="checkbox" name="role_id" value="{{ role.id }}"{% if in_array(role_id, role_ids) %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
+							<input type="checkbox" name="role_id[]" value="{{ role.id }}"{% if in_array(role.id, role_ids) %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
 							{% endfor %}
 						</td>
 					</tr>
@@ -77,7 +77,7 @@
 					</tr>
 					<tr>
 						<td>
-							Kecamatan<br>
+							Kecamatan (*) :<br>
 							<select name="subdistrict_id" id="subdistrict_id">
 							{% for subdistrict in subdistricts %}
 								<option value="{{ subdistrict.id }}"{% if user.village.subdistrict.id == subdistrict.id %} selected{% endif %}>{{ subdistrict.name }}</option>
@@ -87,7 +87,7 @@
 					</tr>
 					<tr>
 						<td>
-							Kelurahan<br>
+							Kelurahan (*) :<br>
 							<select name="village_id" id="village_id">
 							{% for village in current_villages %}
 								<option value="{{ village.id }}"{% if user.village.id == village.id %} selected{% endif %}>{{ village.name }}</option>
@@ -116,14 +116,6 @@
 							{{ user.created_at }}
 						</td>
 					</tr>
-					{% endif %}
-					<tr>
-						<td>
-							Deposit (Rp):<br>
-							<input type="text" name="deposit" value="{{ user.deposit }}" class="form form-control form-50" size="20">
-						</td>
-					</tr>
-					{% if user.id %}
 					<tr>
 						<td>
 							Kode Aktivasi:<br>

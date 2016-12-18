@@ -71,6 +71,7 @@ class User extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
+		$this->keepSnapshots(true);
 		$this->hasManyToMany('id', 'Application\Models\UserRole', 'user_id', 'role_id', 'Application\Models\Role', 'id', ['alias' => 'roles']);
 		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
 			'alias'      => 'village',
@@ -147,7 +148,7 @@ class User extends ModelBase {
 	}
 
 	function setDeposit($deposit) {
-		$this->deposit = $this->_filter->sanitize($deposit, 'int') ?? 0;
+		$this->deposit = filter_var($deposit, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
 	}
 
 	function setCompany($company) {
@@ -197,6 +198,7 @@ class User extends ModelBase {
 	}
 
 	function beforeValidationOnCreate() {
+		parent::beforeValidationOnCreate();
 		$random                 = new Random;
 		$this->status           = array_search('HOLD', static::STATUS);
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
@@ -214,14 +216,16 @@ class User extends ModelBase {
 		$validator = new Validation;
 		$validator->add(['name', 'mobile_phone', 'deposit'], new PresenceOf([
 			'message' => [
-				'name'            => 'nama harus diisi',
-				'mobile_phone'    => 'nomor HP harus diisi',
-				'deposit'         => 'deposit harus diisi',
+				'name'         => 'nama harus diisi',
+				'mobile_phone' => 'nomor HP harus diisi',
+				'deposit'      => 'deposit harus diisi',
 			],
 		]));
-		$validator->add('mobile_phone', new Uniqueness([
-			'message' => 'nomor HP sudah ada',
-		]));
+		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
+			$validator->add('mobile_phone', new Uniqueness([
+				'message' => 'nomor HP sudah ada',
+			]));
+		}
 		if (!$this->id || $this->new_password || $this->new_password_confirmation) {
 			$validator->add(['new_password', 'new_password_confirmation'], new PresenceOf([
 				'message' => [
@@ -281,7 +285,6 @@ class User extends ModelBase {
 	}
 
 	function beforeUpdate() {
-		parent::beforeUpdate();
 		if ($this->new_avatar) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
