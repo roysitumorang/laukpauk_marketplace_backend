@@ -130,7 +130,9 @@ class UsersController extends ControllerBase {
 		if (isset($roles['Buyer'])) {
 			$column = 'buyer_id';
 		} else if (isset($roles['Merchant'])) {
-			$column = 'merchant_id';
+			$column                    = 'merchant_id';
+			$this->view->products      = $this->db->fetchColumn('SELECT COUNT(1) FROM product_prices WHERE user_id = ?', [$user->id]);
+			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
 		}
 		if ($column) {
 			$total = $this->db->fetchOne("
@@ -148,6 +150,10 @@ class UsersController extends ControllerBase {
 					a.{$column} = ?", Db::FETCH_OBJ, [$user->id]);
 			$this->view->total = $total;
 		}
+		$this->view->menu   = $this->_menu('Members');
+		$this->view->user   = $user;
+		$this->view->status = User::STATUS;
+		$this->view->roles  = $roles;
 	}
 
 	function updateAction($id) {
