@@ -48,8 +48,7 @@ class ProductPricesController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->price = $price;
-		$this->_prepare_form_datas();
+		$this->_prepare_form_datas($price);
 	}
 
 	function updateAction($id) {
@@ -72,8 +71,7 @@ class ProductPricesController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->price = $price;
-		$this->_prepare_form_datas();
+		$this->_prepare_form_datas($price);
 	}
 
 	function deleteAction($id) {
@@ -93,7 +91,7 @@ class ProductPricesController extends ControllerBase {
 		return $this->response->redirect("/admin/product_prices/index/user_id:{$this->_user->id}");
 	}
 
-	private function _prepare_form_datas() {
+	private function _prepare_form_datas(ProductPrice $price = null) {
 		$categories = [];
 		$products   = [];
 		foreach (ProductCategory::find(['published = 1', 'order' => 'name']) as $category) {
@@ -109,5 +107,8 @@ class ProductPricesController extends ControllerBase {
 		$this->view->categories       = $categories;
 		$this->view->current_products = $products[$categories[0]->id];
 		$this->view->products_json    = json_encode($products, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		if ($price) {
+			$this->view->price = $price;
+		}
 	}
 }

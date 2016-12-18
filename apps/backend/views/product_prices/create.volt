@@ -12,7 +12,7 @@
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/users">Member List</a></span></li>
+						<li><span><a href="/admin/users">Daftar Member</a></span></li>
 						<li><span><a href="/admin/users/update/{{ user.id }}">{{ user.name }}</a></span></li>
 						<li><span><a href="/admin/product_prices/index/user_id:{{ user.id }}">Produk</a></span></li>
 						<li><span><a href="/admin/product_prices/create/user_id:{{ user.id }}">Tambah Produk</a></span></li>
