@@ -12,26 +12,35 @@ class ProductsController extends ControllerBase {
 		$limit               = $this->config->per_page;
 		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset              = ($current_page - 1) * $limit;
-		$keyword             = $this->request->getQuery('keyword', 'string');
-		$field               = $this->request->getQuery('field', 'string');
+		$id                  = $this->request->getQuery('id', 'int');
+		$name                = $this->request->getQuery('name', 'string');
 		$product_category_id = $this->request->getQuery('product_category_id', 'int');
-		$search_fields       = [
-			'id'          => 'ID Produk',
-			'name'        => 'Nama Produk',
-			'description' => 'Detail Produk',
-			'published'   => 'Show (tampil / sembunyi)',
-		];
+		$published           = filter_var($this->request->getQuery('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+		$parameter           = [];
+		$conditions          = [[]];
 		$this->_prepare_categories();
-		if ($keyword && $field && array_key_exists($field, $search_fields)) {
-			$parameter['conditions']      = "{$field} LIKE :keyword:";
-			$parameter['bind']['keyword'] = "%{$keyword}%";
+		if ($id) {
+			$conditions[0][]  = 'id = :id:';
+			$conditions['id'] = $id;
+		}
+		if ($name) {
+			$conditions[0][]    = 'name LIKE :name:';
+			$conditions['name'] = '%' . $name . '%';
 		}
 		if ($product_category_id) {
-			$parameter['conditions']                 .= ($parameter['conditions'] ? ' AND ' : '') . "product_category_id = :product_category_id:";
-			$parameter['bind']['product_category_id'] = $product_category_id;
+			$conditions[0][]                   = 'product_category_id = :product_category_id:';
+			$conditions['product_category_id'] = $product_category_id;
+		}
+		if ($published) {
+			$conditions[0][]         = 'published = :published:';
+			$conditions['published'] = $published;
+		}
+		if ($conditions[0]) {
+			$parameter['conditions'] = implode(' AND ', array_shift($conditions));
+			$parameter['bind']       = $conditions;
 		}
 		$paginator = new PaginatorModel([
-			'data'  => Product::find($parameter['conditions'] ? $parameter : []),
+			'data'  => Product::find($parameter),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
@@ -40,20 +49,16 @@ class ProductsController extends ControllerBase {
 		$products  = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$picture = $item->pictures->getFirst();
-			if ($picture) {
-				$item->writeAttribute('thumbnail', $picture->getThumbnail(120, 100));
-			}
 			$products[] = $item;
 		}
 		$this->view->menu                = $this->_menu('Products');
-		$this->view->keyword             = $keyword;
 		$this->view->page                = $page;
 		$this->view->pages               = $pages;
 		$this->view->products            = $products;
-		$this->view->search_fields       = $search_fields;
-		$this->view->field               = $field;
+		$this->view->id                  = $id;
+		$this->view->name                = $name;
 		$this->view->product_category_id = $product_category_id;
+		$this->view->published           = $published;
 	}
 
 	function showAction($id) {

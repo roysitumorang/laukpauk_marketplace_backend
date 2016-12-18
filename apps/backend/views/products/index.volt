@@ -29,27 +29,44 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
+								<br>
 								<b>Cari berdasarkan:</b>
-								<select name="field" class="form form-control form-30">
-								{% for key, description in search_fields %}
-									<option value="{{ key }}"{% if key == field %} selected{% endif %}>{{ description }}</option>
-								{% endfor %}
-								</select>&nbsp;&nbsp;
-								<input type="text" name="keyword" size="40" value="{{ keyword }}" class="form form-control form-40">&nbsp;
+							</td>
+							<td>
+								ID :<br>
+								<input type="text" name="id" value="{{ id }}" class="form form-control" placeholder="ID">&nbsp;
+							</td>
+							<td>
+								Nama :<br>
+								<input type="text" name="name" value="{{ name }}" class="form form-control" placeholder="Nama">&nbsp;
+							</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>&nbsp;</td>
+							<td>
+								Kategori :<br>
+								<select name="product_category_id" class="form form-control">
+									<option value="">Semua</option>
+									{% for category in categories %}
+									<option value="{{ category.id}}"{% if category.id == product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
+									{% endfor %}
+								</select>
+							</td>
+							<td>
+								Status :<br>
+								<select name="published" class="form form-control">
+									<option value=""{% if published === null %} selected{% endif %}>Semua</option>
+									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
+									<option value="0"{% if published === 0 %} selected{% endif %}>Tersembunyi</option>
+								</select>
+							</td>
+							<td colspan="2" class="text-right">
+								<br>
 								<input type="submit" value="CARI" class="btn btn-info">
 							</td>
 						</tr>
 					</table>
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<select name="product_category_id" onchange="this.form.submit()" class="form form-control form-30">
-							{% for category in categories %}
-								<option value="{{ category.id}}"{% if category.id == product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
-							{% endfor %}
-							</select>
-							<span style="float:right;padding:3px"><strong>Total Produk:</strong>&nbsp;<font size="3">{{ page.total_items }} produk</font></span>
-						</div>
-					</div>
 				</form>
 				<table class="table table-striped">
 					<thead>
@@ -70,11 +87,7 @@
 						<tr id="{{ product.id }}">
 							<td{{ background }}>{{ product.rank }}</td>
 							<td{{ background }} width="5%">
-								{% if !product.thumbnail %}
 								<img src="/assets/images/no_picture_120.png" border="0">
-								{% else %}
-								<a class="image-popup-no-margins" href="/assets/images/{{ product.pictures[0].name }}"><img src="/assets/images/{{ product.thumbnail }}" width="120" height="100" border="0"></a>
-								{% endif %}
 							</td>
 							<td{{ background }}>
 								<a href="/admin/products/show/{{ product.id }}" title="{{ product.name }}">
@@ -88,7 +101,7 @@
 									{% endif %}
 								</a>
 								<br><br>
-								<strong>Category:</strong>&nbsp;{{ product.category.name }}<br>
+								<strong>Kategori:</strong>&nbsp;{{ product.category.name }}<br>
 							</td>
 							<td{{ background }}>
 								<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_stock_units/create/product_id:{{ product.id }}" title="Tambah Satuan">Tambah Satuan</a>
