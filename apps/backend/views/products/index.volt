@@ -104,6 +104,11 @@
 								<strong>Kategori:</strong>&nbsp;{{ product.category.name }}<br>
 							</td>
 							<td{{ background }}>
+								{% for stock_unit in product.stock_units %}
+								{{ stock_unit.name }}<br>
+								{% elsefor %}
+								<i style="color:red">Belum ada satuan</i><br>
+								{% endfor %}
 								<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_stock_units/create/product_id:{{ product.id }}" title="Tambah Satuan">Tambah Satuan</a>
 							</td>
 							<td{{ background }} class="text-center">
