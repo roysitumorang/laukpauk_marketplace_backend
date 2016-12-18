@@ -1788,6 +1788,7 @@ CREATE TABLE `products` (
   `product_category_id` bigint(20) NOT NULL,
   `name` varchar(150) NOT NULL,
   `description` text,
+  `unit_size` float NOT NULL,
   `stock_unit` varchar(10) NOT NULL,
   `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
