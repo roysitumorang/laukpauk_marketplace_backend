@@ -17,23 +17,27 @@ class ProductsController extends ControllerBase {
 		$product_category_id = $this->request->getQuery('product_category_id', 'int');
 		$published           = filter_var($this->request->getQuery('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 		$parameter           = [];
+		$query_string_params = [];
 		$conditions          = [[]];
 		$this->_prepare_categories();
 		if ($id) {
-			$conditions[0][]  = 'id = :id:';
-			$conditions['id'] = $id;
+			$conditions[0][]           = 'id = :id:';
+			$conditions['id']          = $id;
+			$query_string_params['id'] = $id;
 		}
 		if ($name) {
-			$conditions[0][]    = 'name LIKE :name:';
-			$conditions['name'] = '%' . $name . '%';
+			$conditions[0][]             = 'name LIKE :name:';
+			$conditions['name']          = '%' . $name . '%';
+			$query_string_params['name'] = $name;
 		}
 		if ($product_category_id) {
-			$conditions[0][]                   = 'product_category_id = :product_category_id:';
-			$conditions['product_category_id'] = $product_category_id;
+			$conditions[0][]                            = 'product_category_id = :product_category_id:';
+			$query_string_params['product_category_id'] = $product_category_id;
 		}
 		if ($published) {
-			$conditions[0][]         = 'published = :published:';
-			$conditions['published'] = $published;
+			$conditions[0][]                  = 'published = :published:';
+			$conditions['published']          = $published;
+			$query_string_params['published'] = $published;
 		}
 		if ($conditions[0]) {
 			$parameter['conditions'] = implode(' AND ', array_shift($conditions));
@@ -59,6 +63,7 @@ class ProductsController extends ControllerBase {
 		$this->view->name                = $name;
 		$this->view->product_category_id = $product_category_id;
 		$this->view->published           = $published;
+		$this->view->query_string        = http_build_query($query_string_params);
 	}
 
 	function showAction($id) {
@@ -108,8 +113,8 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_categories();
-		$this->view->menu    = $this->_menu('Products');
-		$this->view->product = $product;
+		$this->view->menu         = $this->_menu('Products');
+		$this->view->product      = $product;
 	}
 
 	function deleteAction($id) {

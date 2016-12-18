@@ -126,7 +126,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/products/index/page:{{ i }}{% if product_keyword %}?keyword={{ product_keyword }}{% endif %}">{{ i }}</a>
+							<a href="/admin/products/index/page:{{ i }}{% if query_string %}?{{ query_string }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
