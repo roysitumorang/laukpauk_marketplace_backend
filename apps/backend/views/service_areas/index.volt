@@ -8,19 +8,19 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/update/{{ user.id }}"><h2>Update Member</h2></a>
+				<a href="/admin/users/update/{{ user.id }}"><h2>Update Member #{{ user.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/users">Member List</a></span></li>
-						<li><span><a href="/admin/users/update/{{ user.id }}">Update Member</a></span></li>
+						<li><span><a href="/admin/users/update/{{ user.id }}">Update Member #{{ user.id }}</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Update Member:&nbsp;&nbsp;{{ user.name }}</h2>
+				<h2 class="panel-title">Update Member #{{ user.id }}</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->

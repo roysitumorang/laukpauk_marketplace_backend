@@ -7,7 +7,6 @@ use Application\Models\ProductCategory;
 use Application\Models\ProductPrice;
 use Application\Models\User;
 use Exception;
-use Phalcon\Db;
 
 class ProductPricesController extends ControllerBase {
 	private $_user;
@@ -25,12 +24,8 @@ class ProductPricesController extends ControllerBase {
 
 	function indexAction() {
 		$prices = [];
-		$result = $this->db->query("SELECT a.id, a.product_id, b.name AS product, c.name AS category, a.value, a.unit_size, b.stock_unit, a.published, a.order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
-		$result->setFetchMode(Db::FETCH_OBJ);
-		$i      = 0;
-		while ($price = $result->fetch()) {
-			$price->rank = ++$i;
-			$prices[]    = $price;
+		foreach ($this->_user->getRelated('product_prices') as $price) {
+			$prices[] = $price;
 		}
 		$this->view->prices = $prices;
 		$this->_prepare_form_datas();
@@ -40,9 +35,8 @@ class ProductPricesController extends ControllerBase {
 		$price = new ProductPrice;
 		if ($this->request->isPost()) {
 			$product_id                = $this->request->getPost('product_id', 'int');
-			$price->product            = Product::findFirst(['published = 1 AND id = :id:', 'bind' => ['id' => $product_id]]);
+			$price->product            = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
 			$price->value              = $this->request->getPost('value', 'int');
-			$price->unit_size          = $this->request->getPost('unit_size', 'float');
 			$price->order_closing_hour = $this->request->getPost('order_closing_hour');
 			$price->user               = $this->_user;
 			if ($price->validation() && $price->create()) {
@@ -71,7 +65,6 @@ class ProductPricesController extends ControllerBase {
 				$product_id                = $this->request->getPost('product_id', 'int');
 				$price->product            = Product::findFirst(['published = 1 AND id = :id:', 'bind' => ['id' => $product_id]]);
 				$price->value              = $this->request->getPost('value', 'int');
-				$price->unit_size          = $this->request->getPost('unit_size', 'float');
 				$price->order_closing_hour = $this->request->getPost('order_closing_hour');
 				$price->user               = $this->_user;
 			}
@@ -116,7 +109,6 @@ class ProductPricesController extends ControllerBase {
 		}
 		$this->view->menu             = $this->_menu('Members');
 		$this->view->user             = $this->_user;
-		$this->view->sizes            = ProductPrice::SIZES;
 		$this->view->categories       = $categories;
 		$this->view->current_products = $products[$categories[0]->id];
 		$this->view->products_json    = json_encode($products, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);

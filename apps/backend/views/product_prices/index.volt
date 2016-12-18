@@ -8,28 +8,28 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/update/{{ user.id }}"><h2>Produk</h2></a>
+				<a href="/admin/users/update/{{ user.id }}"><h2>Update Member #{{ user.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/users">Member List</a></span></li>
-						<li><span><a href="/admin/users/update/{{ user.id }}">Update Member</a></span></li>
+						<li><span><a href="/admin/users/update/{{ user.id }}">Update Member #{{ user.id }}</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Produk:&nbsp;&nbsp;{{ user.name }}</h2>
+				<h2 class="panel-title">Update Member #{{ user.id }}</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_prices/create/user_id:{{ user.id }}">New Product</a></p>
 				<div class="tabs">
 					{{ partial('partials/tabs_user', ['user': user, 'expand': 'products']) }}
 					<div class="tab-content">
 						<div id="areas" class="tab-pane active">
+							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_prices/create/user_id:{{ user.id }}">Tambah Produk</a></p>
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -42,12 +42,12 @@
 									</tr>
 								</thead>
 								<tbody>
-								{% for price in prices %}
+								{% for i, price in prices %}
 									<tr>
-										<td>{{ price.rank }}</td>
-										<td>{{ price.category }}</td>
-										<td>{{ price.product }}</td>
-										<td>Rp. {{ number_format(price.value) }} @ {{ price.unit_size }} {{ price.stock_unit }}</td>
+										<td style="text-right">{{ i + 1 }}</td>
+										<td>{{ price.product.category.name }}</td>
+										<td>{{ price.product.name }}</td>
+										<td>Rp. {{ number_format(price.value) }}</td>
 										<td class="text-center">{{ price.order_closing_hour|default('-') }}</td>
 										<td>
 											<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ price.id }}" class="publish">{% if !price.published %}<font color="#FF0000">{% endif %}<i class="fa fa-eye fa-2x">{% if !price.published %}</font>{% endif %}</i></a>

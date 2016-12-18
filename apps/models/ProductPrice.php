@@ -4,16 +4,14 @@ namespace Application\Models;
 
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Digit;
-use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class ProductPrice extends ModelBase {
 	public $id;
 	public $user_id;
-	public $product_stock_unit_id;
+	public $product_id;
 	public $value;
-	public $unit_size;
 	public $published;
 	public $order_closing_hour;
 	public $created_by;
@@ -22,12 +20,6 @@ class ProductPrice extends ModelBase {
 	public $updated_at;
 
 	private $_filter;
-
-	const SIZES = [
-		'1.0'  => 'satu',
-		'0.5'  => 'setengah',
-		'0.25' => 'seperempat',
-	];
 
 	function getSource() {
 		return 'product_prices';
@@ -45,8 +37,8 @@ class ProductPrice extends ModelBase {
 			'reusable'   => true,
 			'foreignKey' => ['allowNulls' => false],
 		]);
-		$this->belongsTo('product_stock_unit_id', 'Application\Models\ProductStockUnit', 'id', [
-			'alias'      => 'stock_unit',
+		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
+			'alias'      => 'product',
 			'reusable'   => true,
 			'foreignKey' => ['allowNulls' => false],
 		]);
@@ -54,10 +46,6 @@ class ProductPrice extends ModelBase {
 
 	function setValue($value) {
 		$this->value = $this->_filter->sanitize($value, 'int') ?: null;
-	}
-
-	function setUnitSize($unit_size) {
-		$this->unit_size = $this->_filter->sanitize($unit_size, 'float') ?: 1;
 	}
 
 	function setOrderClosingHour($order_closing_hour) {
@@ -72,20 +60,13 @@ class ProductPrice extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['value', 'unit_size'], new PresenceOf([
-			'message' => [
-				'value'     => 'harga harus diisi',
-				'unit_size' => 'jumlah satuan harus diisi',
-			]
+		$validator->add('value', new PresenceOf([
+			'message' => 'harga harus diisi',
 		]));
 		$validator->add('value', new Digit([
 			'message' => 'harga harus diisi dalam bentuk angka',
 		]));
-		$validator->add('unit_size', new InclusionIn([
-			'domain'  => array_keys(static::SIZES),
-			'message' => 'jumlah satuan harus diantara 1/4, 1/2 atau 1',
-		]));
-		$validator->add(['user_id', 'product_stock_unit_id', 'unit_size'], new Uniqueness([
+		$validator->add(['user_id', 'product_id'], new Uniqueness([
 			'message' => 'produk sudah ada',
 		]));
 		return $this->validate($validator);

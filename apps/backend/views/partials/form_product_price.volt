@@ -30,26 +30,10 @@
 				<input type="text" name="value" value="{{ price.value }}" class="form form-control">
 			</td>
 			<td class="text-right">
-				<b>Satuan :</b>
-			</td>
-			<td>
-				<select name="unit_size" class="form form-control form-50">
-					{% for size, label in sizes %}
-					<option value="{{ size }}"{% if size == price.unit_size %} selected{% endif %}>{{ label }}</option>
-					{% endfor %}
-				</select>&nbsp;
-				<span id="stock_unit">{{ price.product.stock_unit }}</span>
-			</td>
-		</tr>
-		<tr>
-			<td class="text-right">
 				<b>Jam Order Maksimal :</b>
 			</td>
 			<td>
 				<input type="text" name="order_closing_hour" value="{{ price.order_closing_hour }}" class="form form-control form-30 text-center" size="5">
-			</td>
-			<td class="text-right"></td>
-			<td>
 				<button type="submit" class="btn btn-info">SIMPAN</button>
 			</td>
 		</tr>
