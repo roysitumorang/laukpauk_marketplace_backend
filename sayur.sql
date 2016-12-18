@@ -9419,7 +9419,7 @@ CREATE TABLE `user_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `role_id` bigint(20) NOT NULL,
-  `created_by` bigint(20) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`role_id`),
