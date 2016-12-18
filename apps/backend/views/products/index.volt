@@ -8,18 +8,18 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products"><h2>Produk List</h2></a>
+				<a href="/admin/products"><h2>Daftar Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span>Produk List</span></li>
+						<li><span>Daftar Produk</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Produk List</h2>
+				<h2 class="panel-title">Daftar Produk</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
@@ -82,7 +82,6 @@
 						<tr>
 							<th width="25" class="text-center"><b>No</b></th>
 							<th colspan="2" class="text-center"><b>Produk</b></th>
-							<th class="text-center"><b>Satuan</b></th>
 							<th class="text-center"><b>#</b></th>
 						</tr>
 					</thead>
@@ -94,14 +93,18 @@
 							{% set background = ' style="opacity:0.4;filter:alpha(opacity=40)"' %}
 						{% endif %}
 						<tr id="{{ product.id }}">
-							<td{{ background }}>{{ product.rank }}</td>
+							<td{{ background }} class="text-right">{{ product.rank }}</td>
 							<td{{ background }} width="5%">
 								<img src="/assets/images/no_picture_120.png" border="0">
 							</td>
 							<td{{ background }}>
-								<a href="/admin/products/show/{{ product.id }}" title="{{ product.name }}">
-									<font size="4">{{ product.name }}</font>
-								</a>
+								<font size="4">{{ product.name }}</font><br>
+								<strong>ID :</strong>&nbsp;#{{ product.id }}<br>
+								<strong>Satuan :</strong>&nbsp;{{ product.stock_unit }}<br>
+								<strong>Kategori :</strong>&nbsp;{{ product.category.name }}<br>
+							</td>
+							<td{{ background }} class="text-center">
+								<a href="/admin/products/update/{{ product.id}}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}">
 									{% if product.published %}
 									<i class="fa fa-eye fa-2x"></i>
@@ -109,25 +112,12 @@
 									<font color="#FF0000"><i class="fa fa-eye-slash fa-2x"></i></font>
 									{% endif %}
 								</a>
-								<br><br>
-								<strong>Kategori:</strong>&nbsp;{{ product.category.name }}<br>
-							</td>
-							<td{{ background }}>
-								{% for stock_unit in product.stock_units %}
-								{{ stock_unit.name }}<br>
-								{% elsefor %}
-								<i style="color:red">Belum ada satuan</i><br>
-								{% endfor %}
-								<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_stock_units/create/product_id:{{ product.id }}" title="Tambah Satuan">Tambah Satuan</a>
-							</td>
-							<td{{ background }} class="text-center">
-								<a href="/admin/products/update/{{ product.id}}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
 								<a href="javascript:void(0)" data-id="{{ product.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="5"><i>Belum ada produk</i></td>
+							<td colspan="4"><i>Belum ada produk</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>

@@ -11,6 +11,7 @@ class Product extends ModelBase {
 	public $product_category_id;
 	public $name;
 	public $description;
+	public $stock_unit;
 	public $published;
 	public $created_by;
 	public $created_at;
@@ -39,7 +40,7 @@ class Product extends ModelBase {
 			],
 		]);
 		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
-		$this->hasMany('id', 'Application\Models\ProductStockUnit', 'product_id', ['alias' => 'stock_units']);
+		$this->hasMany('id', 'Application\Models\ProductPrice', 'product_id', ['alias' => 'prices']);
 	}
 
 	function setName($name) {
@@ -52,36 +53,38 @@ class Product extends ModelBase {
 		}
 	}
 
+	function setStockUnit($stock_unit) {
+		$this->stock_unit = $this->_filter->sanitize($stock_unit, ['string', 'trim']);
+	}
+
 	function setPublished($published) {
 		$this->published = $this->_filter->sanitize($published, 'int');
 	}
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add('name', new PresenceOf([
-			'message' => 'nama harus diisi',
+		$validator->add(['name', 'stock_unit'], new PresenceOf([
+			'message' => [
+				'name'       => 'nama harus diisi',
+				'stock_unit' => 'satuan harus diisi',
+			],
 		]));
-		if ($this->getSnapshotData()['name'] != $this->name) {
-			$validator->add('name', new Uniqueness([
-				'convert' => function(array $values) : array {
-					$values['name'] = strtolower($values['name']);
-					return $values;
-				},
-				'message' => 'nama sudah ada',
-			]));
-		}
+		$validator->add('name', new Uniqueness([
+			'convert' => function(array $values) : array {
+				$values['name'] = strtolower($values['name']);
+				return $values;
+			},
+			'message' => 'nama sudah ada',
+		]));
+		$validator->add(['name', 'stock_unit'], new Uniqueness([
+			'message' => 'nama dan satuan sudah ada',
+		]));
 		return $this->validate($validator);
 	}
 
 	function beforeDelete() {
 		foreach ($this->pictures as $picture) {
 			$picture->delete();
-		}
-		foreach ($this->variants as $variant) {
-			$variant->delete();
-		}
-		foreach ($this->dimensions as $dimension) {
-			$dimension->delete();
 		}
 	}
 }

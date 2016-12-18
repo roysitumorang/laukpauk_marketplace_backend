@@ -67,22 +67,15 @@ class ProductsController extends ControllerBase {
 		$this->view->query_string        = http_build_query($query_string_params);
 	}
 
-	function showAction($id) {
-		if (!$category = ProductCategory::findFirst($id)) {
-			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward('products');
-		}
-	}
-
 	function createAction() {
 		$product  = new Product;
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($product);
 			if ($product->validation() && $product->create()) {
-				$this->flashSession->success('Penambahan data berhasil.');
+				$this->flashSession->success('Penambahan produk berhasil.');
 				return $this->response->redirect('/admin/products');
 			}
-			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
+			$this->flashSession->error('Penambahan produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
@@ -95,7 +88,7 @@ class ProductsController extends ControllerBase {
 
 	function updateAction($id) {
 		if (!$product = Product::findFirst($id)) {
-			$this->flashSession->error('Data tidak ditemukan.');
+			$this->flashSession->error('Produk tidak ditemukan.');
 			return $this->dispatcher->forward('products');
 		}
 		if ($this->request->isPost()) {
@@ -105,10 +98,10 @@ class ProductsController extends ControllerBase {
 			}
 			$this->_set_model_attributes($product);
 			if ($product->validation() && $product->update()) {
-				$this->flashSession->success('Update data berhasil.');
+				$this->flashSession->success('Update produk berhasil.');
 				return $this->response->redirect("/admin/products/update/{$product->id}");
 			}
-			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
+			$this->flashSession->error('Update produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
@@ -120,10 +113,10 @@ class ProductsController extends ControllerBase {
 
 	function deleteAction($id) {
 		if (!$product = Product::findFirst($id)) {
-			$this->flashSession->error('Data tidak ditemukan.');
+			$this->flashSession->error('Produk tidak ditemukan.');
 		} else {
 			$product->delete();
-			$this->flashSession->success('Data berhasil dihapus');
+			$this->flashSession->success('Produk berhasil dihapus');
 		}
 		return $this->response->redirect('/admin/products');
 	}
@@ -150,6 +143,7 @@ class ProductsController extends ControllerBase {
 		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
 		$product->setName($this->request->getPost('name'));
 		$product->setDescription($this->request->getPost('description'));
+		$product->setStockUnit($this->request->getPost('stock_unit'));
 		$product->setPublished($this->request->getPost('published'));
 	}
 }

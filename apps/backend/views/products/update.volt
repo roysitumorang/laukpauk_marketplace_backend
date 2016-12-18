@@ -8,19 +8,19 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products/create"><h2>Tambah Produk</h2></a>
+				<a href="/admin/products/update/{{ product.id }}"><h2>Update Produk #{{ product.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/products">Produk List</a></span></li>
-						<li><span>Update Produk</span></li>
+						<li><span><a href="/admin/products">Daftar Produk</a></span></li>
+						<li><span>Update Produk #{{ product.id}}</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Update Produk {{ product.name }}</h2>
+				<h2 class="panel-title">Update Produk #{{ product.id }}</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
