@@ -20,7 +20,6 @@ class User extends ModelBase {
 		-1 => 'SUSPENDED',
 	];
 	const GENDERS       = ['Pria', 'Wanita'];
-	const MEMBERSHIPS   = ['Free', 'Premium'];
 	const BUSINESS_DAYS = [
 		'Minggu',
 		'Senin',
@@ -32,7 +31,6 @@ class User extends ModelBase {
 	];
 
 	public $id;
-	public $role_id;
 	public $name;
 	public $email;
 	public $password;
@@ -40,29 +38,17 @@ class User extends ModelBase {
 	public $new_password_confirmation;
 	public $address;
 	public $village_id;
-	public $phone;
-	public $mobile;
-	public $premium;
-	public $affiliate_link;
+	public $mobile_phone;
 	public $status;
 	public $activated_at;
 	public $verified_at;
 	public $activation_token;
 	public $password_reset_token;
-	public $last_seen;
 	public $deposit;
-	public $ktp;
 	public $company;
-	public $npwp;
 	public $registration_ip;
-	public $twitter_id;
-	public $google_id;
-	public $facebook_id;
-	public $reward;
 	public $gender;
 	public $date_of_birth;
-	public $buy_point;
-	public $affiliate_point;
 	public $avatar;
 	public $new_avatar;
 	public $thumbnails;
@@ -85,14 +71,7 @@ class User extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('role_id', 'Application\Models\Role', 'id', [
-			'alias'      => 'role',
-			'reusable'   => true,
-			'foreignKey' => [
-				'allowNulls' => false,
-				'message'    => 'role harus diisi',
-			],
-		]);
+		$this->hasManyToMany('id', 'Application\Models\UserRole', 'user_id', 'role_id', 'Application\Models\Role', 'id', ['alias' => 'roles']);
 		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
 			'alias'      => 'village',
 			'reusable'   => true,
@@ -139,24 +118,8 @@ class User extends ModelBase {
 		}
 	}
 
-	function setPhone($phone) {
-		$this->phone = $this->_filter->sanitize($phone, 'int');
-	}
-
-	function setMobile($mobile) {
-		if ($mobile) {
-			$this->mobile = $this->_filter->sanitize($mobile, 'int');
-		}
-	}
-
-	function setPremium($premium) {
-		$this->premium = $this->_filter->sanitize($premium, 'int');
-	}
-
-	function setAffiliateLink($affiliate_link) {
-		if ($affiliate_link) {
-			$this->affiliate_link = $this->_filter->sanitize($affiliate_link, ['string', 'trim']);
-		}
+	function setMobilePhone($mobile_phone) {
+		$this->mobile_phone = $this->_filter->sanitize($mobile_phone, 'int');
 	}
 
 	function setStatus($status) {
@@ -183,54 +146,14 @@ class User extends ModelBase {
 		$this->password_reset_token = $password_reset_token;
 	}
 
-	function setLastSeen($last_seen) {
-		if ($last_seen) {
-			$this->last_seen = $this->_filter->sanitize($last_seen, ['string', 'trim']);
-		}
-	}
-
 	function setDeposit($deposit) {
 		$this->deposit = $this->_filter->sanitize($deposit, 'int') ?? 0;
-	}
-
-	function setKtp($ktp) {
-		if ($ktp) {
-			$this->ktp = $this->_filter->sanitize($ktp, ['string', 'trim']);
-		}
 	}
 
 	function setCompany($company) {
 		if ($company) {
 			$this->company = $this->_filter->sanitize($company, ['string', 'trim']);
 		}
-	}
-
-	function setNpwp($npwp) {
-		if ($npwp) {
-			$this->npwp = $this->_filter->sanitize($npwp, ['string', 'trim']);
-		}
-	}
-
-	function setTwitterId($twitter_id) {
-		if ($twitter_id) {
-			$this->twitter_id = $this->_filter->sanitize($twitter_id, 'int');
-		}
-	}
-
-	function setGoogleId($google_id) {
-		if ($google_id) {
-			$this->google_id = $this->_filter->sanitize($google_id, 'int');
-		}
-	}
-
-	function setFacebookId($facebook_id) {
-		if ($facebook_id) {
-			$this->facebook_id = $this->_filter->sanitize($facebook_id, 'int');
-		}
-	}
-
-	function setReward($reward) {
-		$this->reward = $this->_filter->sanitize($reward, 'int') ?? 0;
 	}
 
 	function setGender($gender) {
@@ -243,14 +166,6 @@ class User extends ModelBase {
 		if ($date_of_birth) {
 			$this->date_of_birth = $this->_filter->sanitize($date_of_birth, ['string', 'trim']);
 		}
-	}
-
-	function setBuyPoint($buy_point) {
-		$this->buy_point = $this->_filter->sanitize($buy_point, 'int') ?? 0;
-	}
-
-	function setAffiliatePoint($affiliate_point) {
-		$this->affiliate_point = $this->_filter->sanitize($affiliate_point, 'int') ?? 0;
 	}
 
 	function setNewAvatar(array $new_avatar) {
@@ -297,18 +212,15 @@ class User extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'phone', 'deposit', 'reward', 'buy_point', 'affiliate_point'], new PresenceOf([
+		$validator->add(['name', 'mobile_phone', 'deposit'], new PresenceOf([
 			'message' => [
 				'name'            => 'nama harus diisi',
-				'phone'           => 'nomor HP harus diisi',
+				'mobile_phone'    => 'nomor HP harus diisi',
 				'deposit'         => 'deposit harus diisi',
-				'reward'          => 'reward harus diisi',
-				'buy_point'       => 'poin buy harus diisi',
-				'affiliate_point' => 'poin affiliasi harus diisi',
 			],
 		]));
-		$validator->add('phone', new Uniqueness([
-			'message' => 'no telepon sudah ada',
+		$validator->add('mobile_phone', new Uniqueness([
+			'message' => 'nomor HP sudah ada',
 		]));
 		if (!$this->id || $this->new_password || $this->new_password_confirmation) {
 			$validator->add(['new_password', 'new_password_confirmation'], new PresenceOf([
@@ -340,13 +252,8 @@ class User extends ModelBase {
 				'message' => 'tanggal lahir tidak valid',
 			]));
 		}
-		$validator->add(['deposit', 'reward', 'buy_point', 'affiliate_point'], new Digit([
-			'message' => [
-				'deposit'         => 'deposit harus dalam bentuk angka',
-				'reward'          => 'reward harus dalam bentuk angka',
-				'buy_point'       => 'poin buy harus dalam bentuk angka',
-				'affiliate_point' => 'poin affiliasi harus dalam bentuk angka',
-			],
+		$validator->add('deposit', new Digit([
+			'message' => 'deposit harus dalam bentuk angka',
 		]));
 		if ($this->new_avatar) {
 			$max_size = $this->_upload_config->max_size;

@@ -10,59 +10,46 @@ use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class UsersController extends ControllerBase {
 	function indexAction() {
-		$limit             = $this->config->per_page;
-		$current_page      = $this->dispatcher->getParam('page', 'int') ?: 1;
-		$offset            = ($current_page - 1) * $limit;
-		$status            = User::STATUS;
-		$roles             = [];
-		$current_status    = $this->request->getQuery('status', 'int');
+		$limit          = $this->config->per_page;
+		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset         = ($current_page - 1) * $limit;
+		$status         = User::STATUS;
+		$roles          = [];
+		$current_status = $this->request->getQuery('status', 'int');
 		if ($current_status === null || !array_key_exists($current_status, $status)) {
 			$current_status = array_search('ACTIVE', $status);
 		}
-		$role_items        = Role::find([
+		$role_items = Role::find([
 			'conditions' => 'id > ' . Role::ANONYMOUS,
 			'columns'    => 'id, name',
 		]);
 		foreach ($role_items as $role) {
 			$roles[$role->id] = $role;
 		}
-		$current_role      = $this->request->getQuery('role_id', 'int');
+		$current_role = $this->request->getQuery('role_id', 'int');
 		if ($current_role && !array_key_exists($current_role, $roles)) {
 			$current_role = null;
 		}
-		$keyword           = $this->request->getQuery('keyword', 'string');
-		$builder           = $this->modelsManager->createBuilder()
+		$keyword = $this->request->getQuery('keyword', 'string');
+		$builder = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
-				'a.role_id',
 				'a.name',
 				'a.email',
 				'a.password',
 				'a.address',
 				'a.village_id',
-				'a.phone',
-				'a.mobile',
-				'a.premium',
-				'a.affiliate_link',
+				'a.mobile_phone',
 				'a.status',
 				'a.activated_at',
 				'a.verified_at',
 				'a.activation_token',
 				'a.password_reset_token',
-				'a.last_seen',
 				'a.deposit',
-				'a.ktp',
 				'a.company',
-				'a.npwp',
 				'a.registration_ip',
-				'a.twitter_id',
-				'a.google_id',
-				'a.facebook_id',
-				'a.reward',
 				'a.gender',
 				'a.date_of_birth',
-				'a.buy_point',
-				'a.affiliate_point',
 				'a.avatar',
 				'a.thumbnails',
 				'a.business_days',
@@ -72,38 +59,39 @@ class UsersController extends ControllerBase {
 				'a.created_at',
 				'a.updated_by',
 				'a.updated_at',
-				'role'                   => 'b.name',
-				'village'                => 'c.name',
-				'subdistrict'            => 'd.name',
-				'total_orders'           => 'COUNT(DISTINCT e.id)',
-				'total_pending_orders'   => 'COUNT(DISTINCT f.id)',
-				'total_completed_orders' => 'COUNT(DISTINCT f.id)',
-				'total_cancelled_orders' => 'COUNT(DISTINCT h.id)',
-				'total_products'         => 'COUNT(DISTINCT i.product_id)',
-				'total_service_areas'    => 'COUNT(DISTINCT j.id)',
+				'role'                   => 'c.name',
+				'village'                => 'd.name',
+				'subdistrict'            => 'e.name',
+				'total_orders'           => 'COUNT(DISTINCT f.id)',
+				'total_pending_orders'   => 'COUNT(DISTINCT g.id)',
+				'total_completed_orders' => 'COUNT(DISTINCT h.id)',
+				'total_cancelled_orders' => 'COUNT(DISTINCT i.id)',
+				'total_products'         => 'COUNT(DISTINCT j.product_id)',
+				'total_service_areas'    => 'COUNT(DISTINCT k.id)',
 			])
 			->from(['a' => 'Application\Models\User'])
-			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
-			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
-			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
-			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', e.merchant_id, e.buyer_id)', 'e')
-			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', f.merchant_id, f.buyer_id) AND f.status = ' . array_search('HOLD', Order::STATUS), 'f')
-			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', g.merchant_id, g.buyer_id) AND g.status = ' . array_search('COMPLETED', Order::STATUS), 'g')
-			->leftJoin('Application\Models\Order', 'a.id = IF(a.role_id = ' . Role::MERCHANT . ', h.merchant_id, h.buyer_id) AND h.status = ' . array_search('CANCELLED', Order::STATUS), 'h')
-			->leftJoin('Application\Models\ProductPrice', 'a.role_id = ' . Role::MERCHANT . ' AND a.id = i.user_id AND i.published = 1', 'i')
-			->leftJoin('Application\Models\ServiceArea', 'a.id = j.user_id', 'j')
+			->join('Application\Models\UserRole', 'a.id = b.user_id', 'b')
+			->join('Application\Models\Role', 'b.role_id = c.id', 'c')
+			->leftJoin('Application\Models\Village', 'a.village_id = d.id', 'd')
+			->leftJoin('Application\Models\Subdistrict', 'd.subdistrict_id = e.id', 'e')
+			->leftJoin('Application\Models\Order', 'a.id = IF(c.id = ' . Role::MERCHANT . ', f.merchant_id, f.buyer_id)', 'f')
+			->leftJoin('Application\Models\Order', 'a.id = IF(c.id = ' . Role::MERCHANT . ', g.merchant_id, g.buyer_id) AND g.status = ' . array_search('HOLD', Order::STATUS), 'g')
+			->leftJoin('Application\Models\Order', 'a.id = IF(c.id = ' . Role::MERCHANT . ', h.merchant_id, h.buyer_id) AND h.status = ' . array_search('COMPLETED', Order::STATUS), 'h')
+			->leftJoin('Application\Models\Order', 'a.id = IF(c.id = ' . Role::MERCHANT . ', i.merchant_id, i.buyer_id) AND i.status = ' . array_search('CANCELLED', Order::STATUS), 'i')
+			->leftJoin('Application\Models\ProductPrice', 'a.id = j.user_id AND j.published = 1', 'j')
+			->leftJoin('Application\Models\ServiceArea', 'a.id = k.user_id', 'k')
 			->groupBy('a.id')
-			->orderBy('a.id DESC');
-		$builder->where('a.status = ' . $current_status);
+			->orderBy('a.id DESC')
+			->where('a.status = ' . $current_status);
 		if ($current_role) {
 			$builder->andWhere('a.role_id = ' . $current_role);
 		}
 		if ($keyword) {
 			$keyword_placeholder = "%{$keyword}%";
-			$builder->andWhere('a.name LIKE ?1 OR a.email LIKE ?2 OR phone LIKE ?3', [
-				1 => $keyword_placeholder,
-				2 => $keyword_placeholder,
-				3 => $keyword_placeholder,
+			$builder->andWhere('a.name LIKE ?0 OR a.email LIKE ?1 OR phone LIKE ?2', [
+				$keyword_placeholder,
+				$keyword_placeholder,
+				$keyword_placeholder,
 			]);
 		}
 		$paginator = new PaginatorQueryBuilder([
@@ -165,11 +153,11 @@ class UsersController extends ControllerBase {
 
 	function updateAction($id) {
 		$user = User::findFirst([
-			'id = ?1 AND status = ?2',
-			'bind'       => [
-				1 => $id,
-				2 => array_search('ACTIVE', User::STATUS),
-			]
+			'id = ?0 AND status = ?1',
+			'bind' => [
+				$id,
+				array_search('ACTIVE', User::STATUS),
+			],
 		]);
 		if (!$user) {
 			$this->flashSession->error('Data tidak ditemukan.');
@@ -197,10 +185,10 @@ class UsersController extends ControllerBase {
 
 	function activateAction($id) {
 		$user = User::findFirst([
-			'id = ?1 AND status = ?2',
+			'id = ?0 AND status = ?1',
 			'bind' => [
-				1 => $id,
-				2 => array_search('HOLD', User::STATUS),
+				$id,
+				array_search('HOLD', User::STATUS),
 			]
 		]);
 		if (!$user) {
@@ -214,10 +202,10 @@ class UsersController extends ControllerBase {
 
 	function suspendAction($id) {
 		$user = User::findFirst([
-			'id = ?1 AND status = ?2',
+			'id = ?0 AND status = ?1',
 			'bind' => [
-				1 => $id,
-				2 => array_search('ACTIVE', User::STATUS),
+				$id,
+				array_search('ACTIVE', User::STATUS),
 			]
 		]);
 		if (!$user) {
@@ -231,10 +219,10 @@ class UsersController extends ControllerBase {
 
 	function reactivateAction($id) {
 		$user = User::findFirst([
-			'id = ?1 AND status = ?2',
+			'id = ?0 AND status = ?1',
 			'bind' => [
-				1 => $id,
-				2 => array_search('SUSPENDED', User::STATUS),
+				$id,
+				array_search('SUSPENDED', User::STATUS),
 			]
 		]);
 		if (!$user) {
@@ -248,10 +236,10 @@ class UsersController extends ControllerBase {
 
 	function verifyAction($id) {
 		$user = User::findFirst([
-			'conditions' => 'id = ?1 AND status = ?2 AND verified_at IS NULL',
+			'conditions' => 'id = ?0 AND status = ?1 AND verified_at IS NULL',
 			'bind'       => [
-				1 => $id,
-				2 => array_search('ACTIVE', User::STATUS),
+				$id,
+				array_search('ACTIVE', User::STATUS),
 			]
 		]);
 		if (!$user) {
@@ -274,7 +262,6 @@ class UsersController extends ControllerBase {
 		$this->view->user             = $user;
 		$this->view->status           = User::STATUS;
 		$this->view->genders          = User::GENDERS;
-		$this->view->memberships      = User::MEMBERSHIPS;
 		$this->view->subdistricts     = $subdistricts;
 		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
 		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
@@ -282,9 +269,6 @@ class UsersController extends ControllerBase {
 	}
 
 	private function _set_model_attributes(&$user) {
-		$role = Role::findFirst($this->request->getPost('role_id', 'int'));
-		$role || $role = Role::findFirst(Role::BUYER);
-		$user->role = $role;
 		$village_id = $this->request->getPost('village_id', 'int');
 		if ($village_id) {
 			$user->village = Village::findFirst($village_id);
@@ -294,19 +278,11 @@ class UsersController extends ControllerBase {
 		$user->setNewPassword($this->request->getPost('new_password'));
 		$user->setNewPasswordConfirmation($this->request->getPost('new_password_confirmation'));
 		$user->setAddress($this->request->getPost('address'));
-		$user->setPhone($this->request->getPost('phone'));
-		$user->setMobile($this->request->getPost('mobile'));
-		$user->setPremium($this->request->getPost('premium'));
-		$user->setAffiliateLink($this->request->getPost('affiliate_link'));
+		$user->setMobilePhone($this->request->getPost('mobile_phone'));
 		$user->setDeposit($this->request->getPost('deposit'));
-		$user->setKtp($this->request->getPost('ktp'));
 		$user->setCompany($this->request->getPost('company'));
-		$user->setNpwp($this->request->getPost('npwp'));
-		$user->setReward($this->request->getPost('reward'));
 		$user->setGender($this->request->getPost('gender'));
 		$user->setDateOfBirth($this->request->getPost('date_of_birth'));
-		$user->setBuyPoint($this->request->getPost('buy_point'));
-		$user->setAffiliatePoint($this->request->getPost('affiliate_point'));
 		$user->setNewAvatar($_FILES['new_avatar']);
 		$user->setBusinessDays($this->request->getPost('business_days'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));

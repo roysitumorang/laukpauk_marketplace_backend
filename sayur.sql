@@ -9411,41 +9411,53 @@ LOCK TABLES `user_memberships` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `user_role` */
+
+DROP TABLE IF EXISTS `user_role`;
+
+CREATE TABLE `user_role` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `role_id` bigint(20) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`role_id`),
+  KEY `role_id` (`role_id`),
+  KEY `created_by` (`created_by`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+/*Data for the table `user_role` */
+
+LOCK TABLES `user_role` WRITE;
+
+insert  into `user_role`(`id`,`user_id`,`role_id`,`created_by`,`created_at`) values
+(1,1,1,1,'2016-12-18 20:35:10');
+
+UNLOCK TABLES;
+
 /*Table structure for table `users` */
 
 DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `role_id` bigint(20) NOT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(80) DEFAULT NULL,
   `password` char(60) NOT NULL,
   `address` varchar(150) DEFAULT NULL,
   `village_id` bigint(20) DEFAULT NULL,
-  `phone` varchar(20) NOT NULL,
-  `mobile` varchar(20) DEFAULT NULL,
-  `premium` tinyint(1) NOT NULL,
-  `affiliate_link` varchar(200) DEFAULT NULL,
-  `status` smallint(6) NOT NULL,
+  `mobile_phone` varchar(20) NOT NULL,
+  `status` tinyint(1) NOT NULL,
   `activated_at` datetime DEFAULT NULL,
   `verified_at` datetime DEFAULT NULL,
   `activation_token` char(32) DEFAULT NULL,
   `password_reset_token` char(32) DEFAULT NULL,
-  `last_seen` datetime DEFAULT NULL,
-  `deposit` decimal(10,0) NOT NULL,
-  `ktp` varchar(80) DEFAULT NULL,
+  `deposit` float NOT NULL,
   `company` varchar(100) DEFAULT NULL,
-  `npwp` varchar(80) DEFAULT NULL,
   `registration_ip` varchar(41) NOT NULL,
-  `twitter_id` bigint(20) DEFAULT NULL,
-  `google_id` bigint(20) DEFAULT NULL,
-  `facebook_id` bigint(20) DEFAULT NULL,
-  `reward` decimal(10,0) NOT NULL,
-  `gender` varchar(6) DEFAULT NULL,
+  `gender` tinyint(1) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `buy_point` decimal(10,0) NOT NULL,
-  `affiliate_point` decimal(10,0) NOT NULL,
   `avatar` char(36) DEFAULT NULL,
   `thumbnails` text,
   `business_days` varchar(15) DEFAULT NULL,
@@ -9456,12 +9468,9 @@ CREATE TABLE `users` (
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `phone` (`phone`),
+  UNIQUE KEY `mobile_phone` (`mobile_phone`),
   UNIQUE KEY `activation_token` (`activation_token`),
-  UNIQUE KEY `facebook_id` (`facebook_id`),
-  UNIQUE KEY `google_id` (`google_id`),
   UNIQUE KEY `password_reset_token` (`password_reset_token`),
-  UNIQUE KEY `twitter_id` (`twitter_id`),
   UNIQUE KEY `avatar` (`avatar`),
   UNIQUE KEY `email` (`email`),
   KEY `activated_at` (`activated_at`),
@@ -9469,7 +9478,6 @@ CREATE TABLE `users` (
   KEY `date_of_birth` (`date_of_birth`),
   KEY `gender` (`gender`),
   KEY `name` (`name`),
-  KEY `premium` (`premium`),
   KEY `status` (`status`),
   KEY `updated_by` (`updated_by`),
   KEY `village_id` (`village_id`)
@@ -9479,8 +9487,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`phone`,`mobile`,`premium`,`affiliate_link`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`last_seen`,`deposit`,`ktp`,`company`,`npwp`,`registration_ip`,`twitter_id`,`google_id`,`facebook_id`,`reward`,`gender`,`date_of_birth`,`buy_point`,`affiliate_point`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+62618223327','+6281265688889',0,NULL,1,'2016-10-25 01:07:27',NULL,NULL,NULL,'2016-11-25 18:40:31',0,NULL,NULL,NULL,'::1',NULL,NULL,NULL,0,'Pria','1981-07-06',0,0,NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-11-25 18:40:31');
+insert  into `users`(`id`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-18 20:41:50');
 
 UNLOCK TABLES;
 

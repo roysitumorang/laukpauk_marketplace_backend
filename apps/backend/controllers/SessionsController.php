@@ -3,8 +3,8 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\LoginHistory;
-use Application\Models\Role;
 use Application\Models\User;
+use Phalcon\Db;
 
 class SessionsController extends ControllerBase {
 	function index() {
@@ -33,18 +33,10 @@ class SessionsController extends ControllerBase {
 				$errors[] = 'Password harus diisi';
 			}
 			if (!$errors) {
-				$user = User::findFirst([
-					'email = :email: AND (role_id = :super_admin: OR role_id = :admin:) AND status = :status:',
-					'bind' => [
-						'email'       => $email,
-						'super_admin' => Role::SUPER_ADMIN,
-						'admin'       => Role::ADMIN,
-						'status'      => array_search('ACTIVE', User::STATUS),
-					],
-				]);
-				if ($user && password_verify($password, $user->password)) {
-					$login_history       = new LoginHistory;
-					$login_history->user = $user;
+				$user = $this->db->fetchOne("SELECT a.id, a.password FROM users a JOIN user_role b ON a.id = b.user_id JOIN roles c ON b.role_id = c.id WHERE a.email = '{$email}' AND a.status = 1 AND c.id IN (1, 2) GROUP BY a.id", Db::FETCH_OBJ);
+				if ($user && $this->security->checkHash($password, $user->password)) {
+					$login_history          = new LoginHistory;
+					$login_history->user_id = $user->id;
 					$login_history->create();
 					$this->session->set('user_id', $user->id);
 					return $this->response->redirect($next_url ?: '/admin/home');

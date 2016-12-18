@@ -25,6 +25,6 @@ class Role extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\User', 'role_id', ['alias'  => 'users']);
+		$this->hasManyToMany('id', 'Application\Models\UserRole', 'role_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'users']);
 	}
 }

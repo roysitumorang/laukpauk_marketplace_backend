@@ -7,7 +7,7 @@
 				<table class="table table-striped">
 					<tr>
 						<td bgcolor="#e5f2ff">
-							Password Baru (*):<br>
+							Password Baru (*) :<br>
 							<input type="password" name="new_password" size="40" class="form form-control form-50">
 							{% if user.id %}
 							<br><i>Kosongkan jika Anda tidak ingin mengubah password lama</i>
@@ -25,33 +25,27 @@
 					</tr>
 					<tr>
 						<td>
-							Role (*):<br>
+							Role (*) :<br>
 							{% for role in roles %}
-							<input type="radio" name="role_id" value="{{ role.id }}"{% if user.role.id == role.id %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
+							<input type="checkbox" name="role_id" value="{{ role.id }}"{% if in_array(role_id, role_ids) %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
 							{% endfor %}
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Nama (*):<br>
+							Nama (*) :<br>
 							<input type="text" name="name" value="{{ user.name }}" class="form form-control form-50" size="40">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Phone Number (*):<br>
-							<input type="text" name="phone" value="{{ user.phone }}" class="form form-control form-40" size="40">
+							Nomor HP (*) :<br>
+							<input type="text" name="mobile_phone" value="{{ user.mobile_phone }}" class="form form-control form-40" size="40">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Mobile Number:<br>
-							<input type="text" name="mobile" value="{{ user.mobile }}" class="form form-control form-40" size="40">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Jenis Kelamin:<br>
+							Jenis Kelamin :<br>
 							{% for gender in genders %}
 							<input type="radio" name="gender" value={{ gender }}{% if user.gender == gender %} checked{% endif %}> {{ gender }}&nbsp;&nbsp;
 							{% endfor %}
@@ -59,37 +53,25 @@
 					</tr>
 					<tr>
 						<td>
-							Tanggal Lahir:<br>
+							Tanggal Lahir :<br>
 							<input type="text" name="date_of_birth" value="{{ user.date_of_birth }}" data-plugin-datepicker data-plugin-options="{format:'yyyy-mm-dd'}" class="form form-control form-30" size="12">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							KTP / SIM / Paspor:<br>
-							<input type="text" name="ktp" value="{{ user.ktp }}" class="form form-control form-50" size="50">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Nama Usaha:<br>
+							Nama Toko (* untuk merchant) :<br>
 							<input type="text" name="company" value="{{ user.company }}" class="form form-control form-50" size="50">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							NPWP:<br>
-							<input type="text" name="npwp" value="{{ user.npwp }}" class="form form-control form-50" size="50">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Email (*):<br>
+							Email :<br>
 							<input type="text" name="email" value="{{ user.email }}" class="form form-control form-50" size="50">
 						</td>
 					</tr>
 					<tr>
 						<td>
-							Alamat:<br>
+							Alamat :<br>
 							<textarea name="address" cols="50" rows="5" class="form form-control form-50">{{ user.address }}</textarea>
 						</td>
 					</tr>
@@ -115,7 +97,7 @@
 					</tr>
 					<tr>
 						<td>
-							Hari Operasional (* untuk merchant):<br>
+							Hari Operasional (* untuk merchant) :<br>
 							{% for i, day in business_days %}
 							<input type="checkbox" name="business_days[]" value="{{ i }}"{% if in_array(i, user.business_days) %} checked{% endif %}> {{ day }}&nbsp;&nbsp;
 							{% endfor %}
@@ -123,7 +105,7 @@
 					</tr>
 					<tr>
 						<td>
-							Jam Operasional (* untuk merchant):<br>
+							Jam Operasional (* untuk merchant) :<br>
 							<input type="text" name="business_opening_hour" value="{{ user.business_opening_hour }}" class="form form-control form-20 text-center" size="5"> - <input type="text" name="business_closing_hour" value="{{ user.business_closing_hour }}" class="form form-control form-20 text-center" size="5">
 						</td>
 					</tr>
@@ -137,34 +119,8 @@
 					{% endif %}
 					<tr>
 						<td>
-							Membership (*):<br>
-							{% for value, label in memberships %}
-							<input type="radio" name="premium" value="{{ value }}"{% if user.premium == value %} checked{% endif %}> {{ label }}&nbsp;&nbsp;
-							{% endfor %}
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Dompet (Rp):<br>
+							Deposit (Rp):<br>
 							<input type="text" name="deposit" value="{{ user.deposit }}" class="form form-control form-50" size="20">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Reward (Rp):<br>
-							<input type="text" name="reward" value="{{ user.reward }}" class="form form-control form-50" size="20">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Poin Beli:<br>
-							<input type="text" name="buy_point" value="{{ user.buy_point }}" class="form form-control form-20" size="20">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Poin Affiliasi:<br>
-							<input type="text" name="affiliate_point" value="{{ user.affiliate_point }}" class="form form-control form-20" size="20">
 						</td>
 					</tr>
 					{% if user.id %}
@@ -198,26 +154,6 @@
 						<td>
 							Registration IP:<br>
 							{{ user.registration_ip }}
-						</td>
-					</tr>
-					{% endif %}
-					{% if user.id %}
-					<tr>
-						<td>
-							Twitter ID:<br>
-							{{ user.twitter_id|default('-') }}
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Google ID:<br>
-							{{ user.google_id|default('-') }}
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Facebook ID:<br>
-							{{ user.facebook_id|default('-') }}
 						</td>
 					</tr>
 					{% endif %}
