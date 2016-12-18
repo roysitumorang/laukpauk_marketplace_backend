@@ -29,7 +29,7 @@
 						<td>{{ stock_unit.name }}</td>
 						<td class="text-center">
 							<a href="/admin/product_stock_units/update/{{ stock_unit.id }}/product_id:{{ product.id}}" title="Update"><i class="fa fa-pencil-square fa-2x"></i></a>&nbsp;
-							<a href="javascript:void(0)" data-product-id="{{ product.id }}" data-id="{{ stock.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+							<a href="javascript:void(0)" data-product-id="{{ product.id }}" data-id="{{ stock_unit.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 						</td>
 					</tr>
 				{% elsefor %}
