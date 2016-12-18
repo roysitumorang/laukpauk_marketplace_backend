@@ -142,8 +142,9 @@ class ProductsController extends ControllerBase {
 	private function _set_model_attributes(&$product) {
 		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
 		$product->setName($this->request->getPost('name'));
-		$product->setDescription($this->request->getPost('description'));
+		$product->setUnitSize($this->request->getPost('unit_size'));
 		$product->setStockUnit($this->request->getPost('stock_unit'));
+		$product->setDescription($this->request->getPost('description'));
 		$product->setPublished($this->request->getPost('published'));
 	}
 }

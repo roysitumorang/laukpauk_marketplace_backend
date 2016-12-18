@@ -3,6 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -11,6 +12,7 @@ class Product extends ModelBase {
 	public $product_category_id;
 	public $name;
 	public $description;
+	public $unit_size;
 	public $stock_unit;
 	public $published;
 	public $created_by;
@@ -53,6 +55,10 @@ class Product extends ModelBase {
 		}
 	}
 
+	function setUnitSize($unit_size) {
+		$this->unit_size = $this->_filter->sanitize($unit_size, 'float');
+	}
+
 	function setStockUnit($stock_unit) {
 		$this->stock_unit = $this->_filter->sanitize($stock_unit, ['string', 'trim']);
 	}
@@ -63,11 +69,15 @@ class Product extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'stock_unit'], new PresenceOf([
+		$validator->add(['name', 'unit_size', 'stock_unit'], new PresenceOf([
 			'message' => [
 				'name'       => 'nama harus diisi',
+				'unit_size'  => 'ukuran harus diisi',
 				'stock_unit' => 'satuan harus diisi',
 			],
+		]));
+		$validator->add('unit_size', new Numericality([
+			'message' => 'ukuran harus dalam bentuk angka/desimal',
 		]));
 		$validator->add('name', new Uniqueness([
 			'convert' => function(array $values) : array {
@@ -76,8 +86,8 @@ class Product extends ModelBase {
 			},
 			'message' => 'nama sudah ada',
 		]));
-		$validator->add(['name', 'stock_unit'], new Uniqueness([
-			'message' => 'nama dan satuan sudah ada',
+		$validator->add(['name', 'unit_size', 'stock_unit'], new Uniqueness([
+			'message' => 'nama, ukuran dan satuan sudah ada',
 		]));
 		return $this->validate($validator);
 	}
