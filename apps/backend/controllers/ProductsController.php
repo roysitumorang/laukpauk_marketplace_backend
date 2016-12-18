@@ -32,9 +32,10 @@ class ProductsController extends ControllerBase {
 		}
 		if ($product_category_id) {
 			$conditions[0][]                            = 'product_category_id = :product_category_id:';
+			$conditions['product_category_id']          = $product_category_id;
 			$query_string_params['product_category_id'] = $product_category_id;
 		}
-		if ($published) {
+		if (is_int($published)) {
 			$conditions[0][]                  = 'published = :published:';
 			$conditions['published']          = $published;
 			$query_string_params['published'] = $published;
