@@ -26,7 +26,7 @@
 				<!-- Content //-->
 				{{ flashSession.output() }}
 				<div class="tabs">
-					{{ partial('partials/user_tabs', ['user': user, 'expand': 'areas']) }}
+					{{ partial('partials/tabs_user', ['user': user, 'expand': 'areas']) }}
 					<div class="tab-content">
 						<div id="areas" class="tab-pane active">
 							<table class="table table-striped">

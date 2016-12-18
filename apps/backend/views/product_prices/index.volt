@@ -27,7 +27,7 @@
 				{{ flashSession.output() }}
 				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_prices/create/user_id:{{ user.id }}">New Product</a></p>
 				<div class="tabs">
-					{{ partial('partials/user_tabs', ['user': user, 'expand': 'products']) }}
+					{{ partial('partials/tabs_user', ['user': user, 'expand': 'products']) }}
 					<div class="tab-content">
 						<div id="areas" class="tab-pane active">
 							<table class="table table-striped">

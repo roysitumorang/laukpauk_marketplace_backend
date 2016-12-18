@@ -1,6 +1,6 @@
 {{ flashSession.output() }}
 <div class="tabs">
-	{{ partial('partials/user_tabs', ['user': user, 'expand': 'profile']) }}
+	{{ partial('partials/tabs_user', ['user': user, 'expand': 'profile']) }}
 	<div class="tab-content">
 		<div id="profile" class="tab-pane active">
 			<form method="POST" action="{{ action }}" enctype="multipart/form-data">

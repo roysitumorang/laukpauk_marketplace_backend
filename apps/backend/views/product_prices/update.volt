@@ -28,7 +28,7 @@
 				<!-- Content //-->
 				{{ flashSession.output() }}
 				<div class="tabs">
-					{{ partial('partials/user_tabs', ['user': user, 'expand': 'products']) }}
+					{{ partial('partials/tabs_user', ['user': user, 'expand': 'products']) }}
 					<div class="tab-content">
 						<div class="tab-pane active">
 							{{ partial('partials/form_product_price', ['action': '/admin/product_prices/update/' ~ price.id ~ '/user_id:' ~ user.id]) }}

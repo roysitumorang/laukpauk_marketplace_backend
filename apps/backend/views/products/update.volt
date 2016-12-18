@@ -20,11 +20,10 @@
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Update Produk</h2>
+				<h2 class="panel-title">Update Produk {{ product.name }}</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ flashSession.output() }}
 				{{ partial('partials/form_product', ['action': '/admin/products/update/' ~ product.id]) }}
 				<!-- eof Content //-->
 			</div>
