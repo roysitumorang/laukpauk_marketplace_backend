@@ -2,18 +2,17 @@
 
 namespace Application\Api\V1\Controllers;
 
-use Application\Models\Role;
 use Application\Models\User;
 
 class SessionsController extends ControllerBase {
 	function createAction() {
-		if (!$this->request->isPost() || $this->_access_token->user) {
+		if (!$this->request->isPost()) {
 			$this->_response['message'] = 'Request tidak valid!';
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
 		$errors = [];
-		if (!$this->_input->phone) {
+		if (!$this->_input->mobile_phone) {
 			$errors['phone'] = 'nomor HP harus diisi';
 		}
 		if (!$this->_input->password) {
@@ -24,26 +23,23 @@ class SessionsController extends ControllerBase {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$user = User::findFirst([
-			'conditions' => 'status = :status: AND role_id IN ({role_ids:array}) AND phone = :phone:',
-			'bind'       => [
-				'status'   => array_search('ACTIVE', User::STATUS),
-				'role_ids' => [Role::BUYER, Role::MERCHANT],
-				'phone'    => $this->_input->phone,
-			],
-		]);
-		if ($user && password_verify($this->_input->password, $user->password)) {
-			$this->_access_token->user  = $user;
-			$this->_access_token->save();
-			$this->_response['status']  = 1;
-			$this->_response['data']    = [
+		$user = User::findFirst(['status = 1 AND mobile_phone = ?0', 'bind' => [$this->_input->mobile_phone]]);
+		if ($user && $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND (b.name = 'Buyer' OR b.name = 'Merchant')", [$user->id]) && $this->security->checkHash($this->_input->password, $user->password)) {
+			if (!$this->_access_token->user) {
+				$this->_access_token->user = $user;
+				$this->_access_token->save();
+			}
+			$this->_response['status'] = 1;
+			$this->_response['data']   = [
 				'current_user' => [
-					'id'             => $user->id,
-					'name'           => $user->name,
-					'phone'          => $user->phone,
-					'address'        => $user->address,
-					'subdistrict_id' => $user->village->subdistrict->id,
-					'village_id'     => $user->village->id,
+					'id'             => $this->_access_token->user->id,
+					'name'           => $this->_access_token->user->name,
+					'mobile_phone'   => $this->_access_token->user->mobile_phone,
+					'address'        => $this->_access_token->user->address,
+					'subdistrict_id' => $this->_access_token->user->village->subdistrict->id,
+					'village_id'     => $this->_access_token->user->village->id,
+					'is_buyer'       => $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND b.name = 'Buyer'", [$this->_access_token->user->id]),
+					'is_merchant'    => $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND b.name = 'Merchant'", [$this->_access_token->user->id]),
 				]
 			];
 		} else {

@@ -62,6 +62,7 @@ class UsersController extends ControllerBase {
 				'address'        => $user->address,
 				'subdistrict_id' => $user->village->subdistrict->id,
 				'village_id'     => $user->village->id,
+				'is_buyer'       => 1,
 			]
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
