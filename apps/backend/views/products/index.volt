@@ -24,28 +24,32 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/products/create" title="Tambah Produk">Tambah Produk</a><br><br>
 				<form action="/admin/products" method="GET">
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<br>
 								<b>Cari berdasarkan:</b>
 							</td>
-							<td>
-								ID :<br>
-								<input type="text" name="id" value="{{ id }}" class="form form-control" placeholder="ID">&nbsp;
+							<td class="text-right">
+								ID :
 							</td>
 							<td>
-								Nama :<br>
+								<input type="text" name="id" value="{{ id }}" class="form form-control" placeholder="ID">&nbsp;
+							</td>
+							<td class="text-right">
+								Nama :
+							</td>
+							<td>
 								<input type="text" name="name" value="{{ name }}" class="form form-control" placeholder="Nama">&nbsp;
 							</td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<td>&nbsp;</td>
+							<td class="text-right">
+								Kategori :
+							</td>
 							<td>
-								Kategori :<br>
 								<select name="product_category_id" class="form form-control">
 									<option value="">Semua</option>
 									{% for category in categories %}
@@ -53,8 +57,10 @@
 									{% endfor %}
 								</select>
 							</td>
+							<td class="text-right">
+								Status :
+							</td>
 							<td>
-								Status :<br>
 								<select name="published" class="form form-control">
 									<option value=""{% if published === null %} selected{% endif %}>Semua</option>
 									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
@@ -62,14 +68,14 @@
 								</select>
 							</td>
 							<td colspan="2" class="text-right">
-								<br>
 								<input type="submit" value="CARI" class="btn btn-info">
 							</td>
 						</tr>
 					</table>
 				</form>
+				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/products/create" title="Tambah Produk">Tambah Produk</a>
 				{% if page.total_items %}
-				<p class="text-right"><strong>{{ page.total_items }} Product{% if page.total_items > 1 %}s{% endif %}</strong></p>
+				<span style="float:right"><strong>{{ page.total_items }} Product{% if page.total_items > 1 %}s{% endif %}</strong></span>
 				{% endif %}
 				<table class="table table-striped">
 					<thead>
