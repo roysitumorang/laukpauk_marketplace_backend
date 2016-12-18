@@ -1224,7 +1224,7 @@ CREATE TABLE `orders` (
   `email` varchar(80) DEFAULT NULL,
   `address` varchar(200) NOT NULL,
   `village_id` bigint(20) NOT NULL,
-  `phone` varchar(20) NOT NULL,
+  `mobile_phone` varchar(20) NOT NULL,
   `mobile` varchar(20) DEFAULT NULL,
   `tracking_number` varchar(20) DEFAULT NULL,
   `payment` text,
