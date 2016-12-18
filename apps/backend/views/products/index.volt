@@ -68,6 +68,9 @@
 						</tr>
 					</table>
 				</form>
+				{% if page.total_items %}
+				<p class="text-right"><strong>{{ page.total_items }} Product{% if page.total_items > 1 %}s{% endif %}</strong></p>
+				{% endif %}
 				<table class="table table-striped">
 					<thead>
 						<tr>
