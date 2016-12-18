@@ -2,7 +2,6 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Brand;
 use Application\Models\Product;
 use Application\Models\ProductCategory;
 use Application\Models\ProductPicture;
@@ -17,17 +16,13 @@ class ProductsController extends ControllerBase {
 		$keyword             = $this->request->getQuery('keyword', 'string');
 		$field               = $this->request->getQuery('field', 'string');
 		$product_category_id = $this->request->getQuery('product_category_id', 'int');
-		$brand_id            = $this->request->getQuery('brand_id', 'int');
 		$search_fields       = [
 			'id'          => 'ID Produk',
 			'name'        => 'Nama Produk',
 			'description' => 'Detail Produk',
-			'price'       => 'Harga Produk',
-			'created_at'  => 'Tanggal Upload',
-			'status'      => 'Status (tersedia / habis)',
 			'published'   => 'Show (tampil / sembunyi)',
 		];
-		$this->_prepare_categories_and_brands();
+		$this->_prepare_categories();
 		if ($keyword && $field && array_key_exists($field, $search_fields)) {
 			$parameter['conditions']      = "{$field} LIKE :keyword:";
 			$parameter['bind']['keyword'] = "%{$keyword}%";
@@ -35,10 +30,6 @@ class ProductsController extends ControllerBase {
 		if ($product_category_id) {
 			$parameter['conditions']                 .= ($parameter['conditions'] ? ' AND ' : '') . "product_category_id = :product_category_id:";
 			$parameter['bind']['product_category_id'] = $product_category_id;
-		}
-		if ($brand_id) {
-			$parameter['conditions']      .= ($parameter['conditions'] ? ' AND ' : '') . "brand_id = :brand_id:";
-			$parameter['bind']['brand_id'] = $brand_id;
 		}
 		$paginator = new PaginatorModel([
 			'data'  => Product::find($parameter['conditions'] ? $parameter : []),
@@ -64,7 +55,6 @@ class ProductsController extends ControllerBase {
 		$this->view->search_fields       = $search_fields;
 		$this->view->field               = $field;
 		$this->view->product_category_id = $product_category_id;
-		$this->view->brand_id            = $brand_id;
 	}
 
 	function showAction($id) {
@@ -87,7 +77,7 @@ class ProductsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_categories_and_brands();
+		$this->_prepare_categories();
 		$this->view->menu     = $this->_menu('Products');
 		$this->view->product  = $product;
 		$this->view->pictures = [];
@@ -128,7 +118,7 @@ class ProductsController extends ControllerBase {
 			$picture->thumbnail = $picture->getThumbnail(600, 450);
 			$pictures[]         = $picture;
 		}
-		$this->_prepare_categories_and_brands();
+		$this->_prepare_categories();
 		$this->view->menu     = $this->_menu('Products');
 		$this->view->product  = $product;
 		$this->view->pictures = $pictures;
@@ -144,9 +134,8 @@ class ProductsController extends ControllerBase {
 		return $this->response->redirect('/admin/products');
 	}
 
-	private function _prepare_categories_and_brands() {
+	private function _prepare_categories() {
 		$categories = [];
-		$brands     = [];
 		$resultset = $this->db->query('SELECT a.id, a.parent_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.parent_id IS NULL GROUP BY a.id ORDER BY a.name ASC');
 		$resultset->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $resultset->fetch()) {
@@ -160,18 +149,11 @@ class ProductsController extends ControllerBase {
 			$categories[] = $row;
 			$categories   = array_merge($categories, $sub_categories);
 		}
-		$resultset = $this->db->query('SELECT a.id, a.name, COUNT(b.id) AS total_products FROM brands a LEFT JOIN products b ON a.id = b.brand_id GROUP BY a.id ORDER BY a.name');
-		$resultset->setFetchMode(Db::FETCH_OBJ);
-		while ($row = $resultset->fetch()) {
-			$brands[] = $row;
-		}
 		$this->view->categories = $categories;
-		$this->view->brands     = $brands;
 	}
 
 	private function _set_model_attributes(&$product) {
 		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
-		$product->brand    = Brand::findFirst($this->request->getPost('brand_id'));
 		$product->setCode($this->request->getPost('code'));
 		$product->setName($this->request->getPost('name'));
 		$product->setStock($this->request->getPost('stock'));

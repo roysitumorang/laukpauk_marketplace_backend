@@ -47,13 +47,6 @@
 								<option value="{{ category.id}}"{% if category.id == product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
 							{% endfor %}
 							</select>
-							&nbsp;
-							<select name="brand_id" onchange="this.form.submit()" class="form
-form-control form-30">
-							{% for brand in brands %}
-								<option value="{{ brand.id}}"{% if brand.id == brand_id %} selected{% endif %}>{{ brand.name }} ({{ brand.total_products }})</option>
-							{% endfor %}
-							</select>&nbsp;
 							<span style="float:right;padding:3px"><strong>Total Produk:</strong>&nbsp;<font size="3">{{ page.total_items }} produk</font></span>
 						</div>
 					</div>
@@ -120,7 +113,7 @@ form-control form-30">
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/products/index/page:{{ i }}{% if product_keyword or brand %}?{% endif %}{% if product_keyword %}keyword={{ product_keyword }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}">{{ i }}</a>
+							<a href="/admin/products/index/page:{{ i }}{% if product_keyword %}?keyword={{ product_keyword }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

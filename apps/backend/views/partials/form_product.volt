@@ -6,7 +6,7 @@
 				<br>
 				<input type="text" name="code" value="{{ product.code }}" placeholder="Kode Produk" size="30" class="form form-control">
 			</td>
-			<td bgcolor="#cce5ff">
+			<td bgcolor="#CCE5FF">
 				<b><font color="#000099">Nama Produk</font></b>
 				<br>
 				<input type="text" name="name" value="{{ product.name }}" placeholder="Nama Produk" size="30" class="form form-control">
@@ -27,15 +27,7 @@
 				{% endfor %}
 				</select>
 			</td>
-			<td bgcolor="#cce5ff">
-				<b><font color="#000099">Brand</font></b>
-				<br>
-				<select name="brand_id" class="form form-control">
-				{% for brand in brands %}
-					<option value="{{ brand.id }}"{% if brand.id == product.brand.id %} selected{% endif %}>{{ brand.name }}</option>
-				{% endfor %}
-				</select>
-			</td>
+			<td bgcolor="#CCE5FF">&nbsp;</td>
 			<td bgcolor="#99CC33">
 				<b><font color="#000099">Berat Produk (gram)</font></b>
 				<br>

@@ -23,7 +23,6 @@ class Product extends ModelBase {
 	public $meta_desc;
 	public $meta_keyword;
 	public $stock;
-	public $brand_id;
 	public $buy_point;
 	public $affiliate_point;
 	public $created_by;
@@ -53,11 +52,6 @@ class Product extends ModelBase {
 				'allowNulls' => false,
 				'message'    => 'kategori harus diisi',
 			],
-		]);
-		$this->belongsTo('brand_id', 'Application\Models\Brand', 'id', [
-			'alias'      => 'brand',
-			'reusable'   => true,
-			'foreignKey' => ['allowNulls' => true],
 		]);
 		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
 		$this->hasMany('id', 'Application\Models\ProductVariant', 'product_id', ['alias' => 'variants']);
