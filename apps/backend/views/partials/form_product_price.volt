@@ -5,21 +5,29 @@
 				<b>Kategori :</b>
 			</td>
 			<td>
+			{% if price.id %}
+				{{ price.product.category.name }}
+			{% else %}
 				<select id="category_id" class="form form-control">
 					{% for category in categories %}
 					<option value="{{ category.id }}"{% if category.id == price.product.category.id %} selected{% endif %}>{{ category.name }}</option>
 					{% endfor %}
 				</select>
+			{% endif %}
 			</td>
 			<td class="text-right">
 				<b>Produk :</b>
 			</td>
 			<td>
+			{% if price.id %}
+				{{ price.product.name }}
+			{% else %}
 				<select name="product_id" id="product_id" class="form form-control">
 					{% for product in current_products %}
 					<option value="{{ product.id }}"{% if product.id == price.product.id %} selected{% endif %}>{{ product.name }}</option>
 					{% endfor %}
 				</select>
+			{% endif %}
 			</td>
 		</tr>
 		<tr>

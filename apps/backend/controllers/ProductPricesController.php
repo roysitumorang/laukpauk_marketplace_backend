@@ -34,11 +34,11 @@ class ProductPricesController extends ControllerBase {
 	function createAction() {
 		$price = new ProductPrice;
 		if ($this->request->isPost()) {
-			$product_id                = $this->request->getPost('product_id', 'int');
-			$price->product            = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
-			$price->value              = $this->request->getPost('value', 'int');
-			$price->order_closing_hour = $this->request->getPost('order_closing_hour');
-			$price->user               = $this->_user;
+			$product_id     = $this->request->getPost('product_id', 'int');
+			$price->product = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
+			$price->setValue($this->request->getPost('value'));
+			$price->setOrderClosingHour($this->request->getPost('order_closing_hour'));
+			$price->user    = $this->_user;
 			if ($price->validation() && $price->create()) {
 				$this->flashSession->success('Penambahan produk berhasil');
 				return $this->response->redirect("/admin/product_prices/index/user_id:{$this->_user->id}");
@@ -62,11 +62,8 @@ class ProductPricesController extends ControllerBase {
 			if ($this->dispatcher->getParam('published')) {
 				$price->writeAttribute('published', $price->published ? 0 : 1);
 			} else {
-				$product_id                = $this->request->getPost('product_id', 'int');
-				$price->product            = Product::findFirst(['published = 1 AND id = :id:', 'bind' => ['id' => $product_id]]);
-				$price->value              = $this->request->getPost('value', 'int');
-				$price->order_closing_hour = $this->request->getPost('order_closing_hour');
-				$price->user               = $this->_user;
+				$price->setValue($this->request->getPost('value'));
+				$price->setOrderClosingHour($this->request->getPost('order_closing_hour'));
 			}
 			if ($price->validation() && $price->update()) {
 				return $this->response->redirect("/admin/product_prices/index/user_id:{$this->_user->id}");

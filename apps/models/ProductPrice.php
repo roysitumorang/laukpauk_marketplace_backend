@@ -49,9 +49,7 @@ class ProductPrice extends ModelBase {
 	}
 
 	function setOrderClosingHour($order_closing_hour) {
-		if ($order_closing_hour) {
-			$this->order_closing_hour = $order_closing_hour;
-		}
+		$this->order_closing_hour = $this->_filter->sanitize($order_closing_hour, ['string', 'trim']) ?: null;
 	}
 
 	function beforeValidation() {
