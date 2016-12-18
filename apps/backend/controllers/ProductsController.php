@@ -175,7 +175,6 @@ class ProductsController extends ControllerBase {
 		$product->setCode($this->request->getPost('code'));
 		$product->setName($this->request->getPost('name'));
 		$product->setStock($this->request->getPost('stock'));
-		$product->setPrice($this->request->getPost('price'));
 		$product->setWeight($this->request->getPost('weight'));
 		$product->setDescription($this->request->getPost('description'));
 		$product->setNewPermalink($this->request->getPost('new_permalink'));
@@ -186,7 +185,6 @@ class ProductsController extends ControllerBase {
 		$product->setMetaTitle($this->request->getPost('meta_title'));
 		$product->setMetaDesc($this->request->getPost('meta_desc'));
 		$product->setMetaKeyword($this->request->getPost('meta_keyword'));
-		$product->setStockUnit($this->request->getPost('stock_unit'));
 		$pictures = [];
 		for ($i = 0; $i < 5; $i++) {
 			$picture_id = filter_var($_POST['product_pictures'][$i]['id'], FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);

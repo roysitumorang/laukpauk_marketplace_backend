@@ -11,7 +11,7 @@ use Phalcon\Validation\Validator\Uniqueness;
 class ProductPrice extends ModelBase {
 	public $id;
 	public $user_id;
-	public $product_id;
+	public $product_stock_unit_id;
 	public $value;
 	public $unit_size;
 	public $published;
@@ -45,8 +45,8 @@ class ProductPrice extends ModelBase {
 			'reusable'   => true,
 			'foreignKey' => ['allowNulls' => false],
 		]);
-		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
-			'alias'      => 'product',
+		$this->belongsTo('product_stock_unit_id', 'Application\Models\ProductStockUnit', 'id', [
+			'alias'      => 'stock_unit',
 			'reusable'   => true,
 			'foreignKey' => ['allowNulls' => false],
 		]);
@@ -85,7 +85,7 @@ class ProductPrice extends ModelBase {
 			'domain'  => array_keys(static::SIZES),
 			'message' => 'jumlah satuan harus diantara 1/4, 1/2 atau 1',
 		]));
-		$validator->add(['user_id', 'product_id', 'unit_size'], new Uniqueness([
+		$validator->add(['user_id', 'product_stock_unit_id', 'unit_size'], new Uniqueness([
 			'message' => 'produk sudah ada',
 		]));
 		return $this->validate($validator);

@@ -16,7 +16,6 @@ class Product extends ModelBase {
 	public $permalink;
 	public $new_permalink;
 	public $description;
-	public $price;
 	public $weight;
 	public $published;
 	public $status;
@@ -27,7 +26,6 @@ class Product extends ModelBase {
 	public $brand_id;
 	public $buy_point;
 	public $affiliate_point;
-	public $stock_unit;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -64,7 +62,7 @@ class Product extends ModelBase {
 		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
 		$this->hasMany('id', 'Application\Models\ProductVariant', 'product_id', ['alias' => 'variants']);
 		$this->hasMany('id', 'Application\Models\ProductDimension', 'product_id', ['alias' => 'dimensions']);
-		$this->hasMany('id', 'Application\Models\ProductPrice', 'user_id', ['alias' => 'prices']);
+		$this->hasMany('id', 'Application\Models\ProductStockUnit', 'product_id', ['alias' => 'stock_units']);
 	}
 
 	function setCode($code) {
@@ -77,10 +75,6 @@ class Product extends ModelBase {
 
 	function setStock($stock) {
 		$this->stock = $this->_filter->sanitize($stock, 'int') ?: 0;
-	}
-
-	function setPrice($price) {
-		$this->price = $this->_filter->sanitize($price, 'int') ?: 0;
 	}
 
 	function setWeight($weight) {
@@ -127,21 +121,14 @@ class Product extends ModelBase {
 		}
 	}
 
-	function setStockUnit($stock_unit) {
-		$this->stock_unit = $this->_filter->sanitize($stock_unit ?: $this->name, ['string', 'trim']);
-	}
-
 	function beforeValidation() {
 		$this->permalink = trim(preg_replace(['/[^\w\d\-\ ]/', '/ /', '/\-{2,}/'], ['', '-', '-'], strtolower($this->new_permalink ?: $this->name)), '-');
 	}
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'stock_unit'], new PresenceOf([
-			'message' => [
-				'name'       => 'nama harus diisi',
-				'stock_unit' => 'satuan harus diisi',
-			]
+		$validator->add('name', new PresenceOf([
+			'message' => 'nama harus diisi',
 		]));
 		if ($this->getSnapshotData()['name'] != $this->name) {
 			$validator->add('name', new Uniqueness([
@@ -161,11 +148,8 @@ class Product extends ModelBase {
 				'message' => 'kode sudah ada',
 			]));
 		}
-		$validator->add(['price', 'stock'], new Digit([
-			'message' => [
-				'price' => 'harga harus diisi dalam bentuk angka',
-				'stock' => 'stok harus diisi dalam bentuk angka',
-			],
+		$validator->add('stock', new Digit([
+			'message' => 'stok harus diisi dalam bentuk angka',
 		]));
 		$validator->add('weight', new Numericality([
 			'message' => 'berat harus diisi dalam bentuk desimal',

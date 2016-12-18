@@ -11,11 +11,6 @@
 				<br>
 				<input type="text" name="name" value="{{ product.name }}" placeholder="Nama Produk" size="30" class="form form-control">
 			</td>
-			<td bgcolor="#CCFFCC">
-				<b><font color="#000099">Satuan Produk</font></b>
-				<br>
-				<input type="text" name="stock_unit" value="{{ product.stock_unit }}" placeholder="Satuan Produk" size="30" class="form form-control">
-			</td>
 			<td bgcolor="#99CC33">
 				<b><font color="#000099">Stok Produk</font></b>
 				<br>
@@ -41,11 +36,6 @@
 				{% endfor %}
 				</select>
 			</td>
-			<td bgcolor="#CCFFCC">
-				<b><font color="#000099">Harga Produk (Rp)</font></b>
-				<br>
-				<input type="text" name="price" value="{{ product.price }}" placeholder="Harga Produk" size="20" class="form form-control">
-			</td>
 			<td bgcolor="#99CC33">
 				<b><font color="#000099">Berat Produk (gram)</font></b>
 				<br>
@@ -53,13 +43,13 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="4">
+			<td colspan="3">
 				<b><font color="#000099">Deskripsi Produk:</font></b><br>
 				<textarea name="description" id="description" class="summernote" data-plugin-summernote data-plugin-options="{'height':180,'codemirror':{'theme':'ambiance'}}">{{ product.description }}</textarea>
 			</td>
 		</tr>
 		<tr>
-			<td colspan="4">
+			<td colspan="3">
 				<b><font color="#000099">Gambar Produk (1)</font></b>
 				<br>
 				<input type="hidden" name="product_pictures[0][id]" value="{{ pictures[0].id }}">

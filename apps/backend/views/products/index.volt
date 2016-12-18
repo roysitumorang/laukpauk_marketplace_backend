@@ -24,18 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<table class="table table-striped">
-					<tr>
-						<td>
-							<input type="button" name="button" onclick="location.href='/admin/products/create'" value="Tambah Produk Baru" class="btn btn-info">
-							<input type="button" name="button" onclick="location.href='products.php?do=updateharga&cat={$Cat}&brand={$Brand}&vCompare={$vCompare}&vTeks={$vTeks}&page={$Page}'" value="Update Harga dan Berat" class="btn btn-warning">
-							<input type="button" name="button" onclick="location.href='products.php?do=updatealltype&cat={$Cat}&brand={$Brand}&vCompare={$vCompare}&vTeks={$vTeks}&page={$Page}'" value="Update Type Produk" class="btn btn-primary">
-							<input type="button" name="button" onclick="location.href='products.php?do=updatealldimensi&cat={$Cat}&brand={$Brand}&vCompare={$vCompare}&vTeks={$vTeks}&page={$Page}'" value="Update Dimensi Produk" class="btn btn-success">
-							<input type="button" name="button" onclick="location.href='products.php?do=updatestock&cat={$Cat}&brand={$Brand}&vCompare={$vCompare}&vTeks={$vTeks}&page={$Page}'" value="Update Stock" class="btn btn-danger">
-							<input type="button" name="button" onclick="location.href='products.php?do=updatefoto&cat={$Cat}&brand={$Brand}&vCompare={$vCompare}&vTeks={$vTeks}&page={$Page}'" value="Update Foto" class="btn btn-warning">
-						</td>
-					</tr>
-				</table>
+				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/products/create" title="Tambah Produk">Tambah Produk</a><br><br>
 				<form action="/admin/products" method="GET">
 					<table class="table table-striped">
 						<tr>
@@ -72,10 +61,10 @@ form-control form-30">
 				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th width="25"><b>No</b></th>
-							<th colspan="2"><b>Produk</b></th>
-							<th><b>Type Produk</b></th>
-							<th><b>##</b></th>
+							<th width="25" class="text-center"><b>No</b></th>
+							<th colspan="2" class="text-center"><b>Produk</b></th>
+							<th class="text-center"><b>Satuan</b></th>
+							<th class="text-center"><b>#</b></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -106,29 +95,14 @@ form-control form-30">
 									{% endif %}
 								</a>
 								<br><br>
-								<strong><font size="3">Rp. {{ product.price }}</font></strong> /
-								{{ product.weight }} gram<br>
 								<strong>Category:</strong>&nbsp;{{ product.category.name }}<br>
-								<strong>Brand: </strong>{{ product.brand.name }}<br>
-								{% if product.status %}
-								<i class="fa fa-check-square"></i>&nbsp;Tersedia</a>
-								{% else %}
-								<a href="/admin/products/update/{{ product.id }}/status:1" title="Set Tersedia" style="color:#FF0000"><i class="fa fa-phone-square"></i>&nbsp;<i>Call Only</i></a>
-								{% endif %}
-								&nbsp;&nbsp;(Stock:&nbsp;{{ product.stock }})
 							</td>
 							<td{{ background }}>
-								{% for product_variant in product.variants %}
-								<a href="/admin/product_variant/update/{{ product.id }}/published:1"{% if product_variant.published %} style="color:#FF0000"{% endif %}>
-									<i class="fa fa-angle-right"></i>&nbsp;{{ product_variant.parameter }} {{ product_variant.value }} ({{ product_variant.stock }})
-								</a>
-								<br>
-								{% endfor %}<br>
-								<a href="/admin/product_variants/create/product_id:{{ product.id }}"><i class="fa fa-plus-square"></i>&nbsp;Tambah Type</a>
+								<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_stock_units/create/product_id:{{ product.id }}" title="Tambah Satuan">Tambah Satuan</a>
 							</td>
-							<td{{ background }}>
+							<td{{ background }} class="text-center">
 								<a href="/admin/products/update/{{ product.id}}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
-								<a href="javascript:void(0)" onclick="confirm('Anda yakin ingin menghapus jenis produk ini ?')&&(location.href='/admin/products/delete/{{ product.id }}')" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+								<a href="javascript:void(0)" data-id="{{ product.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
@@ -146,7 +120,6 @@ form-control form-30">
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<input type="button" name="button" onclick="location.href='/admin/product_prices/page:{{ i }}'" value="Update Harga dan Berat" class="btn btn-warning">
 							<a href="/admin/products/index/page:{{ i }}{% if product_keyword or brand %}?{% endif %}{% if product_keyword %}keyword={{ product_keyword }}{% endif %}{% if brand %}&brand={{ brand }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
