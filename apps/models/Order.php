@@ -15,7 +15,7 @@ class Order extends ModelBase {
 	public $email;
 	public $address;
 	public $village_id;
-	public $phone;
+	public $mobile_phone;
 	public $mobile;
 	public $tracking_number;
 	public $payment;
@@ -73,11 +73,11 @@ class Order extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['code', 'name', 'phone', 'address', 'village_id', 'status', 'merchant_id', 'buyer_id', 'estimated_delivery'], new PresenceOf([
+		$validator->add(['code', 'name', 'mobile_phone', 'address', 'village_id', 'status', 'merchant_id', 'buyer_id', 'estimated_delivery'], new PresenceOf([
 			'message' => [
 				'code'               => 'kode order harus diisi',
 				'name'               => 'nama harus diisi',
-				'phone'              => 'nomor HP harus diisi',
+				'mobile_phone'       => 'nomor HP harus diisi',
 				'address'            => 'alamat harus diisi',
 				'village_id'         => 'kelurahan harus diisi',
 				'status'             => 'status harus diisi',
