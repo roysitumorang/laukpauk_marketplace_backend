@@ -44,7 +44,7 @@ class OrdersController extends ControllerBase {
 		}
 		$this->_response['status']         = 1;
 		$this->_response['data']['orders'] = $orders;
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 
