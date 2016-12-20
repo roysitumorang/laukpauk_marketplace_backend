@@ -2,6 +2,8 @@
 
 namespace Application\Models;
 
+use Application\Models\Notification;
+use Application\Models\NotificationTemplate;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\InclusionIn;
@@ -70,19 +72,23 @@ class Order extends ModelBase {
 		parent::beforeValidationOnCreate();
 		$this->status     = array_search('HOLD', static::STATUS);
 		$this->ip_address = $this->getDI()->getRequest()->getClientAddress();
-		$this->admin_fee  = static::ADMIN_FEE;
+		$this->admin_fee  = Setting::findFirstByName('admin_fee')->value;
+		do {
+			$this->code = random_int(111111, 999999);
+			if (!static::findFirstByCode($this->code)) {
+				break;
+			}
+		} while (1);
 	}
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['code', 'name', 'mobile_phone', 'address', 'village_id', 'status', 'estimated_delivery'], new PresenceOf([
+		$validator->add(['name', 'mobile_phone', 'address', 'village_id', 'estimated_delivery'], new PresenceOf([
 			'message' => [
-				'code'               => 'kode order harus diisi',
 				'name'               => 'nama harus diisi',
 				'mobile_phone'       => 'nomor HP harus diisi',
 				'address'            => 'alamat harus diisi',
 				'village_id'         => 'kelurahan harus diisi',
-				'status'             => 'status harus diisi',
 				'estimated_delivery' => 'waktu pengantaran harus diisi',
 			],
 		]));
@@ -118,9 +124,30 @@ class Order extends ModelBase {
 		}
 	}
 
-	function afterSave() {
+	function afterCreate() {
 		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->final_bill]);
 		$this->buyer->update(['deposit' => $this->buyer->deposit - $this->final_bill]);
+		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
+		$admin_notification             = new Notification;
+		$admin_notification->subject    = $admin_new_order_template->subject;
+		$admin_notification->link       = $admin_new_order_template->url . $this->id;
+		$admin_notification->created_by = $this->created_by;
+		$admins                         = User::find([
+			'role_id IN ({role_ids:array}) AND 1',
+			'bind'       => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
+		]);
+		foreach ($admins as $admin) {
+			$recipients[] = $admin;
+		}
+		$admin_notification->recipients    = $recipients;
+		$admin_notification->create();
+		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api new order');
+		$merchant_notification             = new Notification;
+		$merchant_notification->subject    = $merchant_new_order_template->subject;
+		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
+		$merchant_notification->created_by = $this->created_by;
+		$merchant_notification->recipients = [$this->merchant];
+		$merchant_notification->create();
 	}
 
 	function cancel() {

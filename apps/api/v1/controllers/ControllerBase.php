@@ -2,7 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
-use Application\Models\Role;
+use Application\Models\Setting;
 use Application\Models\User;
 use Exception;
 use Phalcon\Crypt;
@@ -10,15 +10,21 @@ use Phalcon\Mvc\Controller;
 
 abstract class ControllerBase extends Controller {
 	protected $_response = [
-		'status'          => -1,
-		'invalid_api_key' => 0,
-		'message'         => null,
-		'data'            => [],
+		'status'           => -1,
+		'invalid_api_key'  => 0,
+		'maintenance_mode' => 0,
+		'message'          => null,
+		'data'             => [],
 	];
 	protected $_current_user;
 	protected $_input;
 
 	function initialize() {
+		if (Setting::findFirstByName('maintenance_mode')->value) {
+			$this->_response['maintenance_mode'] = 1;
+			$this->response->setJsonContent($this->_response);
+			exit($this->response->send());
+		}
 		$this->_input = $this->request->getJsonRawBody();
 	}
 
@@ -26,7 +32,8 @@ abstract class ControllerBase extends Controller {
 		try {
 			$access_token = $this->request->get('access_token', 'string');
 			if (!$access_token) {
-				throw new Exception;
+				$this->_response['invalid_api_key'] = 1;
+				throw new Exception('API key tidak valid!');
 			}
 			$encrypted_data      = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
 			$crypt               = new Crypt;
@@ -35,11 +42,11 @@ abstract class ControllerBase extends Controller {
 				$api_key,
 			]]);
 			if (!$this->_current_user) {
-				throw new Exception;
+				$this->_response['invalid_api_key'] = 1;
+				throw new Exception('API key tidak valid!');
 			}
 		} catch (Exception $e) {
-			$this->_response['message']         = 'API key tidak valid!';
-			$this->_response['invalid_api_key'] = 1;
+			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
 			exit($this->response->send());
 		}

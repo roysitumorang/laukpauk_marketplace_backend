@@ -2,11 +2,13 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Setting;
 use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
 	function indexAction() {
 		$merchants = [];
+		$coupons   = [];
 		foreach ($this->db->fetchAll("SELECT a.id, a.company, business_days, business_opening_hour, business_closing_hour FROM users a JOIN service_areas b ON a.id = b.user_id WHERE b.village_id = {$this->_current_user->village_id}", Db::FETCH_OBJ) as $merchant) {
 			$categories = [];
 			foreach ($this->db->fetchAll("SELECT c.id, c.name FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} GROUP BY c.id", Db::FETCH_OBJ) as $category) {
@@ -37,7 +39,9 @@ class MerchantsController extends ControllerBase {
 		if (!$merchants) {
 			$this->_response['message'] = 'Maaf, daerah Anda di luar wilayah operasional Kami.';
 		}
-		$this->_response['data']['merchants'] = $merchants;
+		$this->_response['data']['merchants']        = $merchants;
+		$this->_response['data']['minimum_purchase'] = Setting::findFirstByName('minimum_purchase')->value;
+		$this->_response['data']['coupons']          = $coupons;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}

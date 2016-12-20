@@ -2,8 +2,6 @@
 
 namespace Application\Api\V1\Controllers;
 
-use Application\Models\Notification;
-use Application\Models\NotificationTemplate;
 use Application\Models\Order;
 use Application\Models\OrderItem;
 use Application\Models\ProductPrice;
@@ -59,16 +57,9 @@ class OrdersController extends ControllerBase {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$order         = new Order;
-		$order_items   = [];
-		$order->status = 0;
-		do {
-			$order->code = random_int(111111, 999999);
-			if (!Order::findFirstByCode($order->code)) {
-				break;
-			}
-		} while (1);
-		$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
+		$order       = new Order;
+		$order_items = [];
+		$merchant    = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
 			Role::MERCHANT,
 			$this->_input->merchant_id
 		]]);
@@ -98,29 +89,8 @@ class OrdersController extends ControllerBase {
 		$order->final_bill = $order->original_bill;
 		$order->items      = $order_items;
 		if ($order->validation() && $order->create()) {
-			$this->_response['status']      = 1;
-			$this->_response['message']     = 'Pemesanan berhasil!';
-			$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
-			$admin_notification             = new Notification;
-			$admin_notification->subject    = $admin_new_order_template->subject;
-			$admin_notification->link       = $admin_new_order_template->url . $order->id;
-			$admin_notification->created_by = $this->_current_user->id;
-			$admins                         = User::find([
-				'role_id IN ({role_ids:array}) AND 1',
-				'bind'       => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
-			]);
-			foreach ($admins as $admin) {
-				$recipients[] = $admin;
-			}
-			$admin_notification->recipients    = $recipients;
-			$admin_notification->create();
-			$merchant_new_order_template       = NotificationTemplate::findFirstByName('api new order');
-			$merchant_notification             = new Notification;
-			$merchant_notification->subject    = $merchant_new_order_template->subject;
-			$merchant_notification->link       = $merchant_new_order_template->url . $order->id;
-			$merchant_notification->created_by = $this->_current_user->id;
-			$merchant_notification->recipients = [$merchant];
-			$merchant_notification->create();
+			$this->_response['status']  = 1;
+			$this->_response['message'] = 'Pemesanan berhasil!';
 		} else {
 			$errors = [];
 			foreach ($order->getMessages() as $error) {

@@ -2132,6 +2132,35 @@ LOCK TABLES `sessions` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `settings` */
+
+DROP TABLE IF EXISTS `settings`;
+
+CREATE TABLE `settings` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  `value` text NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+/*Data for the table `settings` */
+
+LOCK TABLES `settings` WRITE;
+
+insert  into `settings`(`id`,`name`,`value`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,'minimum_purchase','50000',1,'2016-12-21 02:26:17',NULL,NULL),
+(2,'admin_fee','2000',1,'2016-12-21 02:27:10',NULL,NULL),
+(3,'maintenance_mode','0',1,'2016-12-21 02:28:17',NULL,NULL);
+
+UNLOCK TABLES;
+
 /*Table structure for table `shipping_costs` */
 
 DROP TABLE IF EXISTS `shipping_costs`;
