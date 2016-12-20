@@ -27,7 +27,7 @@
 						<td>
 							Role (*) :<br>
 							{% for role in roles %}
-							<input type="checkbox" name="role_id[]" value="{{ role.id }}"{% if in_array(role.id, role_ids) %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
+							<input type="radio" name="role_id" value="{{ role.id }}"{% if role.id == user.role_id %} checked{% endif %}> {{ role.name }}&nbsp;&nbsp;
 							{% endfor %}
 						</td>
 					</tr>

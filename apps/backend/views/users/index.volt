@@ -78,7 +78,7 @@
 							<td>
 								<font size="4"><a href="/admin/users/show/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
 								<br>
-								<i class="fa fa-users"></i>&nbsp;&nbsp;{% for i, role in user.roles %}{% if i %}, {% endif %}{{ role }}{% endfor %}<br>
+								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}<br>
 								{% if user.email %}
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 								{% endif %}

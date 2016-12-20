@@ -3,6 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\LoginHistory;
+use Application\Models\Role;
 use Application\Models\User;
 use Phalcon\Db;
 
@@ -33,7 +34,10 @@ class SessionsController extends ControllerBase {
 				$errors[] = 'Password harus diisi';
 			}
 			if (!$errors) {
-				$user = $this->db->fetchOne("SELECT a.id, a.password FROM users a JOIN user_role b ON a.id = b.user_id JOIN roles c ON b.role_id = c.id WHERE a.email = '{$email}' AND a.status = 1 AND c.id IN (1, 2) GROUP BY a.id", Db::FETCH_OBJ);
+				$user = User::findFirst(['status = 1 AND email = :email: AND role_id IN ({role_ids:array})', 'bind' => [
+					'email'    => $email,
+					'role_ids' => [Role::SUPER_ADMIN, Role::ADMIN],
+				]]);
 				if ($user && $this->security->checkHash($password, $user->password)) {
 					$login_history          = new LoginHistory;
 					$login_history->user_id = $user->id;

@@ -5,7 +5,6 @@ namespace Application\Backend\Controllers;
 use Application\Models\Role;
 use Application\Models\Village;
 use Application\Models\User;
-use Application\Models\UserRole;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
@@ -49,22 +48,23 @@ class UsersController extends ControllerBase {
 				'a.created_at',
 				'a.updated_by',
 				'a.updated_at',
+				'role'                     => 'b.name',
 				'village'                  => 'c.name',
 				'subdistrict'              => 'd.name'
 			])
 			->from(['a' => 'Application\Models\User'])
-			->join('Application\Models\UserRole', 'a.id = b.user_id', 'b')
+			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
 			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
 			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
 			->groupBy('a.id')
 			->orderBy('a.id DESC')
 			->where('a.status = ' . $current_status);
 		if ($current_role) {
-			$builder->andWhere('b.role_id = ' . $current_role);
+			$builder->andWhere('a.role_id = ' . $current_role);
 		}
 		if ($keyword) {
 			$keyword_placeholder = "%{$keyword}%";
-			$builder->andWhere('a.name LIKE ?0 OR a.email LIKE ?1 OR phone LIKE ?2', [
+			$builder->andWhere('a.name LIKE ?0 OR a.email LIKE ?1 OR a.mobile_phone LIKE ?2', [
 				$keyword_placeholder,
 				$keyword_placeholder,
 				$keyword_placeholder,
@@ -81,11 +81,6 @@ class UsersController extends ControllerBase {
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('status', $status[$item->status]);
-			$roles = [];
-			foreach ($this->db->fetchAll('SELECT b.name FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ?', Db::FETCH_OBJ, [$item->id]) as $role) {
-				$roles[] = $role->name;
-			}
-			$item->writeAttribute('roles', $roles);
 			$users[] = $item;
 		}
 		$this->view->menu                  = $this->_menu('Member');
@@ -109,7 +104,6 @@ class UsersController extends ControllerBase {
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->create()) {
-				$this->_save_roles($user);
 				$this->flashSession->success('Penambahan member berhasil.');
 				return $this->response->redirect('/admin/users?status=0');
 			}
@@ -122,14 +116,10 @@ class UsersController extends ControllerBase {
 	}
 
 	function showAction($id) {
-		$user  = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
-		$roles = [];
-		foreach ($user->getRelated('roles') as $role) {
-			$roles[$role->name] = 1;
-		}
-		if (isset($roles['Buyer'])) {
+		$user = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
+		if ($user->role.name == 'Buyer') {
 			$column = 'buyer_id';
-		} else if (isset($roles['Merchant'])) {
+		} else if ($user->role_name == 'Merchant') {
 			$column                    = 'merchant_id';
 			$this->view->products      = $this->db->fetchColumn('SELECT COUNT(1) FROM product_prices WHERE user_id = ?', [$user->id]);
 			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
@@ -153,7 +143,6 @@ class UsersController extends ControllerBase {
 		$this->view->menu   = $this->_menu('Members');
 		$this->view->user   = $user;
 		$this->view->status = User::STATUS;
-		$this->view->roles  = $roles;
 	}
 
 	function updateAction($id) {
@@ -169,7 +158,6 @@ class UsersController extends ControllerBase {
 			}
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->update()) {
-				$this->_save_roles($user);
 				$this->flashSession->success('Update member berhasil.');
 				return $this->response->redirect('/admin/users');
 			}
@@ -263,13 +251,6 @@ class UsersController extends ControllerBase {
 		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
 		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
 		$this->view->business_days    = User::BUSINESS_DAYS;
-		if ($user->id && !isset($this->view->role_ids)) {
-			$role_ids = [];
-			foreach ($user->getRelated('roles') as $role) {
-				$role_ids[] = $role->id;
-			}
-			$this->view->role_ids = $role_ids;
-		}
 	}
 
 	private function _set_model_attributes(&$user) {
@@ -290,26 +271,6 @@ class UsersController extends ControllerBase {
 		$user->setBusinessDays($this->request->getPost('business_days'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
-		$this->view->role_ids = $this->request->getPost('role_id');
-	}
-
-	private function _save_roles(User $user) {
-		$role_ids = $this->request->getPost('role_id');
-		if ($role_ids) {
-			UserRole::find([
-				'user_id = :user_id: AND role_id NOT IN({role_ids:array})',
-				'bind' => [
-					'user_id'  => $user->id,
-					'role_ids' => $role_ids,
-				],
-			])->delete();
-			foreach ($role_ids as $role_id) {
-				$role = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$role_id]]);
-				if ($role && !UserRole::findFirst(['user_id = ?0 AND role_id = ?1', 'bind' => [$user->id, $role->id]])) {
-					$user_role = new UserRole(['user_id' => $user->id, 'role_id' => $role->id]);
-					$user_role->create();
-				}
-			}
-		}
+		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 	}
 }

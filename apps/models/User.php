@@ -31,6 +31,7 @@ class User extends ModelBase {
 	];
 
 	public $id;
+	public $role_id;
 	public $name;
 	public $email;
 	public $password;
@@ -72,7 +73,14 @@ class User extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->hasManyToMany('id', 'Application\Models\UserRole', 'user_id', 'role_id', 'Application\Models\Role', 'id', ['alias' => 'roles']);
+		$this->belongsTo('role_id', 'Application\Models\Role', 'id', [
+			'alias'      => 'role',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'role harus diisi',
+			],
+		]);
 		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
 			'alias'      => 'village',
 			'reusable'   => true,

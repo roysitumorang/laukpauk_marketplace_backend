@@ -21,7 +21,7 @@ class UsersController extends ControllerBase {
 		$user->setNewPasswordConfirmation($this->_input->new_password);
 		$user->setMobilePhone($this->_input->mobile_phone);
 		$user->setDeposit(0);
-		$user->roles = [Role::findFirstByName('Buyer')];
+		$user->role_id = Role::findFirstByName('Buyer')->id;
 		if ($user->validation() && $user->create()) {
 			$this->_response['status']                   = 1;
 			$this->_response['data']['activation_token'] = $user->activation_token;

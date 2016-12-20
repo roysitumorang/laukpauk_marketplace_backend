@@ -2,6 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Role;
 use Application\Models\User;
 
 class SessionsController extends ControllerBase {
@@ -23,8 +24,11 @@ class SessionsController extends ControllerBase {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$user = User::findFirst(['status = 1 AND mobile_phone = ?0', 'bind' => [$this->_input->mobile_phone]]);
-		if ($user && $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND (b.name = 'Buyer' OR b.name = 'Merchant')", [$user->id]) && $this->security->checkHash($this->_input->password, $user->password)) {
+		$user = User::findFirst(['status = 1 AND role_id IN ({?0|array}) AND mobile_phone = ?1', 'bind' => [
+			[Role::BUYER, Role::MERCHANT],
+			$this->_input->mobile_phone,
+		]]);
+		if ($user && $this->security->checkHash($this->_input->password, $user->password)) {
 			if (!$this->_access_token->user) {
 				$this->_access_token->user = $user;
 				$this->_access_token->save();
@@ -38,8 +42,8 @@ class SessionsController extends ControllerBase {
 					'address'        => $this->_access_token->user->address,
 					'subdistrict_id' => $this->_access_token->user->village->subdistrict->id,
 					'village_id'     => $this->_access_token->user->village->id,
-					'is_buyer'       => $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND b.name = 'Buyer'", [$this->_access_token->user->id]),
-					'is_merchant'    => $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND b.name = 'Merchant'", [$this->_access_token->user->id]),
+					'is_buyer'       => $this->_access_token->user->role->name == 'Buyer',
+					'is_merchant'    => $this->_access_token->user->role->name == 'Merchant',
 				]
 			];
 		} else {
