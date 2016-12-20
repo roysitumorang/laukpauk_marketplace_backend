@@ -16,9 +16,6 @@ class Order extends ModelBase {
 	public $address;
 	public $village_id;
 	public $mobile_phone;
-	public $mobile;
-	public $tracking_number;
-	public $payment;
 	public $final_bill;
 	public $status;
 	public $merchant_id;
@@ -26,10 +23,6 @@ class Order extends ModelBase {
 	public $admin_fee;
 	public $original_bill;
 	public $ip_address;
-	public $affiliate_user_id;
-	public $shipping_fee;
-	public $shipping_line;
-	public $detail;
 	public $coupon_id;
 	public $estimated_delivery;
 	public $actual_delivery;
