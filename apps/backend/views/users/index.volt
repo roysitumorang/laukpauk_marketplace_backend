@@ -86,10 +86,10 @@
 								<i class="fa fa-phone-square"></i>&nbsp;&nbsp;<a href="/admin/sms/create/user_id:{{ user.id }}" target="_blank">{{ user.mobile_phone }}</a><br>
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="/admin/users/emails/{{ user.id }}" title="email log">{{ count(user.emails) }} emails</a><br>
 								<i class="fa fa-sign-in"></i>&nbsp;
-								{% if !user.last_seen %}
-								No login yet
+								{% if user.last_login %}
+								<a href="/admin/login_history/user_id:{{ user.id }}">{{ user.last_login }}</a>
 								{% else %}
-								<a href="/admin/users/login_history/{{ user.id }}">{{ user.last_seen }}</a>
+								No login yet
 								{% endif %}
 								{% if user.village %}
 								<br><i class="fa fa-home"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}

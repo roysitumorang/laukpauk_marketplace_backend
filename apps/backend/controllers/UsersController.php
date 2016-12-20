@@ -51,15 +51,18 @@ class UsersController extends ControllerBase {
 				'a.updated_at',
 				'role'                     => 'b.name',
 				'village'                  => 'c.name',
-				'subdistrict'              => 'd.name'
+				'subdistrict'              => 'd.name',
+				'last_login'               => 'e.sign_in_at',
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
 			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
 			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
+			->leftJoin('Application\Models\LoginHistory', 'a.id = e.user_id', 'e')
 			->groupBy('a.id')
 			->orderBy('a.id DESC')
-			->where('a.status = ' . $current_status);
+			->where('a.status = ' . $current_status)
+			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory f WHERE e.user_id = f.user_id AND f.id > e.id)');
 		if ($current_role) {
 			$builder->andWhere('a.role_id = ' . $current_role);
 		}
@@ -118,9 +121,9 @@ class UsersController extends ControllerBase {
 
 	function showAction($id) {
 		$user = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
-		if ($user->role.name == 'Buyer') {
+		if ($user->role->name == 'Buyer') {
 			$column = 'buyer_id';
-		} else if ($user->role_name == 'Merchant') {
+		} else if ($user->role->name == 'Merchant') {
 			$column                    = 'merchant_id';
 			$this->view->products      = $this->db->fetchColumn('SELECT COUNT(1) FROM product_prices WHERE user_id = ?', [$user->id]);
 			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
@@ -141,9 +144,10 @@ class UsersController extends ControllerBase {
 					a.{$column} = ?", Db::FETCH_OBJ, [$user->id]);
 			$this->view->total = $total;
 		}
-		$this->view->menu   = $this->_menu('Members');
-		$this->view->user   = $user;
-		$this->view->status = User::STATUS;
+		$this->view->menu       = $this->_menu('Members');
+		$this->view->user       = $user;
+		$this->view->status     = User::STATUS;
+		$this->view->last_login = $this->db->fetchColumn('SELECT a.sign_in_at FROM login_history a WHERE a.id = ? AND NOT EXISTS(SELECT 1 FROM login_history b WHERE b.user_id = b.user_id AND b.id > a.id)', [$user->id]);
 	}
 
 	function updateAction($id) {
