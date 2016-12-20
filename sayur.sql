@@ -9419,6 +9419,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `role_id` bigint(20) NOT NULL,
+  `api_key` char(32) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(80) DEFAULT NULL,
   `password` char(60) NOT NULL,
@@ -9450,6 +9451,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `password_reset_token` (`password_reset_token`),
   UNIQUE KEY `avatar` (`avatar`),
   UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `api_key` (`api_key`),
   KEY `activated_at` (`activated_at`),
   KEY `created_by` (`created_by`),
   KEY `date_of_birth` (`date_of_birth`),
@@ -9465,8 +9467,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-18 20:41:50');
+insert  into `users`(`id`,`role_id`,`api_key`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-18 20:41:50');
 
 UNLOCK TABLES;
 
