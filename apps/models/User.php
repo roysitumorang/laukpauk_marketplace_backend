@@ -32,6 +32,7 @@ class User extends ModelBase {
 
 	public $id;
 	public $role_id;
+	public $api_key;
 	public $name;
 	public $email;
 	public $password;
@@ -210,7 +211,18 @@ class User extends ModelBase {
 		$random                 = new Random;
 		$this->status           = array_search('HOLD', static::STATUS);
 		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
-		$this->activation_token = $random->hex(16);
+		do {
+			$this->activation_token = $random->hex(16);
+			if (!static::findFirstByActivationToken($this->activation_token)) {
+				break;
+			}
+		} while (1);
+		do {
+			$this->api_key = $random->hex(16);
+			if (!static::findFirstByApiKey($this->api_key)) {
+				break;
+			}
+		} while (1);
 	}
 
 	function beforeValidation() {
