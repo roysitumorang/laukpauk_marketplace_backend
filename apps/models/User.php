@@ -7,9 +7,9 @@ use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Confirmation;
 use Phalcon\Validation\Validator\Date;
-use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\Email;
 use Phalcon\Validation\Validator\File as FileValidator;
+use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -276,7 +276,7 @@ class User extends ModelBase {
 				'message' => 'tanggal lahir tidak valid',
 			]));
 		}
-		$validator->add('deposit', new Digit([
+		$validator->add('deposit', new Numericality([
 			'message' => 'deposit harus dalam bentuk angka',
 		]));
 		if ($this->new_avatar) {
