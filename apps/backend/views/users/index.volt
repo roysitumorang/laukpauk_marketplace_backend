@@ -82,6 +82,7 @@
 								{% if user.email %}
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 								{% endif %}
+								<i class="fa fa-key"></i>&nbsp;&nbsp;{{ user.api_key | default('-') }}<br>
 								<i class="fa fa-phone-square"></i>&nbsp;&nbsp;<a href="/admin/sms/create/user_id:{{ user.id }}" target="_blank">{{ user.mobile_phone }}</a><br>
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="/admin/users/emails/{{ user.id }}" title="email log">{{ count(user.emails) }} emails</a><br>
 								<i class="fa fa-sign-in"></i>&nbsp;

@@ -23,6 +23,7 @@ class UsersController extends ControllerBase {
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
+				'a.api_key',
 				'a.name',
 				'a.email',
 				'a.password',
