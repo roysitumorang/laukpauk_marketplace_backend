@@ -3,6 +3,7 @@
 namespace Application\Api\V1\Controllers;
 
 use Application\Models\Setting;
+use DateTime;
 use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
@@ -39,9 +40,11 @@ class MerchantsController extends ControllerBase {
 		if (!$merchants) {
 			$this->_response['message'] = 'Maaf, daerah Anda di luar wilayah operasional Kami.';
 		}
-		$this->_response['data']['merchants']        = $merchants;
-		$this->_response['data']['minimum_purchase'] = Setting::findFirstByName('minimum_purchase')->value;
-		$this->_response['data']['coupons']          = $coupons;
+		$minimum_purchase = Setting::findFirstByName('minimum_purchase')->value;
+		$this->_response['data']['merchants']             = $merchants;
+		$this->_response['data']['minimum_purchase']      = $minimum_purchase;
+		$this->_response['data']['minimum_purchase_html'] = number_format($minimum_purchase);
+		$this->_response['data']['coupons']               = $coupons;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
