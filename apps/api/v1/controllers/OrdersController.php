@@ -107,4 +107,46 @@ class OrdersController extends ControllerBase {
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
+
+	function completeAction($id) {
+		if (!$this->request->isPost()) {
+			$this->_response['message'] = 'Request tidak valid!';
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
+		}
+		$order = $this->_current_user->getRelated('merchant_orders', [
+			'status = 0 AND id = ?0',
+			'bind' => [$id]
+		])->getFirst();
+		if ($order) {
+			$order->complete();
+			$this->_response['status']  = 1;
+			$this->_response['message'] = 'Order #' . $order->code . ' telah selesai, terima kasih';
+		} else {
+			$this->_response['message'] = 'Order tidak ditemukan';
+		}
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function cancelAction($id) {
+		if (!$this->request->isPost()) {
+			$this->_response['message'] = 'Request tidak valid!';
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
+		}
+		$order = $this->_current_user->getRelated('merchant_orders', [
+			'status = 0 AND id = ?0',
+			'bind' => [$id]
+		])->getFirst();
+		if ($order) {
+			$order->cancel();
+			$this->_response['status']  = 1;
+			$this->_response['message'] = 'Order #' . $order->code . ' telah dicancel!';
+		} else {
+			$this->_response['message'] = 'Order tidak ditemukan';
+		}
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
 }

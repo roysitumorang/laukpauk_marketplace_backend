@@ -134,7 +134,7 @@ class Order extends ModelBase {
 		$admin_notification->created_by = $this->created_by;
 		$admins                         = User::find([
 			'role_id IN ({role_ids:array}) AND 1',
-			'bind'       => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
+			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
 			$recipients[] = $admin;
@@ -151,13 +151,17 @@ class Order extends ModelBase {
 	}
 
 	function cancel() {
-		return $this->update(['status' => static::STATUS['CANCELLED']]);
+		$this->update(['status' => array_search('CANCELLED', static::STATUS)]);
+		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
+		$this->buyer->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
 	}
 
 	function complete() {
-		return $this->update([
-			'status'          => static::STATUS['COMPLETED'],
+		$this->update([
+			'status'          => array_search('COMPLETED', static::STATUS),
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 		]);
+		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
+		$this->buyer->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
 	}
 }
