@@ -85,11 +85,11 @@
 							<td class="text-center">{{ date('Y-m-d H:i', strtotime(order.created_at)) }}</td>
 							<td>
 								<font size="5">{{ order.name }}</font><br>
-								<i class="fa fa-phone-square"></i>&nbsp;{{ order.phone }}
+								<i class="fa fa-phone-square"></i>&nbsp;{{ order.mobile_phone }}
 							</td>
 							<td>
 								<font size="5">{% if order.merchant.company %}{{ order.merchant.company }}{% else %}{{ order.merchant.name }}{% endif %}</font><br>
-								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant.phone }}
+								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant.mobile_phone }}
 							<td class="text-right">
 								<font size="4">Rp. {{ number_format(order.final_bill) }}</font><br><br>
 							</td>
