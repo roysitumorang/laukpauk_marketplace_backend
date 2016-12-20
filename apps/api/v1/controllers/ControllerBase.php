@@ -2,20 +2,20 @@
 
 namespace Application\Api\V1\Controllers;
 
-use Application\Models\AccessToken;
+use Application\Models\Role;
+use Application\Models\User;
 use Exception;
+use Phalcon\Crypt;
 use Phalcon\Mvc\Controller;
 
 abstract class ControllerBase extends Controller {
 	protected $_response = [
 		'status'          => -1,
-		'expired_at'      => null,
-		'invalid_token'   => 0,
-		'session_expired' => 0,
+		'invalid_api_key' => 0,
 		'message'         => null,
 		'data'            => [],
 	];
-	protected $_access_token;
+	protected $_current_user;
 	protected $_input;
 
 	function initialize() {
@@ -24,19 +24,22 @@ abstract class ControllerBase extends Controller {
 
 	function beforeExecuteRoute() {
 		try {
-			$this->_access_token = AccessToken::findFirstById($this->request->get('access_token'));
-			if (!$this->_access_token || $this->_access_token->ip_address != $this->request->getClientAddress() || $this->_access_token->user_agent != $this->request->getUserAgent()) {
-				$this->_response['invalid_token'] = 1;
-				throw new Exception('Token tidak valid!');
+			$access_token = $this->request->get('access_token', 'string');
+			if (!$access_token) {
+				throw new Exception;
 			}
-			if ($this->_access_token->expired_at >= time()) {
-				$this->_response['session_expired'] = 1;
-				throw new Exception('Token expired!');
+			$encrypted_data      = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
+			$crypt               = new Crypt;
+			$api_key             = $crypt->decryptBase64($encrypted_data, $this->config->encryption_key);
+			$this->_current_user = User::findFirst(['status = 1 AND role_id > 2 AND api_key = ?0', 'bind' => [
+				$api_key,
+			]]);
+			if (!$this->_current_user) {
+				throw new Exception;
 			}
-			$this->_response['expired_at'] = str_replace(' ', '+', $this->_access_token->expired_at);
-			$this->_access_token->update(['updated_at' => time()]);
 		} catch (Exception $e) {
-			$this->_response['message'] = $e->getMessage();
+			$this->_response['message']         = 'API key tidak valid!';
+			$this->_response['invalid_api_key'] = 1;
 			$this->response->setJsonContent($this->_response);
 			exit($this->response->send());
 		}

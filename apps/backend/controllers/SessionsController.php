@@ -5,7 +5,6 @@ namespace Application\Backend\Controllers;
 use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
-use Phalcon\Db;
 
 class SessionsController extends ControllerBase {
 	function index() {

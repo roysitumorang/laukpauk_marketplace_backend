@@ -2,13 +2,12 @@
 
 namespace Application\Api\V1\Controllers;
 
-use Application\Models\Role;
 use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
 	function indexAction() {
 		$merchants = [];
-		foreach ($this->db->fetchAll("SELECT a.id, a.company FROM users a JOIN service_areas b ON a.id = b.user_id WHERE b.village_id = {$this->_access_token->user->village_id}", Db::FETCH_OBJ) as $merchant) {
+		foreach ($this->db->fetchAll("SELECT a.id, a.company FROM users a JOIN service_areas b ON a.id = b.user_id WHERE b.village_id = {$this->_current_user->village_id}", Db::FETCH_OBJ) as $merchant) {
 			$categories = [];
 			foreach ($this->db->fetchAll("SELECT c.id, c.name FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} GROUP BY c.id", Db::FETCH_OBJ) as $category) {
 				$products = [];

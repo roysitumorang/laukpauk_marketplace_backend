@@ -5,14 +5,20 @@ namespace Application\Api\V1\Controllers;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
+use Phalcon\Crypt;
 
 class UsersController extends ControllerBase {
-	function createAction() {
-		if (!$this->request->isPost() || $this->_access_token->user) {
+	function beforeExecuteRoute() {}
+
+	function onConstruct() {
+		if (!$this->request->isPost()) {
 			$this->_response['message'] = 'Request tidak valid!';
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-			return $this->response;
+			exit($this->response->send());
 		}
+	}
+
+	function createAction() {
 		$village_id    = filter_var($this->_input->village_id, FILTER_VALIDATE_INT);
 		$user          = new User;
 		$user->village = Village::findFirst($village_id);
@@ -38,11 +44,6 @@ class UsersController extends ControllerBase {
 	}
 
 	function activateAction($activation_token) {
-		if (!$this->request->isPost() || $this->_access_token->user) {
-			$this->_response['message'] = 'Request tidak valid!';
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-			return $this->response;
-		}
 		$user = User::findFirstByActivationToken($activation_token);
 		if (!$user) {
 			$this->_response['message'] = 'Token aktivasi tidak valid!';
@@ -50,11 +51,15 @@ class UsersController extends ControllerBase {
 			return $this->response;
 		}
 		$user->activate();
-		$this->_access_token->user  = $user;
-		$this->_access_token->save();
+		$crypt                      = new Crypt;
 		$this->_response['status']  = 1;
 		$this->_response['message'] = 'Aktivasi account berhasil!';
 		$this->_response['data']    = [
+			'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
+				'+' => '-',
+				'/' => '_',
+				'=' => ',',
+			]),
 			'current_user' => [
 				'id'             => $user->id,
 				'name'           => $user->name,
@@ -62,7 +67,7 @@ class UsersController extends ControllerBase {
 				'address'        => $user->address,
 				'subdistrict_id' => $user->village->subdistrict->id,
 				'village_id'     => $user->village->id,
-				'is_buyer'       => 1,
+				'role'           => $user->role->name,
 			]
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);

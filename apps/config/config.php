@@ -27,4 +27,5 @@ return new Config([
 		'max_size' => '2M',
 		'path'     => APP_PATH . 'public/assets/images/'
 	],
+	'encryption_key' => 'wWw.L@4ukPauK.1d',
 ]);

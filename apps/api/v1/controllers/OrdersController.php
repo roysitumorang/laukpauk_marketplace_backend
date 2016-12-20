@@ -14,7 +14,7 @@ use Application\Models\Village;
 class OrdersController extends ControllerBase {
 	function indexAction() {
 		$orders = [];
-		foreach ($this->_access_token->user->buyer_orders as $order) {
+		foreach ($this->_current_user->buyer_orders as $order) {
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
 			$merchant = User::findFirst($order->merchant_id);
@@ -49,7 +49,7 @@ class OrdersController extends ControllerBase {
 	}
 
 	function createAction() {
-		if (!$this->request->isPost() || !$this->_access_token->user) {
+		if (!$this->request->isPost()) {
 			$this->_response['message'] = 'Request tidak valid!';
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
@@ -68,19 +68,20 @@ class OrdersController extends ControllerBase {
 				break;
 			}
 		} while (1);
-		$merchant = User::findFirst(['conditions' => 'status = 1 AND id = ?0', 'bind' => [$this->_input->merchant_id]]);
-		if ($merchant && $this->db->fetchColumn("SELECT COUNT(1) FROM user_role a JOIN roles b ON a.role_id = b.id WHERE a.user_id = ? AND b.name = 'Merchant'", [$merchant->id])) {
-			$order->merchant_id = $merchant->id;
-		}
-		$order->name               = $this->_access_token->user->name;
-		$order->mobile_phone       = $this->_access_token->user->mobile_phone;
+		$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
+			Role::MERCHANT,
+			$this->_input->merchant_id
+		]]);
+		$order->merchant_id        = $merchant->id;
+		$order->name               = $this->_current_user->name;
+		$order->mobile_phone       = $this->_current_user->mobile_phone;
 		$order->address            = $this->_input->address;
-		$order->village_id         = $this->_access_token->user->village_id;
+		$order->village_id         = $this->_current_user->village_id;
 		$order->original_bill      = 0;
 		$order->estimated_delivery = $this->_input->estimated_delivery;
 		$order->note               = $this->_input->note;
-		$order->buyer_id           = $this->_access_token->user->id;
-		$order->created_by         = $this->_access_token->user->id;
+		$order->buyer_id           = $this->_current_user->id;
+		$order->created_by         = $this->_current_user->id;
 		foreach ($this->_input->items as $item) {
 			$order_item              = new OrderItem;
 			$price                   = ProductPrice::findFirst($item->product_price_id);
@@ -104,7 +105,7 @@ class OrdersController extends ControllerBase {
 			$admin_notification             = new Notification;
 			$admin_notification->subject    = $admin_new_order_template->subject;
 			$admin_notification->link       = $admin_new_order_template->url . $order->id;
-			$admin_notification->created_by = $this->_access_token->user->id;
+			$admin_notification->created_by = $this->_current_user->id;
 			$admins                         = User::find([
 				'role_id IN ({role_ids:array}) AND 1',
 				'bind'       => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
@@ -118,7 +119,7 @@ class OrdersController extends ControllerBase {
 			$merchant_notification             = new Notification;
 			$merchant_notification->subject    = $merchant_new_order_template->subject;
 			$merchant_notification->link       = $merchant_new_order_template->url . $order->id;
-			$merchant_notification->created_by = $this->_access_token->user->id;
+			$merchant_notification->created_by = $this->_current_user->id;
 			$merchant_notification->recipients = [$merchant];
 			$merchant_notification->create();
 			 *

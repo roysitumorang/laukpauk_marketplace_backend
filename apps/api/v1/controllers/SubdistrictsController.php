@@ -5,6 +5,8 @@ namespace Application\Api\V1\Controllers;
 use Application\Models\City;
 
 class SubdistrictsController extends ControllerBase {
+	function beforeExecuteRoute() {}
+
 	function indexAction() {
 		$this->_response['status'] = 1;
 		$subdistricts              = [];
