@@ -12,7 +12,12 @@ use Application\Models\Village;
 class OrdersController extends ControllerBase {
 	function indexAction() {
 		$orders = [];
-		foreach ($this->_current_user->buyer_orders as $order) {
+		if ($this->_current_user->role->name == 'Buyer') {
+			$collection = 'buyer_orders';
+		} else if ($this->_current_user->role->name == 'Merchant') {
+			$collection = 'merchant_orders';
+		}
+		foreach ($this->_current_user->$collection as $order) {
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
 			$merchant = User::findFirst($order->merchant_id);
