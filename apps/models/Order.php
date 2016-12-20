@@ -53,12 +53,20 @@ class Order extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->belongsTo('merchant_id', 'Application\Models\User', 'id', [
-			'alias'    => 'merchant',
-			'reusable' => true,
+			'alias'      => 'merchant',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'penjual harus diisi',
+			],
 		]);
 		$this->belongsTo('buyer_id', 'Application\Models\User', 'id', [
-			'alias'    => 'buyer',
-			'reusable' => true,
+			'alias'      => 'buyer',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'pembeli harus diisi',
+			],
 		]);
 		$this->hasMany('id', 'Application\Models\OrderItem', 'order_id', [
 			'alias' => 'items',
@@ -66,6 +74,7 @@ class Order extends ModelBase {
 	}
 
 	function beforeValidationOnCreate() {
+		parent::beforeValidationOnCreate();
 		$this->status     = array_search('HOLD', static::STATUS);
 		$this->ip_address = $this->getDI()->getRequest()->getClientAddress();
 		$this->admin_fee  = static::ADMIN_FEE;
@@ -73,7 +82,7 @@ class Order extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['code', 'name', 'mobile_phone', 'address', 'village_id', 'status', 'merchant_id', 'buyer_id', 'estimated_delivery'], new PresenceOf([
+		$validator->add(['code', 'name', 'mobile_phone', 'address', 'village_id', 'status', 'estimated_delivery'], new PresenceOf([
 			'message' => [
 				'code'               => 'kode order harus diisi',
 				'name'               => 'nama harus diisi',
@@ -81,8 +90,6 @@ class Order extends ModelBase {
 				'address'            => 'alamat harus diisi',
 				'village_id'         => 'kelurahan harus diisi',
 				'status'             => 'status harus diisi',
-				'merchant_id'        => 'penjual harus diisi',
-				'buyer_id'           => 'pembeli harus diisi',
 				'estimated_delivery' => 'waktu pengantaran harus diisi',
 			],
 		]));
@@ -116,6 +123,11 @@ class Order extends ModelBase {
 		foreach ($this->items as $item) {
 			$item->delete();
 		}
+	}
+
+	function afterSave() {
+		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->final_bill]);
+		$this->buyer->update(['deposit' => $this->buyer->deposit - $this->final_bill]);
 	}
 
 	function cancel() {

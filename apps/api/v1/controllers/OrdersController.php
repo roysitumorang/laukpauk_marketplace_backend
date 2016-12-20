@@ -72,7 +72,7 @@ class OrdersController extends ControllerBase {
 			Role::MERCHANT,
 			$this->_input->merchant_id
 		]]);
-		$order->merchant_id        = $merchant->id;
+		$order->merchant           = $merchant;
 		$order->name               = $this->_current_user->name;
 		$order->mobile_phone       = $this->_current_user->mobile_phone;
 		$order->address            = $this->_input->address;
@@ -80,7 +80,7 @@ class OrdersController extends ControllerBase {
 		$order->original_bill      = 0;
 		$order->estimated_delivery = $this->_input->estimated_delivery;
 		$order->note               = $this->_input->note;
-		$order->buyer_id           = $this->_current_user->id;
+		$order->buyer              = $this->_current_user;
 		$order->created_by         = $this->_current_user->id;
 		foreach ($this->_input->items as $item) {
 			$order_item              = new OrderItem;
@@ -95,12 +95,11 @@ class OrdersController extends ControllerBase {
 			$order->original_bill   += $item->quantity * $price->value;
 			$order_items[]           = $order_item;
 		}
-		$order->final_bill    = $order->original_bill;
-		$order->items         = $order_items;
+		$order->final_bill = $order->original_bill;
+		$order->items      = $order_items;
 		if ($order->validation() && $order->create()) {
 			$this->_response['status']      = 1;
 			$this->_response['message']     = 'Pemesanan berhasil!';
-			/*
 			$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
 			$admin_notification             = new Notification;
 			$admin_notification->subject    = $admin_new_order_template->subject;
@@ -122,8 +121,6 @@ class OrdersController extends ControllerBase {
 			$merchant_notification->created_by = $this->_current_user->id;
 			$merchant_notification->recipients = [$merchant];
 			$merchant_notification->create();
-			 *
-			 */
 		} else {
 			$errors = [];
 			foreach ($order->getMessages() as $error) {
