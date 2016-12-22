@@ -152,6 +152,28 @@ class Order extends ModelBase {
 	function cancel() {
 		$this->update(['status' => array_search('CANCELLED', static::STATUS)]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
+		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order cancelled');
+		$admin_notification             = new Notification;
+		$admin_notification->subject    = $admin_new_order_template->subject;
+		$admin_notification->link       = $admin_new_order_template->url . $this->id;
+		$admin_notification->created_by = $this->merchant->id;
+		$admins                         = User::find([
+			'role_id IN ({role_ids:array}) AND 1',
+			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
+		]);
+		foreach ($admins as $admin) {
+			$recipients[] = $admin;
+		}
+		$admin_notification->recipients    = $recipients;
+		$admin_notification->create();
+		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api order cancelled');
+		$merchant_notification             = new Notification;
+		$merchant_notification->subject    = $merchant_new_order_template->subject;
+		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
+		$merchant_notification->created_by = $this->merchant->id;
+		$merchant_notification->recipients = [$this->buyer];
+		$merchant_notification->create();
+
 	}
 
 	function complete() {
@@ -160,5 +182,26 @@ class Order extends ModelBase {
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 		]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
+		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order delivered');
+		$admin_notification             = new Notification;
+		$admin_notification->subject    = $admin_new_order_template->subject;
+		$admin_notification->link       = $admin_new_order_template->url . $this->id;
+		$admin_notification->created_by = $this->merchant->id;
+		$admins                         = User::find([
+			'role_id IN ({role_ids:array}) AND 1',
+			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
+		]);
+		foreach ($admins as $admin) {
+			$recipients[] = $admin;
+		}
+		$admin_notification->recipients    = $recipients;
+		$admin_notification->create();
+		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api order delivered');
+		$merchant_notification             = new Notification;
+		$merchant_notification->subject    = $merchant_new_order_template->subject;
+		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
+		$merchant_notification->created_by = $this->merchant->id;
+		$merchant_notification->recipients = [$this->buyer];
+		$merchant_notification->create();
 	}
 }

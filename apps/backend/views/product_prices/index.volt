@@ -46,7 +46,7 @@
 									<tr>
 										<td style="text-right">{{ i + 1 }}</td>
 										<td>{{ price.product.category.name }}</td>
-										<td>{{ price.product.name }}</td>
+										<td>{{ price.product.name }} ({{ price.product.unit_size }} {{ price.product.stock_unit }})</td>
 										<td>Rp. {{ number_format(price.value) }}</td>
 										<td class="text-center">{{ price.order_closing_hour|default('-') }}</td>
 										<td>

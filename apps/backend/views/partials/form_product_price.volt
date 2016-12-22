@@ -20,11 +20,11 @@
 			</td>
 			<td>
 			{% if price.id %}
-				{{ price.product.name }}
+				{{ price.product.name }} ({{ price.product.unit_size }} {{ price.product.stock_unit }})
 			{% else %}
 				<select name="product_id" id="product_id" class="form form-control">
 					{% for product in current_products %}
-					<option value="{{ product.id }}"{% if product.id == price.product.id %} selected{% endif %}>{{ product.name }}</option>
+					<option value="{{ product.id }}"{% if product.id == price.product.id %} selected{% endif %}>{{ product.name }} ({{ product.unit_size }} {{ product.stock_unit }})</option>
 					{% endfor %}
 				</select>
 			{% endif %}
