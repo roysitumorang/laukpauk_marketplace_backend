@@ -23,4 +23,8 @@ class NotificationRecipient extends ModelBase {
 			'foreignKey' => ['allowNulls' => false],
 		]);
 	}
+
+	function read() {
+		return $this->update(['read_at' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s')]);
+	}
 }
