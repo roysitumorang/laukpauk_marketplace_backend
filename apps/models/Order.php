@@ -126,7 +126,6 @@ class Order extends ModelBase {
 
 	function afterCreate() {
 		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->final_bill]);
-		$this->buyer->update(['deposit' => $this->buyer->deposit - $this->final_bill]);
 		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
@@ -153,7 +152,6 @@ class Order extends ModelBase {
 	function cancel() {
 		$this->update(['status' => array_search('CANCELLED', static::STATUS)]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
-		$this->buyer->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
 	}
 
 	function complete() {
@@ -162,6 +160,5 @@ class Order extends ModelBase {
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 		]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
-		$this->buyer->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
 	}
 }
