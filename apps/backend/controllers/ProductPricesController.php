@@ -96,7 +96,7 @@ class ProductPricesController extends ControllerBase {
 		$products   = [];
 		foreach (ProductCategory::find(['published = 1', 'order' => 'name']) as $category) {
 			$category_products = [];
-			foreach ($category->getProducts(['published = 1', 'columns' => 'id, name, unit_size, stock_unit', 'order' => 'name']) as $product) {
+			foreach ($category->getProducts(['published = 1', 'columns' => 'id, name, stock_unit', 'order' => 'name']) as $product) {
 				$category_products[] = $product;
 			}
 			$categories[]            = $category;

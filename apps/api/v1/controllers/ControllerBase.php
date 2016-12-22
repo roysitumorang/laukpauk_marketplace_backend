@@ -10,11 +10,8 @@ use Phalcon\Mvc\Controller;
 
 abstract class ControllerBase extends Controller {
 	protected $_response = [
-		'status'           => -1,
-		'invalid_api_key'  => 0,
-		'maintenance_mode' => 0,
-		'message'          => null,
-		'data'             => [],
+		'status' => -1,
+		'data'   => [],
 	];
 	protected $_current_user;
 	protected $_input;

@@ -12,7 +12,6 @@ class OrderItem extends ModelBase {
 	public $product_id;
 	public $name;
 	public $unit_price;
-	public $unit_size;
 	public $stock_unit;
 	public $quantity;
 	public $buy_point;
@@ -41,19 +40,17 @@ class OrderItem extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'unit_price', 'unit_size', 'stock_unit', 'quantity'], new PresenceOf([
+		$validator->add(['name', 'unit_price', 'stock_unit', 'quantity'], new PresenceOf([
 			'message' => [
 				'name'       => 'nama produk harus diisi',
 				'unit_price' => 'harga satuan harus diisi',
-				'unit_size'  => 'besar satuan harus diisi',
 				'stock_unit' => 'satuan harus diisi',
 				'quantity'   => 'jumlah harus diisi',
 			],
 		]));
-		$validator->add(['unit_price', 'unit_size', 'quantity'], new Numericality([
+		$validator->add(['unit_price', 'quantity'], new Numericality([
 			'message' => [
 				'unit_price' => 'harga satuan harus dalam desimal',
-				'unit_size'  => 'besar satuan harus dalam desimal',
 				'quantity'   => 'jumlah harus dalam desimal',
 			]
 		]));

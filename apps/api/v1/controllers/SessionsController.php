@@ -18,7 +18,7 @@ class SessionsController extends ControllerBase {
 		}
 		$errors = [];
 		if (!$this->_input->mobile_phone) {
-			$errors['phone'] = 'nomor HP harus diisi';
+			$errors['mobile_phone'] = 'nomor HP harus diisi';
 		}
 		if (!$this->_input->password) {
 			$errors['password'] = 'password harus diisi';

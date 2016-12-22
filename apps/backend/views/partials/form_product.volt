@@ -22,13 +22,6 @@
 		</tr>
 		<tr>
 			<td>
-				<b><font color="#000099">Ukuran Produk</font> <font color="red">*</font></b>
-				<br>
-				<input type="text" name="unit_size" value="{{ product.unit_size }}" placeholder="Ukuran Produk" size="30" class="form form-control">
-			</td>
-		</tr>
-		<tr>
-			<td>
 				<b><font color="#000099">Satuan Produk</font> <font color="red">*</font></b>
 				<br>
 				<input type="text" name="stock_unit" value="{{ product.stock_unit }}" placeholder="Satuan Produk" size="30" class="form form-control">

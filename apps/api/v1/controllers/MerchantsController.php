@@ -3,7 +3,6 @@
 namespace Application\Api\V1\Controllers;
 
 use Application\Models\Setting;
-use DateTime;
 use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
@@ -14,11 +13,10 @@ class MerchantsController extends ControllerBase {
 			$categories = [];
 			foreach ($this->db->fetchAll("SELECT c.id, c.name FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} GROUP BY c.id", Db::FETCH_OBJ) as $category) {
 				$products = [];
-				foreach ($this->db->fetchAll("SELECT a.id, b.name, a.value, b.unit_size, b.stock_unit, order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.id = {$category->id} GROUP BY b.id", Db::FETCH_OBJ) as $product) {
+				foreach ($this->db->fetchAll("SELECT a.id, b.name, a.value, b.stock_unit, order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.id = {$category->id} GROUP BY b.id", Db::FETCH_OBJ) as $product) {
 					$products[$product->id] = [
 						'name'               => $product->name,
 						'price'              => $product->value,
-						'unit_size'          => $product->unit_size,
 						'stock_unit'         => $product->stock_unit,
 						'order_closing_hour' => $product->order_closing_hour,
 					];

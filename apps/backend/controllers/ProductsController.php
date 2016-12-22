@@ -107,8 +107,8 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_categories();
-		$this->view->menu         = $this->_menu('Products');
-		$this->view->product      = $product;
+		$this->view->menu    = $this->_menu('Products');
+		$this->view->product = $product;
 	}
 
 	function deleteAction($id) {
@@ -142,7 +142,6 @@ class ProductsController extends ControllerBase {
 	private function _set_model_attributes(&$product) {
 		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
 		$product->setName($this->request->getPost('name'));
-		$product->setUnitSize($this->request->getPost('unit_size'));
 		$product->setStockUnit($this->request->getPost('stock_unit'));
 		$product->setDescription($this->request->getPost('description'));
 		$product->setPublished($this->request->getPost('published'));

@@ -25,7 +25,6 @@ class OrdersController extends ControllerBase {
 				$items[$item->id] = [
 					'name'       => $item->name,
 					'stock_unit' => $item->stock_unit,
-					'unit_size'  => $item->unit_size,
 					'unit_price' => $item->unit_price,
 					'quantity'   => $item->quantity,
 				];
@@ -85,7 +84,6 @@ class OrdersController extends ControllerBase {
 			$order_item->product_id  = $product->id;
 			$order_item->name        = $product->name;
 			$order_item->unit_price  = $price->value;
-			$order_item->unit_size   = $product->unit_size;
 			$order_item->stock_unit  = $product->stock_unit;
 			$order_item->quantity    = $item->quantity;
 			$order->original_bill   += $item->quantity * $price->value;
