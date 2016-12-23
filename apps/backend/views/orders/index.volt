@@ -94,11 +94,7 @@
 								<font size="4">Rp. {{ number_format(order.final_bill) }}</font><br><br>
 							</td>
 							<td>
-								<a href="/admin/orders/show/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a><br>
-								{% if order.status == 'HOLD' %}
-								<a href="/admin/orders/update/{{ order.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
-								<a href="javascript:void(0)" data-id="{{ order.id }}" class="cancel" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
-								{% endif %}
+								<a href="/admin/orders/show/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}

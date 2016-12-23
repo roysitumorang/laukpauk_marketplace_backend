@@ -3,6 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Order;
+use Application\Models\Village;
 use DateTimeImmutable;
 use Exception;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
@@ -72,5 +73,15 @@ class OrdersController extends ControllerBase {
 		$this->view->pending_orders         = $this->db->fetchOne("SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE `status` = 0");
 		$this->view->completed_orders       = $this->db->fetchOne("SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE `status` = 1");
 		$this->view->total_cancelled_orders = $this->db->fetchColumn("SELECT COUNT(1) FROM orders WHERE `status` = -1");
+	}
+
+	function showAction($id) {
+		if (!$order = Order::findFirst($id)) {
+			$this->flashSession->error('Order tidak ditemukan.');
+			return $this->dispatcher->forward('orders');
+		}
+		$this->view->order   = $order;
+		$this->view->village = Village::findFirst($order->village_id);
+		$this->view->menu    = $this->_menu('Order');
 	}
 }
