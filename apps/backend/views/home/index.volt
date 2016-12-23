@@ -198,7 +198,6 @@
 								<a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
 								<a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
 							</div>
-
 							<h2 class="panel-title">Produk Terlaris</h2>
 							<p class="panel-subtitle">Anda dapat melihat produk terlaris disini.</p>
 						</header>
@@ -223,7 +222,6 @@
 							<p class="panel-subtitle">Statistik Penggunaan Server</p>
 						</header>
 						<div class="panel-body">
-
 							<!-- Flot: Curves -->
 							<div class="chart chart-md" id="flotDashRealTime"></div>
 						</div>
