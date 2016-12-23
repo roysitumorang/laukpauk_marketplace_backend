@@ -13,4 +13,9 @@ class HomeController extends ControllerBase {
 		$this->response->setStatusCode(404, 'Not Found');
 		$this->view->setRenderLevel(View::LEVEL_ACTION_VIEW);
 	}
+
+	function inboxAction() {
+		$this->view->pick('partials/inbox');
+		$this->view->setRenderLevel(View::LEVEL_ACTION_VIEW);
+	}
 }

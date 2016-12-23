@@ -33,8 +33,5 @@
 	<script src="/backend/vendor/modernizr/modernizr-2.8.3.min.js"></script>
 	<script src="/backend/vendor/jquery/jquery.min.js"></script>
 	<script src="/backend/vendor/summernote/summernote.min.js"></script>
-	<!--
-	<script src="/backend/javascripts/loadinbox.php"></script>
-	-->
 </head>
 <body>

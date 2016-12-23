@@ -1,6 +1,6 @@
 /apps/backend/cache
 /apps/frontend/cache
 /apps/logs
-/public/assets/images
+/public/assets/image
 /nbproject
 /*.log
