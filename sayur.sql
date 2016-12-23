@@ -1151,9 +1151,9 @@ CREATE TABLE `notification_templates` (
 LOCK TABLES `notification_templates` WRITE;
 
 insert  into `notification_templates`(`id`,`name`,`subject`,`url`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,'admin new order','Order Baru','/admin/order/show/',1,'2016-11-25 18:35:34',NULL,NULL),
-(2,'admin order delivered','Order Diterima','/admin/order/show/',1,'2016-11-25 18:37:03',NULL,NULL),
-(3,'admin order cancelled','Order Dibatalkan','/admin/order/show/',1,'2016-11-25 18:37:37',NULL,NULL),
+(1,'admin new order','Order Baru','/admin/orders/show/',1,'2016-11-25 18:35:34',NULL,NULL),
+(2,'admin order delivered','Order Diterima','/admin/orders/show/',1,'2016-11-25 18:37:03',NULL,NULL),
+(3,'admin order cancelled','Order Dibatalkan','/admin/orders/show/',1,'2016-11-25 18:37:37',NULL,NULL),
 (4,'api new order','Order Baru','/#/tabs/order/',1,'2016-12-18 01:54:01',NULL,NULL),
 (5,'api order delivered','Order Diterima','/#/tabs/order/',1,'2016-12-18 01:54:36',NULL,NULL),
 (6,'api order cancelled','Order Dibatalkan','/#/tabs/order/',1,'2016-12-18 01:55:00',NULL,NULL);
