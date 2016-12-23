@@ -51,16 +51,7 @@
 											<div class="chart chart-sm" data-sales-rel="Transaksi Harian" id="flotDashSales1" class="chart-active"></div>
 											<script>
 												var flotDashSales1Data = [{
-												    data: [
-													["Jan", 140],
-													["Feb", 240],
-													["Mar", 190],
-													["Apr", 140],
-													["May", 180],
-													["Jun", 320],
-													["Jul", 270],
-													["Aug", 180]
-												    ],
+												    data: {{ daily_sales }},
 												    color: "#0088cc"
 												}];
 												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
@@ -69,16 +60,7 @@
 											<div class="chart chart-sm" data-sales-rel="Transaksi Bulanan" id="flotDashSales2" class="chart-hidden"></div>
 											<script>
 												var flotDashSales2Data = [{
-												    data: [
-													["Jan", 240],
-													["Feb", 240],
-													["Mar", 290],
-													["Apr", 540],
-													["May", 480],
-													["Jun", 220],
-													["Jul", 170],
-													["Aug", 190]
-												    ],
+												    data: {{ monthly_sales }},
 												    color: "#2baab1"
 												}];
 												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
@@ -87,16 +69,7 @@
 											<div class="chart chart-sm" data-sales-rel="Transaksi Tahunan" id="flotDashSales3" class="chart-hidden"></div>
 											<script>
 												var flotDashSales3Data = [{
-												    data: [
-													["Jan", 840],
-													["Feb", 740],
-													["Mar", 690],
-													["Apr", 940],
-													["May", 1180],
-													["Jun", 820],
-													["Jul", 570],
-													["Aug", 780]
-												    ],
+												    data: {{ annual_sales }},
 												    color: "#734ba9"
 												}];
 												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
@@ -160,7 +133,7 @@
 											<div class="summary">
 												<h4 class="title">Total Profit</h4>
 												<div class="info">
-													<strong class="amount">Rp. 22,000,000</strong>
+													<strong class="amount">Rp. {{ number_format(total_profit) }}</strong>
 												</div>
 											</div>
 											<div class="summary-footer">
@@ -184,7 +157,7 @@
 											<div class="summary">
 												<h4 class="title">Today's Orders</h4>
 												<div class="info">
-													<strong class="amount">38</strong>
+													<strong class="amount">{{ today_orders }}</strong>
 												</div>
 											</div>
 											<div class="summary-footer">
