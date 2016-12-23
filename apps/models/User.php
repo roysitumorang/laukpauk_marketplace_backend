@@ -311,17 +311,18 @@ class User extends ModelBase {
 			}
 			$this->thumbnails = [];
 		}
-		$this->thumbnails = json_encode($this->thumbnails);
+		$this->thumbnails = $this->thumbnails ? json_encode($this->thumbnails) : null;
 	}
 
 	function afterSave() {
-		if (!$this->new_avatar) {
-			return true;
+		$this->thumbnails    = $this->thumbnails ? json_decode($this->thumbnails) : [];
+		$this->business_days = $this->business_days ? json_decode($this->business_days) : [];
+		if ($this->new_avatar) {
+			$avatar = $this->_upload_config->path . $this->avatar;
+			$gd     = new Gd($this->new_avatar['tmp_name']);
+			$gd->save($avatar, 100);
+			unlink($this->new_avatar['tmp_name']);
 		}
-		$avatar = $this->_upload_config->path . $this->avatar;
-		$gd     = new Gd($this->new_avatar['tmp_name']);
-		$gd->save($avatar, 100);
-		unlink($this->new_avatar['tmp_name']);
 	}
 
 	function beforeDelete() {
@@ -335,7 +336,7 @@ class User extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails    = json_decode($this->thumbnails);
+		$this->thumbnails    = $this->thumbnails ? json_decode($this->thumbnails) : [];
 		$this->business_days = $this->business_days ? json_decode($this->business_days) : [];
 	}
 
