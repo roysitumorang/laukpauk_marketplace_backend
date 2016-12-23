@@ -26,7 +26,7 @@ class Order extends ModelBase {
 	public $original_bill;
 	public $ip_address;
 	public $coupon_id;
-	public $estimated_delivery;
+	public $scheduled_delivery;
 	public $actual_delivery;
 	public $created_by;
 	public $created_at;
@@ -38,8 +38,6 @@ class Order extends ModelBase {
 		0  => 'HOLD',
 		1  => 'COMPLETED',
 	];
-
-	const ADMIN_FEE = 2000;
 
 	function getSource() {
 		return 'orders';
@@ -83,13 +81,13 @@ class Order extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'mobile_phone', 'address', 'village_id', 'estimated_delivery'], new PresenceOf([
+		$validator->add(['name', 'mobile_phone', 'address', 'village_id', 'scheduled_delivery'], new PresenceOf([
 			'message' => [
 				'name'               => 'nama harus diisi',
 				'mobile_phone'       => 'nomor HP harus diisi',
 				'address'            => 'alamat harus diisi',
 				'village_id'         => 'kelurahan harus diisi',
-				'estimated_delivery' => 'waktu pengantaran harus diisi',
+				'scheduled_delivery' => 'waktu pengantaran harus diisi',
 			],
 		]));
 		$validator->add('code', new Uniqueness([
@@ -100,7 +98,7 @@ class Order extends ModelBase {
 			'message' => 'status yang valid HOLD, CANCELLED atau COMPLETED',
 		]));
 		if (!$this->id) {
-			$validator->add('estimated_delivery', new Date([
+			$validator->add('scheduled_delivery', new Date([
 				'format'  => 'Y-m-d H:i:s',
 				'message' => 'jam pengantaran tidak valid',
 			]));

@@ -22,7 +22,7 @@ class OrdersController extends ControllerBase {
 				'code'               => $order->code,
 				'status'             => $order->status,
 				'final_bill'         => $order->final_bill,
-				'estimated_delivery' => str_replace(' ', 'T', $order->estimated_delivery),
+				'scheduled_delivery' => str_replace(' ', 'T', $order->scheduled_delivery),
 			];
 		}
 		$this->_response['status']         = 1;
@@ -54,7 +54,7 @@ class OrdersController extends ControllerBase {
 		$order->address            = $this->_input->address;
 		$order->village_id         = $this->_current_user->village_id;
 		$order->original_bill      = 0;
-		$order->estimated_delivery = $this->_input->estimated_delivery;
+		$order->scheduled_delivery = $this->_input->scheduled_delivery;
 		$order->note               = $this->_input->note;
 		$order->buyer              = $this->_current_user;
 		$order->created_by         = $this->_current_user->id;
@@ -160,7 +160,7 @@ class OrdersController extends ControllerBase {
 				'subdistrict'        => $village->subdistrict->name,
 				'final_bill'         => $order->final_bill,
 				'original_bill'      => $order->original_bill,
-				'estimated_delivery' => str_replace(' ', 'T', $order->estimated_delivery),
+				'scheduled_delivery' => str_replace(' ', 'T', $order->scheduled_delivery),
 				'merchant'           => $merchant->company ?: $merchant->name,
 				'items'              => $items,
 			];

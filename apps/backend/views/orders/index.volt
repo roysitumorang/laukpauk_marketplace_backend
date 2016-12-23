@@ -95,7 +95,7 @@
 								</strong>
 								<br>
 								<div class="text-right">
-									Scheduled delivery: {{ date('Y-m-d H:i', strtotime(order.estimated_delivery)) }}
+									Scheduled delivery: {{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}
 								</div>
 								{% if order.status == 1 %}
 								<div class="text-right">
