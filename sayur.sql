@@ -1195,8 +1195,6 @@ CREATE TABLE `order_items` (
   `unit_price` int(11) NOT NULL,
   `stock_unit` varchar(10) NOT NULL,
   `quantity` int(11) NOT NULL,
-  `buy_point` float NOT NULL,
-  `affiliate_point` float NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,

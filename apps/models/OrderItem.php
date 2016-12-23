@@ -14,8 +14,6 @@ class OrderItem extends ModelBase {
 	public $unit_price;
 	public $stock_unit;
 	public $quantity;
-	public $buy_point;
-	public $affiliate_point;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
