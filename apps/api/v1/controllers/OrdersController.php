@@ -18,35 +18,16 @@ class OrdersController extends ControllerBase {
 			$collection = 'merchant_orders';
 		}
 		foreach ($this->_current_user->$collection as $order) {
-			$items    = [];
-			$village  = Village::findFirst($order->village_id);
-			$merchant = User::findFirst($order->merchant_id);
-			foreach ($order->items as $item) {
-				$items[$item->id] = [
-					'name'       => $item->name,
-					'stock_unit' => $item->stock_unit,
-					'unit_price' => $item->unit_price,
-					'quantity'   => $item->quantity,
-				];
-			}
 			$orders[$order->id] = [
 				'code'               => $order->code,
 				'status'             => $order->status,
-				'name'               => $order->name,
-				'mobile_phone'       => $order->mobile_phone,
-				'address'            => $order->address,
-				'village'            => $village->name,
-				'subdistrict'        => $village->subdistrict->name,
 				'final_bill'         => $order->final_bill,
-				'original_bill'      => $order->original_bill,
 				'estimated_delivery' => str_replace(' ', 'T', $order->estimated_delivery),
-				'merchant'           => $merchant->company ?: $merchant->name,
-				'items'              => $items,
 			];
 		}
 		$this->_response['status']         = 1;
 		$this->_response['data']['orders'] = $orders;
-		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 
@@ -145,6 +126,48 @@ class OrdersController extends ControllerBase {
 			$this->_response['message'] = 'Order tidak ditemukan';
 		}
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function showAction($id) {
+		if ($this->_current_user->role->name == 'Buyer') {
+			$collection = 'buyer_orders';
+		} else if ($this->_current_user->role->name == 'Merchant') {
+			$collection = 'merchant_orders';
+		}
+		$order = $this->_current_user->getRelated($collection, ['Application\Models\Order.id = ?0', 'bind' => [$id]])->getFirst();
+		if (!$order) {
+			$this->_response['message'] = 'Pesanan tidak ditemukan!';
+		} else {
+			$items    = [];
+			$village  = Village::findFirst($order->village_id);
+			$merchant = User::findFirst($order->merchant_id);
+			foreach ($order->items as $item) {
+				$items[$item->id] = [
+					'name'       => $item->name,
+					'stock_unit' => $item->stock_unit,
+					'unit_price' => $item->unit_price,
+					'quantity'   => $item->quantity,
+				];
+			}
+			$payload = [
+				'code'               => $order->code,
+				'status'             => $order->status,
+				'name'               => $order->name,
+				'mobile_phone'       => $order->mobile_phone,
+				'address'            => $order->address,
+				'village'            => $village->name,
+				'subdistrict'        => $village->subdistrict->name,
+				'final_bill'         => $order->final_bill,
+				'original_bill'      => $order->original_bill,
+				'estimated_delivery' => str_replace(' ', 'T', $order->estimated_delivery),
+				'merchant'           => $merchant->company ?: $merchant->name,
+				'items'              => $items,
+			];
+			$this->_response['status']        = 1;
+			$this->_response['data']['order'] = $payload;
+		}
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 }
