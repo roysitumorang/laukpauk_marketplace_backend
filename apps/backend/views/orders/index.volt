@@ -48,7 +48,7 @@
 								<select name="status" class="form form-control">
 									<option value="">Any Status</option>
 									{% for value, label in status %}
-									<option value="{{ value }}"{% if current_status == value %} selected{% endif %}>{{ label }}</option>
+									<option value="{{ value }}"{% if current_status === value %} selected{% endif %}>{{ label }}</option>
 									{% endfor %}
 								</select>
 							</td>
