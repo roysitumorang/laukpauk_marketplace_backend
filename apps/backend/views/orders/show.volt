@@ -75,16 +75,14 @@
 							</font>
 						</td>
 						<td bgcolor="#E0EBEB" colspan="2">
-							<b><font color="#000099">Biaya Administrasi</font></b>
+							<b><font color="#000099">Biaya Admin</font></b>
 							<br>
 							Rp. {{ number_format(order.admin_fee) }}
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<b><font color="#000099">No. Order</font></b>
-							<br>
-							#{{ order.code }}
+							<b><font color="#000099">Pembeli :</font></b>
 						</td>
 						<td>
 							<b><font color="#000099">Nama</font></b>
@@ -98,11 +96,15 @@
 						</td>
 					</tr>
 					<tr>
-						<td>
+						<td>&nbsp;</td>
+						<td colspan="3">
 							<b><font color="#000099">Alamat</font></b>
 							<br>
 							{{ order.address }}
 						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
 						<td>
 							<b><font color="#000099">Kelurahan</font></b>
 							<br>
@@ -115,18 +117,35 @@
 						</td>
 					</tr>
 					<tr>
+						<td>
+							<b><font color="#000099">Penjual :</font></b>
+						</td>
+						<td>
+							<b><font color="#000099">Nama</font></b>
+							<br>
+							{{ order.merchant.name }}
+						</td>
+						<td colspan="2">
+							<b><font color="#000099">Nama Toko</font></b>
+							<br>
+							{{ order.merchant.company }}
+						</td>
+					</tr>
+					<tr>
 						<td colspan="2">
 							<b><font color="#000099">Tgl. Order</font></b>
 							<br>
 							{{ order.created_at }}
 						</td>
 						<td colspan="2">
-							<b><font color="#000099">From IP</font></b><br>{{ order.ip_address }}
+							<b><font color="#000099">From IP</font></b>
+							<br>
+							{{ order.ip_address }}
 						</td>
 					</tr>
 					<tr>
 						<td colspan="4">
-							<b><font color="#000099">Order Items :</font></b>
+							<b><font color="#000099">Order Items</font></b>
 						</td>
 					</tr>
 					{% for item in order.items %}
@@ -138,6 +157,12 @@
 						<td colspan="2"><b>Rp. {{ number_format(item.quantity * item.unit_price) }}</b></td>
 					</tr>
 					{% endfor %}
+					<tr>
+						<td colspan="4">
+							<b><font color="#000099">Catatan Tambahan</font></b><br>
+							{{ order.note | default('-') }}
+						</td>
+					</tr>
 				</table>
 				<!-- eof Content //-->
 			</div>

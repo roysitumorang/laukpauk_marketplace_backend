@@ -62,12 +62,17 @@
 				<table class="table table-striped">
 					<thead>
 						<tr>
+							<th class="text-center" colspan="2"><b>Total Pembayaran : Rp. {{ number_format(total_final_bill) }}</b></th>
+							<th class="text-center" colspan="3"><b>Total Biaya Admin : Rp. {{ number_format(total_admin_fee) }}</b></th>
+							<th class="text-center" colspan="2"><b>Total Orders : {{ page.total_items }}</b></th>
+						</tr>
+						<tr>
 							<th class="text-center"><b>No</b></th>
 							<th class="text-center"><b>No. Order</b></th>
 							<th class="text-center"><b>Tgl Order</b></th>
 							<th class="text-center"><b>Pembeli</b></th>
 							<th class="text-center"><b>Supplier</b></th>
-							<th class="text-center"><b>Pembayaran</b></th>
+							<th class="text-center"><b>Pembayaran / Biaya Admin</b></th>
 							<th class="text-center"><b>#</b></th>
 						</tr>
 					</thead>
@@ -75,14 +80,30 @@
 					{% for order in orders %}
 						<tr id="{{ order.id }}">
 							<td class="text-right">{{ order.rank }}</td>
-							<td{% if order.status == 'HOLD' %} style="background:#FFCCCC"{% elseif order.status == 'COMPLETED' %} style="background:#CCFFCC"{% elseif order.status == 'CANCELLED' %} style="background:#FF0000;color:#FFFFFF"{% endif %}>
-								<font size="3">#{{ order.code }}</font><br><strong>{{ order.status }}</strong>
-								<br>Pengantaran: {{ date('Y-m-d H:i', strtotime(order.estimated_delivery)) }}
-								{% if order.status == 'COMPLETED' %}
-								<br>Actual delivery: {{ order.actual_delivery }}
+							<td{% if order.status == 0 %} style="background:#FFCCCC"{% elseif order.status == 1 %} style="background:#CCFFCC"{% elseif order.status == -1 %} style="background:#FF0000;color:#FFFFFF"{% endif %}>
+								<strong>
+									<font size="3">#{{ order.code }}</font>
+									<br>
+									Status :
+									{% if order.status == 1 %}
+										COMPLETED
+									{% elseif order.status == -1 %}
+										CANCELLED
+									{% else %}
+										HOLD
+									{% endif %}
+								</strong>
+								<br>
+								<div class="text-right">
+									Scheduled delivery: {{ date('Y-m-d H:i', strtotime(order.estimated_delivery)) }}
+								</div>
+								{% if order.status == 1 %}
+								<div class="text-right">
+									Actual delivery: {{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}
+								</div>
 								{% endif %}
 							</td>
-							<td class="text-center">{{ date('Y-m-d H:i', strtotime(order.created_at)) }}</td>
+							<td class="text-center">{{ date('Y-m-d', strtotime(order.created_at)) }}</td>
 							<td>
 								<font size="5">{{ order.name }}</font><br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.mobile_phone }}
@@ -90,8 +111,9 @@
 							<td>
 								<font size="5">{% if order.merchant.company %}{{ order.merchant.company }}{% else %}{{ order.merchant.name }}{% endif %}</font><br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant.mobile_phone }}
+							</t>
 							<td class="text-right">
-								<font size="4">Rp. {{ number_format(order.final_bill) }}</font><br><br>
+								<font size="4">Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}</font><br><br>
 							</td>
 							<td>
 								<a href="/admin/orders/show/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>
