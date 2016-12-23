@@ -293,11 +293,11 @@ class User extends ModelBase {
 
 	function beforeSave() {
 		$this->business_days = $this->business_days ? json_encode($this->business_days, JSON_NUMERIC_CHECK) : null;
-		if ($this->_new_avatar && !$this->avatar) {
+		if ($this->new_avatar && !$this->avatar) {
 			$random = new Random;
 			do {
 				$this->avatar = $random->hex(16) . '.jpg';
-				if (!static::findFirstByAvatar($this->avatar)) {
+				if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
 					break;
 				}
 			} while (1);

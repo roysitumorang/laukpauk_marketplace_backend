@@ -128,7 +128,7 @@
 							Avatar:<br>
 							<input type="file" name="new_avatar" size="30" class="form form-control form-30">
 							{% if user.avatar %}
-							<br><img src="/assets/images/{{ user.avatar }}" border="0"><br>
+							<br><img src="/assets/image/{{ user.avatar }}" border="0"><br>
 							<a href="javascript:void(0)" data-id="{{ user.id }}" class="main delete-avatar" title="Delete Avatar">Delete Avatar</a>
 							{% endif %}
 						</td>
