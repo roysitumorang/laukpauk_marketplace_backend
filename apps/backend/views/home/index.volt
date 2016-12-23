@@ -8,15 +8,10 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="main.php"><h2>Dashboard</h2></a>
-
+				<a href="/admin"><h2>Dashboard</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
-						<li>
-							<a href="index.html">
-								<i class="fa fa-home"></i>
-							</a>
-						</li>
+						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span>Dashboard</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -211,55 +206,7 @@
 							<!-- Flot: Basic -->
 							<div class="chart chart-md" id="flotDashBasic"></div>
 							<script>
-								var flotDashBasicData = [{
-									data: [
-										[0, 170],
-										[1, 169],
-										[2, 173],
-										[3, 188],
-										[4, 147],
-										[5, 113],
-										[6, 128],
-										[7, 169],
-										[8, 173],
-										[9, 128],
-										[10, 128]
-									],
-									label: "Series 1",
-									color: "#0088cc"
-								}, {
-									data: [
-										[0, 115],
-										[1, 124],
-										[2, 114],
-										[3, 121],
-										[4, 115],
-										[5, 83],
-										[6, 102],
-										[7, 148],
-										[8, 147],
-										[9, 103],
-										[10, 113]
-									],
-									label: "Series 2",
-									color: "#2baab1"
-								}, {
-									data: [
-										[0, 70],
-										[1, 69],
-										[2, 73],
-										[3, 88],
-										[4, 47],
-										[5, 13],
-										[6, 28],
-										[7, 69],
-										[8, 73],
-										[9, 28],
-										[10, 28]
-									],
-									label: "Series 3",
-									color: "#734ba9"
-								}];
+								var flotDashBasicData = {{ best_sales }};
 								// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
 							</script>
 						</div>
