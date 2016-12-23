@@ -11,15 +11,17 @@ class MerchantsController extends ControllerBase {
 		$coupons   = [];
 		foreach ($this->db->fetchAll("SELECT a.id, a.company, business_days, business_opening_hour, business_closing_hour FROM users a JOIN service_areas b ON a.id = b.user_id WHERE b.village_id = {$this->_current_user->village_id}", Db::FETCH_OBJ) as $merchant) {
 			$categories = [];
-			foreach ($this->db->fetchAll("SELECT c.id, c.name FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} GROUP BY c.id", Db::FETCH_OBJ) as $category) {
+			foreach ($this->db->fetchAll("SELECT c.id, c.name FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.published = 1 GROUP BY c.id", Db::FETCH_OBJ) as $category) {
 				$products = [];
-				foreach ($this->db->fetchAll("SELECT a.id, b.name, a.value, b.stock_unit, order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.id = {$category->id} GROUP BY b.id", Db::FETCH_OBJ) as $product) {
+				foreach ($this->db->fetchAll("SELECT a.id, b.name, a.value, b.stock_unit, order_closing_hour FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.published = 1 AND c.id = {$category->id} GROUP BY b.id", Db::FETCH_OBJ) as $product) {
 					$products[$product->id] = [
 						'name'               => $product->name,
 						'price'              => $product->value,
 						'stock_unit'         => $product->stock_unit,
-						'order_closing_hour' => $product->order_closing_hour,
 					];
+					if ($product->order_closing_hour) {
+						$products[$product->id]['order_closing_hour'] = $product->order_closing_hour;
+					}
 				}
 				$categories[$category->id] = [
 					'name'     => $category->name,
