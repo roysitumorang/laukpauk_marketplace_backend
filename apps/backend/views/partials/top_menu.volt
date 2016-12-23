@@ -37,7 +37,7 @@
 				<ul class="list-unstyled">
 					<li class="divider"></li>
 					<li>
-						<a role="menuitem" tabindex="-1" href="/admins/passwords"><i class="fa fa-user"></i> My Account</a>
+						<a role="menuitem" tabindex="-1" href="/admin/passwords"><i class="fa fa-user"></i> My Account</a>
 					</li>
 					<li>
 						<a role="menuitem" tabindex="-1" href="/admin/sessions/delete"><i class="fa fa-power-off"></i> Logout</a>
