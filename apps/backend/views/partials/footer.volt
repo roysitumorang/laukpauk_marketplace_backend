@@ -38,8 +38,10 @@
 	{% if current_user %}
 	<script>
 		setInterval(() => {
-			$.get('/admin/home/inbox', response => {
-				$('#inbox').html(response);
+			fetch('/admin/home/inbox', { credentials: 'include' }).then(response => {
+				return response.text();
+			}).then(payload => {
+				document.getElementById('inbox').innerHTML = payload;
 				for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
 					notifications[i].onclick = function() {
 						fetch('/admin/notifications/update/' + this.dataset.id + '/read:1', {method: 'POST'})
