@@ -42,7 +42,13 @@ class UsersController extends ControllerBase {
 				'a.date_of_birth',
 				'a.avatar',
 				'a.thumbnails',
-				'a.business_days',
+				'a.open_on_sunday',
+				'a.open_on_monday',
+				'a.open_on_tuesday',
+				'a.open_on_wednesday',
+				'a.open_on_thursday',
+				'a.open_on_friday',
+				'a.open_on_saturday',
 				'a.business_opening_hour',
 				'a.business_closing_hour',
 				'a.created_by',
@@ -255,7 +261,6 @@ class UsersController extends ControllerBase {
 		$this->view->subdistricts     = $subdistricts;
 		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
 		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
-		$this->view->business_days    = User::BUSINESS_DAYS;
 	}
 
 	private function _set_model_attributes(&$user) {
@@ -273,7 +278,13 @@ class UsersController extends ControllerBase {
 		$user->setGender($this->request->getPost('gender'));
 		$user->setDateOfBirth($this->request->getPost('date_of_birth'));
 		$user->setNewAvatar($_FILES['new_avatar']);
-		$user->setBusinessDays($this->request->getPost('business_days'));
+		$user->setOpenOnSunday($this->request->getPost('open_on_sunday'));
+		$user->setOpenOnMonday($this->request->getPost('open_on_monday'));
+		$user->setOpenOnTuesday($this->request->getPost('open_on_tuesday'));
+		$user->setOpenOnWednesday($this->request->getPost('open_on_wednesday'));
+		$user->setOpenOnThursday($this->request->getPost('open_on_thursday'));
+		$user->setOpenOnFriday($this->request->getPost('open_on_friday'));
+		$user->setOpenOnSaturday($this->request->getPost('open_on_saturday'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;

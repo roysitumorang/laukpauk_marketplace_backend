@@ -9455,7 +9455,13 @@ CREATE TABLE `users` (
   `date_of_birth` date DEFAULT NULL,
   `avatar` char(36) DEFAULT NULL,
   `thumbnails` text,
-  `business_days` varchar(15) DEFAULT NULL,
+  `open_on_sunday` tinyint(1) NOT NULL,
+  `open_on_monday` tinyint(1) NOT NULL,
+  `open_on_tuesday` tinyint(1) NOT NULL,
+  `open_on_wednesday` tinyint(1) NOT NULL,
+  `open_on_thursday` tinyint(1) NOT NULL,
+  `open_on_friday` tinyint(1) NOT NULL,
+  `open_on_saturday` tinyint(1) NOT NULL,
   `business_opening_hour` char(5) DEFAULT NULL,
   `business_closing_hour` char(5) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -9484,8 +9490,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`api_key`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`business_days`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,'null',NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-18 20:41:50');
+insert  into `users`(`id`,`role_id`,`api_key`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
 
 UNLOCK TABLES;
 

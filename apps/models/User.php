@@ -14,21 +14,12 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class User extends ModelBase {
-	const STATUS        = [
+	const STATUS = [
 		0  => 'HOLD',
 		1  => 'ACTIVE',
 		-1 => 'SUSPENDED',
 	];
-	const GENDERS       = ['Pria', 'Wanita'];
-	const BUSINESS_DAYS = [
-		'Minggu',
-		'Senin',
-		'Selasa',
-		'Rabu',
-		'Kamis',
-		'Jumat',
-		'Sabtu',
-	];
+	const GENDERS = ['Pria', 'Wanita'];
 
 	public $id;
 	public $role_id;
@@ -54,7 +45,13 @@ class User extends ModelBase {
 	public $avatar;
 	public $new_avatar;
 	public $thumbnails;
-	public $business_days;
+	public $open_on_sunday;
+	public $open_on_monday;
+	public $open_on_tuesday;
+	public $open_on_wednesday;
+	public $open_on_thursday;
+	public $open_on_friday;
+	public $open_on_saturday;
 	public $business_opening_hour;
 	public $business_closing_hour;
 	public $created_by;
@@ -188,10 +185,32 @@ class User extends ModelBase {
 		$this->thumbnails = array_filter($thumbnails ?? []);
 	}
 
-	function setBusinessDays(array $business_days = null) {
-		if ($business_days) {
-			$this->business_days = $business_days;
-		}
+	function setOpenOnSunday($open_on_sunday) {
+		$this->open_on_sunday = filter_var($open_on_sunday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
+	}
+
+	function setOpenOnMonday($open_on_monday) {
+		$this->open_on_monday = filter_var($open_on_monday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
+	}
+
+	function setOpenOnTuesday($open_on_tuesday) {
+		$this->open_on_tuesday = filter_var($open_on_tuesday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
+	}
+
+	function setOpenOnWednesday($open_on_wednesday) {
+		$this->open_on_wednesday = filter_var($open_on_wednesday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
+	}
+
+	function setOpenOnThursday($open_on_thursday) {
+		$this->open_on_thursday = filter_var($open_on_thursday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
+	}
+
+	function setOpenOnFriday($open_on_friday) {
+		$this->open_on_friday = filter_var($open_on_friday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
+	}
+
+	function setOpenOnSaturday($open_on_saturday) {
+		$this->open_on_saturday = filter_var($open_on_saturday, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) ?? 0;
 	}
 
 	function setBusinessOpeningHour($business_opening_hour) {
@@ -292,7 +311,6 @@ class User extends ModelBase {
 	}
 
 	function beforeSave() {
-		$this->business_days = $this->business_days ? json_encode($this->business_days, JSON_NUMERIC_CHECK) : null;
 		if ($this->new_avatar && !$this->avatar) {
 			$random = new Random;
 			do {
@@ -315,8 +333,7 @@ class User extends ModelBase {
 	}
 
 	function afterSave() {
-		$this->thumbnails    = $this->thumbnails ? json_decode($this->thumbnails) : [];
-		$this->business_days = $this->business_days ? json_decode($this->business_days) : [];
+		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
 		if ($this->new_avatar) {
 			$avatar = $this->_upload_config->path . $this->avatar;
 			$gd     = new Gd($this->new_avatar['tmp_name']);
@@ -336,8 +353,7 @@ class User extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails    = $this->thumbnails ? json_decode($this->thumbnails) : [];
-		$this->business_days = $this->business_days ? json_decode($this->business_days) : [];
+		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
 	}
 
 	function getThumbnail(int $width, int $height, string $default_avatar = null) {

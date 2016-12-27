@@ -7,10 +7,11 @@ use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
 	function indexAction() {
-		$current_day = $this->currentDatetime->format('w');
+		$current_day = $this->currentDatetime->format('l');
 		$merchants   = [];
 		$coupons     = [];
-		foreach ($this->db->fetchAll("SELECT a.id, a.company, business_days, business_opening_hour, business_closing_hour FROM users a JOIN service_areas b ON a.id = b.user_id WHERE b.village_id = {$this->_current_user->village_id}", Db::FETCH_OBJ) as $merchant) {
+
+		foreach ($this->db->fetchAll("SELECT a.id, a.company, open_on_sunday, open_on_monday, open_on_tuesday, open_on_wednesday, open_on_thursday, open_on_friday, open_on_saturday, business_opening_hour, business_closing_hour FROM users a JOIN service_areas b ON a.id = b.user_id WHERE b.village_id = {$this->_current_user->village_id}", Db::FETCH_OBJ) as $merchant) {
 			$categories    = [];
 			$business_days = json_decode($merchant->business_days);
 			foreach ($this->db->fetchAll("SELECT c.id, c.name FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.published = 1 GROUP BY c.id", Db::FETCH_OBJ) as $category) {
@@ -32,12 +33,24 @@ class MerchantsController extends ControllerBase {
 			}
 			$merchants[$merchant->id] = [
 				'company'               => $merchant->company,
-				'business_days'         => $business_days,
+				'open_on_sunday'        => $merchant->open_on_sunday,
+				'open_on_monday'        => $merchant->open_on_monday,
+				'open_on_tuesday'       => $merchant->open_on_tuesday,
+				'open_on_wednesday'     => $merchant->open_on_wednesday,
+				'open_on_thursday'      => $merchant->open_on_thursday,
+				'open_on_friday'        => $merchant->open_on_friday,
+				'open_on_saturday'      => $merchant->open_on_saturday,
 				'business_opening_hour' => $merchant->business_opening_hour,
 				'business_closing_hour' => $merchant->business_closing_hour,
 				'categories'            => $categories,
 			];
-			if (!in_array($current_day, $business_days)) {
+			if ($current_day == 'Sunday' && !$merchant->open_on_sunday ||
+				$current_day == 'Monday' && !$merchant->open_on_monday ||
+				$current_day == 'Tuesday' && !$merchant->open_on_tuesday ||
+				$current_day == 'Wednesday' && !$merchant->open_on_wednesday ||
+				$current_day == 'Thursday' && !$merchant->open_on_thursday ||
+				$current_day == 'Friday' && !$merchant->open_on_friday ||
+				$current_day == 'Saturday' && !$merchant->open_on_saturday) {
 				$merchants[$merchant->id]['unavailable'] = 1;
 			}
 		}
