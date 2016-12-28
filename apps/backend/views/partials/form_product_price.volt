@@ -52,7 +52,7 @@
 	category.onchange = function() {
 		var current_products = products[this.value], new_options = '';
 		for (var item in current_products) {
-			new_options += '<option value="' + current_products[item].id + '">' + current_products[item].name + '</option>';
+			new_options += '<option value="' + current_products[item].id + '">' + current_products[item].name + ' (' + current_products[item].stock_unit + ')</option>';
 		}
 		product.innerHTML = new_options,
 		stock_unit.innerText = current_products[0].stock_unit,
