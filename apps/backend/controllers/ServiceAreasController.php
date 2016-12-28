@@ -12,26 +12,24 @@ class ServiceAreasController extends ControllerBase {
 	private $_user;
 
 	function onConstruct() {
-		try {
-			if (!($user_id = $this->dispatcher->getParam('user_id', 'int')) || !($this->_user = User::findFirst($user_id))) {
-				throw new Exception('Data tidak ditemukan');
-			}
-		} catch (Exception $e) {
-			$this->flashSession->error($e->getMessage());
-			return $this->response->redirect('/admin/users');
+		if (!$this->_user = User::findFirst($this->dispatcher->getParam('user_id', 'int'))) {
+			$this->flashSession->error('Data tidak ditemukan');
+			$this->response->redirect('admin/users');
+			$this->response->send();
+			return false;
 		}
 	}
 
 	function indexAction() {
-		$cached_subdistricts          = apcu_fetch('subdistricts');
-		$cached_villages              = apcu_fetch('villages');
-		$subdistricts                 = [];
-		$villages                     = [];
-		$existing_village_ids         = [];
-		$services_areas               = [];
-		$result                       = $this->db->query("SELECT a.id, a.village_id, b.name AS village, c.name AS subdistrict FROM service_areas a JOIN villages b ON a.village_id = b.id JOIN subdistricts c ON b.subdistrict_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
+		$cached_subdistricts  = apcu_fetch('subdistricts');
+		$cached_villages      = apcu_fetch('villages');
+		$subdistricts         = [];
+		$villages             = [];
+		$existing_village_ids = [];
+		$services_areas       = [];
+		$i                    = 0;
+		$result               = $this->db->query("SELECT a.id, a.village_id, b.name AS village, c.name AS subdistrict FROM service_areas a JOIN villages b ON a.village_id = b.id JOIN subdistricts c ON b.subdistrict_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
 		$result->setFetchMode(Db::FETCH_OBJ);
-		$i                            = 0;
 		while ($service_area = $result->fetch()) {
 			$service_area->rank = ++$i;
 			$services_areas[]                                = $service_area;
