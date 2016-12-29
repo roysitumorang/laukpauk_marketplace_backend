@@ -91,7 +91,7 @@ class UsersController extends ControllerBase {
 		$this->_current_user->setName($this->_input->name);
 		$this->_current_user->setMobilePhone($this->_input->mobile_phone);
 		$this->_current_user->setAddress($this->_input->address);
-		$this->_current_user->village = Village::findFirst($this->input->village_id);
+		$this->_current_user->village = Village::findFirst($this->_input->village_id);
 		$this->_current_user->business_opening_hour = $this->_current_user->business_opening_hour;
 		$this->_current_user->business_closing_hour = $this->_current_user->business_closing_hour;
 		$this->_current_user->setOpenOnSunday($this->_input->open_on_sunday);
