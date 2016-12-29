@@ -242,6 +242,13 @@ class User extends ModelBase {
 				break;
 			}
 		} while (1);
+		$this->open_on_sunday    = $this->open_on_sunday ?? 0;
+		$this->open_on_monday    = $this->open_on_monday ?? 0;
+		$this->open_on_tuesday   = $this->open_on_tuesday ?? 0;
+		$this->open_on_wednesday = $this->open_on_wednesday ?? 0;
+		$this->open_on_thursday  = $this->open_on_thursday ?? 0;
+		$this->open_on_friday    = $this->open_on_friday ?? 0;
+		$this->open_on_saturday  = $this->open_on_saturday ?? 0;
 	}
 
 	function beforeValidation() {
