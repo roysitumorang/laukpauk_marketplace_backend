@@ -37,6 +37,19 @@ class Module implements ModuleDefinitionInterface {
 			$dispatcher    = new Dispatcher;
 			$eventsManager = new EventsManager;
 			$dispatcher->setDefaultNamespace('Application\Api\V1\Controllers');
+			$eventsManager->attach('dispatch:beforeDispatchLoop', function(Event $event, $dispatcher) {
+				$old_params = $dispatcher->getParams();
+				$new_params = [];
+				foreach ($old_params as $key => $value) {
+					if (!strstr($value, ':')) {
+						$new_params[$key] = $value;
+						continue;
+					}
+					list($new_key, $new_value) = explode(':', $value);
+					$new_params[$new_key]      = $new_value;
+				}
+				$dispatcher->setParams($new_params);
+			});
 			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, $exception) {
 				if ($exception instanceof DispatchException && in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
