@@ -10,7 +10,7 @@
 		<tr>
 			<td>
 				<b><font color="#000099">Content Detail:</font></b><br>
-				<textarea name="body" id="body" class="summernote" data-plugin-summernote data-plugin-options="{height:180,codemirror:{theme:'ambiance'}}" cols="80" rows="40">{{ post.body }}</textarea>
+				<textarea name="body" id="body" class="summernote" data-plugin-summernote data-plugin-options="{'height':180,'codemirror':{'theme':'ambiance'}}" cols="80" rows="40">{{ post.body }}</textarea>
 			</td>
 		</tr>
 		<tr>
@@ -82,20 +82,17 @@
 		</tr>
 	</table>
 </form>
+{% if post.id and post.picture %}
 <script>
-$(function() {
-	$('.summernote').summernote()
-	{% if post.id and post.picture %}
 	document.querySelector('.delete-picture').onclick = function() {
 		if (!confirm('Anda yakin mau menghapus gambar ini ?')) {
 			return !1
 		}
-		var form = document.createElement('form');
+		let form = document.createElement('form');
 		form.method = 'POST',
 		form.action = '/admin/posts/update/' + this.dataset.id + '/post_category_id:' + this.dataset.postCategoryId + '/delete_picture:1',
 		document.body.appendChild(form),
 		form.submit()
 	}
-	{% endif %}
-})
 </script>
+{% endif %}

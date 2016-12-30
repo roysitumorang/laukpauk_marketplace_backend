@@ -33,6 +33,7 @@
 	<script src="/backend/vendor/jqvmap/maps/continents/jquery.vmap.europe.js"></script>
 	<script src="/backend/vendor/jqvmap/maps/continents/jquery.vmap.north-america.js"></script>
 	<script src="/backend/vendor/jqvmap/maps/continents/jquery.vmap.south-america.js"></script>
+	<script src="/backend/vendor/summernote/summernote.js"></script>
 
 	<!-- Theme Base, Components and Settings -->
 	<script src="/backend/javascripts/theme.js"></script>
@@ -49,18 +50,19 @@
 	<script>
 		setInterval(() => {
 			fetch('/admin/home/inbox', { credentials: 'include' }).then(response => {
-				return response.text();
+				return response.text()
 			}).then(payload => {
 				document.getElementById('inbox').innerHTML = payload;
 				for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
-					notifications[i].onclick = function() {
+					notifications[i].onclick = () => {
 						fetch('/admin/notifications/update/' + this.dataset.id + '/read:1', { credentials: 'include', method: 'POST' }).then(() => {
 							location.href = this.dataset.link
 						})
 					}
 				}
 			})
-		}, 60000)
+		}, 60000),
+		$('.summernote').summernote()
 	</script>
 	{% endif %}
 </body>
