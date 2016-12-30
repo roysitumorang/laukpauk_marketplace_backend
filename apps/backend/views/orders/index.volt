@@ -33,11 +33,11 @@
 							</td>
 							<td>
 								Dari Tanggal :<br>
-								<input type="text" name="from" value="{{ from }}" data-plugin-datepicker data-plugin-options="{format:'yyyy-mm-dd'}" class="form form-control text-center date" size="10" placeholder="Dari Tanggal">
+								<input type="text" name="from" value="{{ from }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Dari Tanggal">
 							</td>
 							<td>
 								Sampai Tanggal :<br>
-								<input type="text" name="to" value="{{ to }}" data-plugin-datepicker data-plugin-options="{format:'yyyy-mm-dd'}" class="form form-control text-center date" size="10" placeholder="Sampai Tanggal">
+								<input type="text" name="to" value="{{ to }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Sampai Tanggal">
 							</td>
 							<td>
 								Nomor Order :<br>

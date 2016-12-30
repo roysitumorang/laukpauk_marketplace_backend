@@ -54,7 +54,7 @@
 					<tr>
 						<td>
 							Tanggal Lahir :<br>
-							<input type="text" name="date_of_birth" value="{{ user.date_of_birth }}" data-plugin-datepicker data-plugin-options="{format:'yyyy-mm-dd'}" class="form form-control form-30" size="12">
+							<input type="text" name="date_of_birth" value="{{ user.date_of_birth }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control form-30" size="12">
 						</td>
 					</tr>
 					<tr>
