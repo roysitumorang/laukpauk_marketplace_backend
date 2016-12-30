@@ -267,6 +267,9 @@ class User extends ModelBase {
 				'deposit'      => 'deposit harus diisi',
 			],
 		]));
+		if ($this->role->name === 'Merchant') {
+			$validator->add('company', new PresenceOf(['message' => 'nama toko harus diisi']));
+		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
 			$validator->add('mobile_phone', new Uniqueness([
 				'message' => 'nomor HP sudah ada',
