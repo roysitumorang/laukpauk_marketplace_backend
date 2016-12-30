@@ -111,7 +111,7 @@ class Module implements ModuleDefinitionInterface {
 		});
 
 		$di->set('currentUser', function() use($di) {
-			return User::findFirst($di->getSession()->get('user_id'));
+			return User::findFirstById($di->getSession()->get('user_id'));
 		});
 	}
 }

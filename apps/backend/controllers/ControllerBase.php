@@ -9,9 +9,12 @@ use Phalcon\Text;
 
 class ControllerBase extends Controller {
 	function initialize() {
-		$url = $this->request->getQuery('_url');
-		if (!$this->session->get('user_id') && !Text::startsWith($url, '/admin/sessions')) {
-			return $this->response->redirect('/admin/sessions/create?next=' . $url);
+		if (!$this->currentUser) {
+			$url = $this->request->getQuery('_url');
+			if (!Text::startsWith($url, '/admin/sessions/create')) {
+				$this->response->redirect('/admin/sessions/create?next=' . $url);
+			}
+			return;
 		}
 		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 		if (!apcu_exists('subdistricts')) {
