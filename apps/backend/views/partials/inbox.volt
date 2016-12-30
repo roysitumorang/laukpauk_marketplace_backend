@@ -52,7 +52,7 @@
 				<ul>
 				{% for notification in unread_notifications %}
 					<li>
-						<a href="{{ notification.link }}" class="clearfix notification" data-id="{{ notification.id }}">
+						<a href="javascript:void(0)" data-id="{{ notification.id }}" data-link="{{ notification.link }}" class="clearfix notification">
 							<span class="title">{{ notification.created_at }}</span>
 							<span class="message">{{ notification.subject }}</span>
 						</a>

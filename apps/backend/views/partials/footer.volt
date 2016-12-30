@@ -44,7 +44,9 @@
 				document.getElementById('inbox').innerHTML = payload;
 				for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
 					notifications[i].onclick = function() {
-						fetch('/admin/notifications/update/' + this.dataset.id + '/read:1', {method: 'POST'})
+						fetch('/admin/notifications/update/' + this.dataset.id + '/read:1', { credentials: 'include', method: 'POST' }).then(() => {
+							location.href = this.dataset.link
+						})
 					}
 				}
 			})
