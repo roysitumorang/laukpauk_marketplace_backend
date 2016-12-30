@@ -84,7 +84,7 @@
 </form>
 {% if post.id and post.picture %}
 <script>
-	document.querySelector('.delete-picture').onclick = function() {
+	document.querySelector('.delete-picture').onclick = () => {
 		if (!confirm('Anda yakin mau menghapus gambar ini ?')) {
 			return !1
 		}
