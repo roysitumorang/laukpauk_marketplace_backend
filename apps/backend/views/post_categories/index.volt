@@ -31,7 +31,7 @@
 						<div class="panel-body panel-featured">
 							<a href="/admin/posts/index/post_category_id:{{ post_category.id }}" title="{{ post_category.name }}"><i class="fa fa-newspaper-o fa-5x"></i></a><br>
 							<a href="javascript:void(0)" class="published" data-id="{{ post_category.id }}">
-								<img src="/assets/images/bullet-{% if post_category.published %}green{% else %}red{% endif %}.png" border="0">
+								<img src="/assets/image/bullet-{% if post_category.published %}green{% else %}red{% endif %}.png" border="0">
 							</a>
 							{{ post_category.name }}&nbsp;(<font color="#FF0000"><b>ID: </b></font>{{ post_category.id }})<br>
 							({{ post_category.permalink }})
