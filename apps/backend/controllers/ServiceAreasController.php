@@ -4,6 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Village;
 use Application\Models\ServiceArea;
+use Application\Models\Role;
 use Application\Models\User;
 use Exception;
 use Phalcon\Db;
@@ -12,7 +13,10 @@ class ServiceAreasController extends ControllerBase {
 	private $_user;
 
 	function onConstruct() {
-		if (!$this->_user = User::findFirst($this->dispatcher->getParam('user_id', 'int'))) {
+		if (!$this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [
+			$this->dispatcher->getParam('user_id', 'int'),
+			Role::MERCHANT,
+		]])) {
 			$this->flashSession->error('Data tidak ditemukan');
 			$this->response->redirect('admin/users');
 			$this->response->send();
@@ -31,7 +35,7 @@ class ServiceAreasController extends ControllerBase {
 		$result               = $this->db->query("SELECT a.id, a.village_id, b.name AS village, c.name AS subdistrict FROM service_areas a JOIN villages b ON a.village_id = b.id JOIN subdistricts c ON b.subdistrict_id = c.id WHERE a.user_id = {$this->_user->id} ORDER BY CONCAT(c.name, b.name)");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($service_area = $result->fetch()) {
-			$service_area->rank = ++$i;
+			$service_area->rank                              = ++$i;
 			$services_areas[]                                = $service_area;
 			$existing_village_ids[$service_area->village_id] = 1;
 		}

@@ -5,6 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Product;
 use Application\Models\ProductCategory;
 use Application\Models\ProductPrice;
+use Application\Models\Role;
 use Application\Models\User;
 use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
@@ -13,13 +14,14 @@ class ProductPricesController extends ControllerBase {
 	private $_user;
 
 	function onConstruct() {
-		try {
-			if (!($user_id = $this->dispatcher->getParam('user_id', 'int')) || !($this->_user = User::findFirst($user_id))) {
-				throw new Exception('Data tidak ditemukan');
-			}
-		} catch (Exception $e) {
-			$this->flashSession->error($e->getMessage());
-			return $this->response->redirect('/admin/users');
+		if (!$this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [
+			$this->dispatcher->getParam('user_id', 'int'),
+			Role::MERCHANT,
+		]])) {
+			$this->flashSession->error('Data tidak ditemukan');
+			$this->response->redirect('admin/users');
+			$this->response->send();
+			return false;
 		}
 	}
 
@@ -40,9 +42,9 @@ class ProductPricesController extends ControllerBase {
 				'b.order_closing_hour',
 			])
 			->from(['a' => 'Application\Models\User'])
-			->leftjoin('Application\Models\ProductPrice', 'a.id = b.user_id', 'b')
-			->leftjoin('Application\Models\Product', 'b.product_id = c.id', 'c')
-			->leftjoin('Application\Models\ProductCategory', 'c.product_category_id = d.id', 'd')
+			->join('Application\Models\ProductPrice', 'a.id = b.user_id', 'b')
+			->join('Application\Models\Product', 'b.product_id = c.id', 'c')
+			->join('Application\Models\ProductCategory', 'c.product_category_id = d.id', 'd')
 			->orderBy('d.name, c.name')
 			->where('a.id = ' . $this->_user->id);
 		$paginator = new PaginatorQueryBuilder([
