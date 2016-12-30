@@ -7,6 +7,7 @@ use Application\Models\ProductCategory;
 use Application\Models\ProductPrice;
 use Application\Models\User;
 use Exception;
+use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class ProductPricesController extends ControllerBase {
 	private $_user;
@@ -23,11 +24,43 @@ class ProductPricesController extends ControllerBase {
 	}
 
 	function indexAction() {
+		$limit        = $this->config->per_page;
+		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset       = ($current_page - 1) * $limit;
+		$builder      = $this->modelsManager->createBuilder()
+			->columns([
+				'b.id',
+				'b.user_id',
+				'b.product_id',
+				'category'              => 'd.name',
+				'c.name',
+				'c.stock_unit',
+				'b.value',
+				'b.published',
+				'b.order_closing_hour',
+			])
+			->from(['a' => 'Application\Models\User'])
+			->leftjoin('Application\Models\ProductPrice', 'a.id = b.user_id', 'b')
+			->leftjoin('Application\Models\Product', 'b.product_id = c.id', 'c')
+			->leftjoin('Application\Models\ProductCategory', 'c.product_category_id = d.id', 'd')
+			->orderBy('d.name, c.name')
+			->where('a.id = ' . $this->_user->id);
+		$paginator = new PaginatorQueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
+		]);
+		$page   = $paginator->getPaginate();
+		$pages  = $this->_setPaginationRange($page);
 		$prices = [];
-		foreach ($this->_user->getRelated('product_prices') as $price) {
-			$prices[] = $price;
+		foreach ($page->items as $item) {
+			$item->writeAttribute('rank', ++$offset);
+			$prices[] = $item;
 		}
 		$this->view->prices = $prices;
+		$this->view->user   = $this->_user;
+		$this->view->pages  = $pages;
+		$this->view->page   = $paginator->getPaginate();
 		$this->_prepare_form_datas();
 	}
 

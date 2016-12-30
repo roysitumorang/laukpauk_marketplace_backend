@@ -42,11 +42,11 @@
 									</tr>
 								</thead>
 								<tbody>
-								{% for i, price in prices %}
+								{% for price in prices %}
 									<tr>
-										<td style="text-right">{{ i + 1 }}</td>
-										<td>{{ price.product.category.name }}</td>
-										<td>{{ price.product.name }} ({{ price.product.stock_unit }})</td>
+										<td style="text-right">{{ price.rank }}</td>
+										<td>{{ price.category }}</td>
+										<td>{{ price.name }} ({{ price.stock_unit }})</td>
 										<td>Rp. {{ number_format(price.value) }}</td>
 										<td class="text-center">{{ price.order_closing_hour|default('-') }}</td>
 										<td>
@@ -65,6 +65,20 @@
 						</div>
 					</div>
 				</div>
+				{% if page.total_pages > 1 %}
+				<div class="weepaging">
+					<p>
+						<b>Halaman:</b>&nbsp;&nbsp;
+						{% for i in pages %}
+							{% if i == page.current %}
+							<b>{{ i }}</b>
+							{% else %}
+							<a href="/admin/product_prices/index/user_id:{{ user.id }}/page:{{ i }}">{{ i }}</a>
+							{% endif %}
+						{% endfor %}
+					</p>
+				</div>
+				{% endif %}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->
