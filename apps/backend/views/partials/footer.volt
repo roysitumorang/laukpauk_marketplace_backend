@@ -48,18 +48,23 @@
 	<!-- Examples -->
 	<script src="/backend/javascripts/dashboard/examples.dashboard.js"></script>
 	<script>
+		let attachEvent = () => {
+			for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
+				let notification = notifications[i];
+				notification.onclick = () => {
+					fetch('/admin/notifications/update/' + notification.dataset.id + '/read:1', { credentials: 'include', method: 'POST' }).then(() => {
+						location.href = notification.dataset.link
+					})
+				}
+			}
+		};
+		attachEvent(),
 		setInterval(() => {
 			fetch('/admin/home/inbox', { credentials: 'include' }).then(response => {
 				return response.text()
 			}).then(payload => {
-				document.getElementById('inbox').innerHTML = payload;
-				for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
-					notifications[i].onclick = () => {
-						fetch('/admin/notifications/update/' + this.dataset.id + '/read:1', { credentials: 'include', method: 'POST' }).then(() => {
-							location.href = this.dataset.link
-						})
-					}
-				}
+				document.getElementById('inbox').innerHTML = payload,
+				attachEvent()
 			})
 		}, 60000),
 		$('.summernote').summernote()
