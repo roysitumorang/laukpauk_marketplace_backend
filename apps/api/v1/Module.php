@@ -2,6 +2,8 @@
 
 namespace Application\Api\V1;
 
+use Phalcon\Cache\Backend\Apc;
+use Phalcon\Cache\Frontend\Data as FrontData;
 use Phalcon\Loader;
 use Phalcon\Mvc\View;
 use Phalcon\DiInterface;
@@ -83,6 +85,12 @@ class Module implements ModuleDefinitionInterface {
 			$response->setHeader('Access-Control-Allow-Origin', '*');
 			$response->setHeader('Access-Control-Allow-Methods', 'POST, GET');
 			return $response;
+		});
+
+		// Register the cache component
+		$di->set('cache', function() {
+			$cache = new Apc(new FrontData(['lifetime' => 172800]));
+			return $cache;
 		});
 	}
 }
