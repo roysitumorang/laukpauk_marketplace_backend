@@ -43,7 +43,7 @@ class UsersController extends ControllerBase {
 		foreach ($user->getMessages() as $error) {
 			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
 		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 
@@ -132,7 +132,7 @@ class UsersController extends ControllerBase {
 		foreach ($user->getMessages() as $error) {
 			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
 		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 }
