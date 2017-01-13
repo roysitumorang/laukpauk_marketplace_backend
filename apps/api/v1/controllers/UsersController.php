@@ -131,7 +131,7 @@ class UsersController extends ControllerBase {
 		}
 		$this->_response['message']        = 'Update profile gagal! Silahkan cek form dan coba lagi.';
 		$this->_response['data']['errors'] = [];
-		foreach ($user->getMessages() as $error) {
+		foreach ($this->_current_user->getMessages() as $error) {
 			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
 		}
 		$this->response->setJsonContent($this->_response);
