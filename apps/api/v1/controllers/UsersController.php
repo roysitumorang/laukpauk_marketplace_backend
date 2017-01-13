@@ -17,7 +17,7 @@ class UsersController extends ControllerBase {
 	function onConstruct() {
 		if (!$this->request->isPost()) {
 			$this->_response['message'] = 'Request tidak valid!';
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			$this->response->setJsonContent($this->_response);
 			exit($this->response->send());
 		}
 	}
@@ -35,7 +35,7 @@ class UsersController extends ControllerBase {
 		if ($user->validation() && $user->create()) {
 			$this->_response['status']                   = 1;
 			$this->_response['data']['activation_token'] = $user->activation_token;
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
 		$this->_response['message']        = 'Registrasi gagal! Silahkan cek form dan coba lagi.';
@@ -43,7 +43,7 @@ class UsersController extends ControllerBase {
 		foreach ($user->getMessages() as $error) {
 			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
 		}
-		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
 
@@ -51,7 +51,7 @@ class UsersController extends ControllerBase {
 		$user = User::findFirstByActivationToken($activation_token);
 		if (!$user) {
 			$this->_response['message'] = 'Token aktivasi tidak valid!';
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
 		$user->activate();
@@ -83,7 +83,7 @@ class UsersController extends ControllerBase {
 				'business_closing_hour' => $user->business_closing_hour,
 			]
 		];
-		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
 
@@ -124,7 +124,7 @@ class UsersController extends ControllerBase {
 					'business_closing_hour' => $this->_current_user->business_closing_hour,
 				]
 			];
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
 		$this->_response['message']        = 'Update profile gagal! Silahkan cek form dan coba lagi.';
@@ -132,7 +132,7 @@ class UsersController extends ControllerBase {
 		foreach ($user->getMessages() as $error) {
 			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
 		}
-		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
 }
