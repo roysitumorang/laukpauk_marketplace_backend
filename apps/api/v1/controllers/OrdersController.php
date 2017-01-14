@@ -166,6 +166,7 @@ class OrdersController extends ControllerBase {
 				'final_bill'         => $order->final_bill,
 				'original_bill'      => $order->original_bill,
 				'scheduled_delivery' => str_replace(' ', 'T', $order->scheduled_delivery),
+				'note'               => $order->note,
 				'merchant'           => $merchant->company ?: $merchant->name,
 				'items'              => $items,
 			];

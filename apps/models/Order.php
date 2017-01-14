@@ -28,6 +28,7 @@ class Order extends ModelBase {
 	public $coupon_id;
 	public $scheduled_delivery;
 	public $actual_delivery;
+	public $note;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -114,6 +115,7 @@ class Order extends ModelBase {
 
 	function beforeSave() {
 		$this->actual_delivery = $this->actual_delivery ?: null;
+		$this->note            = $this->note            ?: null;
 	}
 
 	function beforeDelete() {

@@ -1232,6 +1232,7 @@ CREATE TABLE `orders` (
   `coupon_id` bigint(20) DEFAULT NULL,
   `scheduled_delivery` datetime NOT NULL,
   `actual_delivery` datetime DEFAULT NULL,
+  `note` varchar(100) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
