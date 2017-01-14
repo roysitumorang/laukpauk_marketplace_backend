@@ -30,6 +30,7 @@ class UsersController extends ControllerBase {
 		$user->setNewPassword($this->_input->new_password);
 		$user->setNewPasswordConfirmation($this->_input->new_password);
 		$user->setMobilePhone($this->_input->mobile_phone);
+		$user->setDeviceToken($this->_input->device_token);
 		$user->setDeposit(0);
 		$user->role_id = Role::findFirstByName('Buyer')->id;
 		if ($user->validation() && $user->create()) {

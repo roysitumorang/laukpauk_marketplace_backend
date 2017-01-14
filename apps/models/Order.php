@@ -147,6 +147,10 @@ class Order extends ModelBase {
 		$merchant_notification->created_by = $this->created_by;
 		$merchant_notification->recipients = [$this->merchant];
 		$merchant_notification->create();
+		$this->_sendPushNotification($this->merchant->device_token, [
+			'title' => 'Order Baru #' . $this->code,
+			'body'  => 'Order Baru #' . $this->code,
+		]);
 	}
 
 	function cancel() {
@@ -173,6 +177,10 @@ class Order extends ModelBase {
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
 		$merchant_notification->create();
+		$this->_sendPushNotification($this->buyer->device_token, [
+			'title' => 'Order #' . $this->code . ' Dibatalkan',
+			'body'  => 'Order #' . $this->code . ' Dibatalkan',
+		]);
 
 	}
 
@@ -203,5 +211,9 @@ class Order extends ModelBase {
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
 		$merchant_notification->create();
+		$this->_sendPushNotification($this->buyer->device_token, [
+			'title' => 'Order #' . $this->code . ' Diterima',
+			'body'  => 'Order #' . $this->code . ' Diterima',
+		]);
 	}
 }

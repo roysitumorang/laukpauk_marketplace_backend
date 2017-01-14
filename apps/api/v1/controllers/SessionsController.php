@@ -37,6 +37,7 @@ class SessionsController extends ControllerBase {
 			$login_history          = new LoginHistory;
 			$login_history->user_id = $user->id;
 			$login_history->create();
+			$user->update(['device_token' => $this->_input->device_token]);
 			$this->_response['status'] = 1;
 			$this->_response['data']   = [
 				'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [

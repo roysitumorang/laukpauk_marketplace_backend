@@ -27,5 +27,6 @@ return new Config([
 		'max_size' => '2M',
 		'path'     => APP_PATH . 'public/assets/image/'
 	],
-	'encryption_key' => 'wWw.L@4ukPauK.1d',
+	'encryption_key'   => 'wWw.L@4ukPauK.1d',
+	'firebase_api_key' => 'AAAAjN8YD00:APA91bGhZXW6-8NOsWTG0lPKSaVGpksJrpOJ2ojfsSgPDg4fexpGWaukR0BObnw3ffgy-hFyVsNtNiUcP3D6Tpxo-nayraro7eqHiFy1HHQxsACbDWYt9b844Oief8NGYwEgNEwGj_SB_B7aLyNRhC6GX5fJm16UDg',
 ]);
