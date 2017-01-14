@@ -8,25 +8,30 @@ use Application\Models\ProductPrice;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
+use Phalcon\Db;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
 		$orders = [];
+		$limit  = 10;
 		if ($this->_current_user->role->name == 'Buyer') {
-			$collection = 'buyer_orders';
+			$field = 'buyer_id';
 		} else if ($this->_current_user->role->name == 'Merchant') {
-			$collection = 'merchant_orders';
+			$field = 'merchant_id';
 		}
-		foreach ($this->_current_user->$collection as $order) {
-			$orders[$order->id] = [
-				'code'               => $order->code,
-				'status'             => $order->status,
-				'final_bill'         => $order->final_bill,
-				'scheduled_delivery' => str_replace(' ', 'T', $order->scheduled_delivery),
-			];
+		$total_pages  = ceil($this->db->fetchColumn("SELECT COUNT(1) FROM orders WHERE {$field} = {$this->_current_user->id}") / $limit);
+		$page         = $this->dispatcher->getParam('page', 'int');
+		$current_page = $page > 0 && $page <= $total_pages ? $page : 1;
+		$offset       = ($current_page - 1) * $limit;
+		foreach ($this->db->fetchAll("SELECT id, code, status, final_bill, scheduled_delivery FROM orders WHERE {$field} = {$this->_current_user->id} ORDER BY id DESC LIMIT {$limit} OFFSET {$offset}", Db::FETCH_OBJ) as $order) {
+			$orders[] = $order;
 		}
-		$this->_response['status']         = 1;
-		$this->_response['data']['orders'] = $orders;
+		$this->_response['status'] = 1;
+		$this->_response['data']   = [
+			'orders'       => $orders,
+			'total_pages'  => $total_pages,
+			'current_page' => $current_page,
+		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
