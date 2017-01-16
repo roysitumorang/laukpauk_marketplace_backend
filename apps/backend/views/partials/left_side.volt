@@ -13,7 +13,7 @@
 				<ul class="nav nav-main">
 					{% for item in menu %}
 					<li{% if item['sub_items'] %} class="nav-parent{% if item['expanded'] %} nav-expanded{% endif %}"{% endif %}>
-						<a{% if item['link'] %} href="{{ item['link'] }}"{% endif %}>
+						<a{% if item['link'] %} href="/admin/{{ item['link'] }}"{% endif %}>
 							<i class="fa fa-{{ item['icon'] }}" aria-hidden="true"></i>
 							<span>{{ item['label'] }}</span>
 						</a>
