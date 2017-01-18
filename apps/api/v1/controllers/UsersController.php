@@ -9,7 +9,7 @@ use Phalcon\Crypt;
 
 class UsersController extends ControllerBase {
 	function beforeExecuteRoute() {
-		if ($this->dispatcher->getActionName() === 'update') {
+		if (in_array($this->dispatcher->getActionName(), ['update', 'saveDeviceToken'])) {
 			parent::beforeExecuteRoute();
 		}
 	}
