@@ -138,4 +138,20 @@ class UsersController extends ControllerBase {
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
+
+	function saveDeviceTokenAction() {
+		$this->_current_user->setDeviceToken($this->_input->device_token);
+		if ($this->_current_user->validation() && $this->_current_user->update()) {
+			$this->_response['status']  = 1;
+			$this->_response['message'] = 'Update device token berhasil!';
+		} else {
+			$this->_response['message']        = 'Update device token gagal!';
+			$this->_response['data']['errors'] = [];
+			foreach ($this->_current_user->getMessages() as $error) {
+				$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
+			}
+		}
+		$this->response->setJsonContent($this->_response);
+		return $this->response;
+	}
 }
