@@ -6,7 +6,7 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class Post extends ModelBase {
+class Device extends ModelBase {
 	public $id;
 	public $user_id;
 	public $token;
