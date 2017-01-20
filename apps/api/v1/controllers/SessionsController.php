@@ -21,6 +21,7 @@ class SessionsController extends ControllerBase {
 					$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file_name;
 				}
 			}
+			$this->_response['status']          = 1;
 			$this->_response['data']['banners'] = $banners;
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
