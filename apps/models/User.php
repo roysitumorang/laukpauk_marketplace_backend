@@ -24,7 +24,6 @@ class User extends ModelBase {
 	public $id;
 	public $role_id;
 	public $api_key;
-	public $device_token;
 	public $name;
 	public $email;
 	public $password;
@@ -96,10 +95,7 @@ class User extends ModelBase {
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
 		$this->hasMany('id', 'Application\Models\AccessToken', 'user_id', ['alias' => 'access_tokens']);
-	}
-
-	function setDeviceToken($device_token) {
-		$this->device_token = $this->_filter->sanitize($device_token, ['string', 'trim']) ?: null;
+		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
 	}
 
 	function setName($name) {

@@ -1,6 +1,6 @@
 /*
 SQLyog Ultimate
-MySQL - 10.1.20-MariaDB : Database - sayur
+MySQL - 10.1.21-MariaDB : Database - sayur
 *********************************************************************
 */
 
@@ -790,6 +790,28 @@ CREATE TABLE `coupons` (
 /*Data for the table `coupons` */
 
 LOCK TABLES `coupons` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `devices` */
+
+DROP TABLE IF EXISTS `devices`;
+
+CREATE TABLE `devices` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `token` char(36) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`token`),
+  UNIQUE KEY `token` (`token`),
+  KEY `created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `devices` */
+
+LOCK TABLES `devices` WRITE;
 
 UNLOCK TABLES;
 
@@ -9438,7 +9460,6 @@ CREATE TABLE `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `role_id` bigint(20) NOT NULL,
   `api_key` char(32) DEFAULT NULL,
-  `device_token` char(36) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(80) DEFAULT NULL,
   `password` char(60) NOT NULL,
@@ -9477,7 +9498,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `avatar` (`avatar`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `api_key` (`api_key`),
-  UNIQUE KEY `device_token` (`device_token`),
   KEY `activated_at` (`activated_at`),
   KEY `created_by` (`created_by`),
   KEY `date_of_birth` (`date_of_birth`),

@@ -26,7 +26,7 @@ class ModelBase extends Model {
 		$this->updated_at = $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s.u');
 	}
 
-	protected function _sendPushNotification($token, array $message) {
+	protected function _sendPushNotification(array $tokens, array $message) {
 		$ch = curl_init();
 		curl_setopt_array($ch, [
 			CURLOPT_URL            => 'https://onesignal.com/api/v1/notifications',
@@ -39,7 +39,7 @@ class ModelBase extends Model {
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_POSTFIELDS     => json_encode([
 				'app_id'             => $this->getDI()->getConfig()->onesignal->app_id,
-				'include_player_ids' => [$token],
+				'include_player_ids' => $tokens,
 				'priority'           => 10,
 				'headings'           => ['en' => $message['title']],
 				'contents'           => ['en' => $message['content']],

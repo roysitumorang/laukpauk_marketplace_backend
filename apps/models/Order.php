@@ -147,7 +147,11 @@ class Order extends ModelBase {
 		$merchant_notification->created_by = $this->created_by;
 		$merchant_notification->recipients = [$this->merchant];
 		$merchant_notification->create();
-		$this->_sendPushNotification($this->merchant->device_token, [
+		$tokens = [];
+		foreach ($this->merhant->devices as $device) {
+			$tokens[] = $device->token;
+		}
+		$this->_sendPushNotification($tokens, [
 			'title'   => 'Order Baru #' . $this->code,
 			'content' => 'Order Baru #' . $this->code,
 		]);
@@ -177,11 +181,14 @@ class Order extends ModelBase {
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
 		$merchant_notification->create();
-		$this->_sendPushNotification($this->buyer->device_token, [
+		$tokens = [];
+		foreach ($this->buyer->devices as $device) {
+			$tokens[] = $device->token;
+		}
+		$this->_sendPushNotification($tokens, [
 			'title'   => 'Order #' . $this->code . ' Dibatalkan',
 			'content' => 'Order #' . $this->code . ' Dibatalkan',
 		]);
-
 	}
 
 	function complete() {
@@ -211,7 +218,11 @@ class Order extends ModelBase {
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
 		$merchant_notification->create();
-		$this->_sendPushNotification($this->buyer->device_token, [
+		$tokens = [];
+		foreach ($this->buyer->devices as $device) {
+			$tokens[] = $device->token;
+		}
+		$this->_sendPushNotification($tokens, [
 			'title'   => 'Order #' . $this->code . ' Diterima',
 			'content' => 'Order #' . $this->code . ' Diterima',
 		]);

@@ -2,6 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Device;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
@@ -30,10 +31,21 @@ class UsersController extends ControllerBase {
 		$user->setNewPassword($this->_input->new_password);
 		$user->setNewPasswordConfirmation($this->_input->new_password);
 		$user->setMobilePhone($this->_input->mobile_phone);
-		$user->setDeviceToken($this->_input->device_token);
 		$user->setDeposit(0);
 		$user->role_id = Role::findFirstByName('Buyer')->id;
 		if ($user->validation() && $user->create()) {
+			if ($this->_input->device_token) {
+				$device = Device::findFirstByToken($this->_input->device_token);
+				if (!$device) {
+					$device        = new Device;
+					$device->user  = $user;
+					$device->token = $this->_input->device_token;
+					$user->create();
+				} else {
+					$device->user = $user;
+					$user->update();
+				}
+			}
 			$this->_response['status']                   = 1;
 			$this->_response['data']['activation_token'] = $user->activation_token;
 			$this->response->setJsonContent($this->_response);

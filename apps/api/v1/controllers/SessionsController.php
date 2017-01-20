@@ -2,6 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Device;
 use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
@@ -37,7 +38,18 @@ class SessionsController extends ControllerBase {
 			$login_history          = new LoginHistory;
 			$login_history->user_id = $user->id;
 			$login_history->create();
-			$user->update(['device_token' => $this->_input->device_token]);
+			if ($this->_input->device_token) {
+				$device = Device::findFirstByToken($this->_input->device_token);
+				if (!$device) {
+					$device        = new Device;
+					$device->user  = $this->_current_user;
+					$device->token = $this->_input->device_token;
+					$device->create();
+				} else if ($device->user_id != $this->_current_user->id) {
+					$device->user = $this->_current_user;
+					$device->update();
+				}
+			}
 			$this->_response['status'] = 1;
 			$this->_response['data']   = [
 				'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
