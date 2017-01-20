@@ -801,7 +801,7 @@ CREATE TABLE `devices` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `token` char(36) NOT NULL,
-  `created_by` bigint(20) NOT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`token`),
