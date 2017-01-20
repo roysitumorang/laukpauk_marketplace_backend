@@ -2,6 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\BannerCategory;
 use Application\Models\Device;
 use Application\Models\LoginHistory;
 use Application\Models\Role;
@@ -13,7 +14,14 @@ class SessionsController extends ControllerBase {
 
 	function createAction() {
 		if (!$this->request->isPost()) {
-			$this->_response['message'] = 'Request tidak valid!';
+			$banners  = [];
+			$category = BannerCategory::findFirstByName('Login');
+			foreach ($category->banners as $banner) {
+				if ($banner->published) {
+					$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file_name;
+				}
+			}
+			$this->_response['data']['banners'] = $banners;
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
