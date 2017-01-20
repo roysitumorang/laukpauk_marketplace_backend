@@ -30,18 +30,21 @@ class ModelBase extends Model {
 		$ch               = curl_init();
 		$message['sound'] = 'default';
 		curl_setopt_array($ch, [
-			CURLOPT_URL            => 'https://fcm.googleapis.com/fcm/send',
+			CURLOPT_URL            => 'https://onesignal.com/api/v1/notifications',
 			CURLOPT_POST           => 1,
 			CURLOPT_HTTPHEADER     => [
-				'Authorization: key=' . $this->getDI()->getConfig()->firebase_api_key,
-				'Content-Type: application/json',
+				'Content-Type: application/json; charset=utf-8',
+				'Authorization: Basic ' . $this->getDI()->getConfig()->onesignal->api_key,
 			],
 			CURLOPT_RETURNTRANSFER => 1,
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_POSTFIELDS     => json_encode([
-				'to'           => $token,
-				'priority'     => 'high',
-				'notification' => $message,
+				'app_id'             => $this->getDI()->getConfig()->onesignal->app_id,
+				'include_player_ids' => [$token],
+				'priority'           => 10,
+				'headings'           => ['en' => $message],
+				'contents'           => ['en' => $message],
+				'data'               => [],
 			]),
 		]);
 		$result = curl_exec($ch);

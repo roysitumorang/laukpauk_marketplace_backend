@@ -9438,7 +9438,7 @@ CREATE TABLE `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `role_id` bigint(20) NOT NULL,
   `api_key` char(32) DEFAULT NULL,
-  `device_token` varchar(200) DEFAULT NULL,
+  `device_token` char(36) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(80) DEFAULT NULL,
   `password` char(60) NOT NULL,
