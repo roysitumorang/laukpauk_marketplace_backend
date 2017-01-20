@@ -134,7 +134,6 @@ class Banner extends ModelBase {
 	}
 
 	function beforeUpdate() {
-		parent::beforeUpdate();
 		if ($this->new_file) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
