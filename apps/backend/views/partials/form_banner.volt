@@ -18,7 +18,7 @@
 				<input type="file" name="new_file" size="50" class="form form-control form-30">
 				<br>
 				{% if banner.file_name %}
-				<a class="image-popup-no-margins" href="/assets/images/{{ banner.file_name }}"><img src="/assets/images/{{ banner.thumbnail }}" border="0"></a>
+				<a class="image-popup-no-margins" href="/assets/image/{{ banner.file_name }}"><img src="/assets/image/{{ banner.thumbnail }}" border="0"></a>
 				<br><a href="javascript:void(0)" class="delete-picture" data-banner-category-id="{{ banner_category.id }}" data-id="{{ banner.id }}" title="Hapus"><i class="fa fa-trash-o"></i></a><br>
 				{% endif %}
 				<i>Kosongkan "FILE URL" jika Anda ingin meng-upload file banner dari komputer Anda</i>

@@ -37,9 +37,9 @@
 					<tr>
 						<td{{ background }}>
 							{% if banner.file_name %}
-							<a class="image-popup-no-margins" href="/assets/images/{{ banner.file_name }}"><img src="/assets/images/{{ banner.thumbnail }}" border="0"></a>
+							<a class="image-popup-no-margins" href="/assets/image/{{ banner.file_name }}"><img src="/assets/image/{{ banner.thumbnail }}" border="0"></a>
 							{% else %}
-							<img src="/assets/images/no_banner_800.png" border="0">
+							<img src="/assets/image/no_banner_800.png" border="0">
 							{% endif %}
 							<br>
 							<b><font size="4">{{ banner.name }}</font></b><br>
@@ -51,7 +51,7 @@
 						</td>
 						<td{{ background}} width="5%">
 							<a href="javascript:void(0)" class="published" data-banner-category-id="{{ banner_category.id }}" data-id="{{ banner.id }}">
-								<img src="/assets/images/bullet-{% if banner.published %}green{% else %}red{% endif %}.png" border="0">
+								<img src="/assets/image/bullet-{% if banner.published %}green{% else %}red{% endif %}.png" border="0">
 							</a>
 							<br><br><br>
 							<a href="/admin/banners/update/{{ banner.id }}/banner_category_id:{{ banner_category.id  }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
