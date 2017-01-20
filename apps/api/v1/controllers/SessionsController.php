@@ -42,11 +42,11 @@ class SessionsController extends ControllerBase {
 				$device = Device::findFirstByToken($this->_input->device_token);
 				if (!$device) {
 					$device        = new Device;
-					$device->user  = $this->_current_user;
+					$device->user  = $user;
 					$device->token = $this->_input->device_token;
 					$device->create();
 				} else if ($device->user_id != $this->_current_user->id) {
-					$device->user = $this->_current_user;
+					$device->user = $user;
 					$device->update();
 				}
 			}
