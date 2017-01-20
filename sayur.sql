@@ -802,11 +802,14 @@ CREATE TABLE `devices` (
   `user_id` bigint(20) NOT NULL,
   `token` char(36) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`token`),
   UNIQUE KEY `token` (`token`),
-  KEY `created_by` (`created_by`)
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `devices` */

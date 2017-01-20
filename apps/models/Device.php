@@ -12,6 +12,8 @@ class Device extends ModelBase {
 	public $token;
 	public $created_by;
 	public $created_at;
+	public $updated_by;
+	public $updated_at;
 
 	function getSource() {
 		return 'devices';
