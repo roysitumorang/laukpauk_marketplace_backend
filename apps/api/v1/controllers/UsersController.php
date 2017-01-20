@@ -37,12 +37,14 @@ class UsersController extends ControllerBase {
 			if ($this->_input->device_token) {
 				$device = Device::findFirstByToken($this->_input->device_token);
 				if (!$device) {
-					$device        = new Device;
-					$device->user  = $user;
-					$device->token = $this->_input->device_token;
+					$device             = new Device;
+					$device->user       = $user;
+					$device->token      = $this->_input->device_token;
+					$device->created_by = $user->id;
 					$device->create();
 				} else {
-					$device->user = $user;
+					$device->user       = $user;
+					$device->updated_by = $user->id;
 					$device->update();
 				}
 			}
