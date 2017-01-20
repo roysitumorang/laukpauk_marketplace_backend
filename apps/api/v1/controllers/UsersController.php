@@ -40,10 +40,10 @@ class UsersController extends ControllerBase {
 					$device        = new Device;
 					$device->user  = $user;
 					$device->token = $this->_input->device_token;
-					$user->create();
+					$device->create();
 				} else {
 					$device->user = $user;
-					$user->update();
+					$device->update();
 				}
 			}
 			$this->_response['status']                   = 1;
