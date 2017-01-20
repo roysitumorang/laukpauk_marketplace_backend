@@ -27,8 +27,7 @@ class ModelBase extends Model {
 	}
 
 	protected function _sendPushNotification($token, array $message) {
-		$ch               = curl_init();
-		$message['sound'] = 'default';
+		$ch = curl_init();
 		curl_setopt_array($ch, [
 			CURLOPT_URL            => 'https://onesignal.com/api/v1/notifications',
 			CURLOPT_POST           => 1,
@@ -42,8 +41,8 @@ class ModelBase extends Model {
 				'app_id'             => $this->getDI()->getConfig()->onesignal->app_id,
 				'include_player_ids' => [$token],
 				'priority'           => 10,
-				'headings'           => ['en' => $message],
-				'contents'           => ['en' => $message],
+				'headings'           => ['en' => $message['title']],
+				'contents'           => ['en' => $message['content']],
 				'data'               => [],
 			]),
 		]);
