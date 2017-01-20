@@ -148,7 +148,7 @@ class Order extends ModelBase {
 		$merchant_notification->recipients = [$this->merchant];
 		$merchant_notification->create();
 		$tokens = [];
-		foreach ($this->merhant->devices as $device) {
+		foreach ($this->merchant->devices as $device) {
 			$tokens[] = $device->token;
 		}
 		$this->_sendPushNotification($tokens, [
