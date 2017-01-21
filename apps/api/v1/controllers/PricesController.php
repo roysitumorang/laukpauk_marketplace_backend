@@ -13,8 +13,8 @@ class PricesController extends ControllerBase {
 		$page         = $this->dispatcher->getParam('page', 'int');
 		$current_page = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset       = ($current_page - 1) * $limit;
-		foreach ($this->db->fetchAll("SELECT b.id, a.name AS category, b.name, b.stock_unit, COALESCE(c.value, 0) AS price, COALESCE(c.published, 0) AS published, c.order_closing_hour FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1 LIMIT {$limit} OFFSET {$offset}", Db::FETCH_OBJ) as $product) {
-			$product->row_number = ++ $offset;
+		foreach ($this->db->fetchAll("SELECT b.id, a.name AS category, b.name, b.stock_unit, COALESCE(c.value, 0) AS price, COALESCE(c.published, 0) AS published, c.order_closing_hour FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1 ORDER BY b.name LIMIT {$limit} OFFSET {$offset}", Db::FETCH_OBJ) as $product) {
+			$product->row_number = ++$offset;
 			$products[]          = $product;
 		}
 		$this->_response['status'] = 1;
