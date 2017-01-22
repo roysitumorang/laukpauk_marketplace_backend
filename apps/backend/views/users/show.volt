@@ -65,12 +65,12 @@
 					<tr>
 						<td rowspan="7" width="5%">
 						{% if user.avatar %}
-							<img src="/assets/images/{{ user.thumbnail }}" border="0"><br>
+							<img src="/assets/image/{{ user.thumbnail }}" border="0"><br>
 							<form method="POST" action="/admin/users/update/{{ user.id }}/delete_avatar:1" onsubmit="if(!confirm('Anda yakin menghapus gambar ini ?'))return !1">
 								<button type="submit"><i class="fa fa-trash-o fa-2x"></i></button>
 							</form>
 						{% else %}
-							<img src="/assets/images/no_picture_300.png" border="0">
+							<img src="/assets/image/no_picture_300.png" border="0">
 						{% endif %}
 						</td>
 					</tr>

@@ -15,7 +15,7 @@
 				<section role="main" class="content-body">
 					<header class="page-header">
 						<a href="message.php?do=inbox"><h2>Pesan</h2></a>
-					
+
 						<div class="right-wrapper pull-right">
 							<ol class="breadcrumbs">
 								<li>
@@ -26,11 +26,11 @@
 								<li><span><a href="message.php?do=inbox">Inbox</a></span></li>
 								<li><span>Detail Pesan</span></li>
 							</ol>
-					
+
 							<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 						</div>
 					</header>
-					
+
 <!-- start: page -->
 									<header class="panel-heading">
 										<h2 class="panel-title">{$Detail.vSubject}</h2>
@@ -42,7 +42,7 @@
 
 <table class="table table-striped">
 <tr>
-	<td><b>Dari:</b>&nbsp;{$Detail.vUsername}<br /><a href="message.php?do=add&id={$Detail.id}" title="Reply"><img src="assets/images/send-email-small.png" border="0" /></a></td>
+	<td><b>Dari:</b>&nbsp;{$Detail.vUsername}<br /><a href="message.php?do=add&id={$Detail.id}" title="Reply"><img src="assets/image/send-email-small.png" border="0" /></a></td>
 </tr>
 <tr>
 	<td><b>Kepada:</b><br />{$Detail.vTo}</td>
@@ -61,12 +61,12 @@
 <!-- eof Content //-->
 </div>
 <!-- end: page -->
-				
+
 				</section>
 			</div>
 
 			{include file='right_side.html'}
-			
+
 		</section>
 
 {include file='footer.html'}

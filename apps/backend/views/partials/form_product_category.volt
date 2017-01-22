@@ -26,8 +26,8 @@
 		<tr>
 			<td>&nbsp;</td>
 			<td>
-				<a class="image-popup-no-margins" href="/assets/images/{{ category.picture }}">
-					<img src="/assets/images/{{ category.thumbnail }}" border="0">
+				<a class="image-popup-no-margins" href="/assets/image/{{ category.picture }}">
+					<img src="/assets/image/{{ category.thumbnail }}" border="0">
 				</a>
 				<br>
 				<a href="javascript:void(0)" class="delete" data-id="{{ category.id }}">

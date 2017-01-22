@@ -60,8 +60,8 @@
 							<td>{{ category.rank }}</td>
 							<td>
 								{% if category.picture %}
-									<a class="image-popup-no-margins" href="/assets/images/{{ category.picture }}">
-										<img src="/assets/images/{{ category.thumbnail }}" border="0">
+									<a class="image-popup-no-margins" href="/assets/image/{{ category.picture }}">
+										<img src="/assets/image/{{ category.thumbnail }}" border="0">
 									</a>
 									<br>
 								{% endif %}

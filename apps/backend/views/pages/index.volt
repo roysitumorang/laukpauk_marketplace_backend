@@ -34,7 +34,7 @@
 					<tr>
 						<td width="30%">
 							{% if page_category.has_picture_icon and page.picture %}
-							<a class="image-popup-no-margins" href="/assets/images/{{ page.picture }}"><img src="/assets/images/{{ page.thumbnail }}" border="0"></a>
+							<a class="image-popup-no-margins" href="/assets/image/{{ page.picture }}"><img src="/assets/image/{{ page.thumbnail }}" border="0"></a>
 							{% else %}
 							<i class="fa fa-file fa-5x"></i>
 							{% endif %}

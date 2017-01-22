@@ -36,7 +36,7 @@
 				<input type="file" name="picture" class="form form-control form-30">
 				Picture file should be bellow of 200 Kb
 				{% if page.picture %}
-				<br><a class="image-popup-no-margins" href="/assets/images/{{ page.picture }}"><img src="/assets/images/{{ page.thumbnail }}" border="0"></a><br>
+				<br><a class="image-popup-no-margins" href="/assets/image/{{ page.picture }}"><img src="/assets/image/{{ page.thumbnail }}" border="0"></a><br>
 				<a href="javascript:void(0)" class="delete-picture" data-page-category-id="{{ page_category.id }}" data-id="{{ page.id }}"{% if parent_id %} data-parent-id="{{ parent_id }}"{% endif %} title="Hapus Gambar"><i class="fa fa-trash-o"></i></a>
 				{% endif %}
 			</td>

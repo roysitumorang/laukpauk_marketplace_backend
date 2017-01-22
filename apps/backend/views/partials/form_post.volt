@@ -20,7 +20,7 @@
 				<input type="file" name="picture" size="50" class="form form-control form-30"><br>
 				Picture file should be bellow of 200 Kb
 				{% if post.picture %}<br>
-				<br><a class="image-popup-no-margins" href="/assets/images/{{ post.picture }}"><img src="/assets/images/{{ post.thumbnail }}" border="0"></a>
+				<br><a class="image-popup-no-margins" href="/assets/image/{{ post.picture }}"><img src="/assets/image/{{ post.thumbnail }}" border="0"></a>
 				&nbsp;<a href="javascript:void(0)" class="delete-picture" data-post-category-id="{{ post_category.id }}" data-id="{{ post.id }}" title="Hapus"><i class="fa fa-trash-o"></i></a>
 				{% endif %}
 			</td>

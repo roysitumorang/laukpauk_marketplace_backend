@@ -57,15 +57,15 @@
 							<td{{ background }}>{{ post.rank }}</td>
 							<td{{ background }}>
 								{% if post.picture %}
-								<img src="/assets/images/{{ post.thumbnail }}" width="120" height="100" border="0">
+								<img src="/assets/image/{{ post.thumbnail }}" width="120" height="100" border="0">
 								{% else %}
-								<img src="/assets/images/no_picture_120.png" border="0">
+								<img src="/assets/image/no_picture_120.png" border="0">
 								{% endif %}
 								<br>
 								<font size="4"><a href="/admin/posts/show/{{ post.id }}/page_category_id:{{ post_category.id }}">{{ post.subject }}</a></font>
 								<a href="javascript:void(0)" class="published" data-post-category-id="{{ post_category.id }}" data-id="{{ post.id }}">
 
-									<img src="/assets/images/bullet-{% if post.published %}green{% else %}red{% endif %}.png" border="0">
+									<img src="/asset/images/bullet-{% if post.published %}green{% else %}red{% endif %}.png" border="0">
 								</a>
 								{% if post.published %}
 								<br>
