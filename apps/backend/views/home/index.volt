@@ -72,49 +72,12 @@
 										</div>
 									</div>
 								</div>
-								<div class="col-lg-4 text-center">
-									<h2 class="panel-title mt-md">Sales Goal</h2>
-									<div class="liquid-meter-wrapper liquid-meter-sm mt-lg">
-										<div class="liquid-meter">
-											<meter min="0" max="100" value="35" id="meterSales"></meter>
-										</div>
-										<div class="liquid-meter-selector" id="meterSalesSel">
-											<a href="#" data-val="35" class="active">Monthly Goal</a>
-											<a href="#" data-val="28">Annual Goal</a>
-										</div>
-									</div>
-								</div>
 							</div>
 						</div>
 					</section>
 				</div>
 				<div class="col-md-6 col-lg-12 col-xl-6">
 					<div class="row">
-						<div class="col-md-12 col-lg-6 col-xl-6">
-							<section class="panel panel-featured-left panel-featured-primary">
-								<div class="panel-body">
-									<div class="widget-summary">
-										<div class="widget-summary-col widget-summary-col-icon">
-											<div class="summary-icon bg-primary">
-												<i class="fa fa-life-ring"></i>
-											</div>
-										</div>
-										<div class="widget-summary-col">
-											<div class="summary">
-												<h4 class="title">Support Questions</h4>
-												<div class="info">
-													<strong class="amount">1,281</strong>
-													<span class="text-primary">(14 unread)</span>
-												</div>
-											</div>
-											<div class="summary-footer">
-												<a class="text-muted text-uppercase">(view all)</a>
-											</div>
-										</div>
-									</div>
-								</div>
-							</section>
-						</div>
 						<div class="col-md-12 col-lg-6 col-xl-6">
 							<section class="panel panel-featured-left panel-featured-secondary">
 								<div class="panel-body">
@@ -163,30 +126,6 @@
 								</div>
 							</section>
 						</div>
-						<div class="col-md-12 col-lg-6 col-xl-6">
-							<section class="panel panel-featured-left panel-featured-quartenary">
-								<div class="panel-body">
-									<div class="widget-summary">
-										<div class="widget-summary-col widget-summary-col-icon">
-											<div class="summary-icon bg-quartenary">
-												<i class="fa fa-user"></i>
-											</div>
-										</div>
-										<div class="widget-summary-col">
-											<div class="summary">
-												<h4 class="title">Today's Visitors</h4>
-												<div class="info">
-													<strong class="amount">19,765</strong>
-												</div>
-											</div>
-											<div class="summary-footer">
-												<a class="text-muted text-uppercase">(report)</a>
-											</div>
-										</div>
-									</div>
-								</div>
-							</section>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -208,22 +147,6 @@
 								var flotDashBasicData = {{ best_sales }};
 								// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
 							</script>
-						</div>
-					</section>
-				</div>
-				<div class="col-md-6">
-					<section class="panel">
-						<header class="panel-heading">
-							<div class="panel-actions">
-								<a href="#" class="panel-action panel-action-toggle" data-panel-toggle></a>
-								<a href="#" class="panel-action panel-action-dismiss" data-panel-dismiss></a>
-							</div>
-							<h2 class="panel-title">Penggunaan Server</h2>
-							<p class="panel-subtitle">Statistik Penggunaan Server</p>
-						</header>
-						<div class="panel-body">
-							<!-- Flot: Curves -->
-							<div class="chart chart-md" id="flotDashRealTime"></div>
 						</div>
 					</section>
 				</div>
