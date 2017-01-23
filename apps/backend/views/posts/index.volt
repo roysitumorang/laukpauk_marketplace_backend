@@ -65,7 +65,7 @@
 								<font size="4"><a href="/admin/posts/show/{{ post.id }}/page_category_id:{{ post_category.id }}">{{ post.subject }}</a></font>
 								<a href="javascript:void(0)" class="published" data-post-category-id="{{ post_category.id }}" data-id="{{ post.id }}">
 
-									<img src="/asset/image/bullet-{% if post.published %}green{% else %}red{% endif %}.png" border="0">
+									<img src="/assets/image/bullet-{% if post.published %}green{% else %}red{% endif %}.png" border="0">
 								</a>
 								{% if post.published %}
 								<br>
