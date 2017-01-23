@@ -149,7 +149,6 @@ class Post extends ModelBase {
 	}
 
 	function beforeUpdate() {
-		parent::beforeUpdate();
 		if ($this->new_picture) {
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
