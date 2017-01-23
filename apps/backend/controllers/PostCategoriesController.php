@@ -90,5 +90,6 @@ class PostCategoriesController extends ControllerBase {
 		$post_category->setNewPermalink($this->request->getPost('new_permalink'));
 		$post_category->setAllowComments($this->request->getPost('allow_comments'));
 		$post_category->setCommentModeration($this->request->getPost('comment_moderation'));
+		$post_category->setPublished($this->request->getPost('published'));
 	}
 }

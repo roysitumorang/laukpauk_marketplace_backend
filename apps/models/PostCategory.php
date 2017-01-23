@@ -13,6 +13,7 @@ class PostCategory extends ModelBase {
 	public $new_permalink;
 	public $allow_comments;
 	public $comment_moderation;
+	public $published;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -55,6 +56,10 @@ class PostCategory extends ModelBase {
 
 	function setCommentModeration($comment_moderation) {
 		$this->comment_moderation = $this->_filter->sanitize($comment_moderation, 'int') ?? 0;
+	}
+
+	function setPublished($published) {
+		$this->published = $this->_filter->sanitize($published, 'int') ?? 0;
 	}
 
 	function beforeValidation() {
