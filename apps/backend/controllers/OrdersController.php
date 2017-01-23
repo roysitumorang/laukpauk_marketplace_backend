@@ -68,8 +68,8 @@ class OrdersController extends ControllerBase {
 		$this->view->status                 = $status;
 		$this->view->current_status         = $current_status;
 		$this->view->code                   = $code;
-		$this->view->total_final_bill       = $this->db->fetchColumn('SELECT SUM(final_bill) FROM orders' . ($parameters[0] ? " WHERE {$parameters[0]}" : '') . $parameter['order']) ?? 0;
-		$this->view->total_admin_fee        = $this->db->fetchColumn('SELECT SUM(admin_fee) FROM orders' . ($parameters[0] ? " WHERE {$parameters[0]}" : '') . $parameter['order']) ?? 0;
+		$this->view->total_final_bill       = $this->db->fetchColumn('SELECT SUM(final_bill) FROM orders' . ($parameters[0] ? " WHERE {$parameters[0]}" : '') . ' ORDER BY ' . $parameters['order']) ?? 0;
+		$this->view->total_admin_fee        = $this->db->fetchColumn('SELECT SUM(admin_fee) FROM orders' . ($parameters[0] ? " WHERE {$parameters[0]}" : '') . ' ORDER BY ' . $parameters['order']) ?? 0;
 		$this->view->total_orders           = $this->db->fetchColumn('SELECT COUNT(1) FROM orders');
 		$this->view->pending_orders         = $this->db->fetchOne("SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE `status` = 0");
 		$this->view->completed_orders       = $this->db->fetchOne("SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE `status` = 1");
