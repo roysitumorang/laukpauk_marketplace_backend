@@ -8,6 +8,7 @@ use Application\Models\ProductPrice;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
+use Exception;
 use Phalcon\Db;
 
 class OrdersController extends ControllerBase {
