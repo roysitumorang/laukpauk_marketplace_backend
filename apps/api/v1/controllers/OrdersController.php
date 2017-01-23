@@ -37,13 +37,18 @@ class OrdersController extends ControllerBase {
 	}
 
 	function createAction() {
-		if (!$this->request->isPost()) {
-			$this->_response['message'] = 'Request tidak valid!';
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-			return $this->response;
-		}
-		if (!$this->_input->items) {
-			$this->_response['message'] = 'Order item kosong!';
+		try {
+			if (!$this->request->isPost()) {
+				throw new Exception('Request tidak valid!');
+			}
+			if ($this->_current_user->role->name != 'Buyer') {
+				throw new Exception('Hanya pembeli yang bisa melakukan pemesanan!');
+			}
+			if (!$this->_input->items) {
+				throw new Exception('Order item kosong!');
+			}
+		} catch (Exception $e) {
+			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
