@@ -107,7 +107,11 @@ class Post extends ModelBase {
 	}
 
 	function beforeValidation() {
-		$this->permalink = trim(preg_replace(['/[^\w\d\-\ ]/', '/ /', '/\-{2,}/'], ['', '-', '-'], strtolower($this->new_permalink ?: $this->subject)), '-');
+		if ($this->new_permalink) {
+			$this->permalink = $this->new_permalink;
+		} else if (!$this->permalink) {
+			$this->permalink = trim(preg_replace(['/[^\w\d\-\ ]/', '/ /', '/\-{2,}/'], ['', '-', '-'], strtolower($this->subject)), '-');
+		}
 	}
 
 	function validation() {
