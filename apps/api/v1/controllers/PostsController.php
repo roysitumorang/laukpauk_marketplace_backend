@@ -6,6 +6,8 @@ use Application\Models\PostCategory;
 use Exception;
 
 class PostsController extends ControllerBase {
+	function beforeExecuteRoute() {}
+
 	function showAction($permalink) {
 		try {
 			$category = PostCategory::findFirst("published = 1 AND name = 'App Info'");
