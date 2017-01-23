@@ -29,6 +29,7 @@ class User extends ModelBase {
 	public $password;
 	public $new_password;
 	public $new_password_confirmation;
+	public $change_password;
 	public $address;
 	public $village_id;
 	public $mobile_phone;
@@ -118,6 +119,10 @@ class User extends ModelBase {
 		if ($new_password_confirmation) {
 			$this->new_password_confirmation = $this->_filter->sanitize($new_password_confirmation, ['string', 'trim']);
 		}
+	}
+
+	function setChangePassword(bool $change_password = false) {
+		$this->change_password = $change_password;
 	}
 
 	function setAddress($address) {
@@ -276,7 +281,7 @@ class User extends ModelBase {
 				'message' => 'nomor HP sudah ada',
 			]));
 		}
-		if (!$this->id || $this->new_password || $this->new_password_confirmation) {
+		if (!$this->id || $this->change_password || $this->new_password || $this->new_password_confirmation) {
 			$validator->add(['new_password', 'new_password_confirmation'], new PresenceOf([
 				'message' => [
 					'new_password'              => 'password harus diisi',
