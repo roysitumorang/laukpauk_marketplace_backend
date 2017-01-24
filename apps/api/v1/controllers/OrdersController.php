@@ -89,7 +89,7 @@ class OrdersController extends ControllerBase {
 		} else {
 			$errors = [];
 			foreach ($order->getMessages() as $error) {
-				$errors[] = $error->getMessage();
+				$errors[$error->getField()] = $error->getMessage();
 			}
 			$this->_response['message']        = 'Pemesanan tidak berhasil!';
 			$this->_response['data']['errors'] = $errors;
