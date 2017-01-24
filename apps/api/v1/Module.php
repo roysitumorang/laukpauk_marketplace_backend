@@ -4,15 +4,15 @@ namespace Application\Api\V1;
 
 use Phalcon\Cache\Backend\Apc;
 use Phalcon\Cache\Frontend\Data as FrontData;
-use Phalcon\Loader;
-use Phalcon\Mvc\View;
 use Phalcon\DiInterface;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Http\Response;
+use Phalcon\Loader;
 use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
+use Phalcon\Mvc\View;
 
 class Module implements ModuleDefinitionInterface {
 	/**
