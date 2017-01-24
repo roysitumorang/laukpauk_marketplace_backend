@@ -1,7 +1,5 @@
 <?php
 
-use DateTimeImmutable;
-use DateTimeZone;
 use Phalcon\Logger;
 use Phalcon\Logger\Adapter\File;
 use Phalcon\Assets\Manager as AssetsManager;
