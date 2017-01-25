@@ -1810,12 +1810,12 @@ CREATE TABLE `products` (
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `stock_unit` (`stock_unit`,`name`),
+  UNIQUE KEY `name` (`name`,`stock_unit`),
   KEY `created_by` (`created_by`),
   KEY `product_category_id` (`product_category_id`),
   KEY `updated_by` (`updated_by`),
-  KEY `published` (`published`)
+  KEY `published` (`published`),
+  KEY `stock_unit` (`stock_unit`)
 ) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8;
 
 /*Data for the table `products` */

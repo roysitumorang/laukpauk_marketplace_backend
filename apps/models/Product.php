@@ -69,13 +69,6 @@ class Product extends ModelBase {
 				'stock_unit' => 'satuan harus diisi',
 			],
 		]));
-		$validator->add('name', new Uniqueness([
-			'convert' => function(array $values) : array {
-				$values['name'] = strtolower($values['name']);
-				return $values;
-			},
-			'message' => 'nama sudah ada',
-		]));
 		$validator->add(['name', 'stock_unit'], new Uniqueness([
 			'message' => 'nama dan satuan sudah ada',
 		]));
