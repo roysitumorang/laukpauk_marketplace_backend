@@ -8,7 +8,6 @@ class SubdistrictsController extends ControllerBase {
 	function beforeExecuteRoute() {}
 
 	function indexAction() {
-		$this->_response['status'] = 1;
 		if (!$this->cache->exists('subdistricts')) {
 			$subdistricts = [];
 			$city         = City::findFirstByName('Medan');
@@ -24,7 +23,10 @@ class SubdistrictsController extends ControllerBase {
 			}
 			$this->cache->save('subdistricts', $subdistricts);
 		}
-		$this->_response['data']['subdistricts'] = $this->cache->get('subdistricts');
+		$this->_response = [
+			'status' => 1,
+			'data'   => ['subdistricts' => $this->cache->get('subdistricts')],
+		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
