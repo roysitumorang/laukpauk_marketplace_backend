@@ -25,7 +25,7 @@ class SubdistrictsController extends ControllerBase {
 			$this->cache->save('subdistricts', $subdistricts);
 		}
 		$this->_response['data']['subdistricts'] = $this->cache->get('subdistricts');
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 }
