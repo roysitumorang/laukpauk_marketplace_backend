@@ -21,8 +21,10 @@ class SessionsController extends ControllerBase {
 					$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file_name;
 				}
 			}
-			$this->_response['status']          = 1;
-			$this->_response['data']['banners'] = $banners;
+			$this->_response = [
+				'status' => 1,
+				'data'   => ['banners' => $banners],
+			];
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
@@ -34,7 +36,7 @@ class SessionsController extends ControllerBase {
 			$errors['password'] = 'password harus diisi';
 		}
 		if ($errors) {
-			$this->_response['data']['errors'] = $errors;
+			$this->_response['message'] = implode('<br>', $errors);
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
@@ -42,27 +44,32 @@ class SessionsController extends ControllerBase {
 			'role_ids'     => [Role::BUYER, Role::MERCHANT],
 			'mobile_phone' => $this->_input->mobile_phone,
 		]]);
-		if ($user && $this->security->checkHash($this->_input->password, $user->password)) {
-			$crypt                  = new Crypt;
-			$login_history          = new LoginHistory;
-			$login_history->user_id = $user->id;
-			$login_history->create();
-			if ($this->_input->device_token) {
-				$device = Device::findFirstByToken($this->_input->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->user       = $user;
-					$device->token      = $this->_input->device_token;
-					$device->created_by = $user->id;
-					$device->create();
-				} else if ($device->user_id != $this->_current_user->id) {
-					$device->user       = $user;
-					$device->updated_by = $user->id;
-					$device->update();
-				}
+		if (!$user || !$this->security->checkHash($this->_input->password, $user->password)) {
+			$this->_response['message'] = 'Nomor HP dan/atau password salah!';
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
+		}
+		$crypt                  = new Crypt;
+		$login_history          = new LoginHistory;
+		$login_history->user_id = $user->id;
+		$login_history->create();
+		if ($this->_input->device_token) {
+			$device = Device::findFirstByToken($this->_input->device_token);
+			if (!$device) {
+				$device             = new Device;
+				$device->user       = $user;
+				$device->token      = $this->_input->device_token;
+				$device->created_by = $user->id;
+				$device->create();
+			} else if ($device->user_id != $this->_current_user->id) {
+				$device->user       = $user;
+				$device->updated_by = $user->id;
+				$device->update();
 			}
-			$this->_response['status'] = 1;
-			$this->_response['data']   = [
+		}
+		$this->_response = [
+			'status' => 1,
+			'data'   => [
 				'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
 					'+' => '-',
 					'/' => '_',
@@ -87,11 +94,9 @@ class SessionsController extends ControllerBase {
 					'open_on_saturday'      => $user->open_on_saturday,
 					'business_opening_hour' => $user->business_opening_hour,
 					'business_closing_hour' => $user->business_closing_hour,
-				]
-			];
-		} else {
-			$this->_response['message'] = 'Nomor HP dan/atau password salah!';
-		}
+				],
+			],
+		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}

@@ -33,31 +33,35 @@ class UsersController extends ControllerBase {
 		$user->setMobilePhone($this->_input->mobile_phone);
 		$user->setDeposit(0);
 		$user->role_id = Role::findFirstByName('Buyer')->id;
-		if ($user->validation() && $user->create()) {
-			if ($this->_input->device_token) {
-				$device = Device::findFirstByToken($this->_input->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->user       = $user;
-					$device->token      = $this->_input->device_token;
-					$device->created_by = $user->id;
-					$device->create();
-				} else {
-					$device->user       = $user;
-					$device->updated_by = $user->id;
-					$device->update();
+		if (!$user->validation() || !$user->create()) {
+			$errors = [];
+			foreach ($user->getMessages() as $error) {
+				if ($error->getField() != 'new_password_confirmation') {
+					$errors[] = $error->getMessage();
 				}
 			}
-			$this->_response['status']                   = 1;
-			$this->_response['data']['activation_token'] = $user->activation_token;
+			$this->_response['message'] = implode('<br>', $errors);
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
-		$this->_response['message']        = 'Registrasi gagal! Silahkan cek form dan coba lagi.';
-		$this->_response['data']['errors'] = [];
-		foreach ($user->getMessages() as $error) {
-			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
+		if ($this->_input->device_token) {
+			$device = Device::findFirstByToken($this->_input->device_token);
+			if (!$device) {
+				$device             = new Device;
+				$device->user       = $user;
+				$device->token      = $this->_input->device_token;
+				$device->created_by = $user->id;
+				$device->create();
+			} else {
+				$device->user       = $user;
+				$device->updated_by = $user->id;
+				$device->update();
+			}
 		}
+		$this->_response = [
+			'status' => 1,
+			'data'   => ['activation_token' => $user->activation_token],
+		];
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
@@ -70,35 +74,37 @@ class UsersController extends ControllerBase {
 			return $this->response;
 		}
 		$user->activate();
-		$crypt                      = new Crypt;
-		$this->_response['status']  = 1;
-		$this->_response['message'] = 'Aktivasi account berhasil!';
-		$this->_response['data']    = [
-			'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
-				'+' => '-',
-				'/' => '_',
-				'=' => ',',
-			]),
-			'current_user' => [
-				'id'                    => $user->id,
-				'name'                  => $user->name,
-				'mobile_phone'          => $user->mobile_phone,
-				'address'               => $user->address,
-				'subdistrict_id'        => $user->village->subdistrict->id,
-				'subdistrict'           => $user->village->subdistrict->name,
-				'village_id'            => $user->village->id,
-				'village'               => $user->village->name,
-				'role'                  => $user->role->name,
-				'open_on_sunday'        => $user->open_on_sunday,
-				'open_on_monday'        => $user->open_on_monday,
-				'open_on_tuesday'       => $user->open_on_tuesday,
-				'open_on_wednesday'     => $user->open_on_wednesday,
-				'open_on_thursday'      => $user->open_on_thursday,
-				'open_on_friday'        => $user->open_on_friday,
-				'open_on_saturday'      => $user->open_on_saturday,
-				'business_opening_hour' => $user->business_opening_hour,
-				'business_closing_hour' => $user->business_closing_hour,
-			]
+		$crypt           = new Crypt;
+		$this->_response = [
+			'status'  => 1,
+			'message' => 'Aktivasi account berhasil!',
+			'data'    => [
+				'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
+					'+' => '-',
+					'/' => '_',
+					'=' => ',',
+				]),
+				'current_user' => [
+					'id'                    => $user->id,
+					'name'                  => $user->name,
+					'mobile_phone'          => $user->mobile_phone,
+					'address'               => $user->address,
+					'subdistrict_id'        => $user->village->subdistrict->id,
+					'subdistrict'           => $user->village->subdistrict->name,
+					'village_id'            => $user->village->id,
+					'village'               => $user->village->name,
+					'role'                  => $user->role->name,
+					'open_on_sunday'        => $user->open_on_sunday,
+					'open_on_monday'        => $user->open_on_monday,
+					'open_on_tuesday'       => $user->open_on_tuesday,
+					'open_on_wednesday'     => $user->open_on_wednesday,
+					'open_on_thursday'      => $user->open_on_thursday,
+					'open_on_friday'        => $user->open_on_friday,
+					'open_on_saturday'      => $user->open_on_saturday,
+					'business_opening_hour' => $user->business_opening_hour,
+					'business_closing_hour' => $user->business_closing_hour,
+				],
+			],
 		];
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
@@ -118,10 +124,19 @@ class UsersController extends ControllerBase {
 		$this->_current_user->setOpenOnThursday($this->_input->open_on_thursday);
 		$this->_current_user->setOpenOnFriday($this->_input->open_on_friday);
 		$this->_current_user->setOpenOnSaturday($this->_input->open_on_saturday);
-		if ($this->_current_user->validation() && $this->_current_user->update()) {
-			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Update profile berhasil!';
-			$this->_response['data']    = [
+		if (!$this->_current_user->validation() || !$this->_current_user->update()) {
+			$errors = [];
+			foreach ($this->_current_user->getMessages() as $error) {
+				$errors[] = $error->getMessage();
+			}
+			$this->_response['message'] = implode('<br>', $errors);
+			$this->response->setJsonContent($this->_response);
+			return $this->response;
+		}
+		$this->_response = [
+			'status'  => 1,
+			'message' => 'Update profile berhasil!',
+			'data'    => [
 				'current_user' => [
 					'id'                    => $this->_current_user->id,
 					'name'                  => $this->_current_user->name,
@@ -141,16 +156,9 @@ class UsersController extends ControllerBase {
 					'open_on_saturday'      => $this->_current_user->open_on_saturday,
 					'business_opening_hour' => $this->_current_user->business_opening_hour,
 					'business_closing_hour' => $this->_current_user->business_closing_hour,
-				]
-			];
-			$this->response->setJsonContent($this->_response);
-			return $this->response;
-		}
-		$this->_response['message']        = 'Update profile gagal! Silahkan cek form dan coba lagi.';
-		$this->_response['data']['errors'] = [];
-		foreach ($this->_current_user->getMessages() as $error) {
-			$this->_response['data']['errors'][$error->getField()] = $error->getMessage();
-		}
+				],
+			],
+		];
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
