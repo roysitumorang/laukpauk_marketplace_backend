@@ -7,18 +7,29 @@ use Phalcon\Db;
 
 class PricesController extends ControllerBase {
 	function indexAction() {
-		$products     = [];
-		$limit        = 10;
-		$total_pages  = ceil($this->db->fetchColumn("SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1") / $limit);
-		$page         = $this->dispatcher->getParam('page', 'int');
-		$current_page = $page > 0 && $page <= $total_pages ? $page : 1;
-		$offset       = ($current_page - 1) * $limit;
-		foreach ($this->db->fetchAll("SELECT b.id, a.name AS category, b.name, b.stock_unit, COALESCE(c.value, 0) AS price, COALESCE(c.published, 0) AS published, c.order_closing_hour FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1 ORDER BY b.name LIMIT {$limit} OFFSET {$offset}", Db::FETCH_OBJ) as $product) {
-			$product->row_number = ++$offset;
-			$products[]          = $product;
+		$products = [];
+		$limit    = 10;
+		$keyword  = $this->dispatcher->getParam('keyword', 'string');
+		$query    = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
+		if ($keyword) {
+			$query .= " AND b.name LIKE '%{$keyword}%'";
 		}
-		$this->_response['status'] = 1;
-		$this->_response['data']   = [
+		$total_products = $this->db->fetchColumn($query);
+		$total_pages    = ceil($total_products / $limit);
+		$page           = $this->dispatcher->getParam('page', 'int');
+		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
+		$offset         = ($current_page - 1) * $limit;
+		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, COALESCE(c.value, 0) AS price, COALESCE(c.published, 0) AS published, c.order_closing_hour', $query) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($product = $result->fetch()) {
+			$products[] = $product;
+		}
+		if (!$total_products) {
+			$this->_response['message'] = $keyword ? 'Produk tidak ditemukan.' : 'Produk belum ada.';
+		} else {
+			$this->_response['status'] = 1;
+		}
+		$this->_response['data'] = [
 			'products'     => $products,
 			'total_pages'  => $total_pages,
 			'current_page' => $current_page,
@@ -42,8 +53,10 @@ class PricesController extends ControllerBase {
 				'current_datetime'   => $current_datetime,
 			]);
 		}
-		$this->_response['status']  = 1;
-		$this->_response['message'] = 'Update produk berhasil!';
+		$this->_response = [
+			'status'  => 1,
+			'message' => 'Update produk berhasil!',
+		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
