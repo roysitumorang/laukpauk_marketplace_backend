@@ -3,6 +3,7 @@
 namespace Application\Api\V1\Controllers;
 
 use Phalcon\Db;
+use Application\Models\Setting;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -34,19 +35,23 @@ QUERY
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 			return $this->response;
 		}
-
 		$category_id = $this->dispatcher->getParam('category_id', 'int');
 		$page        = $this->dispatcher->getParam('page', 'int');
+		$keyword     = $this->dispatcher->getParam('keyword', 'string');
 		$limit       = 10;
 		$products    = [];
 		$query       = "SELECT COUNT(1) FROM product_prices a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND a.value > 0 AND b.published = 1 AND c.published = 1";
 		if ($category_id && $category = $this->db->fetchOne("SELECT id FROM product_categories WHERE id = {$category_id}", Db::FETCH_OBJ)) {
 			$query .= " AND c.id = {$category->id}";
 		}
-		$total_pages  = ceil($this->db->fetchColumn($query) / $limit);
-		$current_page = $page > 0 && $page <= $total_pages ? $page : 1;
-		$offset       = ($current_page - 1) * $limit;
-		$result       = $this->db->query(str_replace('COUNT(1)', 'a.id, b.product_category_id, b.name, a.value, b.stock_unit, order_closing_hour', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		if ($keyword) {
+			$query .= " AND b.name LIKE '%{$keyword}%'";
+		}
+		$total_products = $this->db->fetchColumn($query);
+		$total_pages    = ceil($total_products / $limit);
+		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
+		$offset         = ($current_page - 1) * $limit;
+		$result         = $this->db->query(str_replace('COUNT(1)', 'a.id, b.product_category_id, b.name, a.value, b.stock_unit, order_closing_hour', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$product = [
@@ -60,14 +65,17 @@ QUERY
 			}
 			$products[] = $product;
 		}
-		$this->_response = [
-			'status' => 1,
-			'data'   => [
-				'products'     => $products,
-				'total_pages'  => $total_pages,
-				'current_page' => $current_page,
-				'current_hour' => $this->currentDatetime->format('G'),
-			],
+		if (!$total_products) {
+			$this->_response['message'] = $keyword ? 'Produk tidak ditemukan.' : 'Produk belum ada.';
+		} else {
+			$this->_response['status'] = 1;
+		}
+		$this->_response['data'] = [
+			'products'         => $products,
+			'total_pages'      => $total_pages,
+			'current_page'     => $current_page,
+			'current_hour'     => $this->currentDatetime->format('G'),
+			'minimum_purchase' => Setting::findFirstByName('minimum_purchase')->value,
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
