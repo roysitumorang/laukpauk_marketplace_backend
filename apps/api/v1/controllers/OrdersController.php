@@ -10,6 +10,7 @@ use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
 use Exception;
+use IntlDateFormatter;
 use Phalcon\Db;
 
 class OrdersController extends ControllerBase {
@@ -169,7 +170,16 @@ class OrdersController extends ControllerBase {
 					'quantity'   => $item->quantity,
 				];
 			}
-			$payload = [
+			$date_formatter = new IntlDateFormatter(
+				'id_ID',
+				IntlDateFormatter::FULL,
+				IntlDateFormatter::NONE,
+				$this->currentDatetime->getTimezone(),
+				IntlDateFormatter::GREGORIAN,
+				'EEEE, d MMM yyyy'
+			);
+			$scheduled_delivery = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
+			$payload            = [
 				'code'               => $order->code,
 				'status'             => $order->status,
 				'name'               => $order->name,
@@ -179,7 +189,10 @@ class OrdersController extends ControllerBase {
 				'subdistrict'        => $village->subdistrict->name,
 				'final_bill'         => $order->final_bill,
 				'original_bill'      => $order->original_bill,
-				'scheduled_delivery' => str_replace(' ', 'T', $order->scheduled_delivery),
+				'scheduled_delivery' => [
+					'date' => $date_formatter->format($scheduled_delivery),
+					'hour' => $scheduled_delivery->format('H:i'),
+				],
 				'note'               => $order->note,
 				'merchant'           => $merchant->company ?: $merchant->name,
 				'items'              => $items,

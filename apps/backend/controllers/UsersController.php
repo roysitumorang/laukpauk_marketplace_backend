@@ -251,8 +251,12 @@ class UsersController extends ControllerBase {
 	}
 
 	private function _prepare_form_datas($user) {
-		$subdistricts                 = apcu_fetch('subdistricts');
-		$villages                     = apcu_fetch('villages');
+		$subdistricts   = apcu_fetch('subdistricts');
+		$villages       = apcu_fetch('villages');
+		$business_hours = [];
+		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
+			$business_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
+		}
 		$this->view->menu             = $this->_menu('Members');
 		$this->view->roles            = Role::find(['id > 1', 'order' => 'name']);
 		$this->view->user             = $user;
@@ -261,6 +265,7 @@ class UsersController extends ControllerBase {
 		$this->view->subdistricts     = $subdistricts;
 		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
 		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
+		$this->view->business_hours   = $business_hours;
 	}
 
 	private function _set_model_attributes(&$user) {

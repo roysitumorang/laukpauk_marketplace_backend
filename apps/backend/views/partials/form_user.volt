@@ -110,7 +110,20 @@
 					<tr>
 						<td>
 							Jam Operasional (* untuk merchant) :<br>
-							<input type="text" name="business_opening_hour" value="{{ user.business_opening_hour }}" class="form form-control form-20 text-center" size="5"> - <input type="text" name="business_closing_hour" value="{{ user.business_closing_hour }}" class="form form-control form-20 text-center" size="5">
+							Buka
+							<select name="business_opening_hour">
+								<option value="">-</option>
+								{% for hour, label in business_hours %}
+									<option value="{{ hour }}"{% if user.business_opening_hour == hour %} selected{% endif %}>{{ label }}</option>
+								{% endfor %}
+							</select>
+							- Tutup
+							<select name="business_closing_hour">
+								<option value="">-</option>
+								{% for hour, label in business_hours %}
+									<option value="{{ hour }}"{% if user.business_closing_hour == hour %} selected{% endif %}>{{ label }}</option>
+								{% endfor %}
+							</select>
 						</td>
 					</tr>
 					{% if user.id %}

@@ -94,7 +94,7 @@ QUERY
 			'id_ID',
 			IntlDateFormatter::FULL,
 			IntlDateFormatter::NONE,
-			$this->config->timezone,
+			$this->currentDatetime->getTimezone(),
 			IntlDateFormatter::GREGORIAN,
 			'EEEE, d MMM yyyy'
 		);

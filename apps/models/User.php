@@ -5,6 +5,7 @@ namespace Application\Models;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\Confirmation;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\Email;
@@ -19,7 +20,11 @@ class User extends ModelBase {
 		1  => 'ACTIVE',
 		-1 => 'SUSPENDED',
 	];
-	const GENDERS = ['Pria', 'Wanita'];
+	const GENDERS        = ['Pria', 'Wanita'];
+	const BUSINESS_HOURS = [
+		'opening' => 6,
+		'closing' => 18,
+	];
 
 	public $id;
 	public $role_id;
@@ -275,6 +280,26 @@ class User extends ModelBase {
 		]));
 		if ($this->role->name === 'Merchant') {
 			$validator->add('company', new PresenceOf(['message' => 'nama toko harus diisi']));
+			$validator->add(['business_opening_hour', 'business_closing_hour'], new PresenceOf([
+				'message' => [
+					'business_opening_hour' => 'jam mulai operasional harus diisi',
+					'business_closing_hour' => 'jam tutup operasional harus diisi',
+				],
+			]));
+			$validator->add(['business_opening_hour', 'business_closing_hour'], new Between([
+				'minimum' => [
+					'business_opening_hour' => static::BUSINESS_HOURS['opening'],
+					'business_closing_hour' => static::BUSINESS_HOURS['opening'],
+				],
+				'maximum' => [
+					'business_opening_hour' => static::BUSINESS_HOURS['closing'],
+					'business_closing_hour' => static::BUSINESS_HOURS['closing'],
+				],
+				'message' => [
+					'business_opening_hour' => 'jam mulai operasional antara ' . static::BUSINESS_HOURS['opening'] . ' dan ' . static::BUSINESS_HOURS['closing'],
+					'business_closing_hour' => 'jam mulai operasional antara ' . static::BUSINESS_HOURS['opening'] . ' dan ' . static::BUSINESS_HOURS['closing'],
+				],
+			]));
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
 			$validator->add('mobile_phone', new Uniqueness([

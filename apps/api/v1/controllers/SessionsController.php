@@ -67,6 +67,32 @@ class SessionsController extends ControllerBase {
 				$device->update();
 			}
 		}
+		$current_user = [
+			'id'           => $user->id,
+			'name'         => $user->name,
+			'role'         => $user->role->name,
+			'mobile_phone' => $user->mobile_phone,
+			'address'      => $user->address,
+			'subdistrict'  => [
+				'id'   => $user->village->subdistrict->id,
+				'name' => $user->village->subdistrict->name,
+			],
+			'village'      => [
+				'id'   => $user->village->id,
+				'name' => $user->village->name,
+			],
+		];
+		if ($user->role->name === 'Merchant') {
+			$current_user['open_on_sunday']        = $user->open_on_sunday;
+			$current_user['open_on_monday']        = $user->open_on_monday;
+			$current_user['open_on_tuesday']       = $user->open_on_tuesday;
+			$current_user['open_on_wednesday']     = $user->open_on_wednesday;
+			$current_user['open_on_thursday']      = $user->open_on_thursday;
+			$current_user['open_on_friday']        = $user->open_on_friday;
+			$current_user['open_on_saturday']      = $user->open_on_saturday;
+			$current_user['business_opening_hour'] = $user->business_opening_hour;
+			$current_user['business_closing_hour'] = $user->business_closing_hour;
+		}
 		$this->_response = [
 			'status' => 1,
 			'data'   => [
@@ -75,26 +101,7 @@ class SessionsController extends ControllerBase {
 					'/' => '_',
 					'=' => ',',
 				]),
-				'current_user' => [
-					'id'                    => $user->id,
-					'name'                  => $user->name,
-					'mobile_phone'          => $user->mobile_phone,
-					'address'               => $user->address,
-					'subdistrict_id'        => $user->village->subdistrict->id,
-					'subdistrict'           => $user->village->subdistrict->name,
-					'village_id'            => $user->village->id,
-					'village'               => $user->village->name,
-					'role'                  => $user->role->name,
-					'open_on_sunday'        => $user->open_on_sunday,
-					'open_on_monday'        => $user->open_on_monday,
-					'open_on_tuesday'       => $user->open_on_tuesday,
-					'open_on_wednesday'     => $user->open_on_wednesday,
-					'open_on_thursday'      => $user->open_on_thursday,
-					'open_on_friday'        => $user->open_on_friday,
-					'open_on_saturday'      => $user->open_on_saturday,
-					'business_opening_hour' => $user->business_opening_hour,
-					'business_closing_hour' => $user->business_closing_hour,
-				],
+				'current_user' => $current_user,
 			],
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
