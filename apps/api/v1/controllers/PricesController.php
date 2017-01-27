@@ -7,10 +7,11 @@ use Phalcon\Db;
 
 class PricesController extends ControllerBase {
 	function indexAction() {
-		$products = [];
-		$limit    = 10;
-		$keyword  = $this->dispatcher->getParam('keyword', 'string');
-		$query    = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
+		$products            = [];
+		$order_closing_hours = [];
+		$limit               = 10;
+		$keyword             = $this->dispatcher->getParam('keyword', 'string');
+		$query               = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
 		if ($keyword) {
 			$query .= " AND b.name LIKE '%{$keyword}%'";
 		}
@@ -24,15 +25,19 @@ class PricesController extends ControllerBase {
 		while ($product = $result->fetch()) {
 			$products[] = $product;
 		}
+		foreach (range(6, 18) as $i) {
+			$order_closing_hours[] = ($i < 10 ? '0' . $i : $i). ':00';
+		}
 		if (!$total_products) {
 			$this->_response['message'] = $keyword ? 'Produk tidak ditemukan.' : 'Produk belum ada.';
 		} else {
 			$this->_response['status'] = 1;
 		}
 		$this->_response['data'] = [
-			'products'     => $products,
-			'total_pages'  => $total_pages,
-			'current_page' => $current_page,
+			'products'            => $products,
+			'order_closing_hours' => $order_closing_hours,
+			'total_pages'         => $total_pages,
+			'current_page'        => $current_page,
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
