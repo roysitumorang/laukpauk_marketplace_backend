@@ -93,7 +93,10 @@ QUERY
 		$date_formatter = new IntlDateFormatter(
 			'id_ID',
 			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE
+			IntlDateFormatter::NONE,
+			$this->config->timezone,
+			IntlDateFormatter::GREGORIAN,
+			'EEEE, d MMM yyyy'
 		);
 		$business_hours = range($merchant->business_opening_hour, $merchant->business_closing_hour);
 		for ($i = 0; $i < 7; $i++) {
