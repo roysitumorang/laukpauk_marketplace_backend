@@ -107,7 +107,7 @@ QUERY
 			if ($i) {
 				$now->modify('+1 day');
 			}
-			$current_day   = $now->format('l');
+			$current_day  = $now->format('l');
 			$delivery_day = [
 				'date'  => $now->format('Y-m-d'),
 				'label' => $date_formatter->format($now),
@@ -121,7 +121,7 @@ QUERY
 				($current_day == 'Saturday' && !$merchant->open_on_saturday)) {
 				$delivery_day['unavailable'] = true;
 			} else {
-				$delivery_day['hours'] = !$i ? range($current_hour, $merchant->business_closing_hour) : $business_hours;
+				$delivery_day['hours'] = !$i ? range($current_hour + 1, $merchant->business_closing_hour) : $business_hours;
 			}
 			$delivery_days[] = $delivery_day;
 		}
