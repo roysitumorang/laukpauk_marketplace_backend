@@ -90,8 +90,11 @@ class OrdersController extends ControllerBase {
 			if (!$this->_current_user->address) {
 				$this->_current_user->update(['address' => $this->_input->address]);
 			}
-			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Pemesanan berhasil!';
+			$this->_response = [
+				'status'  => 1,
+				'message' => 'Pemesanan berhasil!',
+				'data'    => ['order' => ['id' => $order->id]],
+			];
 		} else {
 			$errors = [];
 			foreach ($order->getMessages() as $error) {
