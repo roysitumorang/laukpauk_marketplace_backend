@@ -28,10 +28,6 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<br>
-								<b>Cari berdasarkan :</b>
-							</td>
-							<td>
 								Dari Tanggal :<br>
 								<input type="text" name="from" value="{{ from }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Dari Tanggal">
 							</td>
@@ -53,6 +49,10 @@
 								</select>
 							</td>
 							<td>
+								HP Merchant :<br>
+								<input type="text" name="mobile_phone" value="{{ mobile_phone }}" class="form form-control text-center" size="6" placeholder="HP Merchant">
+							</td>
+							<td>
 								<br>
 								<button type="submit" class="btn btn-info">CARI</button>
 							</td>
@@ -71,7 +71,7 @@
 							<th class="text-center"><b>No. Order</b></th>
 							<th class="text-center"><b>Tgl Order</b></th>
 							<th class="text-center"><b>Pembeli</b></th>
-							<th class="text-center"><b>Supplier</b></th>
+							<th class="text-center"><b>Merchant</b></th>
 							<th class="text-center"><b>Pembayaran / Biaya Admin</b></th>
 							<th class="text-center"><b>#</b></th>
 						</tr>
@@ -106,11 +106,11 @@
 							<td class="text-center">{{ date('Y-m-d', strtotime(order.created_at)) }}</td>
 							<td>
 								<font size="5">{{ order.name }}</font><br>
-								<i class="fa fa-phone-square"></i>&nbsp;{{ order.mobile_phone }}
+								<i class="fa fa-phone-square"></i>&nbsp;{{ order.buyer_phone }}
 							</td>
 							<td>
-								<font size="5">{% if order.merchant.company %}{{ order.merchant.company }}{% else %}{{ order.merchant.name }}{% endif %}</font><br>
-								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant.mobile_phone }}
+								<font size="5">{% if order.merchant_company %}{{ order.merchant_company }}{% else %}{{ order.merchant_name }}{% endif %}</font><br>
+								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant_phone }}
 							</t>
 							<td class="text-right">
 								<font size="4">Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}</font><br><br>
@@ -134,7 +134,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/orders/index/page:{{ i }}">{{ i }}</a>
+							<a href="/admin/orders/index/page:{{ i }}{% if query_string %}?{{ query_string }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
