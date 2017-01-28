@@ -51,11 +51,6 @@ class ControllerBase extends Controller {
 		]);
 	}
 
-	function notFoundAction() {
-		// Send a HTTP 404 response header
-		$this->response->setStatusCode(404, 'Not Found');
-	}
-
 	protected function _menu(string $expanded = null) : array {
 		return [[
 				'label'     => 'Dashboard',

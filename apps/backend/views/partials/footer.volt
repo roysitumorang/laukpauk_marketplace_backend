@@ -63,8 +63,14 @@
 			fetch('/admin/home/inbox', { credentials: 'include' }).then(response => {
 				return response.text()
 			}).then(payload => {
-				document.getElementById('inbox').innerHTML = payload,
-				attachEvent()
+				try {
+					let response = JSON.parse(payload);
+					document.getElementById('inbox').innerHTML = response.data,
+					attachEvent()
+				} catch (e) {
+					location.href = '/admin/sessions/create?next=' + location.pathname + location.search;
+					return
+				}
 			})
 		}, 60000),
 		$('.summernote').summernote()

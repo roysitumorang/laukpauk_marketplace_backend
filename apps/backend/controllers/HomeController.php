@@ -47,7 +47,15 @@ class HomeController extends ControllerBase {
 	}
 
 	function inboxAction() {
-		$this->view->pick('partials/inbox');
 		$this->view->setRenderLevel(View::LEVEL_ACTION_VIEW);
+		$this->view->start();
+		$this->view->render('partials', 'inbox');
+		$this->view->finish();
+		$response = [
+			'status' => $this->currentUser ? 1 : -1,
+			'data'   => str_replace(["\n", "\t"], '', $this->view->getContent()),
+		];
+		$this->response->setJsonContent($response, JSON_UNESCAPED_SLASHES);
+		return $this->response;
 	}
 }
