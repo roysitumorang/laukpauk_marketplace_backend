@@ -21,7 +21,7 @@ class PostsController extends ControllerBase {
 			$this->_response['status'] = 1;
 			$this->_response['data']   = [
 				'subject' => $post->subject,
-				'body'    => $post->body,
+				'body'    => str_replace("\r\n", '', $post->body),
 			];
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
