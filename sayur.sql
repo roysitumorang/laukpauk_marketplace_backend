@@ -981,6 +981,25 @@ LOCK TABLES `emails` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `feedbacks` */
+
+DROP TABLE IF EXISTS `feedbacks`;
+
+CREATE TABLE `feedbacks` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `feedbacks` */
+
+LOCK TABLES `feedbacks` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `invoices` */
 
 DROP TABLE IF EXISTS `invoices`;

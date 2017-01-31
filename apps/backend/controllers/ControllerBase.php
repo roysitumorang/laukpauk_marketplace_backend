@@ -66,6 +66,7 @@ class ControllerBase extends Controller {
 					['label' => 'Outbox',      'link' => 'messages/index/read:1'],
 					['label' => 'Kirim Pesan', 'link' => 'messages/create'],
 					['label' => 'Semua Pesan', 'link' => 'messages'],
+					['label' => 'Feedbacks',   'link' => 'feedbacks'],
 				],
 			], [
 				'label'     => 'Content',
