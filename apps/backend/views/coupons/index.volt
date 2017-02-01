@@ -83,7 +83,7 @@
 									{% endif %}
 								</font>
 							</td>
-							<td>{{ coupon.effective_date }} s/d {{ coupon.expiry_date }}</td>
+							<td>{{ coupon.effective_date_start }} s/d {{ coupon.effective_date_end }}</td>
 							<td>
 								<a href="/admin/coupons/usage/{{ coupon.id }}" title="Penggunaan Kupon"><i class="fa fa-folder-open-o fa-2x"></i></a>&nbsp;
 								<a href="/admin/coupons/update/{{ coupon.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>

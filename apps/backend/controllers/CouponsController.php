@@ -3,17 +3,27 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Coupon;
+use DateTime;
+use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model;
 
 class CouponsController extends ControllerBase {
 	function indexAction() {
-		$limit           = $this->config->per_page;
-		$current_page    = $this->dispatcher->getParam('page', 'int') ?: 1;
-		$offset          = ($current_page - 1) * $limit;
-		$keyword         = $this->request->get('keyword', 'string');
-		$current_status  = filter_var($this->request->get('status'), FILTER_VALIDATE_INT);
-		$params          = [];
-		$conditions      = [];
+		$limit          = $this->config->per_page;
+		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset         = ($current_page - 1) * $limit;
+		$keyword        = $this->request->get('keyword', 'string');
+		$current_status = filter_var($this->request->get('status'), FILTER_VALIDATE_INT);
+		$params         = [];
+		$conditions     = [];
+		$date_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'd MMMM yyyy'
+		);
 		if ($keyword) {
 			$conditions[0][]    = 'code LIKE :code:';
 			$conditions['code'] = "%{$keyword}%";
@@ -37,6 +47,8 @@ class CouponsController extends ControllerBase {
 		$coupons = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
+			$item->writeAttribute('effective_date_start', $date_formatter->format(new DateTime($item->effective_date, $this->currentDatetime->getTimezone())));
+			$item->writeAttribute('effective_date_end', $date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
 			$coupons[] = $item;
 		}
 		$this->view->menu           = $this->_menu('Products');
