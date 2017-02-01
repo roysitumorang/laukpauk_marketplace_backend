@@ -62,6 +62,11 @@ class Order extends ModelBase {
 				'message'    => 'pembeli harus diisi',
 			],
 		]);
+		$this->belongsTo('coupon_id', 'Application\Models\Coupon', 'id', [
+			'alias'      => 'coupon',
+			'reusable'   => true,
+			'foreignKey' => ['allowNulls' => true],
+		]);
 		$this->hasMany('id', 'Application\Models\OrderItem', 'order_id', [
 			'alias' => 'items',
 		]);

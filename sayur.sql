@@ -767,24 +767,17 @@ CREATE TABLE `coupons` (
   `usage` char(1) NOT NULL,
   `minimum_purchase` decimal(10,0) NOT NULL,
   `description` text,
-  `meta_title` varchar(200) DEFAULT NULL,
-  `meta_desc` varchar(250) DEFAULT NULL,
-  `meta_keyword` varchar(200) DEFAULT NULL,
-  `published` tinyint(1) NOT NULL,
-  `permalink` varchar(200) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
-  UNIQUE KEY `permalink` (`permalink`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
   KEY `status` (`status`),
   KEY `effective_date` (`effective_date`),
-  KEY `expiry_date` (`expiry_date`),
-  KEY `published` (`published`)
+  KEY `expiry_date` (`expiry_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*Data for the table `coupons` */

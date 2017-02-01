@@ -119,7 +119,7 @@ class ControllerBase extends Controller {
 					['label' => 'Poin Meta'            , 'link' => 'point_metas'],
 					['label' => 'Permintaan Poin'      , 'link' => 'point_requests'],
 					['label' => 'Poin Log'             , 'link' => 'point_logs'],
-					['label' => 'Kupon Member'         , 'link' => 'coupon_users'],
+					['label' => 'Kupon Member'         , 'link' => 'coupons'],
 					['label' => 'Discount'             , 'link' => 'discounts'],
 				],
 			], [
