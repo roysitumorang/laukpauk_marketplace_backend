@@ -41,7 +41,6 @@
 								Kelurahan :
 								<select name="village_id">
 									{% for village in villages[subdistricts[0].id] %}
-									{{ dump(village) }}
 									<option value="{{ village.id }}">{{ village.name }}</option>
 									{% endfor %}
 								</select>

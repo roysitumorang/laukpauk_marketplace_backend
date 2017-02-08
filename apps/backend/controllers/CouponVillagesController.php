@@ -5,6 +5,8 @@ namespace Application\Backend\Controllers;
 use Application\Models\City;
 use Application\Models\Coupon;
 use Application\Models\CouponVillage;
+use Ds\Map;
+use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CouponVillagesController extends ControllerBase {
@@ -43,23 +45,47 @@ class CouponVillagesController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$coupon_villages[] = $item;
 		}
-		$subdistricts = $this->_city->getRelated('subdistricts', ['order' => 'name']);
+		$subdistricts = new Map;
 		$villages     = [];
-		foreach ($subdistricts as $subdistrict) {
-			$villages[$subdistrict->id] = [];
-			foreach ($subdistrict->getRelated('villages', ['order' => 'name']) as $village) {
-				$villages[$subdistrict->id][] = (object) [
-					'id'   => $village->id,
-					'name' => $village->name,
-				];
+		$result       = $this->db->query(<<<QUERY
+			SELECT
+				c.id,
+				c.subdistrict_id,
+				b.name AS subdistrict_name,
+				c.name
+			FROM
+				cities a
+				JOIN subdistricts b ON a.id = b.city_id
+				JOIN villages c ON b.id = c.subdistrict_id
+			WHERE
+				a.id = {$this->_city->id} AND
+				NOT EXISTS(SELECT 1 FROM coupon_villages d WHERE d.coupon_id = {$this->_coupon->id} AND d.village_id = c.id)
+			ORDER BY subdistrict_name, c.name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($village = $result->fetch()) {
+			$subdistrict = (object) [
+				'id'   => $village->subdistrict_id,
+				'name' => $village->subdistrict_name,
+			];
+			if (!$subdistricts->hasKey($subdistrict->id)) {
+				$subdistricts->put($subdistrict->id, $subdistrict);
 			}
+			if (!isset($villages[$village->subdistrict_id])) {
+				$villages[$village->subdistrict_id] = [];
+			}
+			$villages[$village->subdistrict_id][] = (object) [
+				'id'   => $village->id,
+				'name' => $village->name,
+			];
 		}
 		$this->view->menu            = $this->_menu('Products');
 		$this->view->coupon          = $this->_coupon;
 		$this->view->coupon_villages = $coupon_villages;
 		$this->view->page            = $page;
 		$this->view->pages           = $pages;
-		$this->view->subdistricts    = $subdistricts;
+		$this->view->subdistricts    = $subdistricts->values()->toArray();
 		$this->view->villages        = $villages;
 	}
 
