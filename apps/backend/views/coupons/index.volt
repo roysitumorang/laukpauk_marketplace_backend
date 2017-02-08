@@ -64,13 +64,7 @@
 							<td>
 								<font size="4" color="#006bb3"><strong><a href="/admin/coupons/show/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>&nbsp;
 								<img src="/assets/image/bullet-{% if coupon.status == 1 %}green{% else %}red{% endif %}.png" border="0"><br>
-								{% if coupon.usage == 2 %}
-								Sekali Saja Per Member
-								{% elseif coupon.usage == 1 %}
-								Berkali-kali Per Member
-								{% else %}
-								Bebas Dipakai Siapa Saja
-								{% endif %}
+								{{ coupon.usage }}
 								<br><br>
 								Min. Pembelian: Rp. {{ number_format(coupon.minimum_purchase) }}
 							</td>

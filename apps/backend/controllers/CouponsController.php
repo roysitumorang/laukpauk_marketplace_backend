@@ -54,6 +54,7 @@ class CouponsController extends ControllerBase {
 		$coupons = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
+			$item->writeAttribute('usage', Coupon::USAGE_TYPES[$item->usage]);
 			$item->writeAttribute('effective_date_start', $this->_date_formatter->format(new DateTime($item->effective_date, $this->currentDatetime->getTimezone())));
 			$item->writeAttribute('effective_date_end', $this->_date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
 			$coupons[] = $item;

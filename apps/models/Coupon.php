@@ -12,9 +12,8 @@ class Coupon extends ModelBase {
 	const DISCOUNT_TYPES = ['%', 'Rp'];
 	const STATUS         = ['Hold', 'Aktif'];
 	const USAGE_TYPES    = [
-		'Bebas Dipakai Siapa Saja',
-		'Berkali-kali Per Member',
-		'Sekali Saja Per Member',
+		'Sekali Pakai',
+		'Berkali-kali',
 	];
 
 	public $id;
