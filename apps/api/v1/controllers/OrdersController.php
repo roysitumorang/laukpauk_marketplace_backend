@@ -2,6 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Coupon;
 use Application\Models\Order;
 use Application\Models\OrderItem;
 use Application\Models\ProductPrice;
@@ -50,6 +51,21 @@ class OrdersController extends ControllerBase {
 			if (!$this->_input->items) {
 				throw new Exception('Order item kosong!');
 			}
+			if ($this->_input->coupon_code) {
+				$current_date = $this->currentDatetime->format('Y-m-d');
+				$coupon       = Coupon::findFirst(['status = 1 AND code = ?0 AND effective_date <= ?1 AND expiry_date > ?2', 'bind' => [
+					$this->_input->coupon_code,
+					$current_date,
+					$current_date,
+				]]);
+				if (!$coupon ||
+					(count($coupon->users) && !$coupon->getRelated('users', ['id' => $this->_current_user->id])[0]) ||
+					(count($coupon->villages) && !$coupon->getRelated('villages', ['id' => $this->_current_user->village->id])[0]) ||
+					($coupon->usage == Coupon::USAGE_TYPES[0] && $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE buyer_id = ?0 AND coupon_id = ?1', [$this->_current_user->id, $coupon->id]))
+					) {
+					throw new Exception('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
+				}
+			}
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
@@ -86,7 +102,18 @@ class OrdersController extends ControllerBase {
 			$order_items[]           = $order_item;
 		}
 		$order->final_bill = $order->original_bill;
-		$order->items      = $order_items;
+		if ($coupon) {
+			if ($coupon->minimum_purchase && $order->original_bill < $coupon->minimum_purchase) {
+				$this->_response['message'] = 'Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase);
+				$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+				return $this->response;
+			}
+			$order->coupon     = $coupon;
+			$order->final_bill = max(0, $coupon->discount_type == 1
+						? ($order->original_bill - $coupon->discount_amount)
+						: ((100 - $coupon->discount_amount) * $order->original_bill / 100));
+		}
+		$order->items = $order_items;
 		if ($order->validation() && $order->create()) {
 			if (!$this->_current_user->address) {
 				$this->_current_user->update(['address' => $this->_input->address]);
