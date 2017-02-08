@@ -752,6 +752,50 @@ LOCK TABLES `coupon_products` WRITE;
 
 UNLOCK TABLES;
 
+/*Table structure for table `coupon_users` */
+
+DROP TABLE IF EXISTS `coupon_users`;
+
+CREATE TABLE `coupon_users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `coupon_id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coupon_id` (`coupon_id`,`user_id`),
+  KEY `created_by` (`created_by`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `coupon_users` */
+
+LOCK TABLES `coupon_users` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `coupon_villages` */
+
+DROP TABLE IF EXISTS `coupon_villages`;
+
+CREATE TABLE `coupon_villages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `coupon_id` bigint(20) NOT NULL,
+  `village_id` bigint(20) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coupon_id` (`coupon_id`,`village_id`),
+  KEY `village_id` (`village_id`),
+  KEY `created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `coupon_villages` */
+
+LOCK TABLES `coupon_villages` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `coupons` */
 
 DROP TABLE IF EXISTS `coupons`;

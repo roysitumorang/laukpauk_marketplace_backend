@@ -13,7 +13,7 @@
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/coupons">Kupon</a></span></li>
-						<li><span><a href="/admin/coupons/show/{{ coupon.id }}">{{ coupon.code }}</a></span></li>
+						<li><span><a href="/admin/coupons/show/{{ coupon.id }}">Detail Kupon #{{ coupon.id }}</a></span></li>
 						<li><span><a href="/admin/banners/update/{{ coupon.id }}">Update Kupon #{{ coupon.id }}</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>

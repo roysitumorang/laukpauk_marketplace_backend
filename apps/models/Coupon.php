@@ -39,6 +39,8 @@ class Coupon extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->hasMany('id', 'Application\Models\Order', 'coupon_id', ['alias' => 'orders']);
+		$this->hasManyToMany('id', 'Application\Models\CouponUser', 'coupon_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'users']);
+		$this->hasManyToMany('id', 'Application\Models\CouponVillage', 'coupon_id', 'village_id', 'Application\Models\Village', 'id', ['alias' => 'villages']);
 	}
 
 	function setCode($code) {

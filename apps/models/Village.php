@@ -24,5 +24,6 @@ class Village extends ModelBase {
 		]);
 		$this->hasMany('id', 'Application\Models\User', 'village_id', ['alias' => 'users']);
 		$this->hasManyToMany('id', 'Application\Models\ServiceArea', 'village_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
+		$this->hasManyToMany('id', 'Application\Models\CouponVillage', 'village_id', 'coupon_id', 'Application\Models\Coupon', 'id', ['alias' => 'coupons']);
 	}
 }

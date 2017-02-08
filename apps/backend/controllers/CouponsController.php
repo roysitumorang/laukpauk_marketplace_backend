@@ -8,6 +8,21 @@ use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model;
 
 class CouponsController extends ControllerBase {
+	private $_date_formatter;
+
+	function initialize() {
+		parent::initialize();
+		$this->view->menu      = $this->_menu('Products');
+		$this->_date_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'EEEE, d MMMM yyyy'
+		);
+	}
+
 	function indexAction() {
 		$limit          = $this->config->per_page;
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
@@ -16,14 +31,6 @@ class CouponsController extends ControllerBase {
 		$current_status = filter_var($this->request->get('status'), FILTER_VALIDATE_INT);
 		$params         = [];
 		$conditions     = [];
-		$date_formatter = new IntlDateFormatter(
-			'id_ID',
-			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE,
-			$this->currentDatetime->getTimezone(),
-			IntlDateFormatter::GREGORIAN,
-			'd MMMM yyyy'
-		);
 		if ($keyword) {
 			$conditions[0][]    = 'code LIKE :code:';
 			$conditions['code'] = "%{$keyword}%";
@@ -47,8 +54,8 @@ class CouponsController extends ControllerBase {
 		$coupons = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$item->writeAttribute('effective_date_start', $date_formatter->format(new DateTime($item->effective_date, $this->currentDatetime->getTimezone())));
-			$item->writeAttribute('effective_date_end', $date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
+			$item->writeAttribute('effective_date_start', $this->_date_formatter->format(new DateTime($item->effective_date, $this->currentDatetime->getTimezone())));
+			$item->writeAttribute('effective_date_end', $this->_date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
 			$coupons[] = $item;
 		}
 		$this->view->menu           = $this->_menu('Products');
@@ -58,6 +65,18 @@ class CouponsController extends ControllerBase {
 		$this->view->status         = Coupon::STATUS;
 		$this->view->keyword        = $keyword;
 		$this->view->current_status = $current_status;
+	}
+
+	function showAction($id) {
+		$coupon = Coupon::findFirst($id);
+		if (!$coupon) {
+			$this->flashSession->error('Kupon tidak ditemukan.');
+			return $this->response->redirect('/admin/coupons');
+		}
+		$coupon->effective_date_start = $this->_date_formatter->format(new DateTime($coupon->effective_date, $this->currentDatetime->getTimezone()));
+		$coupon->effective_date_end   = $this->_date_formatter->format((new DateTime($coupon->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day'));
+		$coupon->usage_type           = Coupon::USAGE_TYPES[$coupon->usage];
+		$this->view->coupon           = $coupon;
 	}
 
 	function createAction() {
@@ -96,7 +115,6 @@ class CouponsController extends ControllerBase {
 	}
 
 	private function _prepare_form(Coupon &$coupon) {
-		$this->view->menu           = $this->_menu('Products');
 		$this->view->coupon         = $coupon;
 		$this->view->discount_types = Coupon::DISCOUNT_TYPES;
 		$this->view->status         = Coupon::STATUS;
