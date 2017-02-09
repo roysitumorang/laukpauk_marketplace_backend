@@ -15,8 +15,8 @@ class HomeController extends ControllerBase {
 		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%e') AS `date`, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY `date` ORDER BY `date`", Db::FETCH_OBJ, [$this->currentDatetime->format('Y-m') . '-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
 			$daily_sales[] = [$sale->date, $sale->amount];
 		}
-		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%b') AS `month`, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY `month` ORDER BY `month`", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
-			$monthly_sales[] = [$sale->month, $sale->amount];
+		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%c') AS `month_number`, DATE_FORMAT(created_at, '%b') AS `month_name`, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY `month_number` ORDER BY `month_number`", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
+			$monthly_sales[] = [$sale->month_name, $sale->amount];
 		}
 		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%Y') AS `year`, COUNT(1) AS amount FROM orders WHERE status = 1 GROUP BY `year` ORDER BY `year`", Db::FETCH_OBJ) as $sale) {
 			$annual_sales[] = [$sale->year, $sale->amount];
