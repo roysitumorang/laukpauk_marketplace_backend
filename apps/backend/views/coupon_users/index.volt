@@ -33,9 +33,15 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<input type="text" name="keyword" value="{{ keyword }}" size="30" class="form form-control" placeholder="Nama / Nomor HP">
-							</td>
-							<td>
+								Tipe Member :
+								<select name="role_id">
+									<option value="">Semua Tipe</option>
+									{% for role in roles %}
+									<option value="{{ role.id }}"{% if role.id == role_id %} selected{% endif %}>{{ role.name }}</option>
+									{% endfor %}
+								</select>
+								Nama / Nomor HP :
+								<input type="text" name="keyword" value="{{ keyword }}" maxlength="15" placeholder="Nama / Nomor HP">
 								<button type="submit" class="btn btn-info">CARI</button>
 							</td>
 						</tr>

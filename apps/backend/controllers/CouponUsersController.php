@@ -4,6 +4,8 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Coupon;
 use Application\Models\CouponUser;
+use Application\Models\Role;
+use Ds\Map;
 use Phalcon\Paginator\Adapter\Model;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
@@ -24,14 +26,26 @@ class CouponUsersController extends ControllerBase {
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
 		$keyword      = $this->request->get('keyword', 'string');
-		$params       = [];
-		if ($keyword) {
-			$params = [
-				'Application\Models\User.name LIKE :keyword: OR Application\Models\User.mobile_phone LIKE :keyword:',
-				'bind' => ['keyword' => "%{$keyword}%"],
-			];
+		$conditions   = [];
+		$params       = ['bind' => [], 'order' => 'Application\Models\User.name'];
+		$roles        = new Map;
+		foreach (Role::find(['conditions' => 'name IN ({names:array})', 'bind' => ['names' => ['Merchant', 'Buyer']], 'columns' => 'id, name']) as $role) {
+			$roles->put($role->id, $role);
 		}
-		$params['order'] = 'Application\Models\User.name';
+		if ($keyword) {
+			$conditions[]              = '(Application\Models\User.name LIKE :keyword: OR Application\Models\User.mobile_phone LIKE :keyword:)';
+			$params['bind']['keyword'] = "%{$keyword}%";
+		}
+		$role_id = $this->request->get('role_id', 'int');
+		if ($role_id && $roles->hasKey($role_id)) {
+			$conditions[]              = 'Application\Models\User.role_id = :role_id:';
+			$params['bind']['role_id'] = $role_id;
+		} else {
+			$role_id = null;
+		}
+		if ($conditions) {
+			$params[0] = implode(' AND ', $conditions);
+		}
 		$paginator       = new Model([
 			'data'  => $this->_coupon->getRelated('users', $params),
 			'limit' => $limit,
@@ -46,9 +60,11 @@ class CouponUsersController extends ControllerBase {
 		}
 		$this->view->menu    = $this->_menu('Products');
 		$this->view->coupon  = $this->_coupon;
+		$this->view->roles   = $roles->values()->toArray();
 		$this->view->users   = $users;
 		$this->view->page    = $page;
 		$this->view->pages   = $pages;
+		$this->view->role_id = $role_id;
 		$this->view->keyword = $keyword;
 	}
 
