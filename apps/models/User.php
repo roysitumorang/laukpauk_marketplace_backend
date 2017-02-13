@@ -100,7 +100,6 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\ServiceArea', 'user_id', ['alias' => 'service_areas']);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
-		$this->hasMany('id', 'Application\Models\AccessToken', 'user_id', ['alias' => 'access_tokens']);
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
 		$this->hasManyToMany('id', 'Application\Models\CouponUser', 'user_id', 'coupon_id', 'Application\Models\Coupon', 'id', ['alias' => 'users']);
 	}
