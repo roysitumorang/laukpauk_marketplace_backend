@@ -60,7 +60,7 @@ class OrdersController extends ControllerBase {
 				]]);
 				if (!$coupon ||
 					(count($coupon->users) && !$coupon->getRelated('users', ['id' => $this->_current_user->id])->getFirst()) ||
-					($coupon->usage == Coupon::USAGE_TYPES[0] && $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE buyer_id = ?0 AND coupon_id = ?1', [$this->_current_user->id, $coupon->id]))
+					($coupon->usage == array_search('Sekali Pakai', Coupon::USAGE_TYPES) && $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE buyer_id = ? AND coupon_id = ?', [$this->_current_user->id, $coupon->id]))
 					) {
 					throw new Exception('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
 				}
