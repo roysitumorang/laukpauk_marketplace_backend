@@ -1822,7 +1822,8 @@ CREATE TABLE `products` (
   KEY `product_category_id` (`product_category_id`),
   KEY `updated_by` (`updated_by`),
   KEY `published` (`published`),
-  KEY `stock_unit` (`stock_unit`)
+  KEY `stock_unit` (`stock_unit`),
+  KEY `lifetime` (`lifetime`)
 ) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8;
 
 /*Data for the table `products` */
