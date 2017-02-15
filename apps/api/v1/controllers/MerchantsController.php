@@ -14,7 +14,8 @@ class MerchantsController extends ControllerBase {
 		$result    = $this->db->query(<<<QUERY
 			SELECT
 				a.id,
-				a.company
+				a.company,
+				a.address
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
