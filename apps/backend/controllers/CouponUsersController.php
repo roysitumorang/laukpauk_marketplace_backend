@@ -6,11 +6,10 @@ use Application\Models\Coupon;
 use Application\Models\CouponUser;
 use Application\Models\Role;
 use Ds\Map;
-use Phalcon\Paginator\Adapter\Model;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CouponUsersController extends ControllerBase {
-	private $_coupon;
+	private $_coupon, $_current_page, $_query_string;
 
 	function initialize() {
 		parent::initialize();
@@ -22,107 +21,96 @@ class CouponUsersController extends ControllerBase {
 	}
 
 	function indexAction() {
-		$limit        = $this->config->per_page;
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
-		$offset       = ($current_page - 1) * $limit;
-		$keyword      = $this->request->get('keyword', 'string');
-		$conditions   = [];
-		$params       = ['bind' => [], 'order' => 'Application\Models\User.name'];
-		$roles        = new Map;
-		foreach (Role::find(['conditions' => 'name IN ({names:array})', 'bind' => ['names' => ['Merchant', 'Buyer']], 'columns' => 'id, name']) as $role) {
-			$roles->put($role->id, $role);
-		}
-		if ($keyword) {
-			$conditions[]              = '(Application\Models\User.name LIKE :keyword: OR Application\Models\User.mobile_phone LIKE :keyword:)';
-			$params['bind']['keyword'] = "%{$keyword}%";
-		}
-		$role_id = $this->request->get('role_id', 'int');
-		if ($role_id && $roles->hasKey($role_id)) {
-			$conditions[]              = 'Application\Models\User.role_id = :role_id:';
-			$params['bind']['role_id'] = $role_id;
-		} else {
-			$role_id = null;
-		}
-		if ($conditions) {
-			$params[0] = implode(' AND ', $conditions);
-		}
-		$paginator       = new Model([
-			'data'  => $this->_coupon->getRelated('users', $params),
-			'limit' => $limit,
-			'page'  => $current_page,
-		]);
-		$page  = $paginator->getPaginate();
-		$pages = $this->_setPaginationRange($page);
-		$users = [];
+		$offset = 0;
+		$page   = $this->_prepare_datas($offset);
+		$pages  = $this->_setPaginationRange($page);
+		$users  = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$users[] = $item;
 		}
-		$this->view->menu    = $this->_menu('Products');
-		$this->view->coupon  = $this->_coupon;
-		$this->view->roles   = $roles->values()->toArray();
-		$this->view->users   = $users;
-		$this->view->page    = $page;
-		$this->view->pages   = $pages;
-		$this->view->role_id = $role_id;
-		$this->view->keyword = $keyword;
+		$this->view->menu   = $this->_menu('Products');
+		$this->view->coupon = $this->_coupon;
+		$this->view->users  = $users;
+		$this->view->page   = $page;
+		$this->view->pages  = $pages;
 	}
 
 	function createAction() {
-		$keyword      = $this->request->get('keyword', 'string');
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
-		if ($this->request->isPost() && ($user_id = $this->request->getPost('user_id', 'int')) && $this->db->fetchColumn("SELECT COUNT(1) FROM users a WHERE NOT EXISTS(SELECT 1 FROM coupon_users b WHERE b.coupon_id = {$this->_coupon->id} AND b.user_id = a.id) AND a.id = {$user_id} AND a.role_id = 4 AND a.status = 1")) {
-			$coupon_user            = new CouponUser;
-			$coupon_user->coupon_id = $this->_coupon->id;
-			$coupon_user->user_id   = $user_id;
-			if ($coupon_user->create()) {
-				$this->flashSession->success('Penambahan member berhasil.');
-				return $this->response->redirect('/admin/coupon_users/create/coupon_id:' . $this->_coupon->id . ($current_page > 1 ? "/page:{$current_page}" : '') . ($keyword ? "?keyword={$keyword}" : ''));
+		if ($this->request->isPost()) {
+			$offset = 0;
+			$page = $this->_prepare_datas($offset);
+			foreach ($page->items as $user) {
+				$coupon_user = CouponUser::findFirst(['coupon_id = ?0 AND user_id = ?1', 'bind' => [$this->_coupon->id, $user->id]]);
+				if (!$coupon_user && $this->request->getPost('users')[$user->id]) {
+					$coupon_user = new CouponUser;
+					$coupon_user->user_id = $user->id;
+					$coupon_user->coupon  = $this->_coupon;
+					$coupon_user->create();
+				} else if ($coupon_user && !$this->request->getPost('users')[$user->id]) {
+					$coupon_user->delete();
+				}
+			}
+			$this->flashSession->success('Update member berhasil!');
+		}
+		$this->response->redirect('/admin/coupon_users/index/coupon_id:' . $this->_coupon->id . ($this->_current_page > 1 ? '/page:' . $this->_current_page : '') . ($this->_query_string ? '?' . $this->_query_string : ''));
+	}
+
+	function deleteAction($id) {
+		if ($this->request->isPost()) {
+			$coupon_user = CouponUser::findFirst([
+				'coupon_id = ?0 AND user_id = ?1',
+				'bind' => [$this->_coupon->id, $id]
+			]);
+			if ($coupon_user) {
+				$coupon_user->delete();
 			}
 		}
-		$limit   = $this->config->per_page;
-		$offset  = ($current_page - 1) * $limit;
+	}
+
+	private function _prepare_datas(&$offset) {
+		$limit               = $this->config->per_page;
+		$this->_current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset              = ($this->_current_page - 1) * $limit;
+		$keyword             = $this->request->get('keyword', 'string');
+		$this->_query_string = '';
+		$roles               = new Map;
+		foreach (Role::find(['conditions' => 'name IN ({names:array})', 'bind' => ['names' => ['Merchant', 'Buyer']], 'columns' => 'id, name']) as $role) {
+			$roles->put($role->id, $role);
+		}
 		$builder = $this->modelsManager->createBuilder()
-			->columns(['a.id', 'a.name', 'a.mobile_phone'])
+			->columns([
+				'a.id',
+				'a.name',
+				'a.mobile_phone',
+				'a.status',
+				'c.coupon_id',
+				'role' => 'b.name',
+			])
 			->from(['a' => 'Application\Models\User'])
-			->where('NOT EXISTS(SELECT 1 FROM Application\Models\CouponUser b WHERE b.coupon_id = :coupon_id: AND b.user_id = a.id)', ['coupon_id' => $this->_coupon->id])
-			->andWhere('a.role_id = 4')
-			->andWhere('a.status = 1')
-			->orderBy('a.name');
+			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
+			->leftJoin('Application\Models\CouponUser', "a.id = c.user_id AND c.coupon_id = {$this->_coupon->id}", 'c')
+			->orderBy('a.name ASC');
+		$role_id = $this->request->get('role_id', 'int');
+		if ($role_id && $roles->hasKey($role_id)) {
+			$builder->where('a.role_id = :role_id:', ['role_id' => $role_id]);
+			$this->_query_string = 'role_id=' . $role_id;
+		} else {
+			$builder->inWhere('a.role_id', [Role::MERCHANT, Role::BUYER]);
+		}
 		if ($keyword) {
-			$builder->andWhere('(a.name LIKE :keyword: OR a.mobile_phone LIKE :keyword:)', ['keyword' => "%{$keyword}%"]);
+			$builder->andWhere('a.name LIKE :keyword: OR a.mobile_phone LIKE :keyword:', ['keyword' => "%{$keyword}%"]);
+			$this->_query_string .= ($this->_query_string ? '&' : '') . 'keyword=' . $keyword;
 		}
 		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
-			'page'    => $current_page,
+			'page'    => $this->_current_page,
 		]);
-		$page  = $paginator->getPaginate();
-		$pages = $this->_setPaginationRange($page);
-		$users = [];
-		foreach ($page->items as $item) {
-			$item->writeAttribute('rank', ++$offset);
-			$users[] = $item;
-		}
-		$this->view->menu    = $this->_menu('Products');
-		$this->view->coupon  = $this->_coupon;
-		$this->view->users   = $users;
-		$this->view->page    = $page;
-		$this->view->pages   = $pages;
-		$this->view->keyword = $keyword;
-	}
-
-	function deleteAction($id) {
-		$coupon_user = CouponUser::findFirst([
-			'coupon_id = ?0 AND user_id = ?1',
-			'bind' => [$this->_coupon->id, $id]
-		]);
-		if (!$coupon_user) {
-			$this->flashSession->error('Member tidak ditemukan.');
-		} else {
-			$coupon_user->delete();
-			$this->flashSession->success('Member berhasil dihapus.');
-		}
-		return $this->response->redirect('/admin/coupon_users/index/coupon_id:' . $this->_coupon->id);
+		$this->view->roles        = $roles->values()->toArray();
+		$this->view->role_id      = $role_id;
+		$this->view->keyword      = $keyword;
+		$this->view->query_string = $this->_query_string;
+		return $paginator->getPaginate();
 	}
 }

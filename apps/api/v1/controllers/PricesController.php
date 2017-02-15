@@ -2,6 +2,8 @@
 
 namespace Application\Api\V1\Controllers;
 
+use Application\Models\Product;
+use Application\Models\StoreItem;
 use DateTimeImmutable;
 use Phalcon\Db;
 
@@ -11,7 +13,7 @@ class PricesController extends ControllerBase {
 		$order_closing_hours = [];
 		$limit               = 10;
 		$keyword             = $this->dispatcher->getParam('keyword', 'string');
-		$query               = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN product_prices c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
+		$query               = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN store_items c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
 		if ($keyword) {
 			$query .= " AND b.name LIKE '%{$keyword}%'";
 		}
@@ -20,7 +22,7 @@ class PricesController extends ControllerBase {
 		$page           = $this->dispatcher->getParam('page', 'int');
 		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset         = ($current_page - 1) * $limit;
-		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, COALESCE(c.value, 0) AS price, COALESCE(c.published, 0) AS published, c.order_closing_hour', $query) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, c.price, c.stock, c.published, c.order_closing_hour', $query) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($product = $result->fetch()) {
 			$products[] = $product;
@@ -45,18 +47,21 @@ class PricesController extends ControllerBase {
 
 	function saveAction() {
 		foreach ($this->_input as $product_id => $attributes) {
-			$price              = filter_var($attributes->price, FILTER_VALIDATE_INT) ?: 0;
-			$published          = in_array($attributes->published, [0, 1]) ? $attributes->published : 0;
-			$current_datetime   = $this->currentDatetime->format('Y-m-d H:i:s');
-			$order_closing_hour = DateTimeImmutable::createFromFormat('H:i', $attributes->order_closing_hour) ? $attributes->order_closing_hour : null;
-			$this->db->execute('INSERT INTO product_prices (user_id, product_id, value, published, order_closing_hour, created_by, created_at) VALUES (:current_user_id, :product_id, :price, :published, :order_closing_hour, :current_user_id, :current_datetime) ON DUPLICATE KEY UPDATE value = :price, published = :published, order_closing_hour = :order_closing_hour, updated_by = :current_user_id, updated_at = :current_datetime', [
-				'current_user_id'    => $this->_current_user->id,
-				'product_id'         => $product_id,
-				'price'              => $price,
-				'published'          => $published,
-				'order_closing_hour' => $order_closing_hour,
-				'current_datetime'   => $current_datetime,
-			]);
+			$product = Product::findFirstById($product_id);
+			if (!$product) {
+				continue;
+			}
+			$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_current_user->id, $product_id]]);
+			if (!$store_item) {
+				$store_item          = new StoreItem;
+				$store_item->user    = $this->_current_user;
+				$store_item->product = $product;
+			}
+			$store_item->setPrice($attributes->price);
+			$store_item->setStock($attributes->stock);
+			$store_item->setPublished($attributes->published);
+			$store_item->setOrderClosingHour(DateTimeImmutable::createFromFormat('H:i', $attributes->order_closing_hour) ? $attributes->order_closing_hour : null);
+			$store_item->save();
 		}
 		$this->_response = [
 			'status'  => 1,

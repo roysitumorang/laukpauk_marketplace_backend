@@ -5,17 +5,17 @@
 			<td>
 				<b><font color="#000099">Banner Name:</font></b>
 				<br>
-				<input type="text" name="name" value="{{ banner.name }}" size="60" class="form form-control form-60">
+				<input type="text" name="name" value="{{ banner.name }}" size="60" placeholder="Banner name">
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<b><font color="#000099">File URL:</font></b>
 				<br>
-				<input type="text" name="file_url" value="{{ banner.file_url }}" size="60" class="form form-control form-60"><br><br><b>ATAU</b><br><br>
+				<input type="text" name="file_url" value="{{ banner.file_url }}" size="60" placeholder="File URL"><br><br><b>ATAU</b><br><br>
 				<b><font color="#000099">Banner File:</font></b>
 				<br>
-				<input type="file" name="new_file" size="50" class="form form-control form-30">
+				<input type="file" name="new_file" size="50">
 				<br>
 				{% if banner.file_name %}
 				<a class="image-popup-no-margins" href="/assets/image/{{ banner.file_name }}"><img src="/assets/image/{{ banner.thumbnail }}" border="0"></a>
@@ -28,7 +28,7 @@
 			<td>
 				<b><font color="#000099">Banner URL:</font></b>
 				<br>
-				<input type="text" name="link" value="{{ banner.link }}" size="60" class="form form-control form-60"><br><b>Contoh:</b> http://www.domain-anda.com
+				<input type="text" name="link" value="{{ banner.link }}" size="60" placeholder="Banner URL"><br><b>Contoh:</b> http://www.domain-anda.com
 			</td>
 		</tr>
 		<tr>

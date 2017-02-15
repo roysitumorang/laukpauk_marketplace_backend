@@ -6,7 +6,7 @@
 				Directory :
 			</td>
 			<td>
-				<input type="text" name="name" value="{{ page_category.name }}" size="50" class="form form-control form-40">
+				<input type="text" name="name" value="{{ page_category.name }}" size="50" placeholder="Directory">
 			</td>
 		</tr>
 		<tr>

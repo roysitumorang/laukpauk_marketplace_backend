@@ -25,17 +25,11 @@
 				<!-- Content //-->
 				{{ flashSession.output() }}
 				<!-- Main Content //-->
-				<form action="message.php" method="get">
+				<form method="GET" action="/admin/messages/index/unread:1">
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<b>Cari berdasarkan:</b>
-								<select name="parameter" class="form form-control form-30">
-									<option{if $vCompare == 'vUsername'} selected{/if} value="vUsername">Dari (username)</option>
-									<option{if $vCompare == 'vSubject'} selected{/if} value="vSubject">Subject</option>
-									<option{if $vCompare == 'tMessage'} selected{/if} value="tMessage">Pesan</option>
-								</select>&nbsp;&nbsp;
-								<input type="text" name="keyword" value="{{ keyword }}" size="40" class="form form-control form-40">&nbsp;
+								<input type="text" name="keyword" value="{{ keyword }}" size="40" placeholder="Keyword">&nbsp;
 								<button type="submit" class="btn btn-info">CARI</button>
 							</td>
 						</tr>

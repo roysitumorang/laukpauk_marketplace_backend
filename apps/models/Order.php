@@ -29,6 +29,7 @@ class Order extends ModelBase {
 	public $scheduled_delivery;
 	public $actual_delivery;
 	public $note;
+	public $cancellation_reason;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -76,7 +77,7 @@ class Order extends ModelBase {
 		parent::beforeValidationOnCreate();
 		$this->status     = array_search('HOLD', static::STATUS);
 		$this->ip_address = $this->getDI()->getRequest()->getClientAddress();
-		$this->admin_fee  = Setting::findFirstByName('admin_fee')->value;
+		$this->admin_fee  = $this->merchant->admin_fee ?: Setting::findFirstByName('admin_fee')->value;
 		do {
 			$this->code = random_int(111111, 999999);
 			if (!static::findFirstByCode($this->code)) {
@@ -107,6 +108,10 @@ class Order extends ModelBase {
 			$validator->add('scheduled_delivery', new Date([
 				'format'  => 'Y-m-d H:i:s',
 				'message' => 'jam pengantaran tidak valid',
+			]));
+		} else if (array_search($this->status, static::STATUS) == 'CANCELLED') {
+			$validator->add('cancellation_reason', new PresenceOf([
+				'message' => 'alasan pembatalan harus diisi',
 			]));
 		}
 		if ($this->id && $this->actual_delivery) {

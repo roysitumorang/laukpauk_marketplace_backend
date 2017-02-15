@@ -31,7 +31,7 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<input type="text" name="keyword" value="{{ post_category_keyword }}" size="40" class="form form-control form-40">&nbsp;
+								<input type="text" name="keyword" value="{{ post_category_keyword }}" size="40" placeholder="Keyword">&nbsp;
 								<button type="submit" class="btn btn-info">TAMPILKAN</button>
 							</td>
 						</tr>

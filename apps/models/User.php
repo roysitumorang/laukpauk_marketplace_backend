@@ -5,6 +5,7 @@ namespace Application\Models;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\Confirmation;
 use Phalcon\Validation\Validator\Date;
@@ -29,6 +30,12 @@ class User extends ModelBase {
 	public $id;
 	public $role_id;
 	public $api_key;
+	public $premium_merchant;
+	public $merchant_id;
+	public $merchant_token;
+	public $domain;
+	public $minimum_purchase;
+	public $admin_fee;
 	public $name;
 	public $email;
 	public $password;
@@ -93,15 +100,39 @@ class User extends ModelBase {
 				'message'    => 'kelurahan harus diisi',
 			],
 		]);
+		$this->belongsTo('merchant_id', 'Application\Models\User', 'id', [
+			'alias'    => 'merchant',
+			'reusable' => true,
+		]);
 		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', ['alias' => 'login_history']);
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyer_orders']);
 		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchant_orders']);
-		$this->hasMany('id', 'Application\Models\ProductPrice', 'user_id', ['alias' => 'product_prices']);
+		$this->hasManyToMany('id', 'Application\Models\StoreItem', 'user_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
 		$this->hasMany('id', 'Application\Models\ServiceArea', 'user_id', ['alias' => 'service_areas']);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
 		$this->hasManyToMany('id', 'Application\Models\CouponUser', 'user_id', 'coupon_id', 'Application\Models\Coupon', 'id', ['alias' => 'users']);
+	}
+
+	function setPremiumMerchant($premium_merchant) {
+		$this->premium_merchant = $this->_filter->sanitize($premium_merchant, 'int') ?: null;
+	}
+
+	function setMerchantId($merchant_id) {
+		$this->merchant_id = $this->_filter->sanitize($merchant_id, 'int') ?: null;
+	}
+
+	function setDomain($domain) {
+		$this->domain = $this->_filter->sanitize($domain, ['string', 'trim']) ?: null;
+	}
+
+	function setMinimumPurchase($minimum_purchase) {
+		$this->minimum_purchase = filter_var($minimum_purchase, FILTER_VALIDATE_INT) ?: null;
+	}
+
+	function setAdminFee($admin_fee) {
+		$this->admin_fee = filter_var($admin_fee, FILTER_VALIDATE_INT) ?: null;
 	}
 
 	function setName($name) {
@@ -238,9 +269,9 @@ class User extends ModelBase {
 
 	function beforeValidationOnCreate() {
 		parent::beforeValidationOnCreate();
-		$random                 = new Random;
-		$this->status           = array_search('HOLD', static::STATUS);
-		$this->registration_ip  = $this->getDI()->getRequest()->getClientAddress();
+		$random                = new Random;
+		$this->status          = array_search('HOLD', static::STATUS);
+		$this->registration_ip = $this->getDI()->getRequest()->getClientAddress();
 		do {
 			$this->activation_token = $random->hex(16);
 			if (!static::findFirstByActivationToken($this->activation_token)) {
@@ -253,13 +284,21 @@ class User extends ModelBase {
 				break;
 			}
 		} while (1);
-		$this->open_on_sunday    = $this->open_on_sunday ?? 0;
-		$this->open_on_monday    = $this->open_on_monday ?? 0;
-		$this->open_on_tuesday   = $this->open_on_tuesday ?? 0;
+		if ($this->role_id == Role::MERCHANT && $this->premium_merchant) {
+			do {
+				$this->merchant_token = $random->hex(16);
+				if (!static::findFirstByMerchantToken($this->merchant_token)) {
+					break;
+				}
+			} while (1);
+		}
+		$this->open_on_sunday    = $this->open_on_sunday    ?? 0;
+		$this->open_on_monday    = $this->open_on_monday    ?? 0;
+		$this->open_on_tuesday   = $this->open_on_tuesday   ?? 0;
 		$this->open_on_wednesday = $this->open_on_wednesday ?? 0;
-		$this->open_on_thursday  = $this->open_on_thursday ?? 0;
-		$this->open_on_friday    = $this->open_on_friday ?? 0;
-		$this->open_on_saturday  = $this->open_on_saturday ?? 0;
+		$this->open_on_thursday  = $this->open_on_thursday  ?? 0;
+		$this->open_on_friday    = $this->open_on_friday    ?? 0;
+		$this->open_on_saturday  = $this->open_on_saturday  ?? 0;
 	}
 
 	function beforeValidation() {
@@ -267,18 +306,25 @@ class User extends ModelBase {
 		if (!$this->id || $this->new_password) {
 			$this->password = password_hash($this->new_password, PASSWORD_DEFAULT);
 		}
+		if ($this->role->id != Role::MERCHANT) {
+			$this->premium_merchant = null;
+			$this->minimal_purchase = null;
+			$this->admin_fee        = null;
+			$this->domain           = null;
+		}
 	}
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'mobile_phone', 'deposit'], new PresenceOf([
+		$validator->add(['name', 'mobile_phone', 'deposit', 'address'], new PresenceOf([
 			'message' => [
 				'name'         => 'nama harus diisi',
 				'mobile_phone' => 'nomor HP harus diisi',
 				'deposit'      => 'deposit harus diisi',
+				'address'      => 'alamat harus diisi',
 			],
 		]));
-		if ($this->role->name === 'Merchant') {
+		if ($this->role_id == Role::MERCHANT) {
 			$validator->add('company', new PresenceOf(['message' => 'nama toko harus diisi']));
 			$validator->add(['business_opening_hour', 'business_closing_hour'], new PresenceOf([
 				'message' => [
@@ -300,9 +346,38 @@ class User extends ModelBase {
 					'business_closing_hour' => 'jam mulai operasional antara ' . static::BUSINESS_HOURS['opening'] . ' dan ' . static::BUSINESS_HOURS['closing'],
 				],
 			]));
+			if ($this->minimum_purchase) {
+				$validator->add('minimum_purchase', new Digit([
+					'message' => 'minimal order harus dalam bentuk angka',
+				]));
+				$validator->add('minimum_purchase', new Between([
+					'minimum' => 0,
+					'maximum' => 100000,
+					'message' => 'minimal order paling sedikit 0, maksimal ' . number_format(100000, 0, ',', '.'),
+				]));
+			}
+			if ($this->admin_fee) {
+				$validator->add('admin_fee', new Digit([
+					'message' => 'biaya administrasi harus dalam bentuk angka',
+				]));
+				$validator->add('admin_fee', new Between([
+					'minimum' => 0,
+					'maximum' => 10000,
+					'message' => 'biaya administrasi minimal 0, maksimal ' . number_format(10000, 0, ',', '.'),
+				]));
+			}
+			if ($this->domain) {
+				$validator->add('domain', new Uniqueness([
+					'convert' => function(array $values) : array {
+						$values['domain'] = strtolower($values['domain']);
+						return $values;
+					},
+					'message' => 'domain sudah ada',
+				]));
+			}
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
-			$validator->add('mobile_phone', new Uniqueness([
+			$validator->add(['mobile_phone', 'merchant_id'], new Uniqueness([
 				'message' => 'nomor HP sudah ada',
 			]));
 		}

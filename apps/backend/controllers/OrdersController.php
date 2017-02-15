@@ -115,10 +115,11 @@ class OrdersController extends ControllerBase {
 	}
 
 	function showAction($id) {
-		if (!$order = Order::findFirst($id)) {
+		if (!$order = Order::findFirstById($id)) {
 			$this->flashSession->error('Order tidak ditemukan.');
 			return $this->dispatcher->forward('orders');
 		}
+		$order->writeAttribute('status', Order::STATUS[$order->status]);
 		$this->view->order   = $order;
 		$this->view->village = Village::findFirst($order->village_id);
 		$this->view->menu    = $this->_menu('Order');

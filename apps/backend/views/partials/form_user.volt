@@ -8,7 +8,7 @@
 					<tr>
 						<td bgcolor="#e5f2ff">
 							Password Baru (*) :<br>
-							<input type="password" name="new_password" size="40" class="form form-control form-50">
+							<input type="password" name="new_password" size="20" placeholder="Password baru">
 							{% if user.id %}
 							<br><i>Kosongkan jika Anda tidak ingin mengubah password lama</i>
 							{% endif %}
@@ -17,7 +17,7 @@
 					<tr>
 						<td bgcolor="#e5f2ff">
 							Password Baru Sekali Lagi (*):<br>
-							<input type="password" name="new_password_confirmation" size="40" class="form form-control form-50">
+							<input type="password" name="new_password_confirmation" size="20" placeholder="Password baru sekali lagi">
 							{% if user.id %}
 							<br><i>Kosongkan jika Anda tidak ingin mengubah password lama</i>
 							{% endif %}
@@ -34,13 +34,43 @@
 					<tr>
 						<td>
 							Nama (*) :<br>
-							<input type="text" name="name" value="{{ user.name }}" class="form form-control form-50" size="40">
+							<input type="text" name="name" value="{{ user.name }}" size="50" placeholder="Nama">
 						</td>
 					</tr>
 					<tr>
 						<td>
 							Nomor HP (*) :<br>
-							<input type="text" name="mobile_phone" value="{{ user.mobile_phone }}" class="form form-control form-40" size="40">
+							<input type="text" name="mobile_phone" value="{{ user.mobile_phone }}" size="15" placeholder="Nomor HP">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Nama Toko (* untuk merchant) :<br>
+							<input type="text" name="company" value="{{ user.company }}" size="50" placeholder="Nama toko">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Premium Merchant (untuk merchant) :<br>
+							<input type="checkbox" name="premium_merchant" value="1"{% if user.premium_merchant %} checked{% endif %}>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Domain (untuk premium merchant) :<br>
+							<input type="text" name="domain" value="{{ user.domain }}" size="50" placeholder="Domain">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Minimal Order (untuk merchant) :<br>
+							<input type="text" name="minimum_purchase" value="{{ user.minimum_purchase }}" size="20" placeholder="Minimal order">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Biaya Administrasi (untuk merchant) :<br>
+							<input type="text" name="admin_fee" value="{{ user.admin_fee }}" size="20" placeholder="Biaya administrasi">
 						</td>
 					</tr>
 					<tr>
@@ -54,25 +84,19 @@
 					<tr>
 						<td>
 							Tanggal Lahir :<br>
-							<input type="text" name="date_of_birth" value="{{ user.date_of_birth }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control form-30" size="12">
-						</td>
-					</tr>
-					<tr>
-						<td>
-							Nama Toko (* untuk merchant) :<br>
-							<input type="text" name="company" value="{{ user.company }}" class="form form-control form-50" size="50">
+							<input type="text" name="date_of_birth" value="{{ user.date_of_birth }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" size="10" placeholder="Tanggal lahir">
 						</td>
 					</tr>
 					<tr>
 						<td>
 							Email :<br>
-							<input type="text" name="email" value="{{ user.email }}" class="form form-control form-50" size="50">
+							<input type="text" name="email" value="{{ user.email }}" size="50" placeholder="Email">
 						</td>
 					</tr>
 					<tr>
 						<td>
 							Alamat :<br>
-							<textarea name="address" cols="50" rows="5" class="form form-control form-50">{{ user.address }}</textarea>
+							<textarea name="address" cols="50" rows="5" placeholder="Alamat">{{ user.address }}</textarea>
 						</td>
 					</tr>
 					<tr>
@@ -143,7 +167,7 @@
 					<tr>
 						<td>
 							Avatar:<br>
-							<input type="file" name="new_avatar" size="30" class="form form-control form-30">
+							<input type="file" name="new_avatar" size="30">
 							{% if user.avatar %}
 							<br><img src="/assets/image/{{ user.avatar }}" border="0"><br>
 							<a href="javascript:void(0)" data-id="{{ user.id }}" class="main delete-avatar" title="Delete Avatar">Delete Avatar</a>

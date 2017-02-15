@@ -39,8 +39,7 @@
 					<tr>
 						<td>
 							<form method="GET" action="/admin/product_categories">
-								<b>Cari berdasarkan:</b>
-								<input type="text" name="keyword" value="{{ product_category_keyword }}" class="form form-control form-30" size="40">&nbsp;
+								<input type="text" name="keyword" value="{{ product_category_keyword }}" size="40" placeholder="Nama">&nbsp;
 								<button type="submit" class="btn btn-info">CARI</button>
 							</form>
 						</td>

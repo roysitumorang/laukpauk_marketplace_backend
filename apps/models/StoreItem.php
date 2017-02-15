@@ -3,15 +3,17 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class ProductPrice extends ModelBase {
+class StoreItem extends ModelBase {
 	public $id;
 	public $user_id;
 	public $product_id;
-	public $value;
+	public $price;
+	public $stock;
 	public $published;
 	public $order_closing_hour;
 	public $created_by;
@@ -22,7 +24,7 @@ class ProductPrice extends ModelBase {
 	private $_filter;
 
 	function getSource() {
-		return 'product_prices';
+		return 'store_items';
 	}
 
 	function onConstruct() {
@@ -44,8 +46,16 @@ class ProductPrice extends ModelBase {
 		]);
 	}
 
-	function setValue($value) {
-		$this->value = $this->_filter->sanitize($value, 'int') ?: null;
+	function setPrice($price) {
+		$this->price = $this->_filter->sanitize($price, 'int') ?: 0;
+	}
+
+	function setStock($stock) {
+		$this->stock = $this->_filter->sanitize($stock, 'int') ?: 0;
+	}
+
+	function setPublished($published) {
+		$this->published = $published == 1 ? 1 : 0;
 	}
 
 	function setOrderClosingHour($order_closing_hour) {
@@ -56,13 +66,39 @@ class ProductPrice extends ModelBase {
 		$this->published = $this->published ?? 0;
 	}
 
+	function beforeSave() {
+		if (!$this->price) {
+			$this->published = 0;
+		}
+	}
+
 	function validation() {
 		$validator = new Validation;
-		$validator->add('value', new PresenceOf([
-			'message' => 'harga harus diisi',
+		$validator->add(['price', 'stock'], new PresenceOf([
+			'message' => [
+				'price' => 'harga harus diisi',
+				'stock' => 'stok harus diisi',
+			],
 		]));
-		$validator->add('value', new Digit([
-			'message' => 'harga harus diisi dalam bentuk angka',
+		$validator->add(['price', 'stock'], new Digit([
+			'message' => [
+				'price' => 'harga harus dalam bentuk angka',
+				'stock' => 'stok harus dalam bentuk angka',
+			],
+		]));
+		$validator->add(['price', 'stock'], new Between([
+			'minimum' => [
+				'price' => 0,
+				'stock' => 0,
+			],
+			'maximum' => [
+				'price' => 200000,
+				'stock' => 1000,
+			],
+			'message' => [
+				'price' => 'harga minimal 0, maksimal ' . number_format(200000, 0, ','),
+				'stock' => 'stok minimal 0, maksimal ' . number_format(1000, 0, ','),
+			],
 		]));
 		$validator->add(['user_id', 'product_id'], new Uniqueness([
 			'message' => 'produk sudah ada',

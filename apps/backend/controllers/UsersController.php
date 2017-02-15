@@ -131,7 +131,7 @@ class UsersController extends ControllerBase {
 			$column = 'buyer_id';
 		} else if ($user->role->name == 'Merchant') {
 			$column                    = 'merchant_id';
-			$this->view->products      = $this->db->fetchColumn('SELECT COUNT(1) FROM product_prices WHERE user_id = ?', [$user->id]);
+			$this->view->products      = $this->db->fetchColumn('SELECT COUNT(1) FROM store_items WHERE user_id = ?', [$user->id]);
 			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
 		}
 		if ($column) {
@@ -257,8 +257,12 @@ class UsersController extends ControllerBase {
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 			$business_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 		}
-		$this->view->menu             = $this->_menu('Members');
-		$this->view->roles            = Role::find(['id > 1', 'order' => 'name']);
+		$this->view->menu  = $this->_menu('Members');
+		$this->view->roles = Role::find([
+			'id IN ({ids:array})',
+			'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT]],
+			'order' => 'name',
+		]);
 		$this->view->user             = $user;
 		$this->view->status           = User::STATUS;
 		$this->view->genders          = User::GENDERS;
@@ -273,6 +277,10 @@ class UsersController extends ControllerBase {
 		if ($village_id) {
 			$user->village = Village::findFirst($village_id);
 		}
+		$user->setPremiumMerchant($this->request->getPost('premium_merchant'));
+		$user->setDomain($this->request->getPost('domain'));
+		$user->setMinimumPurchase($this->request->getPost('minimum_purchase'));
+		$user->setAdminFee($this->request->getPost('admin_fee'));
 		$user->setName($this->request->getPost('name'));
 		$user->setEmail($this->request->getPost('email'));
 		$user->setNewPassword($this->request->getPost('new_password'));

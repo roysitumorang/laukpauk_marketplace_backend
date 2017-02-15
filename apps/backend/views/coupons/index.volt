@@ -29,20 +29,16 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<b>Cari berdasarkan :</b><br>
-								<input type="text" name="keyword" value="{{ keyword }}" size="30" class="form form-control" placeholder="Kode Kupon">
-							</td>
-							<td>
-								<b>Status :</b><br>
-								<select name="status" class="form form-control">
+								<b>Cari berdasarkan :</b>
+								<input type="text" name="keyword" value="{{ keyword }}" size="30" placeholder="Kode Kupon">
+								<b>Status :</b>
+								<select name="status">
 									<option value="">All</option>
 									{% for key, value in status %}
 									<option value="{{ key }}"{% if current_status === key %} selected{% endif %}>{{ value }}</option>
 									{% endfor %}
 								</select>
-							</td>
-							<td>
-								<br><button type="submit" class="btn btn-info">CARI</button>
+								<button type="submit" class="btn btn-info">CARI</button>
 							</td>
 						</tr>
 					</table>

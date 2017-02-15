@@ -35,13 +35,13 @@
 										<!-- Main Content //-->
 										<form method="POST" action="/admin/service_areas/create/user_id:{{ user.id }}">
 											<b>Kecamatan :</b>&nbsp;&nbsp;
-											<select id="subdistrict_id" class="form form-control form-20">
+											<select id="subdistrict_id">
 												{% for subdistrict in subdistricts %}
 												<option value="{{ subdistrict.id }}">{{ subdistrict.name }}</option>
 												{% endfor %}
 											</select>&nbsp;&nbsp;
 											<b>Kelurahan :</b>&nbsp;&nbsp;
-											<select name="village_id" id="village_id" class="form form-control form-20">
+											<select name="village_id" id="village_id">
 												{% for village in current_villages %}
 												<option value="{{ village.id }}">{{ village.name }}</option>
 												{% endfor %}

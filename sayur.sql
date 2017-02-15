@@ -752,11 +752,11 @@ LOCK TABLES `coupon_products` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `coupon_users` */
+/*Table structure for table `coupon_user` */
 
-DROP TABLE IF EXISTS `coupon_users`;
+DROP TABLE IF EXISTS `coupon_user`;
 
-CREATE TABLE `coupon_users` (
+CREATE TABLE `coupon_user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `coupon_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
@@ -768,9 +768,9 @@ CREATE TABLE `coupon_users` (
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-/*Data for the table `coupon_users` */
+/*Data for the table `coupon_user` */
 
-LOCK TABLES `coupon_users` WRITE;
+LOCK TABLES `coupon_user` WRITE;
 
 UNLOCK TABLES;
 
@@ -1292,6 +1292,7 @@ CREATE TABLE `orders` (
   `scheduled_delivery` datetime NOT NULL,
   `actual_delivery` datetime DEFAULT NULL,
   `note` varchar(100) DEFAULT NULL,
+  `cancellation_reason` varchar(255) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,
@@ -1765,35 +1766,6 @@ CREATE TABLE `product_pictures` (
 /*Data for the table `product_pictures` */
 
 LOCK TABLES `product_pictures` WRITE;
-
-UNLOCK TABLES;
-
-/*Table structure for table `product_prices` */
-
-DROP TABLE IF EXISTS `product_prices`;
-
-CREATE TABLE `product_prices` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NOT NULL,
-  `product_id` bigint(20) NOT NULL,
-  `value` int(11) NOT NULL,
-  `published` tinyint(1) NOT NULL,
-  `order_closing_hour` char(5) DEFAULT NULL,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_at` datetime DEFAULT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `product_id` (`product_id`,`user_id`),
-  KEY `created_by` (`created_by`),
-  KEY `updated_by` (`updated_by`),
-  KEY `user_id` (`user_id`),
-  KEY `published` (`published`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_prices` */
-
-LOCK TABLES `product_prices` WRITE;
 
 UNLOCK TABLES;
 
@@ -2409,6 +2381,38 @@ CREATE TABLE `slots` (
 /*Data for the table `slots` */
 
 LOCK TABLES `slots` WRITE;
+
+UNLOCK TABLES;
+
+/*Table structure for table `store_items` */
+
+DROP TABLE IF EXISTS `store_items`;
+
+CREATE TABLE `store_items` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `price` int(11) NOT NULL,
+  `stock` int(11) NOT NULL,
+  `published` tinyint(1) NOT NULL,
+  `order_closing_hour` char(5) DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`product_id`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`),
+  KEY `published` (`published`),
+  KEY `stock` (`stock`),
+  KEY `product_id` (`product_id`),
+  KEY `price` (`price`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `store_items` */
+
+LOCK TABLES `store_items` WRITE;
 
 UNLOCK TABLES;
 
@@ -9497,6 +9501,12 @@ CREATE TABLE `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `role_id` bigint(20) NOT NULL,
   `api_key` char(32) DEFAULT NULL,
+  `premium_merchant` tinyint(1) DEFAULT NULL,
+  `merchant_id` bigint(20) DEFAULT NULL,
+  `merchant_token` char(32) DEFAULT NULL,
+  `domain` varchar(50) DEFAULT NULL,
+  `minimum_purchase` int(11) DEFAULT NULL,
+  `admin_fee` int(11) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(80) DEFAULT NULL,
   `password` char(60) NOT NULL,
@@ -9529,12 +9539,14 @@ CREATE TABLE `users` (
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `mobile_phone` (`mobile_phone`),
   UNIQUE KEY `activation_token` (`activation_token`),
   UNIQUE KEY `password_reset_token` (`password_reset_token`),
   UNIQUE KEY `avatar` (`avatar`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `api_key` (`api_key`),
+  UNIQUE KEY `mobile_phone` (`mobile_phone`,`merchant_id`),
+  UNIQUE KEY `merchant_token` (`merchant_token`),
+  UNIQUE KEY `domain` (`domain`),
   KEY `activated_at` (`activated_at`),
   KEY `created_by` (`created_by`),
   KEY `date_of_birth` (`date_of_birth`),
@@ -9543,15 +9555,17 @@ CREATE TABLE `users` (
   KEY `status` (`status`),
   KEY `updated_by` (`updated_by`),
   KEY `village_id` (`village_id`),
-  KEY `role_id` (`role_id`)
+  KEY `role_id` (`role_id`),
+  KEY `merchant_id` (`merchant_id`),
+  KEY `premium_merchant` (`premium_merchant`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 /*Data for the table `users` */
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`api_key`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
+insert  into `users`(`id`,`role_id`,`api_key`,`premium_merchant`,`merchant_id`,`merchant_token`,`domain`,`minimum_purchase`,`admin_fee`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
 
 UNLOCK TABLES;
 

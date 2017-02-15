@@ -9,18 +9,18 @@
 		</tr>
 		<tr>
 			<td width="30%"><b>Nama</b> {{ error_message_on_name }}</td>
-			<td><input type="text" name="name" value="{{ category.name }}" class="form form-control form-60" size="40"></td>
+			<td><input type="text" name="name" value="{{ category.name }}" size="40" placeholder="Nama"></td>
 		</tr>
 		<tr>
 			<td><b>Permalink</b> {{ error_message_on_new_permalink }}</td>
 			<td>
-				<input type="text" name="new_permalink" value="{{ category.new_permalink }}" class="form form-control form-60" size="40"><br>
+				<input type="text" name="new_permalink" value="{{ category.new_permalink }}" size="40" placeholder="Permalink"><br>
 				<i>Kosongkan jika Anda ingin system mengisi permalink secara otomatis</i>
 			</td>
 		</tr>
 		<tr>
 			<td><b>Icon</b> {{ error_message_on_picture }}</td>
-			<td><input type="file" name="picture" class="form form-control form-40" size="40"></td>
+			<td><input type="file" name="picture" size="40"></td>
 		</tr>
 		{% if category.picture %}
 		<tr>
@@ -58,22 +58,22 @@
 		<tr>
 			<td><b>Deskripsi</b> {{ error_message_on_description }}</td>
 			<td>
-				<textarea name="description" cols="60" rows="5" class="form form-control form-60">{{ category.description }}</textarea>
+				<textarea name="description" cols="60" rows="5" placeholder="Deskripsi">{{ category.description }}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td><b>Meta Title</b> {{ error_message_on_meta_title }}</td>
-			<td><input type="text" name="meta_title" value="{{ category.meta_title }}" class="form form-control form-50" size="40"></td>
+			<td><input type="text" name="meta_title" value="{{ category.meta_title }}" size="40" placeholder="Meta Title"></td>
 		</tr>
 		<tr>
 			<td><b>Meta Desc</b> {{ error_message_on_meta_desc }}</td>
 			<td>
-				<textarea name="meta_desc" cols="60" rows="2" class="form form-control form-60">{{ category.meta_desc }}</textarea>
+				<textarea name="meta_desc" cols="60" rows="2" placeholder="Meta Desc">{{ category.meta_desc }}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td><b>Meta Keyword</b> {{ error_message_on_meta_keyword }}</td>
-			<td><input type="text" name="meta_keyword" value="{{ category.meta_keyword }}" class="form form-control form-50" size="40"></td>
+			<td><input type="text" name="meta_keyword" value="{{ category.meta_keyword }}" size="40" placeholder="Meta Desc"></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>

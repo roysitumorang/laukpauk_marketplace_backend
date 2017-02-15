@@ -36,7 +36,7 @@
 						<tr>
 							<td>
 								<b>Kepada :</b><br>
-								<input type="text" name="recipients" value="" class="form form-control" size="40"><br>
+								<input type="text" name="recipients" value="" size="40"><br>
 								<input type="checkbox" name="email_recipient">&nbsp;Kirim pesan ke email user<br>
 								<input type="checkbox" name="send_to_all_users">&nbsp;Kirim pesan ini kepada semua member
 							</td>
@@ -44,13 +44,13 @@
 						<tr>
 							<td>
 								<b>Subject :</b><br>
-								<input type="text" name="subject" value="{{ message.subject }}" class="form form-control" size="60">
+								<input type="text" name="subject" value="{{ message.subject }}" size="60">
 							</td>
 						</tr>
 						<tr>
 							<td>
 								<b>Pesan :</b><br>
-								<textarea name="body" cols="80" rows="10" class="form form-control">{{ message.body }}</textarea>
+								<textarea name="body" cols="80" rows="10">{{ message.body }}</textarea>
 							</td>
 						</tr>
 						<tr>

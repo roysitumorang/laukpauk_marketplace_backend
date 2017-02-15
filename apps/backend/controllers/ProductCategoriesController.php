@@ -49,7 +49,7 @@ class ProductCategoriesController extends ControllerBase {
 			->groupBy('a.id')
 			->orderBy('id DESC');
 		if ($keyword) {
-			$builder->where('a.name LIKE :name:', ['name' => "%{$keyword}%"]);
+			$builder->where('a.name LIKE ?0', ["%{$keyword}%"]);
 		}
 		$paginator  = new PaginatorQueryBuilder([
 			'builder' => $builder,

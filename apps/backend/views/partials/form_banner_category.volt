@@ -4,12 +4,12 @@
 		<tr>
 			<td>
 				Nama SLOT<br>
-				<input type="text" name="name" value="{{ banner_category.name }}" size="50" class="form form-control form-60">
+				<input type="text" name="name" value="{{ banner_category.name }}" size="50" placeholder="Nama SLOT">
 			</td>
 		</tr>
 		<tr>
 			<td>
-				<button type="submitclass="btn btn-info">SIMPAN</button>
+				<button type="submit" class="btn btn-info">SIMPAN</button>
 			</td>
 		</tr>
 	</table>

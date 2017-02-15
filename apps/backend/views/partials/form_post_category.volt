@@ -4,9 +4,9 @@
 		<tr>
 			<td>
 				Category Name:<br>
-				<input type="text" name="name" value="{{ post_category.name }}" size="50" class="form form-control form-50"><br>
+				<input type="text" name="name" value="{{ post_category.name }}" size="50" placeholder="Category name"><br>
 				Permalink:<br>
-				<input type="text" name="new_permalink" value="{{ post_category.new_permalink }}" size="50" class="form form-control form-50"><br>
+				<input type="text" name="new_permalink" value="{{ post_category.new_permalink }}" size="50" placeholder="Permalink"><br>
 				<i>Kosongkan jika ingin mengisi permalink secara otomatis</i>
 				<br><br>
 				Comments Available:<br>

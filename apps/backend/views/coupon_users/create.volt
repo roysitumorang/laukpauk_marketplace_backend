@@ -33,9 +33,7 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<input type="text" name="keyword" value="{{ keyword }}" size="30" class="form form-control" placeholder="Nama / Nomor HP">
-							</td>
-							<td>
+								<input type="text" name="keyword" value="{{ keyword }}" size="30" placeholder="Nama / Nomor HP">
 								<button type="submit" class="btn btn-info">CARI</button>
 							</td>
 						</tr>

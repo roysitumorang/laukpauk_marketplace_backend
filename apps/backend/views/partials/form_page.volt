@@ -4,14 +4,14 @@
 		<tr>
 			<td>
 				<b><font color="#000099">Title</font></b><br>
-				<input type="text" name="name" value="{{ page.name }}" size="60" class="form form-control form-60">
+				<input type="text" name="name" value="{{ page.name }}" size="60" placeholder="Title">
 			</td>
 		</tr>
 		{% if page_category.has_content %}
 		<tr>
 			<td>
 				<b><font color="#000099">Content</font></b><br>
-				<textarea name="body"{% if page_category.has_rich_editor %} class="summernote" data-plugin-summernote data-plugin-options="{height:180,codemirror:{theme:'ambiance'}}"{% else %} class="form form-control"{% endif %} id="body" cols="80" rows="20">{{ page.body }}</textarea>
+				<textarea name="body"{% if page_category.has_rich_editor %} class="summernote" data-plugin-summernote data-plugin-options="{height:180,codemirror:{theme:'ambiance'}}"{% endif %} id="body" cols="80" rows="20" placeholder="Content">{{ page.body }}</textarea>
 			</td>
 		</tr>
 		{% endif %}
@@ -20,7 +20,7 @@
 			<td>
 				<b><font color="#000099">Link Target</font></b>
 				<br>
-				<select name="url_target" class="form form-control form-30">
+				<select name="url_target">
 				{% for url_target in url_targets %}
 					<option value="{{ url_target }}"{% if page.url_target == url_target %} selected{% endif %}>{{ url_target }}</option>
 				{% endfor %}
@@ -33,7 +33,7 @@
 			<td>
 				<b><font color="#000099">Picture Icon</font></b>
 				<br>
-				<input type="file" name="picture" class="form form-control form-30">
+				<input type="file" name="picture">
 				Picture file should be bellow of 200 Kb
 				{% if page.picture %}
 				<br><a class="image-popup-no-margins" href="/assets/image/{{ page.picture }}"><img src="/assets/image/{{ page.thumbnail }}" border="0"></a><br>
@@ -47,7 +47,7 @@
 			<td>
 				<b><font color="#000099">URL</font></b>
 				<br>
-				<input type="text" name="url" value="{{ page.url }}" size="60" class="form form-control form-60"><br>
+				<input type="text" name="url" value="{{ page.url }}" size="60" placeholder="URL"><br>
 				<i>(Kosongkan jika tidak ingin melink halaman ini ke URL lain)</i>
 			</td>
 		</tr>
@@ -58,28 +58,28 @@
 		<tr>
 			<td>
 				<b><font color="#000099">Permalink</font></b><br>
-				<input type="text" name="permalink" value="{{ page.permalink }}" size="50" class="form form-control form-50"><br>
+				<input type="text" name="permalink" value="{{ page.permalink }}" size="60" placeholder="Permalink"><br>
 				<i>Biarkan kosong jika ingin mengisi permalink secara otomatis</i>
 			</td>
 		</tr>
 		<tr>
 			<td bgcolor="#e5f2ff">
 				<b><font color="#000099">Meta Title</font></b><br>
-				<input type="text" name="meta_title" value="{{ page.meta_title }}" size="60" class="form form-control form-50"><br>
+				<input type="text" name="meta_title" value="{{ page.meta_title }}" size="60" placeholder="Meta title"><br>
 				<i>Maximum 60 characters</i>
 			</td>
 		</tr>
 		<tr>
 			<td bgcolor="#e5f2ff">
 				<b><font color="#000099">Meta Description</font></b><br>
-				<textarea name="meta_desc" class="form form-control form-50" cols="60" rows="3">{{ page.meta_desc }}</textarea><br>
+				<textarea name="meta_desc" cols="60" rows="3" placeholder="Meta desc">{{ page.meta_desc }}</textarea><br>
 				<i>Maximum 160 characters</i>
 			</td>
 		</tr>
 		<tr>
 			<td bgcolor="#e5f2ff">
 				<b><font color="#000099">Meta Keyword</font></b><br>
-				<input type="text" name="meta_keyword" value="{{ page.meta_keyword }}" size="60" class="form form-control form-50">
+				<input type="text" name="meta_keyword" value="{{ page.meta_keyword }}" size="60" placeholder="Meta keyword">
 			</td>
 		</tr>
 		<tr>
@@ -93,7 +93,7 @@
 			<td>
 				<b><font color="#000099">Urutan</font></b>
 				<br>
-				<input type="text" name="position" value="{{ page.position }}" class="form form-control form-20" size="5">
+				<input type="text" name="position" value="{{ page.position }}" size="5" placeholder="Urutan">
 			</td>
 		</tr>
 	</table>

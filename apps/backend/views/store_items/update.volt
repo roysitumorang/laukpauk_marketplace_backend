@@ -1,0 +1,1 @@
+{{ partial('partials/form_store_item', ['action': '/admin/store_items/update/' ~ store_item.id ~ '/user_id:' ~ user.id, 'user': user, 'store_item': store_item, 'products_json': products_json, 'order_closing_hours': order_closing_hours]) }}

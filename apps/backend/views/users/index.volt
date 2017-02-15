@@ -43,18 +43,18 @@
 							<!-- Main Content //-->
 							<form action="/admin/users" method="GET">
 								<b>Cari berdasarkan:</b>
-								<select name="status" class="form form-control form-20">
+								<select name="status">
 									{% for value, label in status %}
 									<option value="{{ value }}"{% if current_status == value %} selected{% endif %}>{{ label }}</option>
 									{% endfor %}
 								</select>&nbsp;&nbsp;
-								<select name="role_id" class="form form-control form-20">
+								<select name="role_id">
 									<option value="">Any Roles</option>
 									{% for role in roles %}
 									<option value="{{ role.id }}"{% if current_role == role.id %} selected{% endif %}>{{ role.name }}</option>
 									{% endfor %}
 								</select>&nbsp;&nbsp;
-								<input type="text" name="keyword" value="{{ keyword }}" class="form form-control form-20" size="20" placeholder="Name / Email / Phone">&nbsp;
+								<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Name / Email / Phone">&nbsp;
 								<button type="submit" class="btn btn-info">CARI</button>
 								<input type="submit" name="print" value="Excel" class="btn btn-success">&nbsp;
 								<input type="submit" name="print" value="CSV" class="btn btn-warning">

@@ -40,17 +40,7 @@
 						<td{{ background }} colspan="2" width="40%">
 							<b>Status Order</b>
 							<br>
-							<font size="4">
-								<strong>
-									{% if order.status === 1 %}
-										COMPLETED
-									{% elseif order.status === -1 %}
-										CANCELLED
-									{% else %}
-										HOLD
-									{% endif %}
-								</strong>
-							</font>
+							<font size="4"><strong>{{ order.status }}</strong></font>
 						</td>
 						<td colspan="2">
 							{% if order.status === 0 %}

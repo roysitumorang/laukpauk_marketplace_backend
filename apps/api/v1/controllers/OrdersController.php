@@ -5,8 +5,9 @@ namespace Application\Api\V1\Controllers;
 use Application\Models\Coupon;
 use Application\Models\Order;
 use Application\Models\OrderItem;
-use Application\Models\ProductPrice;
+use Application\Models\StoreItem;
 use Application\Models\Role;
+use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
@@ -65,72 +66,70 @@ class OrdersController extends ControllerBase {
 					throw new Exception('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
 				}
 			}
+			$order       = new Order;
+			$order_items = [];
+			$merchant    = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
+				Role::MERCHANT,
+				$this->_input->merchant_id
+			]]);
+			$delivery_date = new DateTime($this->_input->scheduled_delivery->date, $this->currentDatetime->getTimezone());
+			$delivery_date->setTime($this->_input->scheduled_delivery->hour, 0, 0);
+			$order->merchant           = $merchant;
+			$order->name               = $this->_current_user->name;
+			$order->mobile_phone       = $this->_current_user->mobile_phone;
+			$order->address            = $this->_input->address;
+			$order->village_id         = $this->_current_user->village_id;
+			$order->original_bill      = 0;
+			$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
+			$order->note               = $this->_input->note;
+			$order->buyer              = $this->_current_user;
+			$order->created_by         = $this->_current_user->id;
+			foreach ($this->_input->items as $item) {
+				$store_item             = StoreItem::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND product_id = ?1', 'bind' => [$merchant->id, $item->product_price_id ?: $item->store_item_id]]);
+				$order_item             = new OrderItem;
+				$order_item->product_id = $store_item->product->id;
+				$order_item->name       = $store_item->product->name;
+				$order_item->unit_price = $store_item->price;
+				$order_item->stock_unit = $store_item->product->stock_unit;
+				$order_item->quantity   = min($item->quantity, $store_item->stock);
+				$order->original_bill  += $order_item->quantity * $order_item->unit_price;
+				$order_items[]          = $order_item;
+			}
+			$minimum_purchase = $merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value;
+			if ($order->original_bill < $minimum_purchase) {
+				throw new Exception('Belanja minimal Rp. ' . number_format($coupon->minimum_purchase) . ' untuk dapat diproses!');
+			}
+			$order->final_bill = $order->original_bill;
+			if ($coupon) {
+				if ($coupon->minimum_purchase && $order->original_bill < $coupon->minimum_purchase) {
+					throw new Exception('Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase));
+				}
+				$order->coupon     = $coupon;
+				$order->final_bill = max(0, $coupon->discount_type == 1
+							? ($order->original_bill - $coupon->discount_amount)
+							: ((100 - $coupon->discount_amount) * $order->original_bill / 100));
+			}
+			$order->items = $order_items;
+			if ($order->validation() && $order->create()) {
+				if (!$this->_current_user->address) {
+					$this->_current_user->update(['address' => $this->_input->address]);
+				}
+				$this->_response = [
+					'status'  => 1,
+					'data'    => ['order' => ['id' => $order->id]],
+				];
+				throw new Exception('Pemesanan berhasil!');
+			}
+			$errors = [];
+			foreach ($order->getMessages() as $error) {
+				$errors[] = $error->getMessage();
+			}
+			throw new Exception(implode('<br>', $errors));
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$order       = new Order;
-		$order_items = [];
-		$merchant    = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
-			Role::MERCHANT,
-			$this->_input->merchant_id
-		]]);
-		$delivery_date = new DateTime($this->_input->scheduled_delivery->date, $this->currentDatetime->getTimezone());
-		$delivery_date->setTime($this->_input->scheduled_delivery->hour, 0, 0);
-		$order->merchant           = $merchant;
-		$order->name               = $this->_current_user->name;
-		$order->mobile_phone       = $this->_current_user->mobile_phone;
-		$order->address            = $this->_input->address;
-		$order->village_id         = $this->_current_user->village_id;
-		$order->original_bill      = 0;
-		$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
-		$order->note               = $this->_input->note;
-		$order->buyer              = $this->_current_user;
-		$order->created_by         = $this->_current_user->id;
-		foreach ($this->_input->items as $item) {
-			$order_item              = new OrderItem;
-			$price                   = ProductPrice::findFirst($item->product_price_id);
-			$product                 = $price->product;
-			$order_item->product_id  = $product->id;
-			$order_item->name        = $product->name;
-			$order_item->unit_price  = $price->value;
-			$order_item->stock_unit  = $product->stock_unit;
-			$order_item->quantity    = $item->quantity;
-			$order->original_bill   += $item->quantity * $price->value;
-			$order_items[]           = $order_item;
-		}
-		$order->final_bill = $order->original_bill;
-		if ($coupon) {
-			if ($coupon->minimum_purchase && $order->original_bill < $coupon->minimum_purchase) {
-				$this->_response['message'] = 'Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase);
-				$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-				return $this->response;
-			}
-			$order->coupon     = $coupon;
-			$order->final_bill = max(0, $coupon->discount_type == 1
-						? ($order->original_bill - $coupon->discount_amount)
-						: ((100 - $coupon->discount_amount) * $order->original_bill / 100));
-		}
-		$order->items = $order_items;
-		if ($order->validation() && $order->create()) {
-			if (!$this->_current_user->address) {
-				$this->_current_user->update(['address' => $this->_input->address]);
-			}
-			$this->_response = [
-				'status'  => 1,
-				'message' => 'Pemesanan berhasil!',
-				'data'    => ['order' => ['id' => $order->id]],
-			];
-		} else {
-			$errors = [];
-			foreach ($order->getMessages() as $error) {
-				$errors[] = $error->getMessage();
-			}
-			$this->_response['message'] = implode('<br>', $errors);
-		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 
 	function completeAction($id) {

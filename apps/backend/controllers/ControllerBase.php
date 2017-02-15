@@ -2,6 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
+use Ds\Map;
 use Ds\Vector;
 use Phalcon\Db;
 use Phalcon\Mvc\Controller;
@@ -18,13 +19,13 @@ class ControllerBase extends Controller {
 		}
 		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 		if (!apcu_exists('subdistricts')) {
-			$subdistricts = [];
+			$subdistricts = new Vector;
 			$result       = $this->db->query("SELECT a.id, a.name FROM subdistricts a JOIN cities b ON a.city_id = b.id WHERE b.name = 'Medan' ORDER BY a.name");
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($subdistrict = $result->fetch()) {
-				$subdistricts[] = $subdistrict;
+				$subdistricts->push($subdistrict);
 			}
-			apcu_add('subdistricts', $subdistricts);
+			apcu_add('subdistricts', $subdistricts->toArray());
 		}
 		if (!apcu_exists('villages')) {
 			$villages = [];
@@ -32,9 +33,10 @@ class ControllerBase extends Controller {
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				isset($villages[$item->subdistrict_id]) || $villages[$item->subdistrict_id] = [];
-				$village = clone $item;
-				unset($village->subdistrict_id);
-				$villages[$item->subdistrict_id][] = $village;
+				$villages[$item->subdistrict_id][] = (object)[
+					'id'   => $item->id,
+					'name' => $item->name,
+				];
 			}
 			apcu_add('villages', $villages);
 		}
@@ -74,10 +76,9 @@ class ControllerBase extends Controller {
 				'icon'      => 'copy',
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
-					['label' => 'Page',         'link' => 'page_categories'],
-					['label' => 'Content',      'link' => 'post_categories'],
-					['label' => 'Banner',       'link' => 'banner_categories'],
-					['label' => 'File Manager', 'link' => 'files'],
+					['label' => 'Page',    'link' => 'page_categories'],
+					['label' => 'Content', 'link' => 'post_categories'],
+					['label' => 'Banner',  'link' => 'banner_categories'],
 				],
 			], [
 				'label'     => 'Members',
@@ -85,16 +86,8 @@ class ControllerBase extends Controller {
 				'icon'      => 'users',
 				'expanded'  => $expanded == 'Members',
 				'sub_items' => [
-					['label' => 'Member List',                    'link' => 'users'],
-					['label' => 'Tambah Member',                  'link' => 'users/create'],
-					['label' => 'Export Email Member',            'link' => 'users/export_email'],
-					['label' => 'Invoice',                        'link' => 'invoices'],
-					['label' => 'Transaksi',                      'link' => 'transactions'],
-					['label' => 'Withdraw Member',                'link' => 'withdrawals'],
-					['label' => 'Tambah / Potong Dompet',         'link' => 'deposits'],
-					['label' => 'Tambah / Potong Reward Pembeli', 'link' => 'deposits'],
-					['label' => 'Upgrade Membership',             'link' => 'users/upgrade_membership'],
-					['label' => 'Member Testimonies',             'link' => 'testimonies'],
+					['label' => 'Member List',   'link' => 'users'],
+					['label' => 'Tambah Member', 'link' => 'users/create'],
 				],
 			], [
 				'label'     => 'Products',
@@ -102,25 +95,10 @@ class ControllerBase extends Controller {
 				'icon'      => 'coffee',
 				'expanded'  => $expanded == 'Products',
 				'sub_items' => [
-					['label' => 'Category Produk'      , 'link' => 'product_categories'],
-					['label' => 'Category Meta'        , 'link' => 'product_category_metas'],
-					['label' => 'Brand Produk'         , 'link' => 'brands'],
-					['label' => 'Brand Meta'           , 'link' => 'product_metas'],
-					['label' => 'Tambah Produk Baru'   , 'link' => 'products/create'],
-					['label' => 'Produk List'          , 'link' => 'products'],
-					['label' => 'Slot Category'        , 'link' => 'slot_categories'],
-					['label' => 'Slot Meta'            , 'link' => 'slot_metas'],
-					['label' => 'Slot List'            , 'link' => 'slots'],
-					['label' => 'Member Wishlist'      , 'link' => 'wishlists'],
-					['label' => 'Member Product Review', 'link' => 'product_reviews'],
-					['label' => 'Product Meta'         , 'link' => 'product_metas'],
-					['label' => 'Category Poin'        , 'link' => 'point_categories'],
-					['label' => 'Poin'                 , 'link' => 'points'],
-					['label' => 'Poin Meta'            , 'link' => 'point_metas'],
-					['label' => 'Permintaan Poin'      , 'link' => 'point_requests'],
-					['label' => 'Poin Log'             , 'link' => 'point_logs'],
-					['label' => 'Kupon Member'         , 'link' => 'coupons'],
-					['label' => 'Discount'             , 'link' => 'discounts'],
+					['label' => 'Category Produk', 'link' => 'product_categories'],
+					['label' => 'Tambah Produk',   'link' => 'products/create'],
+					['label' => 'Produk List'    , 'link' => 'products'],
+					['label' => 'Kupon Member'   , 'link' => 'coupons'],
 				],
 			], [
 				'label'     => 'Order',
@@ -128,28 +106,7 @@ class ControllerBase extends Controller {
 				'icon'      => 'shopping-cart',
 				'expanded'  => $expanded == 'Order',
 				'sub_items' => [
-					['label' => 'Buat Order Baru'                 , 'link' => 'orders/create'],
-					['label' => 'Order List'                      , 'link' => 'orders'],
-					['label' => 'Data Propinsi / Kota / Kecamatan', 'link' => 'provinces'],
-					['label' => 'Kota Asal Pengiriman'            , 'link' => 'shipping_origins'],
-					['label' => 'Pengiriman'                      , 'link' => 'shippings'],
-					['label' => 'Opsi Pengiriman'                 , 'link' => 'shipping_options'],
-					['label' => 'Email Template'                  , 'link' => 'email_templates'],
-				],
-			], [
-				'label'     => 'Options',
-				'link'      => '#',
-				'icon'      => 'wrench',
-				'expanded'  => $expanded == 'Options',
-				'sub_items' => [
-					['label' => 'Rekening Admin' , 'link' => 'bank_accounts'],
-					['label' => 'User Setting'   , 'link' => 'user_settings'],
-					['label' => 'Admin Setting'  , 'link' => 'admin_settings'],
-					['label' => 'User Notifikasi', 'link' => 'user_notifications'],
-					['label' => 'User Message'   , 'link' => 'user_messages'],
-					['label' => 'Keyword Log'    , 'link' => 'searches'],
-					['label' => 'Short Link'     , 'link' => 'short_urls'],
-					['label' => 'Random Text'    , 'link' => 'random_texts'],
+					['label' => 'Order List', 'link' => 'orders'],
 				],
 			], [
 				'label'     => 'Manage User',

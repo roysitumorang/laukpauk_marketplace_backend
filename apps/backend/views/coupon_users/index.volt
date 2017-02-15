@@ -26,59 +26,73 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ flashSession.output() }}
-				{{ partial('partials/tabs_coupon', ['coupon': coupon, 'expand': 'users']) }}
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/coupon_users/create/coupon_id:{{ coupon.id }}">Tambah Member</a></p>
-				<form method="GET" action="/admin/coupon_users/index/coupon_id:{{ coupon.id }}">
-					<table class="table table-striped">
-						<tr>
-							<td>
-								Tipe Member :
-								<select name="role_id">
-									<option value="">Semua Tipe</option>
-									{% for role in roles %}
-									<option value="{{ role.id }}"{% if role.id == role_id %} selected{% endif %}>{{ role.name }}</option>
+				<div class="tabs">
+					{{ partial('partials/tabs_coupon', ['coupon': coupon, 'expand': 'users']) }}
+					<div class="tab-content">
+						<div id="areas" class="tab-pane active">
+							{{ flashSession.output() }}
+							<form method="GET" action="/admin/coupon_users/index/coupon_id:{{ coupon.id }}">
+								<table class="table table-striped">
+									<tr>
+										<td>
+											<select name="role_id">
+												<option value="">Buyer &amp; Merchant</option>
+												{% for role in roles %}
+												<option value="{{ role.id }}"{% if role.id == role_id %} selected{% endif %}>Hanya {{ role.name }}</option>
+												{% endfor %}
+											</select>
+											<input type="text" name="keyword" value="{{ keyword }}" maxlength="15" placeholder="Nama / Nomor HP">
+											<button type="submit" class="btn btn-info">CARI</button>
+										</td>
+									</tr>
+								</table>
+							</form>
+							<form method="POST" action="/admin/coupon_users/create/coupon_id:{{ coupon.id }}{% if current_page > 1 %}/page:{{ current_page }}{% endif %}{% if query_string %}?{{ query_string }}{% endif %}">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th width="25"><b>No</b></th>
+											<th><b>Nama</b></th>
+											<th><b>Role</b></th>
+											<th><b>Nomor HP</b></th>
+											<th><b>#</b></th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for user in users %}
+										<tr>
+											<td>{{ user.rank }}</td>
+											<td>{{ user.name }}</td>
+											<td>{{ user.role }}</td>
+											<td>{{ user.mobile_phone }}</td>
+											<td><input type="checkbox" name="users[{{ user.id }}]" value="1"{% if user.coupon_id %} checked{% endif %}></i></td>
+										</tr>
+										{% elsefor %}
+										<tr>
+											<td colspan="5"><i>Belum ada member</i></td>
+										</tr>
+										{% endfor %}
+										<tr>
+											<td colspan="5" class="text-right"><button type="submit" class="btn btn-info">SIMPAN</button></td>
+										</tr>
+									</tbody>
+								</table>
+							</form>
+							{% if page.total_pages > 1 %}
+							<div class="weepaging">
+								<p>
+									<b>Halaman:</b>&nbsp;&nbsp;
+									{% for i in pages %}
+										{% if i == page.current %}
+										<b>{{ i }}</b>
+										{% else %}
+										<a href="/admin/coupon_users/index/coupon_id:{{ coupon.id }}/page:{{ i }}{% if keyword %}?keyword={{ keyword }}{% endif %}">{{ i }}</a>
+										{% endif %}
 									{% endfor %}
-								</select>
-								Nama / Nomor HP :
-								<input type="text" name="keyword" value="{{ keyword }}" maxlength="15" placeholder="Nama / Nomor HP">
-								<button type="submit" class="btn btn-info">CARI</button>
-							</td>
-						</tr>
-					</table>
-				</form>
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th width="25"><b>No</b></th>
-							<th><b>Nama</b></th>
-							<th><b>Nomor HP</b></th>
-							<th><b>#</b></th>
-						</tr>
-					</thead>
-					<tbody>
-					{% for user in users %}
-						<tr>
-							<td>{{ user.rank }}</td>
-							<td>{{ user.name }}</td>
-							<td>{{ user.mobile_phone }}</td>
-							<td><i class="fa fa-trash-o" data-coupon-id="{{ coupon.id }}" data-user-id="{{ user.id }}"></i></td>
-						</tr>
-					{% endfor %}
-					</tbody>
-				</table>
-				{% if page.total_pages > 1 %}
-				<div class="weepaging">
-					<p>
-						<b>Halaman:</b>&nbsp;&nbsp;
-						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
-							{% else %}
-							<a href="/admin/coupon_users/index/coupon_id:{{ coupon.id }}/page:{{ i }}{% if keyword %}?keyword={{ keyword }}{% endif %}">{{ i }}</a>
-							{% endif %}
-						{% endfor %}
-					</p>
+								</p>
+							</div>
+						</div>
+					</div>
 				</div>
 				{% endif %}
 				<!-- eof Content //-->
@@ -89,15 +103,14 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	document.querySelectorAll('.fa-trash-o').forEach(function(item) {
+	for (var items = document.querySelectorAll('.fa-trash-o'), i = items.length; i--; ) {
+		let item = items[i];
 		item.onclick = () => {
 			if (confirm('Anda yakin ingin menghapus member ini ?')) {
-				let form = document.createElement('form');
-				form.method = 'POST',
-				form.action = '/admin/coupon_users/delete/' + item.dataset.userId + '/coupon_id:' + item.dataset.couponId,
-				document.body.appendChild(form),
-				form.submit()
+				fetch('/admin/coupon_users/delete/' + item.dataset.userId + '/coupon_id:' + item.dataset.couponId, { credentials: 'include', method: 'POST' }).then(() => {
+					window.location.reload()
+				})
 			}
 		}
-	})
+	}
 </script>

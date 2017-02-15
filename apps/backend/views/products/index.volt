@@ -28,46 +28,23 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<b>Cari berdasarkan:</b>
-							</td>
-							<td class="text-right">
 								ID :
-							</td>
-							<td>
-								<input type="text" name="id" value="{{ id }}" class="form form-control" placeholder="ID">&nbsp;
-							</td>
-							<td class="text-right">
+								<input type="text" name="id" value="{{ id }}" placeholder="ID">&nbsp;
 								Nama :
-							</td>
-							<td>
-								<input type="text" name="name" value="{{ name }}" class="form form-control" placeholder="Nama">&nbsp;
-							</td>
-							<td>&nbsp;</td>
-						</tr>
-						<tr>
-							<td>&nbsp;</td>
-							<td class="text-right">
+								<input type="text" name="name" value="{{ name }}" placeholder="Nama">&nbsp;
 								Kategori :
-							</td>
-							<td>
-								<select name="product_category_id" class="form form-control">
+								<select name="product_category_id">
 									<option value="">Semua</option>
 									{% for category in categories %}
 									<option value="{{ category.id}}"{% if category.id == product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
 									{% endfor %}
 								</select>
-							</td>
-							<td class="text-right">
 								Status :
-							</td>
-							<td>
-								<select name="published" class="form form-control">
+								<select name="published">
 									<option value=""{% if published === null %} selected{% endif %}>Semua</option>
 									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
 									<option value="0"{% if published === 0 %} selected{% endif %}>Tersembunyi</option>
 								</select>
-							</td>
-							<td colspan="2" class="text-right">
 								<input type="submit" value="CARI" class="btn btn-info">
 							</td>
 						</tr>

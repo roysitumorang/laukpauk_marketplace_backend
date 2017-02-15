@@ -3,7 +3,8 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Numericality;
+use Phalcon\Validation\Validator\Digit;
+use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\PresenceOf;
 
 class OrderItem extends ModelBase {
@@ -26,14 +27,21 @@ class OrderItem extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->belongsTo('order_id', 'Application\Models\Order', 'id', [
-			'alias'    => 'order',
-			'reusable' => true,
+			'alias'      => 'order',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'order tidak ditemukan',
+			],
 		]);
-	}
-
-	function beforeValidationOnCreate() {
-		$this->buy_point       = 0;
-		$this->affiliate_point = 0;
+		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
+			'alias'      => 'product',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'produk tidak ditemukan',
+			],
+		]);
 	}
 
 	function validation() {
@@ -46,11 +54,21 @@ class OrderItem extends ModelBase {
 				'quantity'   => 'jumlah harus diisi',
 			],
 		]));
-		$validator->add(['unit_price', 'quantity'], new Numericality([
+		$validator->add(['unit_price', 'quantity'], new Digit([
 			'message' => [
-				'unit_price' => 'harga satuan harus dalam desimal',
-				'quantity'   => 'jumlah harus dalam desimal',
-			]
+				'unit_price' => 'harga satuan harus dalam angka',
+				'quantity'   => 'jumlah harus dalam angka',
+			],
+		]));
+		$validator->add(['unit_price', 'quantity'], new Between([
+			'minimum' => [
+				'unit_price' => 1,
+				'quantity'   => 1,
+			],
+			'message' => [
+				'unit_price' => 'harga satuan minimal 1',
+				'quantity'   => 'jumlah minimal 1',
+			],
 		]));
 		return $this->validate($validator);
 	}
