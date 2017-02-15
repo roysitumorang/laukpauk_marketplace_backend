@@ -78,7 +78,10 @@
 								<font size="4">{{ product.name }}</font><br>
 								<strong>ID :</strong>&nbsp;#{{ product.id }}<br>
 								<strong>Satuan :</strong>&nbsp;{{ product.stock_unit }}<br>
-								<strong>Kategori :</strong>&nbsp;{{ product.category.name }}<br>
+								{% if product.lifetime %}
+								<strong>Masa Pakai :</strong>&nbsp;{{ product.lifetime }} hari<br>
+								{% endif %}
+								<strong>Kategori :</strong>&nbsp;{{ product.category.name }}
 							</td>
 							<td{{ background }} class="text-center">
 								<a href="/admin/products/update/{{ product.id}}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>

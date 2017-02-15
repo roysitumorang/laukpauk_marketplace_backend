@@ -19,7 +19,7 @@ class ProductsController extends ControllerBase {
 		$parameter           = [];
 		$query_string_params = [];
 		$conditions          = [[]];
-		$this->_prepare_categories();
+		$this->_prepare_datas();
 		if ($id) {
 			$conditions[0][]           = 'id = :id:';
 			$conditions['id']          = $id;
@@ -80,7 +80,7 @@ class ProductsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_categories();
+		$this->_prepare_datas();
 		$this->view->menu     = $this->_menu('Products');
 		$this->view->product  = $product;
 		$this->view->pictures = [];
@@ -106,7 +106,7 @@ class ProductsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_categories();
+		$this->_prepare_datas();
 		$this->view->menu    = $this->_menu('Products');
 		$this->view->product = $product;
 	}
@@ -121,7 +121,7 @@ class ProductsController extends ControllerBase {
 		return $this->response->redirect('/admin/products');
 	}
 
-	private function _prepare_categories() {
+	private function _prepare_datas() {
 		$categories = [];
 		$resultset = $this->db->query('SELECT a.id, a.parent_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.parent_id IS NULL GROUP BY a.id ORDER BY a.name ASC');
 		$resultset->setFetchMode(Db::FETCH_OBJ);
@@ -137,6 +137,7 @@ class ProductsController extends ControllerBase {
 			$categories   = array_merge($categories, $sub_categories);
 		}
 		$this->view->categories = $categories;
+		$this->view->lifetimes  = range(1, 30);
 	}
 
 	private function _set_model_attributes(&$product) {
@@ -144,6 +145,7 @@ class ProductsController extends ControllerBase {
 		$product->setName($this->request->getPost('name'));
 		$product->setStockUnit($this->request->getPost('stock_unit'));
 		$product->setDescription($this->request->getPost('description'));
+		$product->setLifetime($this->request->getPost('lifetime'));
 		$product->setPublished($this->request->getPost('published'));
 	}
 }

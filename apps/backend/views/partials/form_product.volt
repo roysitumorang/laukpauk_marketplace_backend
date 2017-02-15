@@ -35,6 +35,18 @@
 		</tr>
 		<tr>
 			<td>
+				<b><font color="#000099">Masa Pakai</font> <font color="red">*</font></b>
+				<br>
+				<select name="lifetime">
+					<option value="">-</option>
+					{% for lifetime in lifetimes %}
+					<option value="{{ lifetime }}"{% if lifetime == product.lifetime  %} selected{% endif %}>{{ lifetime }} hari</options>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
 				<b><font color="#000099">Produk Ditampilkan ?</font></b>
 				<br>
 				<input type="radio" name="published" value="1"{% if product.published %} checked{% endif %}> Ya&nbsp;&nbsp;
