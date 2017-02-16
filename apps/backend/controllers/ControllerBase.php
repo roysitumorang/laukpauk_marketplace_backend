@@ -2,7 +2,6 @@
 
 namespace Application\Backend\Controllers;
 
-use Ds\Map;
 use Ds\Vector;
 use Phalcon\Db;
 use Phalcon\Mvc\Controller;
