@@ -2,6 +2,9 @@
 
 namespace Application\Models;
 
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\PresenceOf;
+
 class Province extends ModelBase {
 	public $id;
 	public $name;
@@ -22,5 +25,13 @@ class Province extends ModelBase {
 				'message' => 'propinsi tidak dapat dihapus karena memiliki kota / kabupaten',
 			],
 		]);
+	}
+
+	function validation() {
+		$validator = new Validation;
+		$validator->add('name', new PresenceOf([
+			'message' => 'nama harus diisi',
+		]));
+		return $this->validate($validator);
 	}
 }
