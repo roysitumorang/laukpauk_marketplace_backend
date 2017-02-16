@@ -1439,9 +1439,6 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 
-insert  into `sessions`(`id`,`user_id`,`ip_address`,`user_agent`,`data`,`last_activity`) values
-('f691a7412f16331ccd7e736f983642af',NULL,'127.0.0.1','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:51.0) Gecko/20100101 Firefox/51.0','$PHALCON/CSRF/KEY$|s:32:\"Y1kxSEVuZFZNZWNZajZRd0EzOXVCUT09\";$PHALCON/CSRF$|s:32:\"SzU0eTBDVVIrbzBkY3k5VGIyenNYZz09\";',1487230151);
-
 UNLOCK TABLES;
 
 /*Table structure for table `settings` */
