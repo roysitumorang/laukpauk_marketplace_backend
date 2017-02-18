@@ -56,9 +56,7 @@
 											{% if store_item.price %}
 											<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ store_item.id }}" class="publish">
 											{% endif %}
-											{% if !store_item.published %}<font color="#FF0000">{% endif %}
-											<i class="fa fa-eye fa-2x"></i>
-											{% if !store_item.published %}</font>{% endif %}
+											<i class="fa fa-eye{% if !store_item.published %}-slash{% endif %} fa-2x"></i>
 											{% if store_item.price %}
 											</a>
 											{% endif %}
