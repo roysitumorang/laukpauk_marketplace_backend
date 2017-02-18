@@ -1,7 +1,7 @@
 <!doctype html>
 <html class="fixed">
 <head>
-	<title>Administrator / Ikoma-Home.Com</title>
+	<title>Administrator / LaukPauk.id</title>
 	<!-- Basic -->
 	<meta charset="UTF-8">
 	<meta name="robots" content="noindex, nofollow">
