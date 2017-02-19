@@ -13,7 +13,7 @@
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/users">Daftar Member</a></span></li>
-						<li><span><a href="/admin/users/update/{{ user.id }}">Update Member #{{ user.id }}</a></span></li>
+						<li><span>Update Member #{{ user.id }}</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
