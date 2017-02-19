@@ -2,7 +2,7 @@
 <section class="body-sign">
 	<div class="center-sign">
 		<a href="/admin" class="logo pull-left">
-			<img src="/backend/images/logo.png" height="54" alt="Ikoma-Home Admin">
+			<img src="/backend/images/logo.png" height="54" alt="LaukPauk.id-Home Admin">
 		</a>
 		<div class="panel panel-sign">
 			<div class="panel-title-sign mt-xl text-right">
