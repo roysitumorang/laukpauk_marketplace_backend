@@ -4,6 +4,7 @@ namespace Application\Models;
 
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Uniqueness;
 
 class Subdistrict extends ModelBase {
 	public $id;
@@ -32,10 +33,21 @@ class Subdistrict extends ModelBase {
 		]);
 	}
 
+	function setName($name) {
+		$this->name = $this->getDI()->getFilter()->sanitize($name, ['string', 'trim']);
+	}
+
 	function validation() {
 		$validator = new Validation;
 		$validator->add('name', new PresenceOf([
 			'message' => 'nama harus diisi',
+		]));
+		$validator->add(['city_id', 'name'], new Uniqueness([
+			'convert' => function(array $values) : array {
+				$values['name'] = strtolower($values['name']);
+				return $values;
+			},
+			'message' => 'nama sudah ada',
 		]));
 		return $this->validate($validator);
 	}
