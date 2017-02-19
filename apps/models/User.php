@@ -108,7 +108,7 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyer_orders']);
 		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchant_orders']);
 		$this->hasManyToMany('id', 'Application\Models\StoreItem', 'user_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
-		$this->hasMany('id', 'Application\Models\ServiceArea', 'user_id', ['alias' => 'service_areas']);
+		$this->hasManyToMany('id', 'Application\Models\ServiceArea', 'user_id', 'village_id', 'Application\Models\Village', 'id', ['alias' => 'service_areas']);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);

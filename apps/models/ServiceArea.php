@@ -19,20 +19,15 @@ class ServiceArea extends ModelBase {
 		return 'service_areas';
 	}
 
-	function onConstruct() {
-		$this->_filter = $this->getDI()->getFilter();
-	}
-
 	function initialize() {
 		parent::initialize();
-		$this->keepSnapshots(true);
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
+			'alias'      => 'user',
+			'foreignKey' => ['allowNulls' => false],
 		]);
 		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
-			'alias'    => 'village',
-			'reusable' => true,
+			'alias'      => 'village',
+			'foreignKey' => ['allowNulls' => false],
 		]);
 	}
 

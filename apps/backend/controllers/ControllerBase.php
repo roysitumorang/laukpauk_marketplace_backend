@@ -17,25 +17,48 @@ class ControllerBase extends Controller {
 			return;
 		}
 		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
+		if (!apcu_exists('provinces')) {
+			$provinces = [];
+			$result    = $this->db->query('SELECT id, name FROM provinces ORDER BY name');
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($province = $result->fetch()) {
+				$provinces[$province->id] = $province->name;
+			}
+			apcu_add('provinces', $provinces);
+		}
+		if (!apcu_exists('cities')) {
+			$cities = [];
+			$result = $this->db->query('SELECT id, province_id, type, name FROM cities ORDER BY province_id, name');
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($city = $result->fetch()) {
+				if (!isset($cities[$city->province_id])) {
+					$cities[$city->province_id] = [];
+				}
+				$cities[$city->province_id][$city->id] = $city->type . ' ' . $city->name;
+			}
+			apcu_add('cities', $cities);
+		}
 		if (!apcu_exists('subdistricts')) {
-			$subdistricts = new Vector;
-			$result       = $this->db->query("SELECT a.id, a.name FROM subdistricts a JOIN cities b ON a.city_id = b.id WHERE b.name = 'Medan' ORDER BY a.name");
+			$subdistricts = [];
+			$result       = $this->db->query('SELECT id, city_id, name FROM subdistricts ORDER BY city_id, name');
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($subdistrict = $result->fetch()) {
-				$subdistricts->push($subdistrict);
+				if (!isset($subdistricts[$subdistrict->city_id])) {
+					$subdistricts[$subdistrict->city_id] = [];
+				}
+				$subdistricts[$subdistrict->city_id][$subdistrict->id] = $subdistrict->name;
 			}
-			apcu_add('subdistricts', $subdistricts->toArray());
+			apcu_add('subdistricts', $subdistricts);
 		}
 		if (!apcu_exists('villages')) {
 			$villages = [];
 			$result   = $this->db->query('SELECT id, subdistrict_id, name FROM villages ORDER BY subdistrict_id, name');
 			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($item = $result->fetch()) {
-				isset($villages[$item->subdistrict_id]) || $villages[$item->subdistrict_id] = [];
-				$villages[$item->subdistrict_id][] = (object)[
-					'id'   => $item->id,
-					'name' => $item->name,
-				];
+			while ($village = $result->fetch()) {
+				if (!isset($villages[$village->subdistrict_id])) {
+					$villages[$village->subdistrict_id] = [];
+				}
+				$villages[$village->subdistrict_id][$village->id] = $village->name;
 			}
 			apcu_add('villages', $villages);
 		}
