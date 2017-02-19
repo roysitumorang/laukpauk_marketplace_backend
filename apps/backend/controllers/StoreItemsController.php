@@ -7,29 +7,89 @@ use Application\Models\ProductCategory;
 use Application\Models\StoreItem;
 use Application\Models\Role;
 use Application\Models\User;
-use Phalcon\Mvc\View;
-use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class StoreItemsController extends ControllerBase {
 	private $_user;
 
-	function onConstruct() {
-		if (!$this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [
-			$this->dispatcher->getParam('user_id', 'int'),
-			Role::MERCHANT,
-		]])) {
-			$this->flashSession->error('Data tidak ditemukan');
-			$this->response->redirect('admin/users');
-			$this->response->send();
-			return false;
+	function beforeExecuteRoute() {
+		if (!($user_id = $this->dispatcher->getParam('user_id', 'int')) ||
+			!($this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [$user_id, Role::MERCHANT]]))) {
+			$this->flashSession->error('Member tidak ditemukan!');
+			$this->response->redirect('/admin/users');
+			$this->response->sendHeaders();
 		}
 	}
 
 	function indexAction() {
-		$limit        = $this->config->per_page;
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
-		$offset       = ($current_page - 1) * $limit;
-		$builder      = $this->modelsManager->createBuilder()
+		$this->_render();
+	}
+
+	function createAction() {
+		$store_item = new StoreItem;
+		if ($this->request->isPost()) {
+			$product_id          = $this->request->getPost('product_id', 'int');
+			$store_item->product = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
+			$store_item->user    = $this->_user;
+			$store_item->setPrice($this->request->getPost('price'));
+			$store_item->setStock($this->request->getPost('stock'));
+			$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
+			if ($store_item->validation() && $store_item->create()) {
+				$page = $this->dispatcher->getParam('page', 'int') ?: 1;
+				$this->flashSession->success('Penambahan produk berhasil!');
+				return $this->response->redirect('/admin/store_items/index/user_id:' . $this->_user->id . ($page > 1 ? '/page:' . $page : ''));
+			}
+			foreach ($store_item->getMessages() as $error) {
+				$this->flashSession->error($error);
+			}
+		}
+		$this->_render($store_item);
+	}
+
+	function updateAction($id) {
+		$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]);
+		$page       = $this->dispatcher->getParam('page', 'int') ?: 1;
+		if (!$store_item) {
+			$this->flashSession->error('Produk tidak ditemukan!');
+			return $this->response->redirect("/admin/store_items/index/user_id:{$this->_user->id}");
+		}
+		if ($this->request->isPost()) {
+			if ($this->dispatcher->getParam('published')) {
+				$store_item->writeAttribute('published', $store_item->published ? 0 : 1);
+			} else {
+				$store_item->setPrice($this->request->getPost('price'));
+				$store_item->setStock($this->request->getPost('stock'));
+				$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
+			}
+			if ($store_item->validation() && $store_item->update()) {
+				$this->flashSession->success('Update produk berhasil!');
+				return $this->response->redirect('/admin/store_items/index/user_id:' . $this->_user->id . ($page > 1 ? '/page:' . $page : ''));
+			}
+			foreach ($store_item->getMessages() as $error) {
+				$this->flashSession->error($error);
+			}
+		}
+		$this->_render($store_item);
+	}
+
+	function deleteAction($id) {
+		$page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		if ($this->request->isPost() &&
+			($store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
+			$store_item->delete();
+		}
+		return $this->response->redirect('/admin/store_items/index/user_id:' . $this->_user->id . ($page > 1 ? '/page:' . $page : ''));
+	}
+
+	private function _render(StoreItem $store_item = null) {
+		$limit               = $this->config->per_page;
+		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset              = ($current_page - 1) * $limit;
+		$store_items         = [];
+		$categories          = [];
+		$products            = [];
+		$order_closing_hours = [];
+		$builder             = $this->modelsManager->createBuilder()
 			->columns([
 				'b.id',
 				'b.user_id',
@@ -48,14 +108,13 @@ class StoreItemsController extends ControllerBase {
 			->join('Application\Models\ProductCategory', 'c.product_category_id = d.id', 'd')
 			->orderBy('d.name, c.name')
 			->where('a.id = ' . $this->_user->id);
-		$paginator = new PaginatorQueryBuilder([
+		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page        = $paginator->getPaginate();
-		$pages       = $this->_setPaginationRange($page);
-		$store_items = [];
+		$page  = $paginator->getPaginate();
+		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			if ($item->order_closing_hour) {
@@ -63,69 +122,6 @@ class StoreItemsController extends ControllerBase {
 			}
 			$store_items[] = $item;
 		}
-		$this->view->store_items = $store_items;
-		$this->view->user        = $this->_user;
-		$this->view->pages       = $pages;
-		$this->view->page        = $paginator->getPaginate();
-		$this->view->menu        = $this->_menu('Members');
-	}
-
-	function createAction() {
-		$store_item = new StoreItem;
-		if ($this->request->isPost()) {
-			$product_id          = $this->request->getPost('product_id', 'int');
-			$store_item->product = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
-			$store_item->user    = $this->_user;
-			$store_item->setPrice($this->request->getPost('price'));
-			$store_item->setStock($this->request->getPost('stock'));
-			$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
-			if ($store_item->validation() && $store_item->create()) {
-				$this->response->setJsonContent(['status' => 1], JSON_UNESCAPED_SLASHES);
-				return $this->response;
-			}
-			foreach ($store_item->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
-		}
-		$this->_render_form($store_item);
-	}
-
-	function updateAction($id) {
-		$store_item = StoreItem::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_user->id, $id]]);
-		if (!$store_item) {
-			$this->flashSession->error('Produk tidak ditemukan');
-			return $this->response->redirect("/admin/store_items/index/user_id:{$this->_user->id}");
-		}
-		if ($this->request->isPost()) {
-			if ($this->dispatcher->getParam('published')) {
-				$store_item->writeAttribute('published', $store_item->published ? 0 : 1);
-			} else {
-				$store_item->setPrice($this->request->getPost('price'));
-				$store_item->setStock($this->request->getPost('stock'));
-				$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
-			}
-			if ($store_item->validation() && $store_item->update()) {
-				$this->response->setJsonContent(['status' => 1], JSON_UNESCAPED_SLASHES);
-				return $this->response;
-			}
-			foreach ($store_item->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
-		}
-		$this->_render_form($store_item);
-	}
-
-	function deleteAction($id) {
-		if ($this->request->isPost()) {
-			$store_item = StoreItem::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_user->id, $id]]);
-			$store_item && $store_item->delete();
-		}
-	}
-
-	private function _render_form(StoreItem $store_item = null) {
-		$categories          = [];
-		$products            = [];
-		$order_closing_hours = [];
 		foreach (ProductCategory::find(['published = 1', 'order' => 'name']) as $category) {
 			$category_products = [];
 			foreach ($category->getProducts(['published = 1 AND NOT EXISTS(SELECT 1 FROM Application\Models\StoreItem WHERE Application\Models\StoreItem.product_id = Application\Models\Product.id AND Application\Models\StoreItem.user_id = ?0)', 'bind' => [$this->_user->id], 'columns' => 'id, name, stock_unit', 'order' => 'name']) as $product) {
@@ -139,22 +135,17 @@ class StoreItemsController extends ControllerBase {
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 			$order_closing_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 		}
+		$this->view->menu                = $this->_menu('Members');
 		$this->view->user                = $this->_user;
+		$this->view->pages               = $pages;
+		$this->view->page                = $paginator->getPaginate();
+		$this->view->store_items         = $store_items;
 		$this->view->categories          = $categories;
+		$this->view->products            = $products;
 		$this->view->current_products    = $products[$categories[0]->id];
-		$this->view->products_json       = json_encode($products, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		$this->view->order_closing_hours = $order_closing_hours;
 		if ($store_item) {
 			$this->view->store_item = $store_item;
 		}
-		$this->view->setRenderLevel(View::LEVEL_ACTION_VIEW);
-		$this->view->start();
-		$this->view->finish();
-		$response = [
-			'status' => -1,
-			'data'   => str_replace(["\n", "\t"], '', $this->view->getContent()),
-		];
-		$this->response->setJsonContent($response, JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 }
