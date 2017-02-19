@@ -13,10 +13,10 @@
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/provinces">Daftar Propinsi</a></span></li>
-						<li><span>{{ subdistrict.city.province.name }}</span></li>
-						<li><span><a href="/admin/cities/index/province_id:{{ subdistrict.city.province.id }}">Daftar Kabupaten / Kota</a></span></li>
-						<li><span>{{ subdistrict.city.name }}</span></li>
-						<li><span><a href="/admin/subdistricts/index/city_id:{{ subdistrict.city.id }}">Daftar Kecamatan</a></span></li>
+						<li><span>{{ province.name }}</span></li>
+						<li><span><a href="/admin/cities/index/province_id:{{ province.id }}">Daftar Kabupaten / Kota</a></span></li>
+						<li><span>{{ city.name }}</span></li>
+						<li><span><a href="/admin/subdistricts/index/city_id:{{ city.id }}">Daftar Kecamatan</a></span></li>
 						<li><span>{{ subdistrict.name }}</span></li>
 						<li><span>Daftar Kelurahan</span></li>
 					</ol>
@@ -25,7 +25,7 @@
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Daftar Kelurahan di Kecamatan {{ subdistrict.name }}, {{ subdistrict.city.type }} {{ subdistrict.city.name }}, Propinsi {{ subdistrict.city.province.name }}</h2>
+				<h2 class="panel-title">Daftar Kelurahan di Kecamatan {{ subdistrict.name }}, {{ city.type }} {{ city.name }}, Propinsi {{ province.name }}</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
