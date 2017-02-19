@@ -5,6 +5,7 @@ namespace Application\Models;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Uniqueness;
 
 class City extends ModelBase {
 	const TYPES = ['Kabupaten', 'Kota'];
@@ -36,6 +37,14 @@ class City extends ModelBase {
 		]);
 	}
 
+	function setType($type) {
+		$this->type = $this->getDI()->getFilter()->sanitize($type, ['string', 'trim']);
+	}
+
+	function setName($name) {
+		$this->name = $this->getDI()->getFilter()->sanitize($name, ['string', 'trim']);
+	}
+
 	function validation() {
 		$validator = new Validation;
 		$validator->add(['name', 'type'], new PresenceOf([
@@ -47,6 +56,13 @@ class City extends ModelBase {
 		$validator->add('type', new InclusionIn([
 			'message' => 'tipe yang valid ' . implode(' atau ', static::TYPES),
 			'domain'  => static::TYPES,
+		]));
+		$validator->add(['province_id', 'name', 'type'], new Uniqueness([
+			'convert' => function(array $values) : array {
+				$values['name'] = strtolower($values['name']);
+				return $values;
+			},
+			'message' => 'kabupaten / kota sudah ada',
 		]));
 		return $this->validate($validator);
 	}

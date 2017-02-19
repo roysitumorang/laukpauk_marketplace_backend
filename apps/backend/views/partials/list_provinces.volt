@@ -10,7 +10,7 @@
 	{% for province in provinces %}
 		<tr>
 			<td class="text-right">{{ province.rank }}</td>
-			<td>{{ province.name }}</td>
+			<td><a href="/admin/cities/index/province_id:{{ province.id }}">{{ province.name }}</a></td>
 			<td class="text-center">
 				<a href="/admin/provinces/update/{{ province.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 			</td>

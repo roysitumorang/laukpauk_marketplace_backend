@@ -111,7 +111,7 @@ class ControllerBase extends Controller {
 				'label'     => 'Settings',
 				'link'      => '#',
 				'icon'      => 'wrench',
-				'expanded'  => $expanded == 'settings',
+				'expanded'  => $expanded == 'Settings',
 				'sub_items' => [
 					['label' => 'Daftar Propinsi', 'link' => 'provinces'],
 				],

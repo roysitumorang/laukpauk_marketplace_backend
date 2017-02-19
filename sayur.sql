@@ -91,7 +91,8 @@ CREATE TABLE `cities` (
   KEY `origin_id` (`origin_id`),
   KEY `created_by` (`created_by`),
   KEY `updated_by` (`updated_by`),
-  KEY `type` (`type`,`name`)
+  KEY `name` (`name`),
+  KEY `type` (`type`)
 ) ENGINE=InnoDB AUTO_INCREMENT=502 DEFAULT CHARSET=utf8;
 
 /*Data for the table `cities` */
