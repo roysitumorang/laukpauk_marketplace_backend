@@ -150,6 +150,9 @@ class UsersController extends ControllerBase {
 					a.{$column} = ?", Db::FETCH_OBJ, [$user->id]);
 			$this->view->total = $total;
 		}
+		if ($user->avatar) {
+			$user->thumbnail = $user->getThumbnail(300, 300);
+		}
 		$this->view->menu       = $this->_menu('Members');
 		$this->view->user       = $user;
 		$this->view->status     = User::STATUS;
@@ -165,7 +168,7 @@ class UsersController extends ControllerBase {
 		if ($this->request->isPost()) {
 			if ($this->dispatcher->hasParam('delete_avatar')) {
 				$user->deleteAvatar();
-				return $this->response->redirect("/admin/users/update/{$user->id}");
+				return $this->response->redirect("/admin/users/show/{$user->id}");
 			}
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->update()) {
@@ -250,9 +253,11 @@ class UsersController extends ControllerBase {
 		return $this->response->redirect('/admin/users?status=1#' . $user->id);
 	}
 
-	private function _prepare_form_datas($user) {
-		$subdistricts   = apcu_fetch('subdistricts');
-		$villages       = apcu_fetch('villages');
+	private function _prepare_form_datas(User $user) {
+		$provinces      = [];
+		$cities         = [];
+		$subdistricts   = [];
+		$villages       = [];
 		$business_hours = [];
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 			$business_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
@@ -263,13 +268,62 @@ class UsersController extends ControllerBase {
 			'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT]],
 			'order' => 'name',
 		]);
-		$this->view->user             = $user;
-		$this->view->status           = User::STATUS;
-		$this->view->genders          = User::GENDERS;
-		$this->view->subdistricts     = $subdistricts;
-		$this->view->current_villages = $villages[$user->village->subdistrict->id ?? $subdistricts[0]->id];
-		$this->view->villages_json    = json_encode($villages, JSON_NUMERIC_CHECK);
-		$this->view->business_hours   = $business_hours;
+		$result = $this->db->query(<<<QUERY
+			SELECT
+				a.id AS province_id,
+				a.name AS province_name,
+				b.id AS city_id,
+				CONCAT_WS(' ', b.type, b.name) AS city_name,
+				c.id AS subdistrict_id,
+				c.name AS subdistrict_name,
+				d.id AS village_id,
+				d.name AS village_name
+			FROM provinces a
+			JOIN cities b ON a.id = b.province_id
+			JOIN subdistricts c ON b.id = c.city_id
+			JOIN villages d ON c.id = d.subdistrict_id
+			ORDER BY province_name, city_name, subdistrict_name, village_name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$provinces[$row->province_id] = $row->province_name;
+			if (!isset($cities[$row->province_id])) {
+				$cities[$row->province_id] = [];
+			}
+			if (!isset($cities[$row->province_id][$row->city_id])) {
+				$cities[$row->province_id][$row->city_id] = $row->city_name;
+			}
+			if (!isset($subdistricts[$row->city_id])) {
+				$subdistricts[$row->city_id] = [];
+			}
+			if (!isset($subdistricts[$row->city_id][$row->subdistrict_id])) {
+				$subdistricts[$row->city_id][$row->subdistrict_id] = $row->subdistrict_name;
+			}
+			if (!isset($villages[$row->subdistrict_id])) {
+				$villages[$row->subdistrict_id] = [];
+			}
+			if (!isset($villages[$row->subdistrict_id][$row->village_id])) {
+				$villages[$row->subdistrict_id][$row->village_id] = $row->village_name;
+			}
+		}
+		$current_province_id              = $user->village->subdistrict->city->province->id ?? array_keys($provinces)[0];
+		$current_cities                   = $cities[$current_province_id];
+		$current_city_id                  = $user->village->subdistrict->city->id ?? array_keys($current_cities)[0];
+		$current_subdistricts             = $subdistricts[$current_city_id];
+		$current_subdistrict_id           = $user->village->subdistrict->id ?? array_keys($current_subdistricts)[0];
+		$current_villages                 = $villages[$current_subdistrict_id];
+		$this->view->user                 = $user;
+		$this->view->status               = User::STATUS;
+		$this->view->genders              = User::GENDERS;
+		$this->view->business_hours       = $business_hours;
+		$this->view->provinces            = $provinces;
+		$this->view->cities               = $cities;
+		$this->view->subdistricts         = $subdistricts;
+		$this->view->villages             = $villages;
+		$this->view->current_cities       = $current_cities;
+		$this->view->current_subdistricts = $current_subdistricts;
+		$this->view->current_villages     = $current_villages;
 	}
 
 	private function _set_model_attributes(&$user) {

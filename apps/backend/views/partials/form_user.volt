@@ -101,10 +101,30 @@
 					</tr>
 					<tr>
 						<td>
+							Propinsi (*) :<br>
+							<select name="province_id" id="province_id">
+							{% for id, name in provinces %}
+								<option value="{{ id }}"{% if user.subdistrict.village.city.province.id == id %} selected{% endif %}>{{ name }}</option>
+							{% endfor %}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Kabupaten / Kota (*) :<br>
+							<select name="city_id" id="city_id">
+							{% for id, name in current_cities %}
+								<option value="{{ id }}"{% if user.village.subdistrict.city.id == id %} selected{% endif %}>{{ name }}</option>
+							{% endfor %}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							Kecamatan (*) :<br>
 							<select name="subdistrict_id" id="subdistrict_id">
-							{% for subdistrict in subdistricts %}
-								<option value="{{ subdistrict.id }}"{% if user.village.subdistrict.id == subdistrict.id %} selected{% endif %}>{{ subdistrict.name }}</option>
+							{% for id, name in current_subdistricts %}
+								<option value="{{ id }}"{% if user.village.subdistrict.id == id %} selected{% endif %}>{{ name }}</option>
 							{% endfor %}
 							</select>
 						</td>
@@ -113,8 +133,8 @@
 						<td>
 							Kelurahan (*) :<br>
 							<select name="village_id" id="village_id">
-							{% for village in current_villages %}
-								<option value="{{ village.id }}"{% if user.village.id == village.id %} selected{% endif %}>{{ village.name }}</option>
+							{% for id, name in current_villages %}
+								<option value="{{ id }}"{% if user.village.id == id %} selected{% endif %}>{{ name }}</option>
 							{% endfor %}
 							</select>
 						</td>
@@ -201,22 +221,35 @@
 	</div>
 </div>
 <script>
-	var villages = {{ villages_json }}, subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id');
-	subdistrict.onchange = function() {
-		var current_villages = villages[this.value], new_options = '';
-		for (var item in current_villages) {
-			new_options += '<option value="' + current_villages[item].id + '">' + current_villages[item].name + '</option>';
+	let cities = {{ cities | json_encode }}, subdistricts = {{ subdistricts | json_encode }}, villages = {{ villages | json_encode }}, province = document.getElementById('province_id'), city = document.getElementById('city_id'), subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id'), avatar = document.querySelector('.delete-avatar');
+	province.onchange = () => {
+		let current_cities = cities[province.value], new_options = '';
+		for (var i in current_cities) {
+			new_options += '<option value="' + i + '">' + current_cities[i] + '</option>'
 		}
-		village.innerHTML = new_options;
+		city.innerHTML = new_options
 	}
-	document.querySelector('.delete-avatar').onclick = function() {
-		if (!confirm('Anda yakin menghapus gambar ini ?')) {
-			return !1
+	city.onchange = () => {
+		let current_subdistricts = subdistricts[city.value], new_options = '';
+		for (var i in current_subdistricts) {
+			new_options += '<option value="' + i + '">' + current_subdistricts[i] + '</option>'
 		}
-		var form = document.createElement('form');
-		form.method = 'POST',
-		form.action = '/admin/users/update/' + this.dataset.id + '/delete_avatar:1',
-		document.body.appendChild(form),
-		form.submit()
+		subdistrict.innerHTML = new_options
+	}
+	subdistrict.onchange = () => {
+		let current_villages = villages[subdistrict.value], new_options = '';
+		for (var i in current_villages) {
+			new_options += '<option value="' + i + '">' + current_villages[i] + '</option>'
+		}
+		village.innerHTML = new_options
+	}
+	avatar.onclick = () => {
+		if (confirm('Anda yakin menghapus gambar ini ?')) {
+			let form = document.createElement('form');
+			form.method = 'POST',
+			form.action = '/admin/users/update/' + avatar.dataset.id + '/delete_avatar:1',
+			document.body.appendChild(form),
+			form.submit()
+		}
 	}
 </script>
