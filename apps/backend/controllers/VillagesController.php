@@ -74,9 +74,12 @@ class VillagesController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$villages[] = $item;
 		}
+		$city                    = $this->_subdistrict->city;
 		$this->view->menu        = $this->_menu('Settings');
 		$this->view->active_tab  = 'villages';
 		$this->view->subdistrict = $this->_subdistrict;
+		$this->view->city        = $city;
+		$this->view->province    = $city->province;
 		$this->view->villages    = $villages;
 		$this->view->page        = $page;
 		$this->view->pages       = $pages;

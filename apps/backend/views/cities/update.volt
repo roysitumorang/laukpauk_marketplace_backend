@@ -26,7 +26,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				<div class="tabs">
-					{{ partial('partials/tabs_province', ['active_tab': active_tab]) }}
+					{{ partial('partials/tabs_province', ['active_tab': active_tab, 'province': province]) }}
 					<div class="tab-content">
 						<div id="cities" class="tab-pane active">
 							{{ partial('partials/form_city', ['action': '/admin/cities/update/' ~ city.id ~ '/province_id:' ~ province.id, 'pages': pages, 'page': page, 'province': province, 'cities': cities, 'types': types]) }}

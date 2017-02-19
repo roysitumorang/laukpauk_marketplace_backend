@@ -77,6 +77,7 @@ class SubdistrictsController extends ControllerBase {
 		$this->view->menu         = $this->_menu('Settings');
 		$this->view->active_tab   = 'subdistricts';
 		$this->view->city         = $this->_city;
+		$this->view->province     = $this->_city->province;
 		$this->view->subdistricts = $subdistricts;
 		$this->view->page         = $page;
 		$this->view->pages        = $pages;

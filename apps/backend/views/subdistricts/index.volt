@@ -28,7 +28,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				<div class="tabs">
-					{{ partial('partials/tabs_province', ['active_tab': active_tab]) }}
+					{{ partial('partials/tabs_province', ['active_tab': active_tab, 'subdistrict': subdistrict]) }}
 					<div class="tab-content">
 						<div id="subdistricts" class="tab-pane active">
 							{{ flashSession.output() }}
