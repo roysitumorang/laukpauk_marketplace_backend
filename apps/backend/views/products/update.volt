@@ -24,7 +24,14 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ partial('partials/form_product', ['action': '/admin/products/update/' ~ product.id]) }}
+				<div class="tabs">
+					{{ partial('partials/tabs_product', ['active_tab': active_tab, 'product': product]) }}
+					<div class="tab-content">
+						<div id="product" class="tab-pane active">
+							{{ partial('partials/form_product', ['action': '/admin/products/update/' ~ product.id]) }}
+						</div>
+					</div>
+				</div>
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->

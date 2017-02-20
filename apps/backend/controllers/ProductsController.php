@@ -107,8 +107,9 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_datas();
-		$this->view->menu    = $this->_menu('Products');
-		$this->view->product = $product;
+		$this->view->menu       = $this->_menu('Products');
+		$this->view->product    = $product;
+		$this->view->active_tab = 'product';
 	}
 
 	function deleteAction($id) {
