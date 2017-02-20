@@ -1193,6 +1193,28 @@ insert  into `product_categories`(`id`,`parent_id`,`name`,`permalink`,`picture`,
 
 UNLOCK TABLES;
 
+/*Table structure for table `product_links` */
+
+DROP TABLE IF EXISTS `product_links`;
+
+CREATE TABLE `product_links` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `product_id` bigint(20) NOT NULL,
+  `linked_product_id` bigint(20) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `product_id` (`product_id`,`linked_product_id`),
+  KEY `created_by` (`created_by`),
+  KEY `linked_product_id` (`linked_product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+
+/*Data for the table `product_links` */
+
+LOCK TABLES `product_links` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `product_pictures` */
 
 DROP TABLE IF EXISTS `product_pictures`;
