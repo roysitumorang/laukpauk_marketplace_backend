@@ -76,7 +76,7 @@ class CitiesController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$cities[] = $item;
 		}
-		$this->view->menu       = $this->_menu('Settings');
+		$this->view->menu       = $this->_menu('Options');
 		$this->view->active_tab = 'cities';
 		$this->view->province   = $this->_province;
 		$this->view->cities     = $cities;

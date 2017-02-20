@@ -131,11 +131,12 @@ class ControllerBase extends Controller {
 					['label' => 'Order List', 'link' => 'orders'],
 				],
 			], [
-				'label'     => 'Settings',
+				'label'     => 'Options',
 				'link'      => '#',
 				'icon'      => 'wrench',
-				'expanded'  => $expanded == 'Settings',
+				'expanded'  => $expanded == 'Options',
 				'sub_items' => [
+					['label' => 'Settings', 'link' => 'settings'],
 					['label' => 'Daftar Propinsi', 'link' => 'provinces'],
 				],
 			], [

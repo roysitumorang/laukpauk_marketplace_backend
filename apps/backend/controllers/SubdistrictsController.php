@@ -74,7 +74,7 @@ class SubdistrictsController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$subdistricts[] = $item;
 		}
-		$this->view->menu         = $this->_menu('Settings');
+		$this->view->menu         = $this->_menu('Options');
 		$this->view->active_tab   = 'subdistricts';
 		$this->view->city         = $this->_city;
 		$this->view->province     = $this->_city->province;

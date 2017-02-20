@@ -75,7 +75,7 @@ class VillagesController extends ControllerBase {
 			$villages[] = $item;
 		}
 		$city                    = $this->_subdistrict->city;
-		$this->view->menu        = $this->_menu('Settings');
+		$this->view->menu        = $this->_menu('Options');
 		$this->view->active_tab  = 'villages';
 		$this->view->subdistrict = $this->_subdistrict;
 		$this->view->city        = $city;

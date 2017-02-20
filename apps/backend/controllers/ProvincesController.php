@@ -62,7 +62,7 @@ class ProvincesController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$provinces[] = $item;
 		}
-		$this->view->menu       = $this->_menu('Settings');
+		$this->view->menu       = $this->_menu('Options');
 		$this->view->active_tab = 'provinces';
 		$this->view->provinces  = $provinces;
 		$this->view->page       = $page;

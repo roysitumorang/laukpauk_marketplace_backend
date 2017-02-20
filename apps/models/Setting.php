@@ -17,8 +17,8 @@ class Setting extends ModelBase {
 
 	private $_filter;
 
-	function initialize() {
-		$this->getDI()->getFilter();
+	function onConstruct() {
+		$this->_filter = $this->getDI()->getFilter();
 	}
 
 	function getSource() {
@@ -35,12 +35,12 @@ class Setting extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'value', new PresenceOf([
+		$validator->add(['name', 'value'], new PresenceOf([
 			'message' => [
 				'name'  => 'nama harus diisi',
 				'value' => 'nilai harus diisi',
 			]
-		])]);
+		]));
 		$validator->add('name', new Uniqueness([
 			'convert' => function(array $values) : array {
 				$values['name'] = strtolower($values['name']);
