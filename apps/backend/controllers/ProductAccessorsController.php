@@ -21,7 +21,7 @@ class ProductAccessorsController extends ControllerBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->_limit           = 2;//$this->config->per_page;
+		$this->_limit           = $this->config->per_page;
 		$this->_current_page    = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$this->_offset          = ($this->_current_page - 1) * $this->_limit;
 		$this->view->menu       = $this->_menu('Products');
