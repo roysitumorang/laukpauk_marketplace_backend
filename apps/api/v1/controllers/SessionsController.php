@@ -92,6 +92,7 @@ class SessionsController extends ControllerBase {
 			$current_user['open_on_saturday']      = $user->open_on_saturday;
 			$current_user['business_opening_hour'] = $user->business_opening_hour;
 			$current_user['business_closing_hour'] = $user->business_closing_hour;
+			$current_user['minimum_purchase']      = $user->minimum_purchase;
 		}
 		$this->_response = [
 			'status' => 1,

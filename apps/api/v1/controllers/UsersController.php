@@ -104,6 +104,7 @@ class UsersController extends ControllerBase {
 			$current_user['open_on_saturday']      = $user->open_on_saturday;
 			$current_user['business_opening_hour'] = $user->business_opening_hour;
 			$current_user['business_closing_hour'] = $user->business_closing_hour;
+			$current_user['minimum_purchase']      = $user->minimum_purchase;
 		}
 		$this->_response = [
 			'status'  => 1,
@@ -164,6 +165,7 @@ class UsersController extends ControllerBase {
 			$this->_current_user->setOpenOnThursday($this->_input->open_on_thursday);
 			$this->_current_user->setOpenOnFriday($this->_input->open_on_friday);
 			$this->_current_user->setOpenOnSaturday($this->_input->open_on_saturday);
+			$this->_current_user->setMinimumPurchase($this->_input->minimum_purchase);
 		}
 		if (!$this->_current_user->validation() || !$this->_current_user->update()) {
 			$errors = [];
@@ -199,6 +201,7 @@ class UsersController extends ControllerBase {
 			$current_user['open_on_saturday']      = $this->_current_user->open_on_saturday;
 			$current_user['business_opening_hour'] = $this->_current_user->business_opening_hour;
 			$current_user['business_closing_hour'] = $this->_current_user->business_closing_hour;
+			$current_user['minimum_purchase']      = $this->_current_user->minimum_purchase;
 		}
 		$this->_response = [
 			'status'  => 1,
