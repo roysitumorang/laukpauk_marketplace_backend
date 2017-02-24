@@ -53,9 +53,12 @@ class StoreItemsController extends ControllerBase {
 			}
 			$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_current_user->id, $product_id]]);
 			if (!$store_item) {
-				$store_item          = new StoreItem;
-				$store_item->user    = $this->_current_user;
-				$store_item->product = $product;
+				$store_item             = new StoreItem;
+				$store_item->user       = $this->_current_user;
+				$store_item->product    = $product;
+				$store_item->created_by = $this->_current_user->id;
+			} else {
+				$store_item->updated_by = $this->_current_user->id;
 			}
 			$store_item->setPrice($attributes->price);
 			$store_item->setStock($attributes->stock);
