@@ -317,12 +317,11 @@ class User extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'mobile_phone', 'deposit', 'address'], new PresenceOf([
+		$validator->add(['name', 'mobile_phone', 'deposit'], new PresenceOf([
 			'message' => [
 				'name'         => 'nama harus diisi',
 				'mobile_phone' => 'nomor HP harus diisi',
 				'deposit'      => 'deposit harus diisi',
-				'address'      => 'alamat harus diisi',
 			],
 		]));
 		if ($this->role_id == Role::MERCHANT) {
