@@ -46,7 +46,6 @@ class SettingsController extends ControllerBase {
 			$this->_response['data']['merchants'] = [];
 			$result = $this->db->query("SELECT a.id, a.name FROM users a JOIN service_areas b ON a.id = b.user_id ORDER BY a.name WHERE b.village_id = {$this->_current_user->village_id}");
 			$result->setFetchMode(Db::FETCH_OBJ);
-			$i = 0;
 			while ($merchant = $result->fetch()) {
 				$this->response['data']['merchants'][$merchant->id] = $merchant->name;
 			}
