@@ -85,7 +85,7 @@ class OrdersController extends ControllerBase {
 			$order->buyer              = $this->_current_user;
 			$order->created_by         = $this->_current_user->id;
 			foreach ($this->_input->items as $item) {
-				$store_item             = StoreItem::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND product_id = ?1', 'bind' => [$merchant->id, $item->product_price_id ?: $item->store_item_id]]);
+				$store_item             = StoreItem::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->product_price_id ?: $item->store_item_id]]);
 				$order_item             = new OrderItem;
 				$order_item->product_id = $store_item->product->id;
 				$order_item->name       = $store_item->product->name;
