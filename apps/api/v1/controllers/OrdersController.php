@@ -212,6 +212,8 @@ class OrdersController extends ControllerBase {
 				'address'            => $order->address,
 				'village'            => $village->name,
 				'subdistrict'        => $village->subdistrict->name,
+				'city'               => $village->subdistrict->city->name,
+				'province'           => $village->subdistrict->city->province->name,
 				'final_bill'         => $order->final_bill,
 				'discount'           => 0,
 				'original_bill'      => $order->original_bill,
