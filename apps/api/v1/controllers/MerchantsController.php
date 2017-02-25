@@ -122,7 +122,7 @@ QUERY
 				($current_day == 'Saturday' && !$merchant->open_on_saturday)) {
 				$delivery_day['unavailable'] = true;
 			} else {
-				$delivery_day['hours'] = !$i ? range($current_hour + 1, $merchant->business_closing_hour) : $business_hours;
+				$delivery_day['hours'] = !$i ? range(max($merchant->business_opening_hour, $current_hour + 1), $merchant->business_closing_hour) : $business_hours;
 			}
 			$delivery_days[] = $delivery_day;
 		}
