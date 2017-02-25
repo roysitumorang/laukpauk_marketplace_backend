@@ -164,7 +164,7 @@ class OrdersController extends ControllerBase {
 			'bind' => [$id]
 		])->getFirst();
 		if ($order) {
-			$order->cancel();
+			$order->cancel($this->_input->cancellation_reason);
 			$this->_response['status']  = 1;
 			$this->_response['message'] = 'Order #' . $order->code . ' telah dicancel!';
 		} else {
@@ -225,6 +225,9 @@ class OrdersController extends ControllerBase {
 				'merchant'           => $merchant->company ?: $merchant->name,
 				'items'              => $items,
 			];
+			if ($order->status == -1) {
+				$payload['cancellation_reason'] = $order->cancellation_reason;
+			}
 			if ($coupon = $order->coupon) {
 				$payload['discount'] = $coupon->discount_type == 1
 							? $coupon->discount_amount

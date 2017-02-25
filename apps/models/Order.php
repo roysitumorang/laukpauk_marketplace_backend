@@ -167,8 +167,11 @@ class Order extends ModelBase {
 		]);
 	}
 
-	function cancel() {
-		$this->update(['status' => array_search('CANCELLED', static::STATUS)]);
+	function cancel($cancellation_reason) {
+		$this->update([
+			'status'              => array_search('CANCELLED', static::STATUS),
+			'cancellation_reason' => $cancellation_reason,
+		]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
 		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order cancelled');
 		$admin_notification             = new Notification;
