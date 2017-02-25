@@ -94,6 +94,18 @@ class UsersController extends ControllerBase {
 				'id'   => $user->village->id,
 				'name' => $user->village->name,
 			],
+			'subdistrict'  => [
+				'id'   => $user->village->subdistrict->id,
+				'name' => $user->village->subdistrict->name,
+			],
+			'city'         => [
+				'id'   => $user->village->subdistrict->city->id,
+				'name' => $user->village->subdistrict->city->name,
+			],
+			'province'     => [
+				'id'   => $user->village->subdistrict->city->province->id,
+				'name' => $user->village->subdistrict->city->province->name,
+			],
 		];
 		if ($user->role->name === 'Merchant') {
 			$current_user['open_on_sunday']        = $user->open_on_sunday;
@@ -220,6 +232,18 @@ class UsersController extends ControllerBase {
 			'village'      => [
 				'id'   => $this->_current_user->village->id,
 				'name' => $this->_current_user->village->name,
+			],
+			'subdistrict'  => [
+				'id'   => $this->_current_user->village->subdistrict->id,
+				'name' => $this->_current_user->village->subdistrict->name,
+			],
+			'city'         => [
+				'id'   => $this->_current_user->village->subdistrict->city->id,
+				'name' => $this->_current_user->village->subdistrict->city->name,
+			],
+			'province'     => [
+				'id'   => $this->_current_user->village->subdistrict->city->province->id,
+				'name' => $this->_current_user->village->subdistrict->city->province->name,
 			],
 		];
 		if ($this->_current_user->role->name == 'Merchant') {
