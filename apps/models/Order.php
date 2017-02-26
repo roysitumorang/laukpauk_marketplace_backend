@@ -205,6 +205,10 @@ class Order extends ModelBase {
 	}
 
 	function complete() {
+		foreach ($this->items as $item) {
+			$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->merchant->id, $item->product_id]]);
+			$store_item->update(['stock' => max(0, $store_item->stock - $item->quantity)]);
+		}
 		$this->update([
 			'status'          => array_search('COMPLETED', static::STATUS),
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
