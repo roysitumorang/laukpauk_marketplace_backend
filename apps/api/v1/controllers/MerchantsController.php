@@ -15,7 +15,17 @@ class MerchantsController extends ControllerBase {
 			SELECT
 				a.id,
 				a.company,
-				a.address
+				a.address,
+				a.open_on_sunday,
+				a.open_on_monday,
+				a.open_on_tuesday,
+				a.open_on_wednesday,
+				a.open_on_thursday,
+				a.open_on_friday,
+				a.open_on_saturday,
+				a.business_opening_hour,
+				a.business_closing_hour,
+				a.delivery_hours
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
@@ -28,7 +38,38 @@ class MerchantsController extends ControllerBase {
 QUERY
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($merchant = $result->fetch()) {
+		while ($item = $result->fetch()) {
+			$business_days = [];
+			if ($item->open_on_sunday) {
+				$business_days[] = 'Minggu';
+			}
+			if ($item->open_on_monday) {
+				$business_days[] = 'Senin';
+			}
+			if ($item->open_on_tuesday) {
+				$business_days[] = 'Selasa';
+			}
+			if ($item->open_on_wednesday) {
+				$business_days[] = 'Rabu';
+			}
+			if ($item->open_on_thursday) {
+				$business_days[] = 'Kamis';
+			}
+			if ($item->open_on_friday) {
+				$business_days[] = 'Jumat';
+			}
+			if ($item->open_on_saturday) {
+				$business_days[] = 'Sabtu';
+			}
+			$merchant = [
+				'id'                    => $item->id,
+				'company'               => $item->company,
+				'address'               => $item->address,
+				'business_days'         => implode(', ', $business_days) ?: '-',
+				'business_opening_hour' => $item->business_opening_hour,
+				'business_closing_hour' => $item->business_closing_hour,
+				'delivery_hours'        => str_replace(',', ', ', $item->delivery_hours ?: implode(',', range($item->business_opening_hour, $item->business_closing_hour))),
+			];
 			$merchants[] = $merchant;
 		}
 		if (!$merchants) {
