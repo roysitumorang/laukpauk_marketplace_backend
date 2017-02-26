@@ -52,6 +52,10 @@ class OrdersController extends ControllerBase {
 			if (!$this->_input->items) {
 				throw new Exception('Order item kosong!');
 			}
+			$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
+				Role::MERCHANT,
+				$this->_input->merchant_id
+			]]);
 			if ($this->_input->coupon_code) {
 				$current_date = $this->currentDatetime->format('Y-m-d');
 				$coupon       = Coupon::findFirst(['status = 1 AND code = ?0 AND effective_date <= ?1 AND expiry_date > ?2', 'bind' => [
@@ -60,18 +64,14 @@ class OrdersController extends ControllerBase {
 					$current_date,
 				]]);
 				if (!$coupon ||
-					(count($coupon->users) && !$coupon->getRelated('users', ['id' => $this->_current_user->id])->getFirst()) ||
+					(!empty($coupon->users) && empty($coupon->getRelated('users', ['id IN ({ids:array})', 'bind' => ['ids' => [$this->_current_user->id, $merchant->id]]]))) ||
 					($coupon->usage == array_search('Sekali Pakai', Coupon::USAGE_TYPES) && $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE buyer_id = ? AND coupon_id = ?', [$this->_current_user->id, $coupon->id]))
 					) {
 					throw new Exception('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
 				}
 			}
-			$order       = new Order;
-			$order_items = [];
-			$merchant    = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
-				Role::MERCHANT,
-				$this->_input->merchant_id
-			]]);
+			$order         = new Order;
+			$order_items   = [];
 			$delivery_date = new DateTime($this->_input->scheduled_delivery->date, $this->currentDatetime->getTimezone());
 			$delivery_date->setTime($this->_input->scheduled_delivery->hour, 0, 0);
 			$order->merchant           = $merchant;
