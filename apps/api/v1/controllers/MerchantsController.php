@@ -68,7 +68,8 @@ QUERY
 					a.open_on_friday,
 					a.open_on_saturday,
 					a.business_opening_hour,
-					a.business_closing_hour
+					a.business_closing_hour,
+					a.delivery_hours
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
@@ -99,16 +100,17 @@ QUERY
 			IntlDateFormatter::GREGORIAN,
 			'EEEE, d MMM yyyy'
 		);
-		$business_hours = range($merchant->business_opening_hour, $merchant->business_closing_hour);
+		if ($merchant->delivery_hours) {
+			$merchant->delivery_hours = explode(',', $merchant->delivery_hours);
+		}
+		$delivery_hours = $merchant->delivery_hours ?: range($merchant->business_opening_hour, $merchant->business_closing_hour);
 		for ($i = 0; $i < 7; $i++) {
-			$current_hour = $now->format('G');
-			if (!$i && $current_hour >= $merchant->business_closing_hour) {
+			if (!$i && $current_hour >= max($delivery_hours)) {
 				continue;
 			}
-			if ($i) {
-				$now->modify('+1 day');
-			}
+			$now->modify("+{$i} day");
 			$current_day  = $now->format('l');
+			$current_hour = $now->format('G');
 			$delivery_day = [
 				'date'  => $now->format('Y-m-d'),
 				'label' => $date_formatter->format($now),
@@ -122,7 +124,11 @@ QUERY
 				($current_day == 'Saturday' && !$merchant->open_on_saturday)) {
 				$delivery_day['unavailable'] = true;
 			} else {
-				$delivery_day['hours'] = !$i ? range(max($merchant->business_opening_hour, $current_hour + 1), $merchant->business_closing_hour) : $business_hours;
+				$delivery_day['hours'] = !$i
+					? array_filter($delivery_hours, function($v, $k) use($current_hour) {
+						return $v > $current_hour;
+					}, ARRAY_FILTER_USE_BOTH)
+					: $delivery_hours;
 			}
 			$delivery_days[] = $delivery_day;
 		}

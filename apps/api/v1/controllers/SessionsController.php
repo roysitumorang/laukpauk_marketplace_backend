@@ -105,6 +105,7 @@ class SessionsController extends ControllerBase {
 			$current_user['business_opening_hour'] = $user->business_opening_hour;
 			$current_user['business_closing_hour'] = $user->business_closing_hour;
 			$current_user['minimum_purchase']      = $user->minimum_purchase;
+			$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
 		}
 		$this->_response = [
 			'status' => 1,

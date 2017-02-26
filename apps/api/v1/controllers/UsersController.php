@@ -107,18 +107,6 @@ class UsersController extends ControllerBase {
 				'name' => $user->village->subdistrict->city->province->name,
 			],
 		];
-		if ($user->role->name === 'Merchant') {
-			$current_user['open_on_sunday']        = $user->open_on_sunday;
-			$current_user['open_on_monday']        = $user->open_on_monday;
-			$current_user['open_on_tuesday']       = $user->open_on_tuesday;
-			$current_user['open_on_wednesday']     = $user->open_on_wednesday;
-			$current_user['open_on_thursday']      = $user->open_on_thursday;
-			$current_user['open_on_friday']        = $user->open_on_friday;
-			$current_user['open_on_saturday']      = $user->open_on_saturday;
-			$current_user['business_opening_hour'] = $user->business_opening_hour;
-			$current_user['business_closing_hour'] = $user->business_closing_hour;
-			$current_user['minimum_purchase']      = $user->minimum_purchase;
-		}
 		$this->_response = [
 			'status'  => 1,
 			'message' => 'Aktivasi account berhasil!',
@@ -209,6 +197,7 @@ class UsersController extends ControllerBase {
 			$this->_current_user->setOpenOnFriday($this->_input->open_on_friday);
 			$this->_current_user->setOpenOnSaturday($this->_input->open_on_saturday);
 			$this->_current_user->setMinimumPurchase($this->_input->minimum_purchase);
+			$this->_current_user->setDeliveryHours($this->_input->delivery_hours);
 		}
 		if (!$this->_current_user->validation() || !$this->_current_user->update()) {
 			$errors = [];
@@ -257,6 +246,8 @@ class UsersController extends ControllerBase {
 			$current_user['business_opening_hour'] = $this->_current_user->business_opening_hour;
 			$current_user['business_closing_hour'] = $this->_current_user->business_closing_hour;
 			$current_user['minimum_purchase']      = $this->_current_user->minimum_purchase;
+			$current_user['delivery_hours']        = $this->_current_user->delivery_hours;
+			$current_user['delivery_hours']        = array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1);
 		}
 		$this->_response = [
 			'status'  => 1,

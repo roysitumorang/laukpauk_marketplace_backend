@@ -67,6 +67,7 @@ class User extends ModelBase {
 	public $open_on_saturday;
 	public $business_opening_hour;
 	public $business_closing_hour;
+	public $delivery_hours;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -268,6 +269,12 @@ class User extends ModelBase {
 		}
 	}
 
+	function setDeliveryHours($delivery_hours) {
+		if ($delivery_hours) {
+			$this->delivery_hours = $delivery_hours;
+		}
+	}
+
 	function beforeValidationOnCreate() {
 		parent::beforeValidationOnCreate();
 		$random                = new Random;
@@ -436,6 +443,9 @@ class User extends ModelBase {
 				}
 			} while (1);
 		}
+		if ($this->delivery_hours) {
+			$this->delivery_hours = join(',', $this->delivery_hours);
+		}
 	}
 
 	function beforeUpdate() {
@@ -456,6 +466,9 @@ class User extends ModelBase {
 			$gd->save($avatar, 100);
 			unlink($this->new_avatar['tmp_name']);
 		}
+		if ($this->delivery_hours) {
+			$this->delivery_hours = explode(',', $this->delivery_hours);
+		}
 	}
 
 	function beforeDelete() {
@@ -470,6 +483,9 @@ class User extends ModelBase {
 
 	function afterFetch() {
 		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
+		if ($this->delivery_hours) {
+			$this->delivery_hours = explode(',', $this->delivery_hours);
+		}
 	}
 
 	function getThumbnail(int $width, int $height, string $default_avatar = null) {
