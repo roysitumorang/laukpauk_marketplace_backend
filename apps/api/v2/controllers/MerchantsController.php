@@ -39,36 +39,34 @@ QUERY
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
-			$business_days = [];
-			if ($item->open_on_sunday) {
-				$business_days[] = 'Minggu';
+			$business_days = [
+				$item->open_on_monday    ? 'Senin'  : ',',
+				$item->open_on_tuesday   ? 'Selasa' : ',',
+				$item->open_on_wednesday ? 'Rabu'   : ',',
+				$item->open_on_thursday  ? 'Kamis'  : ',',
+				$item->open_on_friday    ? 'Jumat'  : ',',
+				$item->open_on_saturday  ? 'Sabtu'  : ',',
+				$item->open_on_sunday    ? 'Minggu' : ',',
+			];
+			$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
+			if ($hours = explode(',', $item->delivery_hours)) {
+				foreach ($business_hours as &$hour) {
+					if (!in_array($hour, $hours)) {
+						$hour = ',';
+					} else {
+						$hour .= '.00';
+					}
+				}
 			}
-			if ($item->open_on_monday) {
-				$business_days[] = 'Senin';
-			}
-			if ($item->open_on_tuesday) {
-				$business_days[] = 'Selasa';
-			}
-			if ($item->open_on_wednesday) {
-				$business_days[] = 'Rabu';
-			}
-			if ($item->open_on_thursday) {
-				$business_days[] = 'Kamis';
-			}
-			if ($item->open_on_friday) {
-				$business_days[] = 'Jumat';
-			}
-			if ($item->open_on_saturday) {
-				$business_days[] = 'Sabtu';
-			}
-			$merchant = [
+			$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-9]{1,2}\.00)(-[1-9]{1,2}\.00)+(-[1-9]{1,2}\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+			$merchant       = [
 				'id'                    => $item->id,
 				'company'               => $item->company,
 				'address'               => $item->address,
-				'business_days'         => implode(', ', $business_days) ?: '-',
-				'business_opening_hour' => $item->business_opening_hour,
-				'business_closing_hour' => $item->business_closing_hour,
-				'delivery_hours'        => str_replace(',', ', ', $item->delivery_hours ?: implode(',', range($item->business_opening_hour, $item->business_closing_hour))),
+				'business_days'         => preg_replace(['/\,+/', '/([a-z])([A-Z])/'], [',', '\1-\2'], implode('', $business_days)) ?: '-',
+				'business_opening_hour' => $item->business_opening_hour . '.00',
+				'business_closing_hour' => $item->business_closing_hour . '.00 WIB',
+				'delivery_hours'        => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 			];
 			$merchants[] = $merchant;
 		}
@@ -88,7 +86,7 @@ QUERY
 				],
 			];
 		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
 
