@@ -22,7 +22,7 @@ class Module implements ModuleDefinitionInterface {
 		$application = $di->getConfig()->application;
 		$loader      = new Loader;
 		$loader->registerNamespaces([
-			'Application\Api\V1\Controllers' => APP_PATH . 'apps/api/v1/controllers/',
+			'Application\Api\V2\Controllers' => APP_PATH . 'apps/api/v2/controllers/',
 			'Application\Models'             => $application->modelsDir,
 			'Application\Plugins'            => $application->pluginsDir,
 			'Phalcon'                        => $application->libraryDir,
@@ -38,7 +38,7 @@ class Module implements ModuleDefinitionInterface {
 		$di->set('dispatcher', function() {
 			$dispatcher    = new Dispatcher;
 			$eventsManager = new EventsManager;
-			$dispatcher->setDefaultNamespace('Application\Api\V1\Controllers');
+			$dispatcher->setDefaultNamespace('Application\Api\V2\Controllers');
 			$eventsManager->attach('dispatch:beforeDispatchLoop', function(Event $event, $dispatcher) {
 				$old_params = $dispatcher->getParams();
 				$new_params = [];
@@ -83,7 +83,9 @@ class Module implements ModuleDefinitionInterface {
 			$response->setStatusCode(200, 'OK');
 			$response->setContentType('application/json', 'UTF-8');
 			$response->setHeader('Access-Control-Allow-Origin', '*');
-			$response->setHeader('Access-Control-Allow-Methods', 'POST, GET');
+			$response->setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+			$response->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Range, Content-Disposition, Content-Type, Authorization');
+			$response->setHeader('Access-Control-Allow-Credentials', 'true');
 			return $response;
 		});
 

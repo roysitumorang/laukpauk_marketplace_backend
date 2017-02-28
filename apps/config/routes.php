@@ -43,6 +43,47 @@ $di->set('router', function() {
 		'params'     => 3
 	]);
 
+	$router->add('/api/v2', [
+		'module'     => 'v2',
+		'controller' => 'home',
+		'action'     => 'index'
+	]);
+
+	$router->add('/api/v2/:controller', [
+		'module'     => 'v2',
+		'controller' => 1,
+		'action'     => 'index'
+	]);
+
+	$router->add('/api/v2/:controller/:action/:params', [
+		'module'     => 'v2',
+		'controller' => 1,
+		'action'     => 2,
+		'params'     => 3
+	]);
+
+	$router->add('/api/v2/([a-z0-9]{32})', [
+		'module'         => 'v2',
+		'merchant_token' => 1,
+		'controller'     => 'home',
+		'action'         => 'index',
+	]);
+
+	$router->add('/api/v2/([a-z0-9]{32})/:controller', [
+		'module'         => 'v2',
+		'merchant_token' => 1,
+		'controller'     => 2,
+		'action'         => 'index'
+	]);
+
+	$router->add('/api/v2/([a-z0-9]{32})/:controller/:action/:params', [
+		'module'         => 'v2',
+		'merchant_token' => 1,
+		'controller'     => 2,
+		'action'         => 3,
+		'params'         => 4
+	]);
+
 	$router->add('/admin', [
 		'module'     => 'backend',
 		'controller' => 'home',

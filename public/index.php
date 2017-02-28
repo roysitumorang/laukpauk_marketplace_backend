@@ -47,6 +47,10 @@ try {
 			'className' => 'Application\Api\V1\Module',
 			'path'      => APP_PATH . 'apps/api/v1/Module.php',
 		],
+		'v2' => [
+			'className' => 'Application\Api\V2\Module',
+			'path'      => APP_PATH . 'apps/api/v2/Module.php',
+		],
 		'backend' => [
 			'className' => 'Application\Backend\Module',
 			'path'      => APP_PATH . 'apps/backend/Module.php',

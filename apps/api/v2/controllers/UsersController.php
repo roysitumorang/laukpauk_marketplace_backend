@@ -33,6 +33,9 @@ class UsersController extends ControllerBase {
 		$user->setMobilePhone($this->_input->mobile_phone);
 		$user->setDeposit(0);
 		$user->role_id = Role::findFirstByName('Buyer')->id;
+		if ($this->_premium_merchant) {
+			$user->merchant = $this->_premium_merchant;
+		}
 		if (!$user->validation() || !$user->create()) {
 			$errors = [];
 			foreach ($user->getMessages() as $error) {
@@ -72,8 +75,10 @@ class UsersController extends ControllerBase {
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
-		$user = User::findFirstByActivationToken($activation_token);
-		if (!$user) {
+		$params = $this->_premium_merchant
+			? ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id = ?2', 'bind' => [Role::BUYER, $activation_token, $this->_premium_merchant->id]]
+			: ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id IS NULL', 'bind' => [Role::BUYER, $activation_token]];
+		if (!($user = User::findFirst($params))) {
 			$this->_response['message'] = 'Token aktivasi tidak valid!';
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
