@@ -31,7 +31,7 @@ abstract class ControllerBase extends Controller {
 
 	function beforeExecuteRoute() {
 		try {
-			$access_token   = $this->request->getHeader('access_token', 'string');
+			$access_token   = str_replace('Bearer ', '', $this->request->getHeader('Authorization', 'string'));
 			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
 			if (!$access_token) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
@@ -41,11 +41,11 @@ abstract class ControllerBase extends Controller {
 			}
 			$encrypted_data = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
 			$crypt          = new Crypt;
-			$api_key        = $crypt->decryptBase64($encrypted_data, $this->config->encryption_key);
+			$payload        = json_decode($crypt->decryptBase64($encrypted_data, $this->config->encryption_key));
 			$params         = $this->_premium_merchant
-					? ['status = 1 AND api_key = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$api_key, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
-					: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id > 2 AND api_key = ?0', 'bind' => [$api_key]];
-			if (!($this->_current_user = User::findFirst($params))) {
+					? ['status = 1 AND api_key = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$payload->api_key, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
+					: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id > 2 AND api_key = ?0', 'bind' => [$payload->api_key]];
+			if (($merchant_token && !$payload->merchant_token != $merchant_token) || !($this->_current_user = User::findFirst($params))) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
 		} catch (Exception $e) {

@@ -112,11 +112,15 @@ class UsersController extends ControllerBase {
 				'name' => $user->village->subdistrict->city->province->name,
 			],
 		];
+		$payload = ['api_key' => $user->api_key];
+		if ($this->_premium_merchant) {
+			$payload['merchant_token'] = $this->_premium_merchant->merchant_token;
+		}
 		$this->_response = [
 			'status'  => 1,
 			'message' => 'Aktivasi account berhasil!',
 			'data'    => [
-				'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
+				'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
 					'+' => '-',
 					'/' => '_',
 					'=' => ',',

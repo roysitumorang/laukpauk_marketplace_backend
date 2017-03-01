@@ -8,6 +8,7 @@ use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
 use Phalcon\Crypt;
+use Phalcon\Db;
 
 class SessionsController extends ControllerBase {
 	function beforeExecuteRoute() {}
@@ -28,6 +29,11 @@ class SessionsController extends ControllerBase {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
+		$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
+		if ($merchant_token && !($premium_merchant = $this->db->fetchOne('SELECT * FROM users WHERE status = 1 AND premium_merchant = 1 AND role_id = ? AND merchant_token = ?', Db::FETCH_OBJ, [Role::MERCHANT, $merchant_token]))) {
+			$this->response->setJsonContent(['message' => 'Merchant token tidak valid, silahkan hubungi Tim LaukPauk.id!']);
+			return $this->response;
+		}
 		$errors = [];
 		if (!$this->_input->mobile_phone) {
 			$errors['mobile_phone'] = 'nomor HP harus diisi';
@@ -40,8 +46,8 @@ class SessionsController extends ControllerBase {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$params = $this->_premium_merchant
-			? ['status = 1 AND mobile_phone = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$this->_input->mobile_phone, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
+		$params = $premium_merchant
+			? ['status = 1 AND mobile_phone = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$this->_input->mobile_phone, Role::MERCHANT, $premium_merchant->id, Role::BUYER, $premium_merchant->id]]
 			: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id IN ({role_ids:array}) AND mobile_phone = :mobile_phone:', 'bind' => ['role_ids' => [Role::BUYER, Role::MERCHANT], 'mobile_phone' => $this->_input->mobile_phone]];
 		$user = User::findFirst($params);
 		if (!$user || !$this->security->checkHash($this->_input->password, $user->password)) {
@@ -107,10 +113,14 @@ class SessionsController extends ControllerBase {
 			$current_user['minimum_purchase']      = $user->minimum_purchase;
 			$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
 		}
+		$payload = ['api_key' => $user->api_key];
+		if ($merchant_token) {
+			$payload['merchant_token'] = $merchant_token;
+		}
 		$this->_response = [
 			'status' => 1,
 			'data'   => [
-				'access_token' => strtr($crypt->encryptBase64($user->api_key, $this->config->encryption_key), [
+				'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
 					'+' => '-',
 					'/' => '_',
 					'=' => ',',
