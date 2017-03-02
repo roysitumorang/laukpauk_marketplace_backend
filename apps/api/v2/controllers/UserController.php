@@ -12,7 +12,7 @@ use Phalcon\Crypt;
 use Phalcon\Db;
 use stdClass;
 
-class UsersController extends ControllerBase {
+class UserController extends ControllerBase {
 	function beforeExecuteRoute() {
 		if ($this->dispatcher->getActionName() === 'update') {
 			parent::beforeExecuteRoute();
