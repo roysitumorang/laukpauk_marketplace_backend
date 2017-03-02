@@ -43,7 +43,7 @@ abstract class ControllerBase extends Controller {
 			$crypt          = new Crypt;
 			$payload        = json_decode($crypt->decryptBase64($encrypted_data, $this->config->encryption_key));
 			$params         = $this->_premium_merchant
-					? ['status = 1 AND api_key = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$payload->api_key, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
+					? ['status = 1 AND api_key = ?0 AND ((role_id = ?1 AND id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$payload->api_key, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
 					: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id > 2 AND api_key = ?0', 'bind' => [$payload->api_key]];
 			if (($merchant_token && $payload->merchant_token != $merchant_token) || !($this->_current_user = User::findFirst($params))) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
