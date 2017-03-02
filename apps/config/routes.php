@@ -51,6 +51,14 @@ $di->set('router', function() {
 		'params'         => 5,
 	]);
 
+	$router->add('/api/v2(/([a-z0-9]{32}))?/posts/:params', [
+		'module'         => 'v2',
+		'merchant_token' => 2,
+		'controller'     => 'posts',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
 	$router->add('/api/v2(/([a-z0-9]{32}))?/:controller', [
 		'module'         => 'v2',
 		'merchant_token' => 2,
