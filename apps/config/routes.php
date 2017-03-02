@@ -67,6 +67,14 @@ $di->set('router', function() {
 		'params'         => 3,
 	]);
 
+	$router->add('/api/v2(/([a-z0-9]{32}))?/notifications/:int', [
+		'module'         => 'v2',
+		'merchant_token' => 2,
+		'controller'     => 'notifications',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
 	$router->add('/api/v2(/([a-z0-9]{32}))?/:controller', [
 		'module'         => 'v2',
 		'merchant_token' => 2,
