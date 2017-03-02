@@ -52,10 +52,14 @@ class OrdersController extends ControllerBase {
 			if (!$this->_input->items) {
 				throw new Exception('Order item kosong!');
 			}
-			$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
-				Role::MERCHANT,
-				$this->_input->merchant_id
-			]]);
+			if ($this->_premium_merchant) {
+				$merchant = $this->_premium_merchant;
+			} else {
+				$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
+					Role::MERCHANT,
+					$this->_input->merchant_id
+				]]);
+			}
 			if ($this->_input->coupon_code) {
 				$current_date = $this->currentDatetime->format('Y-m-d');
 				$coupon       = Coupon::findFirst(['status = 1 AND code = ?0 AND effective_date <= ?1 AND expiry_date > ?2', 'bind' => [
