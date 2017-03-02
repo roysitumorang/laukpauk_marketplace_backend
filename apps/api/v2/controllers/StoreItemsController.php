@@ -4,16 +4,14 @@ namespace Application\Api\V2\Controllers;
 
 use Application\Models\Product;
 use Application\Models\StoreItem;
-use DateTimeImmutable;
 use Phalcon\Db;
 
 class StoreItemsController extends ControllerBase {
 	function indexAction() {
-		$products            = [];
-		$order_closing_hours = [];
-		$limit               = 10;
-		$keyword             = $this->dispatcher->getParam('keyword', 'string');
-		$query               = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN store_items c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
+		$products = [];
+		$limit    = 10;
+		$keyword  = $this->dispatcher->getParam('keyword', 'string');
+		$query    = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN store_items c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
 		if ($keyword) {
 			$query .= " AND b.name LIKE '%{$keyword}%'";
 		}
@@ -22,13 +20,10 @@ class StoreItemsController extends ControllerBase {
 		$page           = $this->dispatcher->getParam('page', 'int');
 		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset         = ($current_page - 1) * $limit;
-		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, c.price, c.stock, c.published, c.order_closing_hour', $query) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, c.price, c.stock, c.published', $query) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($product = $result->fetch()) {
 			$products[] = $product;
-		}
-		foreach (range(6, 18) as $i) {
-			$order_closing_hours[] = ($i < 10 ? '0' . $i : $i). ':00';
 		}
 		if (!$total_products) {
 			$this->_response['message'] = $keyword ? 'Produk tidak ditemukan.' : 'Produk belum ada.';
@@ -36,10 +31,9 @@ class StoreItemsController extends ControllerBase {
 			$this->_response['status'] = 1;
 		}
 		$this->_response['data'] = [
-			'products'            => $products,
-			'order_closing_hours' => $order_closing_hours,
-			'total_pages'         => $total_pages,
-			'current_page'        => $current_page,
+			'products'     => $products,
+			'total_pages'  => $total_pages,
+			'current_page' => $current_page,
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
@@ -63,13 +57,10 @@ class StoreItemsController extends ControllerBase {
 			$store_item->setPrice($attributes->price);
 			$store_item->setStock($attributes->stock);
 			$store_item->setPublished($attributes->published);
-			$store_item->setOrderClosingHour(DateTimeImmutable::createFromFormat('H:i', $attributes->order_closing_hour) ? $attributes->order_closing_hour : null);
 			$store_item->save();
 		}
-		$this->_response = [
-			'status'  => 1,
-			'message' => 'Update produk berhasil!',
-		];
+		$this->_response['status']  = 1;
+		$this->_response['message'] = 'Update produk berhasil!';
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
