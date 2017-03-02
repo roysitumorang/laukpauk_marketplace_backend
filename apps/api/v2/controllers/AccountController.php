@@ -61,10 +61,8 @@ class AccountController extends ControllerBase {
 				$device->update();
 			}
 		}
-		$this->_response = [
-			'status' => 1,
-			'data'   => ['activation_token' => $user->activation_token],
-		];
+		$this->_response['status']                   = 1;
+		$this->_response['data']['activation_token'] = $user->activation_token;
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
@@ -116,17 +114,15 @@ class AccountController extends ControllerBase {
 		if ($this->_premium_merchant) {
 			$payload['merchant_token'] = $this->_premium_merchant->merchant_token;
 		}
-		$this->_response = [
-			'status'  => 1,
-			'message' => 'Aktivasi account berhasil!',
-			'data'    => [
-				'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
-					'+' => '-',
-					'/' => '_',
-					'=' => ',',
-				]),
-				'current_user' => $current_user,
-			],
+		$this->_response['status']  = 1;
+		$this->_response['message'] = 'Aktivasi account berhasil!';
+		$this->_response['data']    = [
+			'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
+				'+' => '-',
+				'/' => '_',
+				'=' => ',',
+			]),
+			'current_user' => $current_user,
 		];
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
@@ -141,39 +137,62 @@ class AccountController extends ControllerBase {
 				}
 				$this->_response['data']['business_hours'] = $business_hours;
 			}
-			if (!$this->cache->exists('provinces')) {
-				$provinces = [];
-				$result    = $this->db->query("SELECT a.id AS province_id, a.name AS province_name, b.id AS city_id, CONCAT_WS(' ', b.type, b.name) AS city_name, c.id AS subdistrict_id, c.name AS subdistrict_name, d.id AS village_id, d.name AS village_name FROM provinces a JOIN cities b ON a.id = b.province_id JOIN subdistricts c ON b.id = c.city_id JOIN villages d ON c.id = d.subdistrict_id ORDER BY province_name, city_name, subdistrict_name, village_name");
-				$result->setFetchMode(Db::FETCH_OBJ);
-				while ($row = $result->fetch()) {
-					if (!isset($provinces[$row->province_id])) {
-						$provinces[$row->province_id] = [
-							'name'   => $row->province_name,
-							'cities' => [],
-						];
-					}
-					if (!isset($provinces[$row->province_id]['cities'][$row->city_id])) {
-						$provinces[$row->province_id]['cities'][$row->city_id] = [
-							'name'         => $row->city_name,
-							'subdistricts' => [],
-						];
-					}
-					if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id])) {
-						$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id] = [
-							'name'     => $row->subdistrict_name,
-							'villages' => [],
-						];
-					}
-					if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id])) {
-						$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id] = $row->village_name;
-					}
-				}
-				$this->cache->save('provinces', $provinces);
+			$provinces = [];
+			$query     = <<<QUERY
+				SELECT
+					a.id AS province_id,
+					a.name AS province_name,
+					b.id AS city_id,
+					CONCAT_WS(' ', b.type, b.name) AS city_name,
+					c.id AS subdistrict_id,
+					c.name AS subdistrict_name,
+					d.id AS village_id,
+					d.name AS village_name
+				FROM
+					provinces a
+					JOIN cities b ON a.id = b.province_id
+					JOIN subdistricts c ON b.id = c.city_id
+					JOIN villages d ON c.id = d.subdistrict_id
+				WHERE
+					EXISTS(SELECT 1 FROM service_areas e WHERE e.village_id = d.id
+QUERY;
+			if ($this->_premium_merchant) {
+				$query .= " AND e.user_id = {$this->_premium_merchant->id}";
 			}
-			$this->_response = [
-				'status' => 1,
-				'data'   => ['provinces' => $this->cache->get('provinces')]
-			];
+			$query .= <<<QUERY
+				) ORDER BY
+					province_name,
+					city_name,
+					subdistrict_name,
+					village_name
+QUERY;
+			$result = $this->db->query($query);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				if (!isset($provinces[$row->province_id])) {
+					$provinces[$row->province_id] = [
+						'name'   => $row->province_name,
+						'cities' => [],
+					];
+				}
+				if (!isset($provinces[$row->province_id]['cities'][$row->city_id])) {
+					$provinces[$row->province_id]['cities'][$row->city_id] = [
+						'name'         => $row->city_name,
+						'subdistricts' => [],
+					];
+				}
+				if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id])) {
+					$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id] = [
+						'name'     => $row->subdistrict_name,
+						'villages' => [],
+					];
+				}
+				if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id])) {
+					$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id] = $row->village_name;
+				}
+			}
+			$this->_response['status']            = 1;
+			$this->_response['data']['provinces'] = $provinces;
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
@@ -244,11 +263,9 @@ class AccountController extends ControllerBase {
 			$current_user['delivery_hours']        = $this->_current_user->delivery_hours;
 			$current_user['delivery_hours']        = array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1);
 		}
-		$this->_response = [
-			'status'  => 1,
-			'message' => 'Update profile berhasil!',
-			'data'    => ['current_user' => $current_user],
-		];
+		$this->_response['status']               = 1;
+		$this->_response['message']              = 'Update profile berhasil!';
+		$this->_response['data']['current_user'] = $current_user;
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
@@ -346,16 +363,14 @@ class AccountController extends ControllerBase {
 		if ($merchant_token) {
 			$payload['merchant_token'] = $merchant_token;
 		}
-		$this->_response = [
-			'status' => 1,
-			'data'   => [
-				'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
-					'+' => '-',
-					'/' => '_',
-					'=' => ',',
-				]),
-				'current_user' => $current_user,
-			],
+		$this->_response['status'] = 1;
+		$this->_response['data']   = [
+			'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
+				'+' => '-',
+				'/' => '_',
+				'=' => ',',
+			]),
+			'current_user' => $current_user,
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;

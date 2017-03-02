@@ -87,12 +87,10 @@ QUERY;
 				'columns'    => 'id, name',
 				'order'      => 'name',
 			])->toArray();
-			$this->_response = [
-				'status' => 1,
-				'data'   => [
-					'merchants'  => $merchants,
-					'categories' => $categories,
-				],
+			$this->_response['status'] = 1;
+			$this->_response['data']   = [
+				'merchants'  => $merchants,
+				'categories' => $categories,
 			];
 		}
 		$this->response->setJsonContent($this->_response);
@@ -190,10 +188,8 @@ QUERY;
 			}
 			$delivery_days[] = $delivery_day;
 		}
-		$this->_response = [
-			'status' => 1,
-			'data'   => ['delivery_days' => $delivery_days],
-		];
+		$this->_response['status']                = 1;
+		$this->_response['data']['delivery_days'] = $delivery_days;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 		return $this->response;
 	}
