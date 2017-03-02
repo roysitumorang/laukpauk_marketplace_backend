@@ -37,10 +37,8 @@ class ProvincesController extends ControllerBase {
 			}
 			$this->cache->save('provinces', $provinces);
 		}
-		$this->_response = [
-			'status' => 1,
-			'data'   => ['provinces' => $this->cache->get('provinces')],
-		];
+		$this->_response['status']            = 1;
+		$this->_response['data']['provinces'] = $this->cache->get('provinces');
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
