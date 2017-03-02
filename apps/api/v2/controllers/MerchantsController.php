@@ -39,9 +39,12 @@ QUERY;
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id}
-			ORDER BY a.company
 QUERY;
 		}
+		$query .= <<<QUERY
+			GROUP BY a.id
+			ORDER BY a.company
+QUERY;
 		$result = $this->db->query($query);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
