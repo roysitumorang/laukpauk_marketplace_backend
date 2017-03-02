@@ -72,7 +72,7 @@ QUERY;
 				'id'                    => $item->id,
 				'company'               => $item->company,
 				'address'               => $item->address,
-				'business_days'         => preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)) ?: '-',
+				'business_days'         => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
 				'business_opening_hour' => $item->business_opening_hour . '.00',
 				'business_closing_hour' => $item->business_closing_hour . '.00 WIB',
 				'delivery_hours'        => $delivery_hours ? $delivery_hours . ' WIB' : '-',
