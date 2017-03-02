@@ -20,7 +20,7 @@ abstract class ControllerBase extends Controller {
 	protected $_input;
 
 	function initialize() {
-		$this->_response['version'] = Setting::findFirstByName('current_apk_version')->value;
+		$this->_response['version'] = $this->db->fetchColumn('SELECT MAX(`version`) FROM releases');
 		if (Setting::findFirstByName('maintenance_mode')->value) {
 			$this->_response['maintenance_mode'] = 1;
 			$this->response->setJsonContent($this->_response);
