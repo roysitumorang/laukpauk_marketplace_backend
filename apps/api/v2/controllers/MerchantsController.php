@@ -104,7 +104,7 @@ QUERY;
 			if (!filter_var($id, FILTER_VALIDATE_INT)) {
 				throw new Exception('Merchant tidak valid!');
 			}
-			$merchant = $this->db->fetchOne(<<<QUERY
+			$query = <<<QUERY
 				SELECT
 					a.id,
 					a.company,
@@ -126,10 +126,20 @@ QUERY;
 					a.status = 1 AND
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
+QUERY;
+			if ($this->_premium_merchant) {
+				$query .= <<<QUERY
+					a.premium_merchant = 1 AND
+					a.id = {$this->_premium_merchant->id}
+QUERY;
+			} else {
+				$query .= <<<QUERY
+					a.premium_merchant IS NULL AND
 					a.id = {$id}
-				ORDER BY a.company
-QUERY
-			, Db::FETCH_OBJ);
+QUERY;
+			}
+			$query .= ' ORDER BY a.company';
+			$merchant = $this->db->fetchOne($query, Db::FETCH_OBJ);
 			if (!$merchant) {
 				throw new Exception('Merchant tidak valid!');
 			}
