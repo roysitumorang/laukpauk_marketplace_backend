@@ -30,7 +30,7 @@ class SessionsController extends ControllerBase {
 			return $this->response;
 		}
 		$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
-		if ($merchant_token && !($premium_merchant = $this->db->fetchOne('SELECT * FROM users WHERE status = 1 AND premium_merchant = 1 AND role_id = ? AND merchant_token = ?', Db::FETCH_OBJ, [Role::MERCHANT, $merchant_token]))) {
+		if ($merchant_token && !($premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]))) {
 			$this->response->setJsonContent(['message' => 'Merchant token tidak valid, silahkan hubungi Tim LaukPauk.id!']);
 			return $this->response;
 		}
