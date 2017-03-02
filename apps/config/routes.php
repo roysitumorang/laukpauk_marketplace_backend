@@ -91,6 +91,16 @@ $di->set('router', function() {
 		'params'         => 3,
 	]);
 
+	$router->add('/api/v2(/([a-z0-9]{32}))?/merchants/:int/categories/:int/products/index/:params', [
+		'module'         => 'v2',
+		'merchant_token' => 2,
+		'controller'     => 'products',
+		'action'         => 'index',
+		'merchant_id'    => 3,
+		'category_id'    => 4,
+		'params'         => 5,
+	]);
+
 	$router->add('/api/v2(/([a-z0-9]{32}))?/:controller', [
 		'module'         => 'v2',
 		'merchant_token' => 2,
