@@ -12,7 +12,7 @@ class ProductsController extends ControllerBase {
 			if (!filter_var($merchant_id, FILTER_VALIDATE_INT)) {
 				throw new Exception('Merchant tidak valid!');
 			}
-			$merchant = $this->db->fetchOne(<<<QUERY
+			$query = <<<QUERY
 				SELECT
 					a.id,
 					a.minimum_purchase
@@ -24,10 +24,20 @@ class ProductsController extends ControllerBase {
 					a.status = 1 AND
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
+QUERY;
+			if ($this->_premium_merchant) {
+				$query .= <<<QUERY
+					a.premium_merchant = 1 AND
+					a.id = {$this->_premium_merchant->id}
+QUERY;
+			} else {
+				$query .= <<<QUERY
+					a.premium_merchant IS NULL AND
 					a.id = {$merchant_id}
-				ORDER BY a.company
-QUERY
-			, Db::FETCH_OBJ);
+QUERY;
+			}
+			$query   .= ' ORDER BY a.company';
+			$merchant = $this->db->fetchOne($query, Db::FETCH_OBJ);
 			if (!$merchant) {
 				throw new Exception('Merchant tidak valid!');
 			}
@@ -41,7 +51,23 @@ QUERY
 		$keyword     = $this->dispatcher->getParam('keyword', 'string');
 		$limit       = 10;
 		$products    = [];
-		$query       = "SELECT COUNT(1) FROM store_items a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.published = 1";
+		$query       = <<<QUERY
+			SELECT
+				COUNT(1)
+			FROM
+				store_items a
+				JOIN products b ON a.product_id = b.id
+				JOIN product_categories c ON b.product_category_id = c.id
+			WHERE
+				a.published = 1 AND
+				b.published = 1 AND
+				c.published = 1 AND
+QUERY;
+		if ($this->_premium_merchant) {
+			$query .= " a.user_id = {$this->_premium_merchant->id}";
+		} else {
+			$query .= " a.user_id = {$merchant->id}";
+		}
 		if ($category_id && $category = $this->db->fetchOne("SELECT id FROM product_categories WHERE id = {$category_id}", Db::FETCH_OBJ)) {
 			$query .= " AND c.id = {$category->id}";
 		}
