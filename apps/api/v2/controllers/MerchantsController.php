@@ -11,7 +11,7 @@ use Phalcon\Db;
 class MerchantsController extends ControllerBase {
 	function indexAction() {
 		$merchants = [];
-		$result    = $this->db->query(<<<QUERY
+		$query     = <<<QUERY
 			SELECT
 				a.id,
 				a.company,
@@ -31,12 +31,18 @@ class MerchantsController extends ControllerBase {
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
 			WHERE
+QUERY;
+		if ($this->_premium_merchant) {
+			$query .= " a.id = {$this->_premium_merchant->id}";
+		} else {
+			$query .= <<<QUERY
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id}
 			ORDER BY a.company
-QUERY
-		);
+QUERY;
+		}
+		$result = $this->db->query($query);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$business_days = [
