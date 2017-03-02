@@ -133,28 +133,13 @@ class UsersController extends ControllerBase {
 	}
 
 	function updateAction() {
-		if ($this->request->isGet()) {
+		if ($this->request->isOptions()) {
 			if ($this->_current_user->role->name == 'Merchant') {
 				$business_hours = new stdClass;
 				foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 					$business_hours->$hour = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 				}
 				$this->_response['data']['business_hours'] = $business_hours;
-			}
-			if (!$this->cache->exists('subdistricts')) {
-				$subdistricts = [];
-				$city         = City::findFirstByName('Medan');
-				foreach ($city->subdistricts as $subdistrict) {
-					$villages = [];
-					foreach ($subdistrict->villages as $village) {
-						$villages[$village->id] = $village->name;
-					}
-					$subdistricts[$subdistrict->id] = [
-						'name'     => $subdistrict->name,
-						'villages' => $villages,
-					];
-				}
-				$this->cache->save('subdistricts', $subdistricts);
 			}
 			if (!$this->cache->exists('provinces')) {
 				$provinces = [];
@@ -185,9 +170,10 @@ class UsersController extends ControllerBase {
 				}
 				$this->cache->save('provinces', $provinces);
 			}
-			$this->_response['status']               = 1;
-			$this->_response['data']['subdistricts'] = $this->cache->get('subdistricts');
-			$this->_response['data']['provinces']    = $this->cache->get('provinces');
+			$this->_response = [
+				'status' => 1,
+				'data'   => ['provinces' => $this->cache->get('provinces')]
+			];
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
