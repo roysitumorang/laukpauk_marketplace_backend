@@ -2,7 +2,6 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Application\Models\BannerCategory;
 use Application\Models\Device;
 use Application\Models\LoginHistory;
 use Application\Models\Role;
@@ -255,21 +254,6 @@ class UserController extends ControllerBase {
 	}
 
 	function authorizeAction() {
-		if (!$this->request->isPost()) {
-			$banners  = [];
-			$category = BannerCategory::findFirstByName('Login');
-			foreach ($category->banners as $banner) {
-				if ($banner->published) {
-					$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file_name;
-				}
-			}
-			$this->_response = [
-				'status' => 1,
-				'data'   => ['banners' => $banners],
-			];
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-			return $this->response;
-		}
 		$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
 		if ($merchant_token && !($premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]))) {
 			$this->response->setJsonContent(['message' => 'Merchant token tidak valid, silahkan hubungi Tim LaukPauk.id!']);
