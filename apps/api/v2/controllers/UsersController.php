@@ -2,7 +2,6 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Application\Models\City;
 use Application\Models\Device;
 use Application\Models\Role;
 use Application\Models\User;
