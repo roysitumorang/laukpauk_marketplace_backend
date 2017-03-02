@@ -2,8 +2,9 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Phalcon\Db;
 use Application\Models\Setting;
+use Exception;
+use Phalcon\Db;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -36,7 +37,6 @@ QUERY;
 					a.id = {$merchant_id}
 QUERY;
 			}
-			$query   .= ' ORDER BY a.company';
 			$merchant = $this->db->fetchOne($query, Db::FETCH_OBJ);
 			if (!$merchant) {
 				throw new Exception('Merchant tidak valid!');
