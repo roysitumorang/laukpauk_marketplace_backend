@@ -98,7 +98,7 @@
 									</tr>
 								{% elsefor %}
 									<tr>
-										<td colspan="4"><i>Belum ada area operasional</i></td>
+										<td colspan="6"><i>Belum ada area operasional</i></td>
 									</tr>
 								{% endfor %}
 								</tbody>
