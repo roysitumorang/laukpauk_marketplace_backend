@@ -67,7 +67,7 @@ QUERY;
 					}
 				}
 			}
-			$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-9]{1,2}\.00)(-[1-9]{1,2}\.00)+(-[1-9]{1,2}\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+			$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
 			$merchant       = [
 				'id'                    => $item->id,
 				'company'               => $item->company,
