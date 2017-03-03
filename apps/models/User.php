@@ -271,7 +271,9 @@ class User extends ModelBase {
 
 	function setDeliveryHours($delivery_hours) {
 		if ($delivery_hours) {
-			$this->delivery_hours = $delivery_hours;
+			$this->delivery_hours = array_filter($delivery_hours, function($v, $k) {
+				return $v >= $this->business_opening_hour && $v <= $this->business_closing_hour;
+			});
 		}
 	}
 
