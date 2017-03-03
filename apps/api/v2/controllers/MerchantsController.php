@@ -191,25 +191,20 @@ QUERY;
 		}
 		$result = $this->db->query(<<<QUERY
 			SELECT
-				a.id,
-				a.name
+				c.id,
+				c.name
 			FROM
-				product_categories a
-				JOIN products b ON a.id = b.product_category_id
+				store_items a
+				JOIN products b ON a.product_id = b.id
+				JOIN product_categories c ON b.product_category_id = c.id
 			WHERE
+				a.user_id = {$merchant->id} AND
+				a.price > 0 AND
 				a.published = 1 AND
 				b.published = 1 AND
-				EXISTS(
-					SELECT
-						1
-					FROM
-						store_items c
-					WHERE
-						c.user_id = {$merchant->id} AND
-						c.product_id = b.id AND
-						c.published = 1
-				)
-			ORDER BY a.name
+				c.published = 1
+			GROUP BY c.id
+			ORDER BY c.name
 QUERY
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
