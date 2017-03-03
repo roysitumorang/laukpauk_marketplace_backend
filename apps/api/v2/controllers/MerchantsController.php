@@ -147,6 +147,7 @@ QUERY;
 			return $this->response;
 		}
 		$delivery_days  = [];
+		$categories     = [];
 		$now            = (new DateTime(null, $this->currentDatetime->getTimezone()))->setTimestamp($this->currentDatetime->getTimestamp());
 		$date_formatter = new IntlDateFormatter(
 			'id_ID',
@@ -188,8 +189,36 @@ QUERY;
 			}
 			$delivery_days[] = $delivery_day;
 		}
+		$result = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				a.name
+			FROM
+				product_categories a
+				JOIN products b ON a.id = b.product_category_id
+			WHERE
+				a.published = 1 AND
+				b.published = 1 AND
+				EXISTS(
+					SELECT
+						1
+					FROM
+						store_items c
+					WHERE
+						c.user_id = {$merchant->id} AND
+						c.product_id = b.id AND
+						c.published = 1
+				)
+			ORDER BY a.name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($item = $result->fetch()) {
+			$categories[] = $item;
+		}
 		$this->_response['status']                = 1;
 		$this->_response['data']['delivery_days'] = $delivery_days;
+		$this->_response['data']['categories']    = $categories;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 		return $this->response;
 	}
