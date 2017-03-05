@@ -21,13 +21,13 @@
 			<td class="text-center">{{ store_item.order_closing_hour|default('-') }}</td>
 			<td class="text-center">
 				{% if store_item.price %}
-				<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ store_item.product_id }}" class="publish">
+				<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ store_item.product_id }}" data-published="{{ store_item.published }}" class="publish">
 				{% endif %}
 				<i class="fa fa-eye{% if !store_item.published %}-slash{% endif %} fa-2x"></i>
 				{% if store_item.price %}
 				</a>
 				{% endif %}
-				<a href="/admin/users/{{ user.id }}/store_items/{{ store_item.product_id }}/update{% if page.current > 1%}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+				<a href="/admin/users/{{ user.id }}/store_items/{{ store_item.product_id }}/update{% if page.current > 1%}?page={{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 				<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ store_item.product_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 			</td>
 		</tr>
@@ -59,7 +59,7 @@
 			if (confirm('Anda yakin menghapus data ini ?')) {
 				let form = document.createElement('form');
 				form.method = 'POST',
-				form.action = '/admin/users/' + item.dataset.userId + '/store_items/' + item.dataset.id + '/delete{% if page.current > 1%}/page:{{ page.current }}{% endif %}',
+				form.action = '/admin/users/' + item.dataset.userId + '/store_items/' + item.dataset.id + '/delete{% if page.current > 1%}?page={{ page.current }}{% endif %}',
 				document.body.appendChild(form),
 				form.submit()
 			}
@@ -70,7 +70,7 @@
 		items[i].onclick = () => {
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/users/' + item.dataset.userId + '/store_items/' + item.dataset.id + '/update' + '/published:1{% if page.current > 1%}/page:{{ page.current }}{% endif %}',
+			form.action = '/admin/users/' + item.dataset.userId + '/store_items/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '{% if page.current > 1%}?page={{ page.current }}{% endif %}',
 			document.body.appendChild(form),
 			form.submit()
 		}

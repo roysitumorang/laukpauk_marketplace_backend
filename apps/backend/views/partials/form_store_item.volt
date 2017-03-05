@@ -4,7 +4,7 @@
 	<div class="tab-content">
 		<div id="store_items" class="tab-pane active">
 			{{ flashSession.output() }}
-			<form method="POST" action="{{ action }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+			<form method="POST" action="{{ action }}{% if page.current > 1 %}?page={{ page.current }}{% endif %}">
 				<table class="table table-striped">
 					<tr>
 						<td class="text-right">

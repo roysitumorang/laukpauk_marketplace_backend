@@ -48,19 +48,14 @@ class StoreItemsController extends ControllerBase {
 
 	function updateAction($id) {
 		$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]);
-		$page       = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$page       = $this->request->get('page', 'int') ?: 1;
 		if (!$store_item) {
 			$this->flashSession->error('Produk tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/store_items");
 		}
 		if ($this->request->isPost()) {
-			if ($this->dispatcher->getParam('published')) {
-				$store_item->writeAttribute('published', $store_item->published ? 0 : 1);
-			} else {
-				$store_item->setPrice($this->request->getPost('price'));
-				$store_item->setStock($this->request->getPost('stock'));
-				$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
-			}
+			$store_item->setPrice($this->request->getPost('price'));
+			$store_item->setStock($this->request->getPost('stock'));
 			if ($store_item->validation() && $store_item->update()) {
 				$this->flashSession->success('Update produk berhasil!');
 				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
@@ -69,7 +64,29 @@ class StoreItemsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_render($store_item);
+		$this->_render($store_item, $page);
+	}
+
+	function publishAction($id) {
+		$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1 AND published = 0', 'bind' => [$this->_user->id, $id]]);
+		if (!$store_item) {
+			$this->flashSession->error('Produk tidak ditemukan!');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/store_items");
+		}
+		$page = $this->request->get('page', 'int') ?: 1;
+		$store_item->update(['published' => 1]);
+		return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
+	}
+
+	function unpublishAction($id) {
+		$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1 AND published = 1', 'bind' => [$this->_user->id, $id]]);
+		if (!$store_item) {
+			$this->flashSession->error('Produk tidak ditemukan!');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/store_items");
+		}
+		$page = $this->request->get('page', 'int') ?: 1;
+		$store_item->update(['published' => 0]);
+		return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 	}
 
 	function deleteAction($id) {
@@ -81,9 +98,8 @@ class StoreItemsController extends ControllerBase {
 		return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 	}
 
-	private function _render(StoreItem $store_item = null) {
+	private function _render(StoreItem $store_item = null, $current_page = 1) {
 		$limit               = $this->config->per_page;
-		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset              = ($current_page - 1) * $limit;
 		$store_items         = [];
 		$categories          = [];
