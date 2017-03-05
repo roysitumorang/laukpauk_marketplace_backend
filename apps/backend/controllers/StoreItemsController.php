@@ -37,7 +37,7 @@ class StoreItemsController extends ControllerBase {
 			if ($store_item->validation() && $store_item->create()) {
 				$page = $this->dispatcher->getParam('page', 'int') ?: 1;
 				$this->flashSession->success('Penambahan produk berhasil!');
-				return $this->response->redirect('/admin/store_items/index/user_id:' . $this->_user->id . ($page > 1 ? '/page:' . $page : ''));
+				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 			}
 			foreach ($store_item->getMessages() as $error) {
 				$this->flashSession->error($error);
@@ -51,7 +51,7 @@ class StoreItemsController extends ControllerBase {
 		$page       = $this->dispatcher->getParam('page', 'int') ?: 1;
 		if (!$store_item) {
 			$this->flashSession->error('Produk tidak ditemukan!');
-			return $this->response->redirect("/admin/store_items/index/user_id:{$this->_user->id}");
+			return $this->response->redirect("/admin/users/{$this->_user->id}/store_items");
 		}
 		if ($this->request->isPost()) {
 			if ($this->dispatcher->getParam('published')) {
@@ -63,7 +63,7 @@ class StoreItemsController extends ControllerBase {
 			}
 			if ($store_item->validation() && $store_item->update()) {
 				$this->flashSession->success('Update produk berhasil!');
-				return $this->response->redirect('/admin/store_items/index/user_id:' . $this->_user->id . ($page > 1 ? '/page:' . $page : ''));
+				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 			}
 			foreach ($store_item->getMessages() as $error) {
 				$this->flashSession->error($error);
@@ -78,7 +78,7 @@ class StoreItemsController extends ControllerBase {
 			($store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
 			$store_item->delete();
 		}
-		return $this->response->redirect('/admin/store_items/index/user_id:' . $this->_user->id . ($page > 1 ? '/page:' . $page : ''));
+		return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 	}
 
 	private function _render(StoreItem $store_item = null) {

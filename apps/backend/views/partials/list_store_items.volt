@@ -27,7 +27,7 @@
 				{% if store_item.price %}
 				</a>
 				{% endif %}
-				<a href="/admin/store_items/update/{{ store_item.product_id }}/user_id:{{ user.id }}{% if page.current > 1%}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+				<a href="/admin/users/{{ user.id }}/store_items/{{ store_item.product_id }}/update{% if page.current > 1%}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 				<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ store_item.product_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 			</td>
 		</tr>
@@ -46,7 +46,7 @@
 			{% if i == page.current %}
 			<b>{{ i }}</b>
 			{% else %}
-			<a href="/admin/store_items/index/user_id:{{ user.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+			<a href="/admin/users/{{ user.id }}/store_items{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 			{% endif %}
 		{% endfor %}
 	</p>
@@ -59,7 +59,7 @@
 			if (confirm('Anda yakin menghapus data ini ?')) {
 				let form = document.createElement('form');
 				form.method = 'POST',
-				form.action = '/admin/store_items/delete/' + item.dataset.id + '/user_id:' + item.dataset.userId{% if page.current > 1%} + '/page:' + {{ page.current }}{% endif %},
+				form.action = '/admin/users/' + item.dataset.userId + '/store_items/' + item.dataset.id + '/delete{% if page.current > 1%}/page:{{ page.current }}{% endif %}',
 				document.body.appendChild(form),
 				form.submit()
 			}
@@ -70,7 +70,7 @@
 		items[i].onclick = () => {
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/store_items/update/' + item.dataset.id + '/user_id:' + item.dataset.userId + '/published:1'{% if page.current > 1%} + '/page:' + {{ page.current }}{% endif %},
+			form.action = '/admin/users/' + item.dataset.userId + '/store_items/' + item.dataset.id + '/update' + '/published:1{% if page.current > 1%}/page:{{ page.current }}{% endif %}',
 			document.body.appendChild(form),
 			form.submit()
 		}

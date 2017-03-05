@@ -134,7 +134,7 @@ QUERY
 				$this->flashSession->success('Penambahan area operasional berhasil!');
 			}
 		}
-		return $this->response->redirect("/admin/service_areas/index/user_id:{$this->_user->id}");
+		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
 	}
 
 	function deleteAction($id) {
@@ -146,6 +146,6 @@ QUERY
 				$this->flashSession->success('Area operasional berhasil dihapus');
 			}
 		}
-		return $this->response->redirect("/admin/service_areas/index/user_id:{$this->_user->id}");
+		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
 	}
 }

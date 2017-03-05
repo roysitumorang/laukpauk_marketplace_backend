@@ -134,6 +134,59 @@ $di->set('router', function() {
 		'params'     => 3
 	]);
 
+	$router->add('/admin/users/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'users',
+		'action'     => 2,
+		'params'     => 1,
+	]);
+
+	$router->add('/admin/users/:int', [
+		'module'     => 'backend',
+		'controller' => 'users',
+		'action'     => 'show',
+		'params'     => 1,
+	]);
+
+	$router->add('/admin/users/:int/service_areas/create', [
+		'module'     => 'backend',
+		'controller' => 'service_areas',
+		'action'     => 'create',
+		'user_id'    => 1,
+	]);
+
+	$router->add('/admin/users/:int/service_areas(/index/:params)?', [
+		'module'     => 'backend',
+		'controller' => 'service_areas',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 3,
+	]);
+
+	$router->add('/admin/users/:int/service_areas/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'service_areas',
+		'action'     => 3,
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/store_items/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'store_items',
+		'action'     => 3,
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/store_items(/index/:params)?', [
+		'module'     => 'backend',
+		'controller' => 'store_items',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 3,
+	]);
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',

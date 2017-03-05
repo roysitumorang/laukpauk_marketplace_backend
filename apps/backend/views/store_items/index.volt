@@ -8,12 +8,12 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/store_items/index/user_id:{{ user.id }}"><h2>Produk</h2></a>
+				<a href="/admin/users/{{ user.id }}/store_items"><h2>Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/users">Daftar Member</a></span></li>
-						<li><span><a href="/admin/users/show/{{ user.id }}">{{ user.name }}</a></span></li>
+						<li><span><a href="/admin/users/{{ user.id }}">{{ user.name }}</a></span></li>
 						<li><span>Produk</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -30,7 +30,7 @@
 					<div class="tab-content">
 						<div id="store_items" class="tab-pane active">
 							{{ flashSession.output() }}
-							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/store_items/create/user_id:{{ user.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">Tambah Produk</a></p>
+							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/{{ user.id }}/store_items/create{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">Tambah Produk</a></p>
 							{{ partial('partials/list_store_items', ['pages': pages, 'page': page, 'user': user, 'store_items': store_items]) }}
 						</div>
 					</div>

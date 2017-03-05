@@ -8,12 +8,12 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/service_areas/index/user_id:{{ user.id }}"><h2>Area Operasional</h2></a>
+				<a href="/admin/users/{{ user.id }}/service_areas"><h2>Area Operasional</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/users">Daftar Member</a></span></li>
-						<li><span><a href="/admin/users/show/{{ user.id }}">{{ user.name }}</a></span></li>
+						<li><span><a href="/admin/users/{{ user.id }}">{{ user.name }}</a></span></li>
 						<li><span>Area Operasional</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -31,7 +31,7 @@
 					<div class="tab-content">
 						<div id="areas" class="tab-pane active">
 							<!-- Main Content //-->
-							<form method="POST" action="/admin/service_areas/create/user_id:{{ user.id }}">
+							<form method="POST" action="/admin/users/{{ user.id }}/service_areas/create">
 								<table class="table table-striped">
 									<tr>
 										<td class="text-right">
@@ -111,7 +111,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/service_areas/index/user_id:{{ user.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/{{ user.id }}/service_areas{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -156,7 +156,7 @@
 			if (confirm('Anda yakin menghapus data ini ?')) {
 				let form = document.createElement('form');
 				form.method = 'POST',
-				form.action = '/admin/service_areas/delete/' + item.dataset.id + '/user_id:' + item.dataset.userId,
+				form.action = '/admin/users/' + item.dataset.userId + '/service_areas/' + item.dataset.id + '/delete',
 				document.body.appendChild(form),
 				form.submit()
 			}

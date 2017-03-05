@@ -170,6 +170,14 @@
 							</select>
 						</td>
 					</tr>
+					<tr>
+						<td>
+							Jam Pengantaran (* untuk merchant) :<br>
+							{% for hour, label in business_hours %}
+							<input type="checkbox" name="delivery_hours[]" value="{{ hour }}"{% if in_array(hour, user.delivery_hours) %} checked{% endif %}> {{ label }}&nbsp;&nbsp;
+							{% endfor %}
+						</td>
+					</tr>
 					{% if user.id %}
 					<tr>
 						<td>
@@ -247,7 +255,7 @@
 		if (confirm('Anda yakin menghapus gambar ini ?')) {
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/users/update/' + avatar.dataset.id + '/delete_avatar:1',
+			form.action = '/admin/users/' + avatar.dataset.id + '/update/delete_avatar:1',
 			document.body.appendChild(form),
 			form.submit()
 		}

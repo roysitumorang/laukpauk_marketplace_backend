@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/show/{{ user.id }}"><h2>{{ user.name }}</h2></a>
+				<a href="/admin/users/{{ user.id }}"><h2>{{ user.name }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -21,7 +21,7 @@
 			<!-- start: page -->
 			<header class="panel-heading">
 				<h2 class="panel-title">{{ user.name }}</h2>
-				<span style="float:right;margin-top:-20px"><a href="/admin/users/update/{{ user.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a></span>
+				<span style="float:right;margin-top:-20px"><a href="/admin/users/{{ user.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a></span>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
@@ -70,7 +70,7 @@
 									<td rowspan="7" width="5%">
 									{% if user.avatar %}
 										<img src="/assets/image/{{ user.thumbnail }}" border="0"><br>
-										<form method="POST" action="/admin/users/update/{{ user.id }}/delete_avatar:1" onsubmit="if(!confirm('Anda yakin menghapus gambar ini ?'))return !1">
+										<form method="POST" action="/admin/users/{{ user.id }}/update/delete_avatar:1" onsubmit="if(!confirm('Anda yakin menghapus gambar ini ?'))return !1">
 											<button type="submit"><i class="fa fa-trash-o fa-2x"></i></button>
 										</form>
 									{% else %}
