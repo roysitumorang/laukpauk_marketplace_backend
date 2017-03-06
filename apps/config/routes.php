@@ -187,6 +187,13 @@ $di->set('router', function() {
 		'params'     => 3,
 	]);
 
+	$router->add('/admin/users/:int/store_items/:action', [
+		'module'     => 'backend',
+		'controller' => 'store_items',
+		'action'     => 2,
+		'user_id'    => 1,
+	]);
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',
