@@ -40,7 +40,7 @@
 							<td>{{ feedback.rank }}</td>
 							<td>{{ feedback.user.mobile_phone }} / {{ feedback.user.name }}</td>
 							<td>{{ feedback.created_at }}</td>
-							<td>{{ feedback.content }}</a></td>
+							<td>{{ feedback.content }}</td>
 						</tr>
 					{% elsefor %}
 					<tr>
