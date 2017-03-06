@@ -70,7 +70,7 @@
 									<td rowspan="7" width="5%">
 									{% if user.avatar %}
 										<img src="/assets/image/{{ user.thumbnail }}" border="0"><br>
-										<form method="POST" action="/admin/users/{{ user.id }}/update/delete_avatar:1" onsubmit="if(!confirm('Anda yakin menghapus gambar ini ?'))return !1">
+										<form method="POST" action="/admin/users/{{ user.id }}/deleteAvatar" onsubmit="if(!confirm('Anda yakin menghapus gambar ini ?'))return !1">
 											<button type="submit"><i class="fa fa-trash-o fa-2x"></i></button>
 										</form>
 									{% else %}
@@ -90,6 +90,16 @@
 									<td>Nama Usaha</td>
 									<td>{{ user.company | default('-') }}</td>
 								</tr>
+								{% if user.role.name == 'Merchant' %}
+								<tr>
+									<td>Buka</td>
+									<td>{{ user.businessDays() }} ({{ user.business_opening_hour }}.00-{{ user.business_closing_hour }}.00 WIB)</td>
+								</tr>
+								<tr>
+									<td>Pengantaran</td>
+									<td>{{ user.deliveryHours() }}</td>
+								</tr>
+								{% endif %}
 							</table>
 							<table class="table table-striped">
 								<tr>
@@ -135,7 +145,7 @@
 								{% if roles['Merchant'] %}
 								<tr>
 									<td>Produk</td>
-									<td>{{ products }}</td>
+									<td>{{ store_items }}</td>
 								</tr>
 								<tr>
 									<td>Service Area</td>

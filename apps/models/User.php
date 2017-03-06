@@ -536,4 +536,30 @@ class User extends ModelBase {
 			'status' => array_search('ACTIVE', static::STATUS),
 		]);
 	}
+
+	function businessDays() {
+		$business_days = [
+			$this->open_on_monday    ? 'Senin'  : ',',
+			$this->open_on_tuesday   ? 'Selasa' : ',',
+			$this->open_on_wednesday ? 'Rabu'   : ',',
+			$this->open_on_thursday  ? 'Kamis'  : ',',
+			$this->open_on_friday    ? 'Jumat'  : ',',
+			$this->open_on_saturday  ? 'Sabtu'  : ',',
+			$this->open_on_sunday    ? 'Minggu' : ',',
+		];
+		return trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-';
+	}
+
+	function deliveryHours() {
+		$business_hours = range($this->business_opening_hour, $this->business_closing_hour);
+		foreach ($business_hours as &$hour) {
+			if (!in_array($hour, $this->delivery_hours)) {
+				$hour = ',';
+			} else {
+				$hour .= '.00';
+			}
+		}
+		$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+		return $delivery_hours ? $delivery_hours . ' WIB' : '-';
+	}
 }

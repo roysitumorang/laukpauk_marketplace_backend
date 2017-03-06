@@ -131,7 +131,7 @@ class UsersController extends ControllerBase {
 			$column = 'buyer_id';
 		} else if ($user->role->name == 'Merchant') {
 			$column                    = 'merchant_id';
-			$this->view->products      = $this->db->fetchColumn('SELECT COUNT(1) FROM store_items WHERE user_id = ?', [$user->id]);
+			$this->view->store_items   = $this->db->fetchColumn('SELECT COUNT(1) FROM store_items WHERE user_id = ?', [$user->id]);
 			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
 		}
 		if ($column) {
@@ -166,10 +166,6 @@ class UsersController extends ControllerBase {
 			return $this->response->redirect('/admin/users');
 		}
 		if ($this->request->isPost()) {
-			if ($this->dispatcher->hasParam('delete_avatar')) {
-				$user->deleteAvatar();
-				return $this->response->redirect("/admin/users/show/{$user->id}");
-			}
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->update()) {
 				$this->flashSession->success('Update member berhasil.');
@@ -183,6 +179,16 @@ class UsersController extends ControllerBase {
 			$user->city_id     = $this->request->getPost('city_id', 'int');
 		}
 		$this->_prepare_form_datas($user);
+	}
+
+	function deleteAvatarAction($id) {
+		$user = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
+		if (!$user) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->response->redirect('/admin/users');
+		}
+		$user->deleteAvatar();
+		return $this->response->redirect("/admin/users/{$user->id}");
 	}
 
 	function activateAction($id) {
@@ -355,5 +361,8 @@ QUERY
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
+		if ($user->role_id == Role::MERCHANT) {
+			$user->setDeliveryHours($this->request->getPost('delivery_hours'));
+		}
 	}
 }
