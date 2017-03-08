@@ -32,6 +32,7 @@ class MerchantsController extends ControllerBase {
 				JOIN service_areas c ON a.id = c.user_id
 			WHERE
 				a.status = 1 AND
+				a.premium_merchant IS NULL AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id}
 			ORDER BY a.company
@@ -115,6 +116,7 @@ QUERY
 					JOIN service_areas c ON a.id = c.user_id
 				WHERE
 					a.status = 1 AND
+					a.premium_merchant IS NULL AND
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
 					a.id = {$id}

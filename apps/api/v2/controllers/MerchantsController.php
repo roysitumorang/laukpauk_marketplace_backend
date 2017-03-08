@@ -37,6 +37,7 @@ QUERY;
 		} else {
 			$query .= <<<QUERY
 				a.status = 1 AND
+				a.premium_merchant IS NULL AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id}
 QUERY;
