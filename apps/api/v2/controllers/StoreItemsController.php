@@ -2,7 +2,6 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Application\Models\Product;
 use Application\Models\StoreItem;
 use Phalcon\Db;
 
@@ -11,7 +10,7 @@ class StoreItemsController extends ControllerBase {
 		$products = [];
 		$limit    = 10;
 		$keyword  = $this->dispatcher->getParam('keyword', 'string');
-		$query    = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN store_items c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
+		$query    = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id JOIN store_items c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1 AND b.published";
 		if ($keyword) {
 			$query .= " AND b.name LIKE '%{$keyword}%'";
 		}
@@ -40,24 +39,18 @@ class StoreItemsController extends ControllerBase {
 	}
 
 	function saveAction() {
-		foreach ($this->_input as $product_id => $attributes) {
-			$product = Product::findFirstById($product_id);
-			if (!$product) {
+		$store_items = StoreItem::find(['user_id = ?0', 'bind' => [$this->_current_user->id]]);
+		$product_ids = array_keys(get_object_vars($this->_input));
+		foreach ($store_items as $store_item) {
+			if (!in_array($store_item->product_id, $product_ids)) {
 				continue;
 			}
-			$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_current_user->id, $product_id]]);
-			if (!$store_item) {
-				$store_item             = new StoreItem;
-				$store_item->user       = $this->_current_user;
-				$store_item->product    = $product;
-				$store_item->created_by = $this->_current_user->id;
-			} else {
-				$store_item->updated_by = $this->_current_user->id;
-			}
+			$attributes = $this->_input->{"{$store_item->product_id}"};
 			$store_item->setPrice($attributes->price);
 			$store_item->setStock($attributes->stock);
 			$store_item->setPublished($attributes->published);
-			$store_item->save();
+			$store_item->updated_by = $this->_current_user->id;
+			$store_item->update();
 		}
 		$this->_response['status']  = 1;
 		$this->_response['message'] = 'Update produk berhasil!';
