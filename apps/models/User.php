@@ -114,7 +114,6 @@ class User extends ModelBase {
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
 		$this->hasManyToMany('id', 'Application\Models\CouponUser', 'user_id', 'coupon_id', 'Application\Models\Coupon', 'id', ['alias' => 'users']);
-		$this->hasManyToMany('id', 'Application\Models\ProductAccessors', 'user_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'restricted_products']);
 	}
 
 	function setPremiumMerchant($premium_merchant) {

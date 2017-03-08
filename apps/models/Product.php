@@ -42,7 +42,6 @@ class Product extends ModelBase {
 		]);
 		$this->hasMany('id', 'Application\Models\ProductPicture', 'product_id', ['alias' => 'pictures']);
 		$this->hasManyToMany('id', 'Application\Models\StoreItem', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
-		$this->hasManyToMany('id', 'Application\Models\ProductAccessor', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'accessors']);
 		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'product_id', 'linked_product_id', 'Application\Models\Product', 'id', ['alias' => 'linked_products']);
 		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'linked_product_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'linkers']);
 	}
