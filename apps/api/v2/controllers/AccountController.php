@@ -24,6 +24,10 @@ class AccountController extends ControllerBase {
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
+		$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
+		if ($merchant_token) {
+			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
+		}
 		$village_id    = filter_var($this->_input->village_id, FILTER_VALIDATE_INT);
 		$user          = new User;
 		$user->village = Village::findFirst($village_id);
@@ -33,8 +37,8 @@ class AccountController extends ControllerBase {
 		$user->setMobilePhone($this->_input->mobile_phone);
 		$user->setDeposit(0);
 		$user->role_id = Role::findFirstByName('Buyer')->id;
-		if ($this->_premium_merchant) {
-			$user->merchant = $this->_premium_merchant;
+		if ($premium_merchant) {
+			$user->merchant_id = $premium_merchant->id;
 		}
 		if (!$user->validation() || !$user->create()) {
 			$errors = [];
@@ -73,8 +77,12 @@ class AccountController extends ControllerBase {
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
-		$params = $this->_premium_merchant
-			? ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id = ?2', 'bind' => [Role::BUYER, $activation_token, $this->_premium_merchant->id]]
+		$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
+		if ($merchant_token) {
+			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
+		}
+		$params = $premium_merchant
+			? ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id = ?2', 'bind' => [Role::BUYER, $activation_token, $premium_merchant->id]]
 			: ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id IS NULL', 'bind' => [Role::BUYER, $activation_token]];
 		if (!($user = User::findFirst($params))) {
 			$this->_response['message'] = 'Token aktivasi tidak valid!';
@@ -111,8 +119,8 @@ class AccountController extends ControllerBase {
 			],
 		];
 		$payload = ['api_key' => $user->api_key];
-		if ($this->_premium_merchant) {
-			$payload['merchant_token'] = $this->_premium_merchant->merchant_token;
+		if ($premium_merchant) {
+			$payload['merchant_token'] = $premium_merchant->merchant_token;
 		}
 		$this->_response['status']  = 1;
 		$this->_response['message'] = 'Aktivasi account berhasil!';
