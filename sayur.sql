@@ -1477,6 +1477,7 @@ CREATE TABLE `service_areas` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `village_id` bigint(20) NOT NULL,
+  `minimum_purchase` int(11) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_by` bigint(20) DEFAULT NULL,

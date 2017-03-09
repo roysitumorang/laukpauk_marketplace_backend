@@ -25,6 +25,59 @@ class ServiceAreasController extends ControllerBase {
 	}
 
 	function indexAction() {
+		$this->_render(new ServiceArea);
+	}
+
+	function createAction() {
+		$service_area = new ServiceArea;
+		if ($this->request->isPost()) {
+			$service_area->user_id    = $this->_user->id;
+			$service_area->village_id = Village::findFirstById($this->request->getPost('village_id', 'int'))->id;
+			$service_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
+			if ($service_area->validation() && $service_area->create()) {
+				$this->flashSession->success('Penambahan area operasional berhasil!');
+				return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
+			}
+			foreach ($service_area->getMessages() as $error) {
+				$this->flashSession->error($error);
+			}
+		}
+		$this->_render($service_area);
+	}
+
+	function updateAction($id) {
+		$service_area = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]);
+		if (!$service_area) {
+			$this->flashSession->error('Area operasional tidak ditemukan!');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
+		}
+		if ($this->request->isPost()) {
+			$service_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
+			if ($service_area->validation() && $service_area->update()) {
+				$this->flashSession->success('Update produk berhasil!');
+				return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
+			}
+			foreach ($service_area->getMessages() as $error) {
+				$this->flashSession->error($error);
+			}
+		}
+		$this->_render($service_area);
+	}
+
+
+	function deleteAction($id) {
+		if ($this->request->isPost()) {
+			if (!($service_area = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
+				$this->flashSession->error('Area operasional tidak ditemukan');
+			} else {
+				$service_area->delete();
+				$this->flashSession->success('Area operasional berhasil dihapus');
+			}
+		}
+		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
+	}
+
+	private function _render(ServiceArea $service_area = null) {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -89,6 +142,7 @@ QUERY
 				'subdistrict_name' => 'c.name',
 				'village_id'       => 'd.id',
 				'village_name'     => 'd.name',
+				'e.minimum_purchase',
 			])
 			->from(['a' => 'Application\Models\Province'])
 			->join('Application\Models\City', 'a.id = b.province_id', 'b')
@@ -120,32 +174,8 @@ QUERY
 		$this->view->current_cities       = $current_cities;
 		$this->view->current_subdistricts = $current_subdistricts;
 		$this->view->current_villages     = $current_villages;
-	}
-
-	function createAction() {
-		if ($this->request->isPost()) {
-			$village_id = $this->request->getPost('village_id', 'int');
-			$village    = Village::findFirstById($village_id);
-			if ($village && !$this->_user->getRelated('service_areas', ['Application\Models\Village.id = ?0', 'bind' => [$village->id]])->getFirst()) {
-				$service_area          = new ServiceArea;
-				$service_area->user    = $this->_user;
-				$service_area->village = $village;
-				$service_area->create();
-				$this->flashSession->success('Penambahan area operasional berhasil!');
-			}
+		if ($service_area) {
+			$this->view->service_area = $service_area;
 		}
-		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
-	}
-
-	function deleteAction($id) {
-		if ($this->request->isPost()) {
-			if (!($service_area = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
-				$this->flashSession->error('Area operasional tidak ditemukan');
-			} else {
-				$service_area->delete();
-				$this->flashSession->success('Area operasional berhasil dihapus');
-			}
-		}
-		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
 	}
 }
