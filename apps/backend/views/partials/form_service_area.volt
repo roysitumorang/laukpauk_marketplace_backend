@@ -45,7 +45,7 @@
 				{% if service_area.id %}
 				{{ service_area.village.name }}
 				{% else %}
-				<select name="village_id">
+				<select name="village_id" id="village_id">
 					{% for id, name in current_villages %}
 					<option value="{{ id }}"{% if id == service_area.village.id %} selected{% endif %}>{{ name }}</option>
 					{% endfor %}
