@@ -1130,28 +1130,6 @@ LOCK TABLES `posts` WRITE;
 
 UNLOCK TABLES;
 
-/*Table structure for table `product_accessors` */
-
-DROP TABLE IF EXISTS `product_accessors`;
-
-CREATE TABLE `product_accessors` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `product_id` bigint(20) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `created_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `user_id` (`user_id`,`product_id`),
-  KEY `product_id` (`product_id`),
-  KEY `created_by` (`created_by`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
-
-/*Data for the table `product_accessors` */
-
-LOCK TABLES `product_accessors` WRITE;
-
-UNLOCK TABLES;
-
 /*Table structure for table `product_categories` */
 
 DROP TABLE IF EXISTS `product_categories`;
@@ -1252,7 +1230,7 @@ CREATE TABLE `products` (
   `product_category_id` bigint(20) NOT NULL,
   `name` varchar(150) NOT NULL,
   `description` text,
-  `stock_unit` varchar(10) NOT NULL,
+  `stock_unit` varchar(15) NOT NULL,
   `lifetime` tinyint(4) DEFAULT NULL,
   `published` tinyint(1) NOT NULL,
   `created_by` bigint(20) DEFAULT NULL,
@@ -1433,6 +1411,30 @@ insert  into `provinces`(`id`,`name`,`created_by`,`created_at`,`updated_by`,`upd
 (32,'Sumatera Barat',1,'2016-10-25 02:26:16',NULL,NULL),
 (33,'Sumatera Selatan',1,'2016-10-25 02:26:16',NULL,NULL),
 (34,'Sumatera Utara',1,'2016-10-25 02:26:16',NULL,NULL);
+
+UNLOCK TABLES;
+
+/*Table structure for table `releases` */
+
+DROP TABLE IF EXISTS `releases`;
+
+CREATE TABLE `releases` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `version` varchar(5) NOT NULL,
+  `features` text,
+  `created_by` bigint(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_by` bigint(20) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `version` (`version`),
+  KEY `created_by` (`created_by`),
+  KEY `updated_by` (`updated_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Data for the table `releases` */
+
+LOCK TABLES `releases` WRITE;
 
 UNLOCK TABLES;
 
