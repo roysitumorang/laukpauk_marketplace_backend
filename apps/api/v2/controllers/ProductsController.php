@@ -16,7 +16,7 @@ class ProductsController extends ControllerBase {
 			$query = <<<QUERY
 				SELECT
 					a.id,
-					a.minimum_purchase
+					COALESCE(c.minimum_purchase, a.minimum_purchase) AS minimum_purchase
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id

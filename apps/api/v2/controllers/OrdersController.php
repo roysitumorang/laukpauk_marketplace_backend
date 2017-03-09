@@ -7,6 +7,7 @@ use Application\Models\Order;
 use Application\Models\OrderItem;
 use Application\Models\StoreItem;
 use Application\Models\Role;
+use Application\Models\ServiceArea;
 use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
@@ -99,7 +100,8 @@ class OrdersController extends ControllerBase {
 				$order->original_bill  += $order_item->quantity * $order_item->unit_price;
 				$order_items[]          = $order_item;
 			}
-			$minimum_purchase = $merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value;
+			$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
+			$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
 			if ($order->original_bill < $minimum_purchase) {
 				throw new Exception('Belanja minimal Rp. ' . number_format($coupon->minimum_purchase) . ' untuk dapat diproses!');
 			}
