@@ -53,7 +53,7 @@
 				{% endif %}
 			</td>
 			<td>
-				<b>Minimum Purchase :</b><br>
+				<b>Minimum Order :</b><br>
 				<input type="text" name="minimum_purchase" value="{{ service_area.minimum_purchase }}">
 			</td>
 			<td>
