@@ -30,7 +30,7 @@
 					<div class="tab-content">
 						<div id="store_items" class="tab-pane active">
 							{{ flashSession.output() }}
-							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/{{ user.id }}/store_items/create{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">Tambah Produk</a></p>
+							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/{{ user.id }}/store_items/create{% if page.current > 1 %}?page={{ page.current }}{% endif %}">Tambah Produk</a></p>
 							{{ partial('partials/list_store_items', ['pages': pages, 'page': page, 'user': user, 'store_items': store_items]) }}
 						</div>
 					</div>

@@ -27,6 +27,7 @@ class StoreItemsController extends ControllerBase {
 
 	function createAction() {
 		$store_item = new StoreItem;
+		$page       = $this->request->get('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
 			$product_id          = $this->request->getPost('product_id', 'int');
 			$store_item->product = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
@@ -35,7 +36,6 @@ class StoreItemsController extends ControllerBase {
 			$store_item->setStock($this->request->getPost('stock'));
 			$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
 			if ($store_item->validation() && $store_item->create()) {
-				$page = $this->dispatcher->getParam('page', 'int') ?: 1;
 				$this->flashSession->success('Penambahan produk berhasil!');
 				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 			}
@@ -43,7 +43,7 @@ class StoreItemsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_render($store_item);
+		$this->_render($store_item, $page);
 	}
 
 	function updateAction($id) {
