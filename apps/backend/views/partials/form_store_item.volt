@@ -9,6 +9,8 @@
 					<tr>
 						<td class="text-right">
 							<b>Kategori :</b>
+						</td>
+						<td>
 							{% if store_item.id %}
 							{{ store_item.product.category.name }}
 							{% else %}
@@ -20,17 +22,9 @@
 							{% endif %}
 						</td>
 						<td class="text-right">
-							<b>Harga :</b>
-							<input type="text" name="price" value="{{ store_item.price }}" placeholder="Harga">
-						</td>
-						<td class="text-right">
-							<b>Stok :</b>
-							<input type="text" name="stock" value="{{ store_item.stock }}" placeholder="Stok">
-						</td>
-					</tr>
-					<tr>
-						<td class="text-right">
 							<b>Produk :</b>
+						</td>
+						<td>
 							{% if store_item.id %}
 							{{ store_item.product.name }} ({{ store_item.product.stock_unit }})
 							{% else %}
@@ -41,14 +35,20 @@
 							</select>
 							{% endif %}
 						</td>
+						<td></td>
+					</tr>
+					<tr>
 						<td class="text-right">
-							<b>Jam Order Maksimal :</b>
-							<select name="order_closing_hour">
-								<option value="">-</option>
-								{% for hour, label in order_closing_hours %}
-								<option value="{{ hour }}"{% if hour == store_item.order_closing_hour %} selected{% endif %}>{{ label }}</option>
-								{% endfor %}
-							</select>
+							<b>Harga :</b>
+						</td>
+						<td>
+							<input type="text" name="price" value="{{ store_item.price }}" placeholder="Harga">
+						</td>
+						<td class="text-right">
+							<b>Stok :</b>
+						</td>
+						<td>
+							<input type="text" name="stock" value="{{ store_item.stock }}" placeholder="Stok">
 						</td>
 						<td class="text-right">
 							<button type="submit" class="btn btn-info">SIMPAN</button>
