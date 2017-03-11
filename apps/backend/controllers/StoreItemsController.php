@@ -22,7 +22,7 @@ class StoreItemsController extends ControllerBase {
 	}
 
 	function indexAction() {
-		$this->_render();
+		$this->_render(null, $this->dispatcher->getParam('page', 'int') ?: 1);
 	}
 
 	function createAction() {
