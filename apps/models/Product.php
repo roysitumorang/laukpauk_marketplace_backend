@@ -76,8 +76,8 @@ class Product extends ModelBase {
 				'stock_unit' => 'satuan harus diisi',
 			],
 		]));
-		$validator->add(['name', 'stock_unit'], new Uniqueness([
-			'message' => 'nama dan satuan sudah ada',
+		$validator->add(['name', 'stock_unit', 'product_category_id'], new Uniqueness([
+			'message' => 'nama, satuan dan kategori sudah ada',
 		]));
 		return $this->validate($validator);
 	}

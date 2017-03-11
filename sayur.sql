@@ -1238,7 +1238,7 @@ CREATE TABLE `products` (
   `updated_by` bigint(20) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`,`stock_unit`),
+  UNIQUE KEY `name` (`name`,`stock_unit`,`product_category_id`),
   KEY `created_by` (`created_by`),
   KEY `product_category_id` (`product_category_id`),
   KEY `updated_by` (`updated_by`),
