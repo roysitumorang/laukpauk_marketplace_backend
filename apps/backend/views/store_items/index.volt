@@ -33,7 +33,7 @@
 							<p style="margin-left:5px">
 								<a type="button" href="/admin/users/{{ user.id }}/store_items/create{% if page.current > 1 %}?page={{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-plus-square"></i> Tambah Produk</a>
 								{% if store_items %}
-								<a type="button" href="/admin/users/{{ user.id }}/store_items/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-pencil"></i> UPDATE HARGA &amp; STOK</a>
+								<a type="button" href="/admin/users/{{ user.id }}/store_items/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-pencil"></i> Update Harga &amp; Stok</a>
 								{% endif %}
 							</p>
 							<table class="table table-striped">
