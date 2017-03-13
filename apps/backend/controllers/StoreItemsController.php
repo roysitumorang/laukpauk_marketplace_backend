@@ -35,13 +35,14 @@ class StoreItemsController extends ControllerBase {
 			$store_item->setStock($this->request->getPost('stock'));
 			if ($store_item->validation() && $store_item->create()) {
 				$this->flashSession->success('Penambahan produk berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
+				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items");
 			}
 			foreach ($store_item->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
 		}
 		$this->_render($store_item);
+		$this->view->render('store_items', 'index');
 	}
 
 	function updateAction() {

@@ -30,12 +30,62 @@
 					<div class="tab-content">
 						<div id="store_items" class="tab-pane active">
 							{{ flashSession.output() }}
-							<p style="margin-left:5px">
-								<a type="button" href="/admin/users/{{ user.id }}/store_items/create{% if page.current > 1 %}?page={{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-plus-square"></i> Tambah Produk</a>
-								{% if store_items %}
+							<form method="POST" action="/admin/users/{{ user.id }}/store_items/create">
+								<table class="table table-striped">
+									<tr>
+										<td class="text-right text-nowrap">
+											<b>Kategori :</b>
+										</td>
+										<td>
+											{% if store_item.id %}
+											{{ store_item.product.category.name }}
+											{% else %}
+											<select id="category_id">
+												{% for category in categories %}
+												<option value="{{ category.id }}"{% if category.id == store_item.product.category.id %} selected{% endif %}>{{ category.name }}</option>
+												{% endfor %}
+											</select>
+											{% endif %}
+										</td>
+										<td class="text-right text-nowrap">
+											<b>Produk :</b>
+										</td>
+										<td colspan="2">
+											{% if store_item.id %}
+											{{ store_item.product.name }} ({{ store_item.product.stock_unit }})
+											{% else %}
+											<select name="product_id" id="product_id">
+												{% for product in current_products %}
+												<option value="{{ product.id }}"{% if product.id == store_item.product.id %} selected{% endif %}>{{ product.name }} ({{ product.stock_unit }})</option>
+												{% endfor %}
+											</select>
+											{% endif %}
+										</td>
+									</tr>
+									<tr>
+										<td class="text-right">
+											<b>Harga :</b>
+										</td>
+										<td>
+											<input type="text" name="price" value="{{ store_item.price }}" placeholder="Harga">
+										</td>
+										<td class="text-right">
+											<b>Stok :</b>
+										</td>
+										<td>
+											<input type="text" name="stock" value="{{ store_item.stock }}" placeholder="Stok">
+										</td>
+										<td class="text-right">
+											<button type="submit" class="btn btn-info"><i class="fa fa-plus-square"></i> Tambah</button>
+										</td>
+									</tr>
+								</table>
+							</form>
+							{% if store_items %}
+							<p style="margin-left:5px" class="text-right">
 								<a type="button" href="/admin/users/{{ user.id }}/store_items/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-pencil"></i> Update Harga &amp; Stok</a>
-								{% endif %}
 							</p>
+							{% endif %}
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -98,6 +148,7 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
+        let products = {{ products | json_encode }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), stock_unit = document.getElementById('stock_unit');
 	for (let items = document.querySelectorAll('.delete'), i = items.length; i--; ) {
 		let item = items[i];
 		item.onclick = () => {
@@ -120,4 +171,20 @@
 			form.submit()
 		}
 	}
+        category.onchange = () => {
+                let current_products = products[category.value], new_options = '';
+                for (let i in current_products) {
+                        new_options += '<option value="' + current_products[i].id + '">' + current_products[i].name + ' (' + current_products[i].stock_unit + ')</option>'
+                }
+                product.innerHTML = new_options,
+                stock_unit.innerText = current_products[0].stock_unit,
+                product.onchange = () => {
+                        for (let i in current_products) {
+                                if (current_products[i].id == product.value) {
+                                        stock_unit.innerText = current_products[i].stock_unit;
+                                        break;
+                                }
+                        }
+                }
+        }
 </script>
