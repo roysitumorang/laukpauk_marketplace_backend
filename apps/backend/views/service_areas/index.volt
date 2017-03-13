@@ -89,7 +89,7 @@
 										</td>
 										<td class="text-right">
 											<br>
-											<button type="submit" class="btn btn-info">SIMPAN</button>
+											<button type="submit" class="btn btn-info"><i class="fa fa-plus-square"></i> Tambah</button>
 										</td>
 									</tr>
 								</table>
