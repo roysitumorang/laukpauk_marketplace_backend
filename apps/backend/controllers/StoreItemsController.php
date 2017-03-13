@@ -27,14 +27,12 @@ class StoreItemsController extends ControllerBase {
 
 	function createAction() {
 		$store_item = new StoreItem;
-		$page       = $this->request->get('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
 			$product_id          = $this->request->getPost('product_id', 'int');
 			$store_item->product = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
 			$store_item->user    = $this->_user;
 			$store_item->setPrice($this->request->getPost('price'));
 			$store_item->setStock($this->request->getPost('stock'));
-			$store_item->setOrderClosingHour($this->request->getPost('order_closing_hour'));
 			if ($store_item->validation() && $store_item->create()) {
 				$this->flashSession->success('Penambahan produk berhasil!');
 				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
@@ -43,26 +41,27 @@ class StoreItemsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_render($store_item, $page);
+		$this->_render($store_item);
 	}
 
-	function updateAction($id) {
-		$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]);
-		$page       = $this->request->get('page', 'int') ?: 1;
-		if (!$store_item) {
-			$this->flashSession->error('Produk tidak ditemukan!');
-			return $this->response->redirect("/admin/users/{$this->_user->id}/store_items");
-		}
+	function updateAction() {
+		$page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
-			$store_item->setPrice($this->request->getPost('price'));
-			$store_item->setStock($this->request->getPost('stock'));
-			if ($store_item->validation() && $store_item->update()) {
-				$this->flashSession->success('Update produk berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
+			$input = filter_input_array(INPUT_POST, [
+				'id'    => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+				'price' => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+				'stock' => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+			]);
+			foreach ($input['id'] as $k => $id) {
+				$store_item = StoreItem::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_user->id, $id]]);
+				if ($store_item) {
+					$store_item->setPrice(max($input['price'][$k] ?: 0, 0));
+					$store_item->setStock(max($input['stock'][$k] ?: 0, 0));
+					$store_item->update();
+				}
 			}
-			foreach ($store_item->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
+			$this->flashSession->success('Update produk berhasil!');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/store_items" . ($page > 1 ? '/index/page:' . $page : ''));
 		}
 		$this->_render($store_item, $page);
 	}
@@ -90,7 +89,7 @@ class StoreItemsController extends ControllerBase {
 	}
 
 	function deleteAction($id) {
-		$page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$page = $this->request->get('page', 'int') ?: 1;
 		if ($this->request->isPost() &&
 			($store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
 			$store_item->delete();
@@ -99,13 +98,12 @@ class StoreItemsController extends ControllerBase {
 	}
 
 	private function _render(StoreItem $store_item = null, $current_page = 1) {
-		$limit               = $this->config->per_page;
-		$offset              = ($current_page - 1) * $limit;
-		$store_items         = [];
-		$categories          = [];
-		$products            = [];
-		$order_closing_hours = [];
-		$builder             = $this->modelsManager->createBuilder()
+		$limit       = $this->config->per_page;
+		$offset      = ($current_page - 1) * $limit;
+		$store_items = [];
+		$categories  = [];
+		$products    = [];
+		$builder     = $this->modelsManager->createBuilder()
 			->columns([
 				'b.id',
 				'b.user_id',
@@ -116,7 +114,6 @@ class StoreItemsController extends ControllerBase {
 				'b.price',
 				'b.stock',
 				'b.published',
-				'b.order_closing_hour',
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\StoreItem', 'a.id = b.user_id', 'b')
@@ -148,18 +145,14 @@ class StoreItemsController extends ControllerBase {
 				$products[$category->id] = $category_products;
 			}
 		}
-		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
-			$order_closing_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
-		}
-		$this->view->menu                = $this->_menu('Members');
-		$this->view->user                = $this->_user;
-		$this->view->pages               = $pages;
-		$this->view->page                = $paginator->getPaginate();
-		$this->view->store_items         = $store_items;
-		$this->view->categories          = $categories;
-		$this->view->products            = $products;
-		$this->view->current_products    = $products[$categories[0]->id];
-		$this->view->order_closing_hours = $order_closing_hours;
+		$this->view->menu             = $this->_menu('Members');
+		$this->view->user             = $this->_user;
+		$this->view->pages            = $pages;
+		$this->view->page             = $paginator->getPaginate();
+		$this->view->store_items      = $store_items;
+		$this->view->categories       = $categories;
+		$this->view->products         = $products;
+		$this->view->current_products = $products[$categories[0]->id];
 		if ($store_item) {
 			$this->view->store_item = $store_item;
 		}

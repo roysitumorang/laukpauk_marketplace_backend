@@ -171,27 +171,28 @@ $di->set('router', function() {
 		'params'     => 2,
 	]);
 
+	$router->add('/admin/users/:int/store_items/:params', [
+		'module'     => 'backend',
+		'controller' => 'store_items',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/store_items/:action/:params', [
+		'module'     => 'backend',
+		'controller' => 'store_items',
+		'action'     => 2,
+		'user_id'    => 1,
+		'params'     => 3,
+	]);
+
 	$router->add('/admin/users/:int/store_items/:int/:action', [
 		'module'     => 'backend',
 		'controller' => 'store_items',
 		'action'     => 3,
 		'user_id'    => 1,
 		'params'     => 2,
-	]);
-
-	$router->add('/admin/users/:int/store_items(/index/:params)?', [
-		'module'     => 'backend',
-		'controller' => 'store_items',
-		'action'     => 'index',
-		'user_id'    => 1,
-		'params'     => 3,
-	]);
-
-	$router->add('/admin/users/:int/store_items/:action', [
-		'module'     => 'backend',
-		'controller' => 'store_items',
-		'action'     => 2,
-		'user_id'    => 1,
 	]);
 
 	$router->notFound([
