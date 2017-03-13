@@ -148,17 +148,18 @@ $di->set('router', function() {
 		'params'     => 1,
 	]);
 
-	$router->add('/admin/users/:int/service_areas/create', [
-		'module'     => 'backend',
-		'controller' => 'service_areas',
-		'action'     => 'create',
-		'user_id'    => 1,
-	]);
-
-	$router->add('/admin/users/:int/service_areas(/index/:params)?', [
+	$router->add('/admin/users/:int/service_areas/:params', [
 		'module'     => 'backend',
 		'controller' => 'service_areas',
 		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/service_areas/:action/:params', [
+		'module'     => 'backend',
+		'controller' => 'service_areas',
+		'action'     => 2,
 		'user_id'    => 1,
 		'params'     => 3,
 	]);

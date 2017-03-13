@@ -34,7 +34,7 @@ class ServiceArea extends ModelBase {
 	}
 
 	function setMinimumPurchase($minimum_purchase) {
-		$this->minimum_purchase = $minimum_purchase;
+		$this->minimum_purchase = $this->getDI()->getFilter()->sanitize($minimum_purchase, 'int');
 	}
 
 	function beforeSave() {

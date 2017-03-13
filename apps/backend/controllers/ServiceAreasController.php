@@ -36,36 +36,39 @@ class ServiceAreasController extends ControllerBase {
 			$service_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
 			if ($service_area->validation() && $service_area->create()) {
 				$this->flashSession->success('Penambahan area operasional berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
+				return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
 			}
 			foreach ($service_area->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
 		}
 		$this->_render($service_area);
+		$this->view->render('service_areas', 'index');
 	}
 
-	function updateAction($id) {
-		$service_area = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]);
-		if (!$service_area) {
-			$this->flashSession->error('Area operasional tidak ditemukan!');
-			return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
-		}
+	function updateAction() {
+		$page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
-			$service_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
-			if ($service_area->validation() && $service_area->update()) {
-				$this->flashSession->success('Update produk berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
+			$input = filter_input_array(INPUT_POST, [
+				'id'               => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+				'minimum_purchase' => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+			]);
+			foreach ($input['id'] as $k => $id) {
+				$service_area = ServiceArea::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_user->id, $id]]);
+				if ($service_area) {
+					$service_area->setMinimumPurchase($input['minimum_purchase'][$k]);
+					$service_area->update();
+				}
 			}
-			foreach ($service_area->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
+			$this->flashSession->success('Update produk berhasil!');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
 		}
 		$this->_render($service_area);
 	}
 
 
 	function deleteAction($id) {
+		$page = $this->request->get('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
 			if (!($service_area = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
 				$this->flashSession->error('Area operasional tidak ditemukan');
@@ -74,7 +77,7 @@ class ServiceAreasController extends ControllerBase {
 				$this->flashSession->success('Area operasional berhasil dihapus');
 			}
 		}
-		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
+		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
 	}
 
 	private function _render(ServiceArea $service_area = null) {
@@ -134,6 +137,7 @@ QUERY
 		$services_areas         = [];
 		$builder                = $this->modelsManager->createBuilder()
 			->columns([
+				'e.id',
 				'province_id'      => 'a.id',
 				'province_name'    => 'a.name',
 				'city_id'          => 'b.id',

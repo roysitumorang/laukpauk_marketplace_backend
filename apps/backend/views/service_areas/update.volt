@@ -24,7 +24,70 @@
 				<h2 class="panel-title">Update Area Operasional {{ user.name }}</h2>
 			</header>
 			<div class="panel-body">
-				{{ partial('partials/form_service_area', ['action': '/admin/users/' ~ user.id ~ '/service_areas/' ~ service_area.village_id ~ '/update', 'user': user, 'pages': pages, 'page': page, 'service_areas': service_areas, 'service_area': service_area, 'provinces': provinces, 'cities': cities, 'subdistricts': subdistricts, 'villages': villages, 'current_cities': current_cities, 'current_subdistricts': current_subdistricts, 'current_villages': current_villages]) }}
+				{% if service_areas %}
+				<form method="POST" action="/admin/users/{{ user.id }}/service_areas/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+				{% endif %}
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th width="5%"><b>No</b></th>
+								<th><b>Propinsi</b></th>
+								<th><b>Kabupaten / Kota</b></th>
+								<th><b>Kecamatan</b></th>
+								<th><b>Kelurahan</b></th>
+								<th><b>Minimum Order</b></th>
+								<th><b>#</b></th>
+							</tr>
+						</thead>
+						<tbody>
+						{% for service_area in service_areas %}
+							<tr>
+								<td>
+									{{ service_area.rank }}
+									<input type="hidden" name="id[]" value="{{ service_area.id }}">
+								</td>
+								<td>{{ service_area.province_name }}</td>
+								<td>{{ service_area.city_name }}</td>
+								<td>{{ service_area.subdistrict_name }}</td>
+								<td>{{ service_area.village_name }}</td>
+								<td>
+									<input type="text" name="minimum_purchase[]" value="{{ service_area.minimum_purchase }}">
+								</td>
+								<td>
+									<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ service_area.village_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+								</td>
+							</tr>
+						{% elsefor %}
+							<tr>
+								<td colspan="7"><i>Belum ada area operasional</i></td>
+							</tr>
+						{% endfor %}
+						{% if service_areas %}
+							<tr>
+								<td colspan="7" class="text-right">
+									<button type="submit" class="btn btn-info">SIMPAN</button>
+								</td>
+							</tr>
+						{% endif %}
+						</tbody>
+					</table>
+				{% if service_areas %}
+				</form>
+				{% endif %}
+				{% if page.total_pages > 1 %}
+				<div class="weepaging">
+					<p>
+						<b>Halaman:</b>&nbsp;&nbsp;
+						{% for i in pages %}
+							{% if i == page.current %}
+							<b>{{ i }}</b>
+							{% else %}
+							<a href="/admin/users/{{ user.id }}/service_areas{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+							{% endif %}
+						{% endfor %}
+					</p>
+				</div>
+				{% endif %}
 			</div>
 		</section>
 	{{ partial('partials/right_side') }}
