@@ -47,7 +47,6 @@ class User extends ModelBase {
 	public $mobile_phone;
 	public $status;
 	public $activated_at;
-	public $verified_at;
 	public $activation_token;
 	public $password_reset_token;
 	public $deposit;
@@ -179,12 +178,6 @@ class User extends ModelBase {
 	function setActivatedAt($activated_at) {
 		if ($activated_at) {
 			$this->activated_at = $this->_filter->sanitize($activated_at, ['string', 'trim']);
-		}
-	}
-
-	function setVerifiedAt($verified_at) {
-		if ($verified_at) {
-			$this->verified_at = $this->_filter->sanitize($verified_at, ['string', 'trim']);
 		}
 	}
 

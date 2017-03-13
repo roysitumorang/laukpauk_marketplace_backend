@@ -54,12 +54,6 @@
 										</td>
 										<td>
 											<b>{{ status[user.status] }}</b>
-											<br><br>
-											{% if user.verified_at %}
-											<font color="#000000"><b>VERIFIED</font></b></font>
-											{% else %}
-											<font color="#FF0000"><b>VERIFICATION IN PROGRESS</b></font>
-											{% endif %}
 										</td>
 										<td>Rp. {{ number_format(user.deposit) }}</td>
 									</tr>

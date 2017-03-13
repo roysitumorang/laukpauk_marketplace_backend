@@ -32,7 +32,6 @@ class UsersController extends ControllerBase {
 				'a.mobile_phone',
 				'a.status',
 				'a.activated_at',
-				'a.verified_at',
 				'a.activation_token',
 				'a.password_reset_token',
 				'a.deposit',
@@ -239,23 +238,6 @@ class UsersController extends ControllerBase {
 		}
 		$user->reactivate();
 		$this->flashSession->success('Member berhasil diaktifkan kembali.');
-		return $this->response->redirect('/admin/users?status=1#' . $user->id);
-	}
-
-	function verifyAction($id) {
-		$user = User::findFirst([
-			'conditions' => 'id = ?0 AND status = ?1 AND verified_at IS NULL',
-			'bind'       => [
-				$id,
-				array_search('ACTIVE', User::STATUS),
-			]
-		]);
-		if (!$user) {
-			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->response->redirect('/admin/users');
-		}
-		$user->update(['verified_at' => $this->currentDatetime->format('Y-m-d H:i:s')]);
-		$this->flashSession->success('Verifikasi member berhasil.');
 		return $this->response->redirect('/admin/users?status=1#' . $user->id);
 	}
 

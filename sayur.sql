@@ -1,5 +1,5 @@
 /*
-SQLyog Ultimate
+SQLyog Enterprise
 MySQL - 10.1.21-MariaDB : Database - sayur
 *********************************************************************
 */
@@ -8621,7 +8621,6 @@ CREATE TABLE `users` (
   `mobile_phone` varchar(20) NOT NULL,
   `status` tinyint(1) NOT NULL,
   `activated_at` datetime DEFAULT NULL,
-  `verified_at` datetime DEFAULT NULL,
   `activation_token` char(32) DEFAULT NULL,
   `password_reset_token` char(32) DEFAULT NULL,
   `deposit` float NOT NULL,
@@ -8671,8 +8670,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`api_key`,`premium_merchant`,`merchant_id`,`merchant_token`,`domain`,`minimum_purchase`,`admin_fee`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`verified_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`delivery_hours`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
+insert  into `users`(`id`,`role_id`,`api_key`,`premium_merchant`,`merchant_id`,`merchant_token`,`domain`,`minimum_purchase`,`admin_fee`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`delivery_hours`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,0,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
 
 UNLOCK TABLES;
 

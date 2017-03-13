@@ -117,14 +117,6 @@
 								<a href="javascript:confirm('Anda yakin mengaktifkan kembali member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/reactivate')" title="Reactivated"><img src="/backend/images/bullet-red.png" border="0"></a>
 								<b><font color="#FF0000">SUSPENDED</font></b>
 								{% endif %}
-								<br><br>
-								{% if user.verified_at %}
-								<img src="/backend/images/bullet-green.png" border="0">&nbsp;
-								<b><font color="#000000">VERIFIED</font></b>
-								{% elseif user.status == 'ACTIVE' %}
-								<a href="javascript:confirm('Anda yakin ingin melakukan verifikasi terhadap member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/verify')" title="Verify"><img src="/backend/images/bullet-red.png" border="0"></a>&nbsp;
-								<b><font color="#FF0000">VERIFICATION IN PROGRESS</font></b>
-								{% endif %}
 							</td>
 							<td>
 								{% if user.status == 'ACTIVE' %}
