@@ -30,7 +30,9 @@
 					<div class="tab-content">
 						<div id="store_items" class="tab-pane active">
 							{{ flashSession.output() }}
+							{% if store_items %}
 							<form method="POST" action="/admin/users/{{ user.id }}/store_items/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+							{% endif %}
 								<table class="table table-striped">
 									<thead>
 										<tr>
@@ -58,14 +60,18 @@
 											<td colspan="5"><i>Belum ada produk</i></td>
 										</tr>
 									{% endfor %}
+									{% if store_items %}
 										<tr>
 											<td colspan="5" class="text-right">
 												<button type="submit" class="btn btn-info">SIMPAN</button>
 											</td>
 										</tr>
+									{% endif %}
 									</tbody>
 								</table>
+							{% if store_items %}
 							</form>
+							{% endif %}
 							{% if page.total_pages > 1 %}
 							<div class="weepaging">
 								<p>
