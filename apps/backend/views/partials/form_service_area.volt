@@ -113,18 +113,27 @@
 <script>
 	let cities = {{ cities | json_encode }}, subdistricts = {{ subdistricts | json_encode }}, villages = {{ villages | json_encode }}, province = document.getElementById('province_id'), city = document.getElementById('city_id'), subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id'), items = document.querySelectorAll('.delete');
 	province.onchange = () => {
-		let current_cities = cities[province.value], new_options = '';
+		let current_cities = cities[province.value], city_id = Object.keys(current_cities)[0], current_subdistricts = subdistricts[city_id], subdistrict_id = Object.keys(current_subdistricts)[0], current_villages = villages[subdistrict_id], new_cities = '', new_subdistricts = '', new_villages = '';
 		for (let id in current_cities) {
-			new_options += '<option value="' + id + '">' + current_cities[id] + '</option>'
+			new_cities += '<option value="' + id + '">' + current_cities[id] + '</option>'
 		}
-		city.innerHTML = new_options
+		for (let id in current_subdistricts) {
+			new_subdistricts += '<option value="' + id + '">' + current_subdistricts[id] + '</option>'
+		}
+		for (let id in current_villages) {
+			new_villages += '<option value="' + id + '">' + current_villages[id] + '</option>'
+		}
+		city.innerHTML = new_cities, subdistrict.innerHTML = new_subdistricts, village.innerHTML = new_villages
 	}
 	city.onchange = () => {
-		let current_subdistricts = subdistricts[city.value], new_options = '';
+		let current_subdistricts = subdistricts[city.value], subdistrict_id = Object.keys(current_subdistricts)[0], current_villages = villages[subdistrict_id], new_subdistricts = '', new_villages = '';
 		for (let id in current_subdistricts) {
-			new_options += '<option value="' + id + '">' + current_subdistricts[id] + '</option>'
+			new_subdistricts += '<option value="' + id + '">' + current_subdistricts[id] + '</option>'
 		}
-		subdistrict.innerHTML = new_options
+		for (let id in current_villages) {
+			new_villages += '<option value="' + id + '">' + current_villages[id] + '</option>'
+		}
+		subdistrict.innerHTML = new_subdistricts, village.innerHTML = new_villages
 	}
 	subdistrict.onchange = () => {
 		let current_villages = villages[subdistrict.value], new_options = '';
