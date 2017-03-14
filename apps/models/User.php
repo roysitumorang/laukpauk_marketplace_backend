@@ -24,7 +24,7 @@ class User extends ModelBase {
 	const GENDERS        = ['Pria', 'Wanita'];
 	const BUSINESS_HOURS = [
 		'opening' => 6,
-		'closing' => 18,
+		'closing' => 22,
 	];
 
 	public $id;
