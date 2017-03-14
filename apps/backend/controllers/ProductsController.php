@@ -9,36 +9,29 @@ use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
-		$limit               = $this->config->per_page;
-		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;
-		$offset              = ($current_page - 1) * $limit;
-		$id                  = $this->request->getQuery('id', 'int');
-		$name                = $this->request->getQuery('name', 'string');
-		$product_category_id = $this->request->getQuery('product_category_id', 'int');
-		$published           = filter_var($this->request->getQuery('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-		$parameter           = [];
-		$query_string_params = [];
-		$conditions          = [[]];
+		$limit        = $this->config->per_page;
+		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset       = ($current_page - 1) * $limit;
+		$category_id  = $this->dispatcher->getParam('category_id', 'int');
+		$published    = filter_var($this->dispatcher->getParam('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+		$keyword      = $this->dispatcher->getParam('keyword', 'string');
+		$parameter    = [];
+		$conditions   = [[]];
 		$this->_prepare_datas();
-		if ($id) {
-			$conditions[0][]           = 'id = :id:';
-			$conditions['id']          = $id;
-			$query_string_params['id'] = $id;
+		if (filter_var($keyword, FILTER_VALIDATE_INT)) {
+			$conditions[0][]  = 'id = :id:';
+			$conditions['id'] = $keyword;
+		} else if (!$keyword) {
+			$conditions[0][]    = 'name LIKE :name:';
+			$conditions['name'] = '%' . $keyword . '%';
 		}
-		if ($name) {
-			$conditions[0][]             = 'name LIKE :name:';
-			$conditions['name']          = '%' . $name . '%';
-			$query_string_params['name'] = $name;
-		}
-		if ($product_category_id) {
-			$conditions[0][]                            = 'product_category_id = :product_category_id:';
-			$conditions['product_category_id']          = $product_category_id;
-			$query_string_params['product_category_id'] = $product_category_id;
+		if ($category_id) {
+			$conditions[0][]           = 'product_category_id = :category_id:';
+			$conditions['category_id'] = $category_id;
 		}
 		if (is_int($published)) {
-			$conditions[0][]                  = 'published = :published:';
-			$conditions['published']          = $published;
-			$query_string_params['published'] = $published;
+			$conditions[0][]         = 'published = :published:';
+			$conditions['published'] = $published;
 		}
 		if ($conditions[0]) {
 			$parameter['conditions'] = implode(' AND ', array_shift($conditions));
@@ -49,22 +42,20 @@ class ProductsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
-		$pages     = $this->_setPaginationRange($page);
-		$products  = [];
+		$page     = $paginator->getPaginate();
+		$pages    = $this->_setPaginationRange($page);
+		$products = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$products[] = $item;
 		}
-		$this->view->menu                = $this->_menu('Products');
-		$this->view->page                = $page;
-		$this->view->pages               = $pages;
-		$this->view->products            = $products;
-		$this->view->id                  = $id;
-		$this->view->name                = $name;
-		$this->view->product_category_id = $product_category_id;
-		$this->view->published           = $published;
-		$this->view->query_string        = http_build_query($query_string_params);
+		$this->view->menu        = $this->_menu('Products');
+		$this->view->page        = $page;
+		$this->view->pages       = $pages;
+		$this->view->products    = $products;
+		$this->view->keyword     = $keyword;
+		$this->view->category_id = $category_id;
+		$this->view->published   = $published;
 	}
 
 	function createAction() {
@@ -92,14 +83,10 @@ class ProductsController extends ControllerBase {
 			return $this->dispatcher->forward('products');
 		}
 		if ($this->request->isPost()) {
-			if ($this->dispatcher->hasParam('published')) {
-				$product->save(['published' => $product->published ? 0 : 1]);
-				return $this->response->redirect($this->request->getQuery('next'));
-			}
 			$this->_set_model_attributes($product);
 			if ($product->validation() && $product->update()) {
 				$this->flashSession->success('Update produk berhasil.');
-				return $this->response->redirect("/admin/products/update/{$product->id}");
+				return $this->response->redirect("/admin/products/{$product->id}/update");
 			}
 			$this->flashSession->error('Update produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product->getMessages() as $error) {
@@ -112,12 +99,38 @@ class ProductsController extends ControllerBase {
 		$this->view->active_tab = 'product';
 	}
 
+	function publishAction($id) {
+		if ($this->request->isPost()) {
+			if (!$product = Product::findFirst(['id = ?0 AND published = 0', 'bind' => [$id]])) {
+				$this->flashSession->error('Produk tidak ditemukan.');
+			} else {
+				$product->update(['published' => 1]);
+				$this->flashSession->success('Produk berhasil ditampilkan');
+			}
+		}
+		return $this->response->redirect($this->request->getQuery('next'));
+	}
+
+	function unpublishAction($id) {
+		if ($this->request->isPost()) {
+			if (!$product = Product::findFirst(['id = ?0 AND published = 1', 'bind' => [$id]])) {
+				$this->flashSession->error('Produk tidak ditemukan.');
+			} else {
+				$product->update(['published' => 0]);
+				$this->flashSession->success('Produk berhasil disembunyikan');
+			}
+		}
+		return $this->response->redirect($this->request->getQuery('next'));
+	}
+
 	function deleteAction($id) {
-		if (!$product = Product::findFirst($id)) {
-			$this->flashSession->error('Produk tidak ditemukan.');
-		} else {
-			$product->delete();
-			$this->flashSession->success('Produk berhasil dihapus');
+		if ($this->request->isPost()) {
+			if (!$product = Product::findFirstById($id)) {
+				$this->flashSession->error('Produk tidak ditemukan.');
+			} else {
+				$product->delete();
+				$this->flashSession->success('Produk berhasil dihapus');
+			}
 		}
 		return $this->response->redirect('/admin/products');
 	}

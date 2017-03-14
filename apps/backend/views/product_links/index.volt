@@ -8,12 +8,12 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/product_links/index/product_id:{{ product.id }}{% if page.current > 1%}/page:{{ page.current }}{% endif %}"><h2>Produk Terkait</h2></a>
+				<a href="/admin/products/{{ product.id }}/links{% if page.current > 1%}/index/page:{{ page.current }}{% endif %}"><h2>Produk Terkait</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/products">Daftar Produk</a></span></li>
-						<li><span><a href="/admin/products/show/{{ product.id }}">{{ product.name }} ({{ product.stock_unit }})</a></span></li>
+						<li><span><a href="/admin/products/{{ product.id }}/update">{{ product.name }} ({{ product.stock_unit }})</a></span></li>
 						<li><span>Produk Terkait</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -30,7 +30,31 @@
 					<div class="tab-content">
 						<div id="accessors" class="tab-pane active">
 							{{ flashSession.output() }}
-							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_links/create/product_id:{{ product.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="new">Tambah Produk Terkait</a></p>
+							<form method="POST" action="/admin/products/{{ product.id }}/links/create">
+								<table class="table table-striped">
+									<tr>
+										<td>Kategori :</td>
+										<td>
+											<select id="category_id">
+											{% for id, category in categories %}
+												<option value="{{ id }}">{{ category['name'] }}</option>
+											{% endfor %}
+											</select>
+										</td>
+										<td>Produk :</td>
+										<td>
+											<select name="product_id">
+											{% for nomination in categories[default_category]['products'] %}
+												<option value="{{ nomination.id }}">{{ nomination.name }}</option
+											{% endfor %}
+											</select>
+										</td>
+										<td>
+											<button type="submit" class="btn btn-info"><i class="fa fa-user-plus"></i> TAMBAH</button>
+										</td>
+									</tr>
+								</table>
+							</form>
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -65,7 +89,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/product_links/index/product_id:{{ product.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/products/{{ product.id }}/links{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -82,16 +106,24 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	for (let items = document.querySelectorAll('.delete'), i = items.length; i--; ) {
+	let categories = {{ categories | json_encode }}, items = document.querySelectorAll('.delete'), i = items.length, category_id = document.getElementById('category_id'), product_id = document.querySelector('[name=product_id]');
+	for ( ; i--; ) {
 		let item = items[i];
 		item.onclick = () => {
 			if (confirm('Anda yakin menghapus data ini ?')) {
 				let form = document.createElement('form');
 				form.method = 'POST',
-				form.action = '/admin/product_links/delete/' + item.dataset.linkedProductId + '/product_id:' + item.dataset.productId{% if page.current > 1%} + '/page:' + {{ page.current }}{% endif %},
+				form.action = '/admin/products/' + item.dataset.productId + '/links/' + item.dataset.linkedProductId + '/delete'{% if page.current > 1%} + '?page=' + {{ page.current }}{% endif %},
 				document.body.appendChild(form),
 				form.submit()
 			}
 		}
 	}
+	category_id.onchange = () => {
+		let new_options = '';
+		categories[category_id.value].products.forEach(function(product) {
+			new_options += '<option value="' + product.id + '">' + product.name + '</option>';
+		});
+		product_id.innerHTML = new_options;
+	};
 </script>

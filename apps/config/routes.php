@@ -196,6 +196,37 @@ $di->set('router', function() {
 		'params'     => 2,
 	]);
 
+	$router->add('/admin/products/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'products',
+		'action'     => 2,
+		'params'     => 1,
+	]);
+
+	$router->add('/admin/products/:int/links', [
+		'module'     => 'backend',
+		'controller' => 'product_links',
+		'action'     => 'index',
+		'product_id' => 1,
+	]);
+
+	$router->add('/admin/products/:int/links/:action/:params', [
+		'module'     => 'backend',
+		'controller' => 'product_links',
+		'action'     => 2,
+		'product_id' => 1,
+		'params'     => 3,
+	]);
+
+	$router->add('/admin/products/:int/links/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'product_links',
+		'action'     => 3,
+		'product_id' => 1,
+		'params'     => 2,
+	]);
+
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',

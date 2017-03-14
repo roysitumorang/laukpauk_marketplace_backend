@@ -28,7 +28,7 @@
 					{{ partial('partials/tabs_product', ['active_tab': active_tab, 'product': product]) }}
 					<div class="tab-content">
 						<div id="product" class="tab-pane active">
-							{{ partial('partials/form_product', ['action': '/admin/products/update/' ~ product.id]) }}
+							{{ partial('partials/form_product', ['action': '/admin/products/' ~ product.id ~ '/update']) }}
 						</div>
 					</div>
 				</div>

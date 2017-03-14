@@ -94,6 +94,7 @@ class Module implements ModuleDefinitionInterface {
 					]);
 					$volt->getCompiler()
 						->addFunction('is_a', 'is_a')
+						->addFunction('is_int', 'is_int')
 						->addFunction('count', 'count')
 						->addFunction('number_format', 'number_format')
 						->addFunction('date', 'date')

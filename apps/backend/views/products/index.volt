@@ -24,27 +24,25 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form action="/admin/products" method="GET">
+				<form action="/admin/products" method="GET" id="search">
 					<table class="table table-striped">
 						<tr>
 							<td>
-								ID :
-								<input type="text" name="id" value="{{ id }}" placeholder="ID">&nbsp;
-								Nama :
-								<input type="text" name="name" value="{{ name }}" placeholder="Nama">&nbsp;
 								Kategori :
-								<select name="product_category_id">
+								<select name="category_id">
 									<option value="">Semua</option>
 									{% for category in categories %}
-									<option value="{{ category.id}}"{% if category.id == product_category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
+									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
 									{% endfor %}
 								</select>
 								Status :
 								<select name="published">
-									<option value=""{% if published === null %} selected{% endif %}>Semua</option>
+									<option value="">Semua</option>
 									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
 									<option value="0"{% if published === 0 %} selected{% endif %}>Tersembunyi</option>
 								</select>
+								Nama :
+								<input type="text" name="keyword" value="{{ keyword }}" placeholder="ID / Nama">&nbsp;
 								<input type="submit" value="CARI" class="btn btn-info">
 							</td>
 						</tr>
@@ -84,8 +82,8 @@
 								<strong>Kategori :</strong>&nbsp;{{ product.category.name }}
 							</td>
 							<td{{ background }} class="text-center">
-								<a href="/admin/products/update/{{ product.id}}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
-								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}">
+								<a href="/admin/products/{{ product.id}}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}" data-published="{{ product.published }}">
 									{% if product.published %}
 									<i class="fa fa-eye fa-2x"></i>
 									{% else %}
@@ -110,7 +108,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/products/index/page:{{ i }}{% if query_string %}?{{ query_string }}{% endif %}">{{ i }}</a>
+							<a href="/admin/products/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if is_int(published) %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -124,16 +122,33 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	for (var items = document.querySelectorAll('.published,.delete'), i = items.length; i--; ) {
-		items[i].onclick = function() {
-			if ('delete' === this.className && !confirm('Anda yakin ingin menghapus product ini ?')) {
+	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
+	search.addEventListener('submit', event => {
+		event.preventDefault();
+		if (search.category_id.value) {
+			url += '/category_id:' + search.category_id.value;
+		}
+		if (search.published.value) {
+			url += '/published:' + search.published.value;
+		}
+		if (search.keyword.value) {
+			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+				return replacement[match];
+			});
+		}
+		location.href = url;
+	}, false);
+	for ( ; i--; ) {
+		let item = items[i];
+		item.onclick = () => {
+			if ('delete' === item.className && !confirm('Anda yakin ingin menghapus product ini ?')) {
 				return !1
 			}
-			var form = document.createElement('form');
+			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = 'delete' === this.className
-			? '/admin/products/delete/' + this.dataset.id
-			: '/admin/products/update/' + this.dataset.id + '/published:1?next=' + window.location.href.split('#')[0] + '#' + this.dataset.id,
+			form.action = 'delete' === item.className
+			? '/admin/products/' + item.dataset.id + '/delete'
+			: '/admin/products/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}
