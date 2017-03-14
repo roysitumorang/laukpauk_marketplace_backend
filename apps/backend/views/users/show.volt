@@ -34,6 +34,9 @@
 								<thead>
 									<tr>
 										<th><b>Nama</b></td>
+										{% if user.merchant %}
+										<th><b>Merchant</b></th>
+										{% endif %}
 										<th><b>Membership</b></td>
 										<th><b>Status</b></td>
 										<th><b>Dompet</b></td>
@@ -44,11 +47,16 @@
 										<td>
 											<font size="5">{{ user.name }}{% if user.company %} / {{ user.company }}{% endif %}{% if user.premium_merchant%} <i class="fa fa-check-circle"></i>{% endif %}</font>
 										</td>
+										{% if user.merchant %}
+										<td>
+											{{ user.merchant.company }}
+										</td>
+										{% endif %}
 										<td>
 											<i class="fa fa-sign-in"></i>&nbsp;{{ last_login | default('No login yet') }}
 										</td>
 										<td>
-											<b>{{ status[user.status] }}</b>
+											{{ status[user.status] }}
 										</td>
 										<td>Rp. {{ number_format(user.deposit) }}</td>
 									</tr>

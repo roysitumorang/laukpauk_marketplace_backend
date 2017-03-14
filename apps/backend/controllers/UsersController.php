@@ -62,6 +62,7 @@ class UsersController extends ControllerBase {
 				'city'                     => 'e.name',
 				'province'                 => 'f.name',
 				'last_login'               => 'g.sign_in_at',
+				'merchant'                 => 'h.company',
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
@@ -70,6 +71,7 @@ class UsersController extends ControllerBase {
 			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
 			->leftJoin('Application\Models\Province', 'e.province_id = f.id', 'f')
 			->leftJoin('Application\Models\LoginHistory', 'a.id = g.user_id', 'g')
+			->leftJoin('Application\Models\User', 'a.merchant_id = h.id', 'h')
 			->groupBy('a.id')
 			->orderBy('a.id DESC')
 			->where('a.status = ' . $current_status)

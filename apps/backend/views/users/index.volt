@@ -76,7 +76,7 @@
 							<td>
 								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}{% if user.company %} / {{ user.company }}{% endif %} {% if user.premium_merchant %} <i class="fa fa-check-circle"></i>{% endif %}</a></font>
 								<br>
-								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}{% if user.premium_merchant %} / <i class="fa fa-check-circle"></i> {{ user.merchant_token }}{% endif %}<br>
+								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}{% if user.premium_merchant %} / <i class="fa fa-check-circle"></i> {{ user.merchant_token }}{% elseif user.merchant %} <i class="fa fa-home"></i> {{ user.merchant }}{% endif %}<br>
 								{% if user.email %}
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 								{% endif %}
