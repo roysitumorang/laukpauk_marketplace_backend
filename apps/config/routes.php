@@ -247,6 +247,13 @@ $di->set('router', function() {
 		'params'     => 1,
 	]);
 
+	$router->add('/admin/product_categories/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'product_categories',
+		'action'     => 2,
+		'params'     => 1,
+	]);
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',

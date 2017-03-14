@@ -161,6 +161,7 @@ class ProductCategory extends ModelBase {
 		}
 		$picture = $this->_upload_config->path . $this->picture;
 		$gd      = new Gd($this->new_picture['tmp_name']);
+		imageinterlace($gd->getImage(), 1);
 		$gd->save($picture, 100);
 		unlink($this->new_picture['tmp_name']);
 	}

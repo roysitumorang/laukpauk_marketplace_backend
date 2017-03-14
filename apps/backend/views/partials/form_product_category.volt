@@ -8,18 +8,18 @@
 			<td colspan="2" bgcolor="#999999"><b><font color="#FFFFFF">Input Kategori</font></b></td>
 		</tr>
 		<tr>
-			<td width="30%"><b>Nama</b> {{ error_message_on_name }}</td>
+			<td width="30%"><b>Nama</b></td>
 			<td><input type="text" name="name" value="{{ category.name }}" size="40" placeholder="Nama"></td>
 		</tr>
 		<tr>
-			<td><b>Permalink</b> {{ error_message_on_new_permalink }}</td>
+			<td><b>Permalink</b></td>
 			<td>
 				<input type="text" name="new_permalink" value="{{ category.new_permalink }}" size="40" placeholder="Permalink"><br>
 				<i>Kosongkan jika Anda ingin system mengisi permalink secara otomatis</i>
 			</td>
 		</tr>
 		<tr>
-			<td><b>Icon</b> {{ error_message_on_picture }}</td>
+			<td><b>Icon</b></td>
 			<td><input type="file" name="picture" size="40"></td>
 		</tr>
 		{% if category.picture %}
@@ -34,45 +34,45 @@
 					<i class="fa fa-trash-o fa-2x"></i>
 				</a>
 				<script>
-					document.querySelector('.delete').onclick = function() {
-						if (!confirm('Anda yakin menghapus gambar ini ?')) {
-							return !1
+					let removal_link = document.querySelector('.delete');
+					removal_link.onclick = () => {
+						if (confirm('Anda yakin menghapus gambar ini ?')) {
+							let form = document.createElement('form');
+							form.method = 'POST',
+							form.action = '/admin/product_categories/' + removal_link.dataset.id + '/deletePicture',
+							document.body.appendChild(form),
+							form.submit()
 						}
-						var form = document.createElement('form');
-						form.method = 'POST',
-						form.action = '/admin/product_categories/update/' + this.dataset.id + '/delete_picture:1',
-						document.body.appendChild(form),
-						form.submit()
 					}
 				</script>
 			</td>
 		</tr>
 		{% endif %}
 		<tr>
-			<td><b>Status</b> {{ error_message_on_published }}</td>
+			<td><b>Status</b></td>
 			<td>
 				<input type="radio" name="published" value="0"{% if !category.published %} checked{% endif %}> Sembunyikan
 				<input type="radio" name="published" value="1"{% if category.published %} checked{% endif %}> Tampilkan
 			</td>
 		</tr>
 		<tr>
-			<td><b>Deskripsi</b> {{ error_message_on_description }}</td>
+			<td><b>Deskripsi</b></td>
 			<td>
 				<textarea name="description" cols="60" rows="5" placeholder="Deskripsi">{{ category.description }}</textarea>
 			</td>
 		</tr>
 		<tr>
-			<td><b>Meta Title</b> {{ error_message_on_meta_title }}</td>
+			<td><b>Meta Title</b></td>
 			<td><input type="text" name="meta_title" value="{{ category.meta_title }}" size="40" placeholder="Meta Title"></td>
 		</tr>
 		<tr>
-			<td><b>Meta Desc</b> {{ error_message_on_meta_desc }}</td>
+			<td><b>Meta Desc</b></td>
 			<td>
 				<textarea name="meta_desc" cols="60" rows="2" placeholder="Meta Desc">{{ category.meta_desc }}</textarea>
 			</td>
 		</tr>
 		<tr>
-			<td><b>Meta Keyword</b> {{ error_message_on_meta_keyword }}</td>
+			<td><b>Meta Keyword</b></td>
 			<td><input type="text" name="meta_keyword" value="{{ category.meta_keyword }}" size="40" placeholder="Meta Desc"></td>
 		</tr>
 		<tr>

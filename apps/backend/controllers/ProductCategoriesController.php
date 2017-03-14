@@ -23,7 +23,7 @@ class ProductCategoriesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$keyword      = $this->request->getQuery('keyword', 'string');
+		$keyword      = $this->dispatcher->getParam('keyword');
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'id'             => 'a.id',
@@ -66,16 +66,16 @@ class ProductCategoriesController extends ControllerBase {
 			$item->writeAttribute('thumbnail', $thumbnail);
 			$categories[] = $item;
 		}
-		$this->view->menu                     = $this->_menu('Products');
-		$this->view->product_category_keyword = $keyword;
-		$this->view->categories               = $categories;
-		$this->view->page                     = $paginator->getPaginate();
-		$this->view->pages                    = $pages;
+		$this->view->menu       = $this->_menu('Products');
+		$this->view->keyword    = $keyword;
+		$this->view->categories = $categories;
+		$this->view->page       = $paginator->getPaginate();
+		$this->view->pages      = $pages;
 	}
 
 	function showAction($id) {
 		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
-			$this->flashSession->error('Data tidak ditemukan.');
+			$this->flashSession->error('Kategori tidak ditemukan.');
 			return $this->dispatcher->forward('product_categories');
 		}
 	}
@@ -112,19 +112,11 @@ class ProductCategoriesController extends ControllerBase {
 
 	function updateAction($id) {
 		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
-			$this->flashSession->error('Data tidak ditemukan.');
+			$this->flashSession->error('Kategori tidak ditemukan.');
 			return $this->dispatcher->forward('product_categories');
 		}
 		$category->thumbnail = $category->getThumbnail($this->_thumb->width, $this->_thumb->height, $this->_thumb->default_picture);
 		if ($this->request->isPost()) {
-			if ($this->dispatcher->hasParam('delete_picture')) {
-				$category->deletePicture();
-				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
-			}
-			if ($this->dispatcher->hasParam('published')) {
-				$category->save(['published' => $category->published ? 0 : 1]);
-				return $this->response->redirect($this->request->getQuery('next'));
-			}
 			$category->setName($this->request->getPost('name'));
 			$category->setNewPermalink($this->request->getPost('new_permalink'));
 			$category->setPublished($this->request->getPost('published'));
@@ -135,7 +127,7 @@ class ProductCategoriesController extends ControllerBase {
 			$category->setNewPicture($_FILES['picture']);
 			if ($category->validation() && $category->save()) {
 				$this->flashSession->success('Update data berhasil.');
-				return $this->response->redirect("/admin/product_categories/update/{$category->id}");
+				return $this->response->redirect("/admin/product_categories/{$category->id}/update");
 			}
 			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
@@ -144,6 +136,42 @@ class ProductCategoriesController extends ControllerBase {
 		}
 		$this->view->category = $category;
 		$this->view->menu     = $this->_menu('Products');
+	}
+
+	function publishAction($id) {
+		if ($this->request->isPost()) {
+			$category = ProductCategory::findFirst(['id = ?0 AND published = 0', 'bind' => [$id]]);
+			if ($category) {
+				$category->update(['published' => 1]);
+			} else {
+				$this->flashSession->error('Kategori tidak ditemukan!');
+			}
+		}
+		return $this->response->redirect($this->request->get('next'));
+	}
+
+	function unpublishAction($id) {
+		if ($this->request->isPost()) {
+			$category = ProductCategory::findFirst(['id = ?0 AND published = 1', 'bind' => [$id]]);
+			if ($category) {
+				$category->update(['published' => 0]);
+			} else {
+				$this->flashSession->error('Kategori tidak ditemukan!');
+			}
+		}
+		return $this->response->redirect($this->request->get('next'));
+	}
+
+	function deletePictureAction($id) {
+		if ($this->request->isPost()) {
+			$category = ProductCategory::findFirst(['id = ?0 AND picture IS NOT NULL', 'bind' => [$id]]);
+			if ($category) {
+				$category->deletePicture();
+				return $this->response->redirect("/admin/product_categories/{$category->id}/update");
+			}
+			$this->flashSession->error('Kategori tidak ditemukan!');
+		}
+		return $this->response->redirect('/admin/product_categories');
 	}
 
 	function deleteAction($id) {

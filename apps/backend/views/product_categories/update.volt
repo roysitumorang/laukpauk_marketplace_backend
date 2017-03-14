@@ -24,16 +24,12 @@
 			<!-- start: page -->
 			<header class="panel-heading">
 				<h2 class="panel-title">
-					{% if !vTopStatus %}
-					Kategori Produk
-					{% else %}
-					<a href="/admin/product_categories?keyword={{ keyword }}&page={{ page }}">Kategori Produk</a> {{ listLevel }}
-					{% endif %}
+					<a href="/admin/product_categories{% if keyword %}/index/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">Kategori Produk</a>
 				</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ partial('partials/form_product_category', ['action': '/admin/product_categories/update/' ~ category.id, 'category': category]) }}
+				{{ partial('partials/form_product_category', ['action': '/admin/product_categories/' ~ category.id ~ '/update', 'category': category]) }}
 			</div>
 			<!-- end: page -->
 		</section>
