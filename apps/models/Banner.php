@@ -149,6 +149,7 @@ class Banner extends ModelBase {
 		}
 		$file_name = $this->_upload_config->path . $this->file_name;
 		$gd      = new Gd($this->new_file['tmp_name']);
+		imageinterlace($gd->getImage(), 1);
 		$gd->save($file_name, 100);
 		unlink($this->new_file['tmp_name']);
 	}
@@ -172,6 +173,7 @@ class Banner extends ModelBase {
 		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $picture);
 		if (!in_array($thumbnail, $this->thumbnails)) {
 			$gd = new Gd($this->_upload_config->path . $picture);
+			imageinterlace($gd->getImage(), 1);
 			$gd->resize($width, $height);
 			$gd->save($this->_upload_config->path . $thumbnail, 100);
 			if ($this->file_name) {
