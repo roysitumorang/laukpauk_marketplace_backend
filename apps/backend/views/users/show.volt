@@ -42,12 +42,7 @@
 								<tbody>
 									<tr>
 										<td>
-											<font size="5">{{ user.name }}</font>
-											<br>
-											{% if user.email %}
-											<i class="fa fa-envelope"></i>&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
-											{% endif %}
-											<i class="fa fa-phone-square"></i>&nbsp;&nbsp;{{ user.mobile_phone }}
+											<font size="5">{{ user.name }}{% if user.company %} / {{ user.company }}{% endif %}{% if user.premium_merchant%} <i class="fa fa-check-circle"></i>{% endif %}</font>
 										</td>
 										<td>
 											<i class="fa fa-sign-in"></i>&nbsp;{{ last_login | default('No login yet') }}
@@ -61,7 +56,7 @@
 							</table>
 							<table class="table table-striped">
 								<tr>
-									<td rowspan="7" width="5%">
+									<td rowspan="{% if user.email %}9{% else %}8{% endif %}" width="5%">
 									{% if user.avatar %}
 										<img src="/assets/image/{{ user.thumbnail }}" border="0"><br>
 										<form method="POST" action="/admin/users/{{ user.id }}/deleteAvatar" onsubmit="if(!confirm('Anda yakin menghapus gambar ini ?'))return !1">
@@ -73,16 +68,32 @@
 									</td>
 								</tr>
 								<tr>
+									<td>Role</td>
+									<td>{{ user.role.name }}</td>
+								</tr>
+								<tr>
+									<td>API Key</td>
+									<td>{{ user.api_key }}</td>
+								</tr>
+								{% if user.premium_merchant %}
+								<tr>
+									<td>Merchant Token</td>
+									<td>{{ user.merchant_token }}</td>
+								</tr>
+								{% endif %}
+								{% if user.email %}
+								<tr>
+									<td>Email</td>
+									<td>{{ user.email }}</td>
+								</tr>
+								{% endif %}
+								<tr>
 									<td>Tanggal Lahir</td>
 									<td>{{ user.date_of_birth | default('Belum ada data') }}</td>
 								</tr>
 								<tr>
 									<td>Jenis Kelamin</td>
 									<td>{{ user.gender | default('Belum ada data') }}</td>
-								</tr>
-								<tr>
-									<td>Nama Usaha</td>
-									<td>{{ user.company | default('-') }}</td>
 								</tr>
 								{% if user.role.name == 'Merchant' %}
 								<tr>
@@ -98,43 +109,15 @@
 							<table class="table table-striped">
 								<tr>
 									<td>Alamat</td>
-									<td>{{ user.address }}</td>
+									<td>{{ user.address | default('-') }}, {{ user.village.name }}, {{ user.village.subdistrict.name }}, {{ user.village.subdistrict.city.name }}, {{ user.village.subdistrict.city.province.name }}</td>
 								</tr>
 								<tr>
-									<td>Kelurahan</td>
-									<td>{{ user.village.name }}</td>
+									<td>Tanggal / IP Pendaftaran / Aktivasi </td>
+									<td>{{ user.created_at }} /{{ user.registration_ip }} / {{ user.activated_at | default('Belum aktif') }}
 								</tr>
 								<tr>
-									<td>Kecamatan</td>
-									<td>{{ user.village.subdistrict.name }}</td>
-								</tr>
-								<tr>
-									<td>Tanggal Pendaftaran</td>
-									<td>{{ user.created_at }}</td>
-								</tr>
-								<tr>
-									<td>Tanggal Aktivasi</td>
-									<td>{{ user.activated_at | default('Belum aktif') }}</td>
-								</tr>
-								<tr>
-									<td>Daftar dari IP</td>
-									<td>{{ user.registration_ip }}</td>
-								</tr>
-								<tr>
-									<td>Order</td>
-									<td>{{ total.orders }}</td>
-								</tr>
-								<tr>
-									<td>Pending Order</td>
-									<td>{{ total.pending_orders }}</td>
-								</tr>
-								<tr>
-									<td>Completed Order</td>
-									<td>{{ total.completed_orders }}</td>
-								</tr>
-								<tr>
-									<td>Cancelled Order</td>
-									<td>{{ total.cancelled_orders }}</td>
+									<td>Total Order / Pending / Completed / Cancelled</td>
+									<td>{{ total.orders }} / {{ total.pending_orders }} / {{ total.completed_orders }} / {{ total.cancelled_orders }}</td>
 								</tr>
 								{% if roles['Merchant'] %}
 								<tr>

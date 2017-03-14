@@ -24,6 +24,8 @@ class UsersController extends ControllerBase {
 			->columns([
 				'a.id',
 				'a.api_key',
+				'a.premium_merchant',
+				'a.merchant_token',
 				'a.name',
 				'a.email',
 				'a.password',
@@ -57,17 +59,21 @@ class UsersController extends ControllerBase {
 				'role'                     => 'b.name',
 				'village'                  => 'c.name',
 				'subdistrict'              => 'd.name',
-				'last_login'               => 'e.sign_in_at',
+				'city'                     => 'e.name',
+				'province'                 => 'f.name',
+				'last_login'               => 'g.sign_in_at',
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
 			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
 			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
-			->leftJoin('Application\Models\LoginHistory', 'a.id = e.user_id', 'e')
+			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
+			->leftJoin('Application\Models\Province', 'e.province_id = f.id', 'f')
+			->leftJoin('Application\Models\LoginHistory', 'a.id = g.user_id', 'g')
 			->groupBy('a.id')
 			->orderBy('a.id DESC')
 			->where('a.status = ' . $current_status)
-			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory f WHERE e.user_id = f.user_id AND f.id > e.id)');
+			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory h WHERE g.user_id = h.user_id AND h.id > g.id)');
 		if ($current_role) {
 			$builder->andWhere('a.role_id = ' . $current_role);
 		}

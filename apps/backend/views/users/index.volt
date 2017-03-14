@@ -74,9 +74,9 @@
 						<tr id="{{ user.id }}">
 							<td>{{ user.rank }}</td>
 							<td>
-								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}</a></font>
+								<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}{% if user.company %} / {{ user.company }}{% endif %} {% if user.premium_merchant %} <i class="fa fa-check-circle"></i>{% endif %}</a></font>
 								<br>
-								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}<br>
+								<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}{% if user.premium_merchant %} / <i class="fa fa-check-circle"></i> {{ user.merchant_token }}{% endif %}<br>
 								{% if user.email %}
 								<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 								{% endif %}
@@ -89,7 +89,7 @@
 								No login yet
 								{% endif %}
 								{% if user.village %}
-								<br><i class="fa fa-home"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}
+								<br><i class="fa fa-home"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}, {{ user.city }}, {{ user.province }}
 								{% endif %}
 							</td>
 							<td>
