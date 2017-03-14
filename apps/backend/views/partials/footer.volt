@@ -72,7 +72,7 @@
 					return
 				}
 			})
-		}, 60000),
+		}, 6e4),
 		$('.summernote').summernote()
 	</script>
 	{% endif %}
