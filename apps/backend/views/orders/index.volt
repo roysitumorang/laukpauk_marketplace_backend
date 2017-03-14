@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="order.php"><h2>Order List</h2></a>
+				<a href="/admin/orders{% if page.current > 1 %}/index/page:{{ page.current }}{% endif %}"><h2>Order List</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/orders">Order List</a></span></li>
+						<li><span><a href="/admin/orders{% if page.current > 1 %}/index/page:{{ page.current }}{% endif %}">Order List</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="GET" action="/admin/orders">
+				<form method="GET" action="/admin/orders" id="search">
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -116,7 +116,7 @@
 								<font size="4">Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}</font><br><br>
 							</td>
 							<td>
-								<a href="/admin/orders/show/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>
+								<a href="/admin/orders/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
@@ -147,3 +147,18 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	let search = document.getElementById('search'), url = '/admin/orders/index', replacement = {' ': '+', ':': '', '\/': ''};
+	search.addEventListener('submit', event => {
+		event.preventDefault();
+		['from', 'to', 'code', 'status', 'mobile_phone'].forEach(function(attribute) {
+			console.log(attribute);
+			if (search[attribute].value) {
+				url += '/' + attribute + ':' + search[attribute].value.trim().replace(/ |:|\//g, match => {
+					return replacement[match];
+				});
+			}
+			location.href = url;
+		}, false);
+	});
+</script>

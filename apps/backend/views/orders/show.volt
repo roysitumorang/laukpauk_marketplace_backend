@@ -8,12 +8,12 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/orders/show/{{ order.id }}"><h2>Detail Order #{{ order.code }}</h2></a>
+				<a href="/admin/orders/{{ order.id }}"><h2>Detail Order #{{ order.code }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/orders">Order List</a></span></li>
-						<li><span><a href="/admin/orders/show/{{ order.id }}">Detail Order #{{ order.code }}</a></span></li>
+						<li><span><a href="/admin/orders{{ order.id }}">Detail Order #{{ order.code }}</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -22,7 +22,7 @@
 			<header class="panel-heading">
 				<h2 class="panel-title">Detail Order #{{ order.code }}</h2>
 				<span style="float:right;margin-top:-20px">
-					<a href="javascript:void(0)" onclick="let popup=window.open('/admin/orders/print/{{ order.id }}','popup','height=800,width=800,resizeable=no,scrollbars=yes,toolbar=no,status=no');window.focus&&popup.focus()" title="Print Invoice"><i class="fa fa-print fa-2x"></i></a>
+					<a href="javascript:void(0)" onclick="let popup=window.open('/admin/orders/{{ order.id }}/print','popup','height=800,width=800,resizeable=no,scrollbars=yes,toolbar=no,status=no');window.focus&&popup.focus()" title="Print Invoice"><i class="fa fa-print fa-2x"></i></a>
 				</span>
 			</header>
 			<div class="panel-body">

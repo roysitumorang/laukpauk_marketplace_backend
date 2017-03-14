@@ -17,8 +17,8 @@ class OrdersController extends ControllerBase {
 		$parameters     = [];
 		$conditions     = [];
 		$status         = Order::STATUS;
-		$current_status = filter_var($this->request->getQuery('status'), FILTER_VALIDATE_INT);
-		if ($date = $this->request->getQuery('from')) {
+		$current_status = filter_var($this->dispatcher->getParam('status'), FILTER_VALIDATE_INT);
+		if ($date = $this->dispatcher->getParam('from')) {
 			try {
 				$from                 = (new DateTimeImmutable($date))->format('Y-m-d');
 				$conditions[]         = "DATE(a.created_at) >= '{$from}'";
@@ -27,7 +27,7 @@ class OrdersController extends ControllerBase {
 				unset($from);
 			}
 		}
-		if ($date = $this->request->getQuery('to')) {
+		if ($date = $this->dispatcher->getParam('to')) {
 			try {
 				$to                 = (new DateTimeImmutable($date))->format('Y-m-d');
 				$conditions[]       = "DATE(a.created_at) <= '{$to}'";
@@ -36,7 +36,7 @@ class OrdersController extends ControllerBase {
 				unset($to);
 			}
 		}
-		if ($code = $this->request->getQuery('code', 'int')) {
+		if ($code = $this->dispatcher->getParam('code', 'int')) {
 			$conditions[]         = "a.code = {$code}";
 			$query_string['code'] = $code;
 		}
@@ -47,12 +47,12 @@ class OrdersController extends ControllerBase {
 		if ($conditions) {
 			$parameters[] = implode(' AND ', $conditions);
 		}
-		if ($mobile_phone = $this->request->getQuery('mobile_phone')) {
+		if ($mobile_phone = $this->dispatcher->getParam('mobile_phone')) {
 			$conditions[]                 = "b.mobile_phone = '{$mobile_phone}'";
 			$query_string['mobile_phone'] = $to;
 		}
 		$parameters['order'] = 'a.id DESC';
-		$builder = $this->modelsManager->createBuilder()
+		$builder             = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
 				'a.code',
