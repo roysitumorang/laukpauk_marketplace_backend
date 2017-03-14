@@ -458,7 +458,7 @@ class User extends ModelBase {
 			$avatar = $this->_upload_config->path . $this->avatar;
 			$gd     = new Gd($this->new_avatar['tmp_name']);
 			imageinterlace($gd->getImage(), 1);
-			$gd->save($avatar, 100, 1);
+			$gd->save($avatar, 100);
 			unlink($this->new_avatar['tmp_name']);
 		}
 		if ($this->delivery_hours) {

@@ -176,7 +176,7 @@ class UsersController extends ControllerBase {
 			$this->_set_model_attributes($user);
 			if ($user->validation() && $user->update()) {
 				$this->flashSession->success('Update member berhasil.');
-				return $this->response->redirect('/admin/users');
+				return $this->response->redirect("/admin/users/{$user->id}");
 			}
 			$this->flashSession->error('Update member tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($user->getMessages() as $error) {
