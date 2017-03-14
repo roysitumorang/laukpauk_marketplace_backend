@@ -14,12 +14,12 @@ class UsersController extends ControllerBase {
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset         = ($current_page - 1) * $limit;
 		$status         = User::STATUS;
-		$current_status = $this->request->getQuery('status', 'int');
+		$current_status = $this->dispatcher->getParam('status', 'int');
 		if ($current_status === null || !array_key_exists($current_status, $status)) {
 			$current_status = array_search('ACTIVE', $status);
 		}
-		$current_role = $this->request->getQuery('role_id', 'int');
-		$keyword      = $this->request->getQuery('keyword', 'string');
+		$current_role = $this->dispatcher->getParam('role_id', 'int');
+		$keyword      = str_replace([':', '/'], '', $this->dispatcher->getParam('keyword', 'string'));
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',

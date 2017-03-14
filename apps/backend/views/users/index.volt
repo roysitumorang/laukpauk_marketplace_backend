@@ -41,7 +41,7 @@
 					<tr>
 						<td>
 							<!-- Main Content //-->
-							<form action="/admin/users" method="GET">
+							<form action="/admin/users" method="GET" id="search">
 								<b>Cari berdasarkan:</b>
 								<select name="status">
 									{% for value, label in status %}
@@ -139,7 +139,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/users/index/page:{{ i }}{% if query_string %}?{{ query_string }}{% endif %}">{{ i }}</a>
+							<a href="/admin/users/index{% if current_status %}/status:{{ current_status }}{% endif %}{% if current_role %}/role_id:{{ current_role }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -152,3 +152,21 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	let search = document.getElementById('search'), url = '/admin/users/index', replacement = {' ': '+', ':': '', '\/': ''};
+	search.addEventListener('submit', event => {
+		event.preventDefault();
+		if (search.status.value) {
+			url += '/status:' + search.status.value;
+		}
+		if (search.role_id.value) {
+			url += '/role_id:' + search.role_id.value;
+		}
+		if (search.keyword.value) {
+			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+				return replacement[match];
+			});
+		}
+		location.href = url;
+	}, false)
+</script>
