@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/{{ user.id }}/store_items/{{ store_item.id }}/update"><h2>Update Produk</h2></a>
+				<a href="/admin/users/{{ user.id }}/store_items/update{% if page.current > 1%}/page:{{ page.current }}{% endif %}"><h2>Update Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
