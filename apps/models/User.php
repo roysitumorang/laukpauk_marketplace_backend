@@ -286,14 +286,6 @@ class User extends ModelBase {
 				break;
 			}
 		} while (1);
-		if ($this->role_id == Role::MERCHANT && $this->premium_merchant) {
-			do {
-				$this->merchant_token = $random->hex(16);
-				if (!static::findFirstByMerchantToken($this->merchant_token)) {
-					break;
-				}
-			} while (1);
-		}
 		$this->open_on_sunday    = $this->open_on_sunday    ?? 0;
 		$this->open_on_monday    = $this->open_on_monday    ?? 0;
 		$this->open_on_tuesday   = $this->open_on_tuesday   ?? 0;
@@ -428,8 +420,8 @@ class User extends ModelBase {
 	}
 
 	function beforeSave() {
+		$random = new Random;
 		if ($this->new_avatar && !$this->avatar) {
-			$random = new Random;
 			do {
 				$this->avatar = $random->hex(16) . '.jpg';
 				if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
@@ -439,6 +431,14 @@ class User extends ModelBase {
 		}
 		if ($this->delivery_hours) {
 			$this->delivery_hours = join(',', $this->delivery_hours);
+		}
+		if ($this->role_id == Role::MERCHANT && $this->premium_merchant && !$this->merchant_token) {
+			do {
+				$this->merchant_token = $random->hex(16);
+				if (!static::findFirstByMerchantToken($this->merchant_token)) {
+					break;
+				}
+			} while (1);
 		}
 	}
 
