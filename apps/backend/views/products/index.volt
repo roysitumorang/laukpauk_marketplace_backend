@@ -82,7 +82,7 @@
 								<strong>Kategori :</strong>&nbsp;{{ product.category.name }}
 							</td>
 							<td{{ background }} class="text-center">
-								<a href="/admin/products/{{ product.id}}/update?next=/admin/products{% if category_id or published or keyword %}/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if published %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% endif %}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+								<a href="/admin/products/{{ product.id}}/update?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}" data-published="{{ product.published }}">
 									{% if product.published %}
 									<i class="fa fa-eye fa-2x"></i>

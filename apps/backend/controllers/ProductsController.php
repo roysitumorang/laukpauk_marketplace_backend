@@ -15,23 +15,28 @@ class ProductsController extends ControllerBase {
 		$category_id  = $this->dispatcher->getParam('category_id', 'int');
 		$published    = filter_var($this->dispatcher->getParam('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 		$keyword      = $this->dispatcher->getParam('keyword', 'string');
+		$next         = '/admin/products/index';
 		$parameter    = [];
 		$conditions   = [[]];
 		$this->_prepare_datas();
-		if (filter_var($keyword, FILTER_VALIDATE_INT)) {
-			$conditions[0][]  = 'id = :id:';
-			$conditions['id'] = $keyword;
-		} else if ($keyword) {
-			$conditions[0][]    = 'name LIKE :name:';
-			$conditions['name'] = '%' . $keyword . '%';
-		}
 		if ($category_id) {
 			$conditions[0][]           = 'product_category_id = :category_id:';
 			$conditions['category_id'] = $category_id;
+			$next                     .= "/category_id:{$category_id}";
 		}
 		if (is_int($published)) {
 			$conditions[0][]         = 'published = :published:';
 			$conditions['published'] = $published;
+			$next                   .= "/published:{$published}";
+		}
+		if (filter_var($keyword, FILTER_VALIDATE_INT)) {
+			$conditions[0][]  = 'id = :id:';
+			$conditions['id'] = $keyword;
+			$next            .= "/keyword:{$keyword}";
+		} else if ($keyword) {
+			$conditions[0][]    = 'name LIKE :name:';
+			$conditions['name'] = '%' . $keyword . '%';
+			$next              .= "/keyword:{$keyword}";
 		}
 		if ($conditions[0]) {
 			$parameter['conditions'] = implode(' AND ', array_shift($conditions));
@@ -56,6 +61,7 @@ class ProductsController extends ControllerBase {
 		$this->view->keyword     = $keyword;
 		$this->view->category_id = $category_id;
 		$this->view->published   = $published;
+		$this->view->next        = $next;
 	}
 
 	function createAction() {
