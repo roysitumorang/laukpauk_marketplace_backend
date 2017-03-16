@@ -21,7 +21,7 @@ class ProductsController extends ControllerBase {
 		if (filter_var($keyword, FILTER_VALIDATE_INT)) {
 			$conditions[0][]  = 'id = :id:';
 			$conditions['id'] = $keyword;
-		} else if (!$keyword) {
+		} else if ($keyword) {
 			$conditions[0][]    = 'name LIKE :name:';
 			$conditions['name'] = '%' . $keyword . '%';
 		}
@@ -59,7 +59,7 @@ class ProductsController extends ControllerBase {
 	}
 
 	function createAction() {
-		$product  = new Product;
+		$product = new Product;
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($product);
 			if ($product->validation() && $product->create()) {
@@ -82,11 +82,12 @@ class ProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan.');
 			return $this->dispatcher->forward('products');
 		}
+		$next = $this->request->get('next');
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($product);
 			if ($product->validation() && $product->update()) {
 				$this->flashSession->success('Update produk berhasil.');
-				return $this->response->redirect("/admin/products/{$product->id}/update");
+				return $this->response->redirect($next);
 			}
 			$this->flashSession->error('Update produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product->getMessages() as $error) {
@@ -97,6 +98,7 @@ class ProductsController extends ControllerBase {
 		$this->view->menu       = $this->_menu('Products');
 		$this->view->product    = $product;
 		$this->view->active_tab = 'product';
+		$this->view->next       = $next;
 	}
 
 	function publishAction($id) {

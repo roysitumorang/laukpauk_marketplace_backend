@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products/update/{{ product.id }}"><h2>Update Produk #{{ product.id }}</h2></a>
+				<a href="/admin/products/{{ product.id }}/update?next={{ next }}"><h2>Update Produk #{{ product.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -28,7 +28,7 @@
 					{{ partial('partials/tabs_product', ['active_tab': active_tab, 'product': product]) }}
 					<div class="tab-content">
 						<div id="product" class="tab-pane active">
-							{{ partial('partials/form_product', ['action': '/admin/products/' ~ product.id ~ '/update']) }}
+							{{ partial('partials/form_product', ['action': '/admin/products/' ~ product.id ~ '/update?next=' ~ next]) }}
 						</div>
 					</div>
 				</div>
