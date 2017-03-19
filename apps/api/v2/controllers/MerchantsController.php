@@ -25,11 +25,13 @@ class MerchantsController extends ControllerBase {
 				a.open_on_saturday,
 				a.business_opening_hour,
 				a.business_closing_hour,
-				a.delivery_hours
+				a.delivery_hours,
+				COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
+				JOIN settings d ON d.name = 'minimum_purchase'
 			WHERE
 QUERY;
 		if ($this->_premium_merchant) {
@@ -77,6 +79,7 @@ QUERY;
 				'business_opening_hour' => $item->business_opening_hour . '.00',
 				'business_closing_hour' => $item->business_closing_hour . '.00 WIB',
 				'delivery_hours'        => $delivery_hours ? $delivery_hours . ' WIB' : '-',
+				'minimum_purchase'      => $item->minimum_purchase,
 			];
 			$merchants[] = $merchant;
 		}
