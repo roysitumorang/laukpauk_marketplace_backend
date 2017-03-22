@@ -3,7 +3,6 @@
 namespace Application\Api\V2\Controllers;
 
 use Application\Models\Post;
-use Application\Models\Setting;
 use Exception;
 use Phalcon\Db;
 
@@ -17,11 +16,13 @@ class ProductsController extends ControllerBase {
 			$query = <<<QUERY
 				SELECT
 					a.id,
-					COALESCE(c.minimum_purchase, a.minimum_purchase) AS minimum_purchase
+					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
+					a.shipping_cost
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
 					JOIN service_areas c ON a.id = c.user_id
+					JOIN settings d ON d.name = 'minimum_purchase'
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -105,7 +106,8 @@ QUERY;
 			'total_pages'      => $total_pages,
 			'current_page'     => $current_page,
 			'current_hour'     => $this->currentDatetime->format('G'),
-			'minimum_purchase' => $merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value,
+			'minimum_purchase' => $merchant->minimum_purchase,
+			'shipping_cost'    => $merchant->shipping_cost,
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;

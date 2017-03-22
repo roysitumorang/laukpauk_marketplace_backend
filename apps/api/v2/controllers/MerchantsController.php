@@ -35,22 +35,26 @@ class MerchantsController extends ControllerBase {
 				a.business_opening_hour,
 				a.business_closing_hour,
 				a.delivery_hours,
-				COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase
+				COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
+				a.shipping_cost
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
 				JOIN settings d ON d.name = 'minimum_purchase'
 			WHERE
+				a.status = 1 AND
+				b.name = 'Merchant' AND
+				c.village_id = {$this->_current_user->village->id} AND
 QUERY;
 		if ($this->_premium_merchant) {
-			$query .= " a.id = {$this->_premium_merchant->id}";
+			$query .= <<<QUERY
+				a.premium_merchant = 1 AND
+				a.id = {$this->_premium_merchant->id}
+QUERY;
 		} else {
 			$query .= <<<QUERY
-				a.status = 1 AND
-				a.premium_merchant IS NULL AND
-				b.name = 'Merchant' AND
-				c.village_id = {$this->_current_user->village->id}
+				a.premium_merchant IS NULL
 QUERY;
 		}
 		$query .= <<<QUERY
@@ -89,6 +93,7 @@ QUERY;
 				'business_closing_hour' => $item->business_closing_hour . '.00 WIB',
 				'delivery_hours'        => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 				'minimum_purchase'      => $item->minimum_purchase,
+				'shipping_cost'         => $item->shipping_cost,
 			];
 			$merchants[] = $merchant;
 		}
