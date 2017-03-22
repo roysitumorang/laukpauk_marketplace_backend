@@ -202,7 +202,7 @@ class User extends ModelBase {
 
 	function setCompanyProfile($company_profile) {
 		if ($company_profile) {
-			$this->company_profile = $this->_filter->sanitize($company_profile, ['string', 'trim']);
+			$this->company_profile = $this->_filter->sanitize($company_profile, 'trim');
 		}
 	}
 
