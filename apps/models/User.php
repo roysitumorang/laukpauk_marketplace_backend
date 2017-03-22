@@ -26,6 +26,9 @@ class User extends ModelBase {
 		'opening' => 6,
 		'closing' => 22,
 	];
+	const MAX_MINIMUM_PURCHASE = 100000;
+	const MAX_ADMIN_FEE        = 10000;
+	const MAX_SHIPPING_COST    = 10000;
 
 	public $id;
 	public $role_id;
@@ -35,6 +38,7 @@ class User extends ModelBase {
 	public $merchant_token;
 	public $domain;
 	public $minimum_purchase;
+	public $shipping_cost;
 	public $admin_fee;
 	public $name;
 	public $email;
@@ -135,6 +139,10 @@ class User extends ModelBase {
 
 	function setMinimumPurchase($minimum_purchase) {
 		$this->minimum_purchase = filter_var($minimum_purchase, FILTER_VALIDATE_INT) ?: null;
+	}
+
+	function setShippingCost($shipping_cost) {
+		$this->shipping_cost = filter_var($shipping_cost, FILTER_VALIDATE_INT) ?: null;
 	}
 
 	function setAdminFee($admin_fee) {
@@ -340,6 +348,7 @@ class User extends ModelBase {
 				$this->company_logo     = null;
 				$this->launcher_icon    = null;
 				$this->terms_conditions = null;
+				$this->shipping_cost    = null;
 			}
 		}
 	}
@@ -382,8 +391,8 @@ class User extends ModelBase {
 				]));
 				$validator->add('minimum_purchase', new Between([
 					'minimum' => 0,
-					'maximum' => 100000,
-					'message' => 'minimal order paling sedikit 0, maksimal ' . number_format(100000, 0, ',', '.'),
+					'maximum' => static::MAX_MINIMUM_PURCHASE,
+					'message' => 'minimal order paling sedikit 0, maksimal ' . number_format(static::MAX_MINIMUM_PURCHASE, 0, ',', '.'),
 				]));
 			}
 			if ($this->admin_fee) {
@@ -392,8 +401,8 @@ class User extends ModelBase {
 				]));
 				$validator->add('admin_fee', new Between([
 					'minimum' => 0,
-					'maximum' => 10000,
-					'message' => 'biaya administrasi minimal 0, maksimal ' . number_format(10000, 0, ',', '.'),
+					'maximum' => static::MAX_ADMIN_FEE,
+					'message' => 'biaya administrasi minimal 0, maksimal ' . number_format(static::MAX_ADMIN_FEE, 0, ',', '.'),
 				]));
 			}
 			if ($this->domain) {
@@ -426,6 +435,13 @@ class User extends ModelBase {
 						'messageType'          => 'format gambar harus PNG',
 						'maxResolution'        => $max_resolution,
 						"messageMaxResolution" => 'Resolusi maksimal ' . $max_resolution,
+					]));
+				}
+				if ($this->shipping_cost) {
+					$validator->add('shipping_cost', new Between([
+						'minimum' => 0,
+						'maximum' => static::MAX_SHIPPING_COST,
+						'message' => 'ongkos kirim minimal 0, maksimal ' . number_format(static::MAX_SHIPPING_COST, 0, ',', '.'),
 					]));
 				}
 			}

@@ -107,6 +107,12 @@
 					</tr>
 					<tr>
 						<td>
+							Ongkos Kirim (untuk premium merchant) :<br>
+							<input type="text" name="shipping_cost" value="{{ user.shipping_cost }}" size="20" placeholder="Ongkos kirim">
+						</td>
+					</tr>
+					<tr>
+						<td>
 							Jenis Kelamin :<br>
 							{% for gender in genders %}
 							<input type="radio" name="gender" value={{ gender }}{% if user.gender == gender %} checked{% endif %}> {{ gender }}&nbsp;&nbsp;

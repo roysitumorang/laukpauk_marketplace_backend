@@ -358,6 +358,7 @@ QUERY
 		$user->setNewCompanyLogo($_FILES['company_logo']);
 		$user->setNewLauncherIcon($_FILES['launcher_icon']);
 		$user->setTermsConditions($this->request->getPost('terms_conditions'));
+		$user->setShippingCost($this->request->getPost('shipping_cost'));
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {
 			$user->setDeliveryHours($this->request->getPost('delivery_hours'));
