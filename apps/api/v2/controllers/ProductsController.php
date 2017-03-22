@@ -2,6 +2,7 @@
 
 namespace Application\Api\V2\Controllers;
 
+use Application\Models\Post;
 use Application\Models\Setting;
 use Exception;
 use Phalcon\Db;
@@ -99,6 +100,7 @@ QUERY;
 			$this->_response['status'] = 1;
 		}
 		$this->_response['data'] = [
+			'merchant_note'    => Post::findFirstByPermalink('merchant-note')->body,
 			'products'         => $products,
 			'total_pages'      => $total_pages,
 			'current_page'     => $current_page,
