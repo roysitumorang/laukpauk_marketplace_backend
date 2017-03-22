@@ -4,6 +4,8 @@ namespace Application\Api\V2\Controllers;
 
 use Application\Models\Post;
 use Application\Models\ProductCategory;
+use Application\Models\User;
+use Application\Models\Role;
 use DateTime;
 use Exception;
 use IntlDateFormatter;
@@ -230,10 +232,14 @@ QUERY
 	}
 
 	function aboutAction() {
+		if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
+			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
+
+		}
 		$this->_response = [
 			'status' => 1,
 			'data'   => [
-				'company_profile' => $this->_premium_merchant ? $this->_premium_merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
+				'company_profile' => $premium_merchant ? $this->merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
 			],
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
