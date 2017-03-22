@@ -103,19 +103,21 @@ class OrdersController extends ControllerBase {
 			$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
 			$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
 			if ($order->original_bill < $minimum_purchase) {
-				throw new Exception('Belanja minimal Rp. ' . number_format($coupon->minimum_purchase) . ' untuk dapat diproses!');
+				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			$order->final_bill = $order->original_bill;
+			$order->discount   = 0;
 			if ($coupon) {
 				if ($coupon->minimum_purchase && $order->original_bill < $coupon->minimum_purchase) {
 					throw new Exception('Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase));
 				}
 				$order->coupon     = $coupon;
-				$order->final_bill = max(0, $coupon->discount_type == 1
-							? ($order->original_bill - $coupon->discount_amount)
-							: ((100 - $coupon->discount_amount) * $order->original_bill / 100));
+				$order->discount   = $coupon->discount_type == 1 ? $coupon->discount_amount : ceil($coupon->discount_amount * $order->original_bill / 100.0);
+				$order->final_bill = $order->original_bill - $order->discount;
 			}
-			$order->items = $order_items;
+			$order->shipping_cost = $merchant->shipping_cost ?? 0;
+			$order->final_bill   += $order->shipping_cost;
+			$order->items         = $order_items;
 			if ($order->validation() && $order->create()) {
 				if (!$this->_current_user->address) {
 					$this->_current_user->update(['address' => $this->_input->address]);
@@ -190,7 +192,7 @@ class OrdersController extends ControllerBase {
 		} else {
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
-			$merchant = User::findFirst($order->merchant_id);
+			$merchant = $this->_premium_merchant ?: User::findFirst($order->merchant_id);
 			foreach ($order->items as $item) {
 				$items[$item->id] = [
 					'name'       => $item->name,
@@ -219,8 +221,9 @@ class OrdersController extends ControllerBase {
 				'city'               => $village->subdistrict->city->name,
 				'province'           => $village->subdistrict->city->province->name,
 				'final_bill'         => $order->final_bill,
-				'discount'           => 0,
+				'discount'           => $order->discount,
 				'original_bill'      => $order->original_bill,
+				'shipping_cost'      => $order->shipping_cost,
 				'scheduled_delivery' => [
 					'date' => $date_formatter->format($scheduled_delivery),
 					'hour' => $scheduled_delivery->format('H:i'),

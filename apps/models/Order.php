@@ -24,8 +24,10 @@ class Order extends ModelBase {
 	public $buyer_id;
 	public $admin_fee;
 	public $original_bill;
+	public $shipping_cost;
 	public $ip_address;
 	public $coupon_id;
+	public $discount;
 	public $scheduled_delivery;
 	public $actual_delivery;
 	public $note;
@@ -84,6 +86,8 @@ class Order extends ModelBase {
 				break;
 			}
 		} while (1);
+		$this->shipping_cost = $this->shipping_cost ?? 0;
+		$this->discount      = $this->discount ?? 0;
 	}
 
 	function validation() {
