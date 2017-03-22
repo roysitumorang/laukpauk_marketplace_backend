@@ -51,12 +51,6 @@
 					</tr>
 					<tr>
 						<td>
-							Profil Toko (* untuk merchant) :<br>
-							<textarea name="company_profile" placeholder="Profil toko">{{ user.company_profile }}</textarea>
-						</td>
-					</tr>
-					<tr>
-						<td>
 							Premium Merchant (untuk merchant) :<br>
 							<input type="checkbox" name="premium_merchant" value="1"{% if user.premium_merchant %} checked{% endif %}>
 						</td>
@@ -65,6 +59,21 @@
 						<td>
 							Domain (untuk premium merchant) :<br>
 							<input type="text" name="domain" value="{{ user.domain }}" size="50" placeholder="Domain">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Logo Toko (* untuk premium merchant) :<br>
+							<input type="file" name="company_logo" placeholder="Logo Toko">
+							{% if user.company_logo %}
+							<br><img src="/assets/image/{{ user.company_logo }}">
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Profil Toko (* untuk premium merchant) :<br>
+							<textarea name="company_profile" cols="50" rows="5" placeholder="Profil toko">{{ user.company_profile }}</textarea>
 						</td>
 					</tr>
 					<tr>

@@ -39,6 +39,7 @@ class UsersController extends ControllerBase {
 				'a.deposit',
 				'a.company',
 				'a.company_profile',
+				'a.company_logo',
 				'a.registration_ip',
 				'a.gender',
 				'a.date_of_birth',
@@ -352,6 +353,7 @@ QUERY
 		$user->setOpenOnSaturday($this->request->getPost('open_on_saturday'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
+		$user->setNewCompanyLogo($_FILES['company_logo']);
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {
 			$user->setDeliveryHours($this->request->getPost('delivery_hours'));

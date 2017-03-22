@@ -52,6 +52,8 @@ class User extends ModelBase {
 	public $deposit;
 	public $company;
 	public $company_profile;
+	public $company_logo;
+	public $new_company_logo;
 	public $registration_ip;
 	public $gender;
 	public $date_of_birth;
@@ -203,6 +205,12 @@ class User extends ModelBase {
 	function setCompanyProfile($company_profile) {
 		if ($company_profile) {
 			$this->company_profile = $this->_filter->sanitize($company_profile, 'trim');
+		}
+	}
+
+	function setNewCompanyLogo(array $new_company_logo) {
+		if ($new_company_logo['tmp_name'] && $new_company_logo['size'] && !$new_company_logo['error']) {
+			$this->new_company_logo = $new_company_logo;
 		}
 	}
 
@@ -376,6 +384,15 @@ class User extends ModelBase {
 					'message' => 'domain sudah ada',
 				]));
 			}
+			if ($this->premium_merchant && $this->new_company_logo) {
+				$max_size = $this->_upload_config->max_size;
+				$validator->add('new_company_logo', new FileValidator([
+					'maxSize'      => $max_size,
+					'messageSize'  => 'ukuran file maksimal ' . $max_size,
+					'allowedTypes' => ['image/jpeg', 'image/png'],
+					'messageType'  => 'format gambar harus JPG atau PNG',
+				]));
+			}
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
 			$validator->add(['mobile_phone', 'merchant_id'], new Uniqueness([
@@ -440,13 +457,23 @@ class User extends ModelBase {
 		if ($this->delivery_hours) {
 			$this->delivery_hours = join(',', $this->delivery_hours);
 		}
-		if ($this->role_id == Role::MERCHANT && $this->premium_merchant && !$this->merchant_token) {
-			do {
-				$this->merchant_token = $random->hex(16);
-				if (!static::findFirstByMerchantToken($this->merchant_token)) {
-					break;
-				}
-			} while (1);
+		if ($this->role_id == Role::MERCHANT && $this->premium_merchant) {
+			if (!$this->merchant_token) {
+				do {
+					$this->merchant_token = $random->hex(16);
+					if (!static::findFirstByMerchantToken($this->merchant_token)) {
+						break;
+					}
+				} while (1);
+			}
+			if ($this->new_company_logo && !$this->company_logo) {
+				do {
+					$this->company_logo = $random->hex(16) . '.jpg';
+					if (!is_readable($this->_upload_config->path . $this->company_logo) && !static::findFirstByCompanyLogo($this->company_logo)) {
+						break;
+					}
+				} while (1);
+			}
 		}
 	}
 
@@ -468,6 +495,13 @@ class User extends ModelBase {
 			imageinterlace($gd->getImage(), 1);
 			$gd->save($avatar, 100);
 			unlink($this->new_avatar['tmp_name']);
+		}
+		if ($this->premium_merchant && $this->new_company_logo) {
+			$company_logo = $this->_upload_config->path . $this->company_logo;
+			$gd           = new Gd($this->new_company_logo['tmp_name']);
+			imageinterlace($gd->getImage(), 1);
+			$gd->save($company_logo, 100);
+			unlink($this->new_company_logo['tmp_name']);
 		}
 		if ($this->delivery_hours) {
 			$this->delivery_hours = explode(',', $this->delivery_hours);
