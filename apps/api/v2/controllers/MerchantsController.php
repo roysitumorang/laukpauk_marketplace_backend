@@ -2,6 +2,7 @@
 
 namespace Application\Api\V2\Controllers;
 
+use Application\Models\Post;
 use Application\Models\ProductCategory;
 use DateTime;
 use Exception;
@@ -9,6 +10,12 @@ use IntlDateFormatter;
 use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
+	function beforeExecuteRoute() {
+		if ($this->dispatcher->getActionName() != 'about') {
+			parent::beforeExecuteRoute();
+		}
+	}
+
 	function indexAction() {
 		$merchants = [];
 		$query     = <<<QUERY
