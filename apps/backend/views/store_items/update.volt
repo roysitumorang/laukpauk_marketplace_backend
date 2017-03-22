@@ -36,11 +36,11 @@
 								<table class="table table-striped">
 									<thead>
 										<tr>
-											<th class="text-center" width="5%"><b>No</b></th>
-											<th class="text-center"><b>Kategori</b></th>
-											<th class="text-center"><b>Produk</b></th>
-											<th class="text-center"><b>Harga</b></th>
-											<th class="text-center"><b>Stok</b></th>
+											<th class="text-center" width="5%">No</th>
+											<th class="text-center">Kategori</th>
+											<th class="text-center">Produk</th>
+											<th class="text-center">Harga<br><i>(min: 0, max: {{ max_price }})</i></th>
+											<th class="text-center">Stok<br><i>(min: 0, max: {{ max_stock }})</i></th>
 										</tr>
 									</thead>
 									<tbody>

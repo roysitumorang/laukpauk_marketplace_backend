@@ -9,6 +9,9 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class StoreItem extends ModelBase {
+	const MAX_PRICE = 500000;
+	const MAX_STOCK = 1000;
+
 	public $id;
 	public $user_id;
 	public $product_id;
@@ -92,12 +95,12 @@ class StoreItem extends ModelBase {
 				'stock' => 0,
 			],
 			'maximum' => [
-				'price' => 200000,
-				'stock' => 1000,
+				'price' => static::MAX_PRICE,
+				'stock' => static::MAX_STOCK,
 			],
 			'message' => [
-				'price' => 'harga minimal 0, maksimal ' . number_format(200000, 0, ','),
-				'stock' => 'stok minimal 0, maksimal ' . number_format(1000, 0, ','),
+				'price' => 'harga minimal 0, maksimal ' . number_format(static::MAX_PRICE, 0, ',', '.'),
+				'stock' => 'stok minimal 0, maksimal ' . number_format(static::MAX_STOCK, 0, ',', '.'),
 			],
 		]));
 		$validator->add(['user_id', 'product_id'], new Uniqueness([

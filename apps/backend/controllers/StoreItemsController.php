@@ -154,6 +154,8 @@ class StoreItemsController extends ControllerBase {
 		$this->view->categories       = $categories;
 		$this->view->products         = $products;
 		$this->view->current_products = $products[$categories[0]->id];
+		$this->view->max_price        = number_format(StoreItem::MAX_PRICE, 0, ',', '.');
+		$this->view->max_stock        = number_format(StoreItem::MAX_STOCK, 0, ',', '.');
 		if ($store_item) {
 			$this->view->store_item = $store_item;
 		}

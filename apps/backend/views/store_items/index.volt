@@ -68,12 +68,14 @@
 										</td>
 										<td>
 											<input type="text" name="price" value="{{ store_item.price }}" placeholder="Harga">
+											<br><i>min: 0, max: {{ max_price }}
 										</td>
 										<td class="text-right">
 											<b>Stok :</b>
 										</td>
 										<td>
 											<input type="text" name="stock" value="{{ store_item.stock }}" placeholder="Stok">
+											<br><i>min: 0, max: {{ max_stock }}
 										</td>
 										<td class="text-right">
 											<button type="submit" class="btn btn-info"><i class="fa fa-plus-square"></i> Tambah</button>
