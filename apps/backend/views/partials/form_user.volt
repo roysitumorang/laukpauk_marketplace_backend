@@ -51,6 +51,12 @@
 					</tr>
 					<tr>
 						<td>
+							Profil Toko (* untuk merchant) :<br>
+							<textarea name="company_profile" placeholder="Profil toko">{{ user.company_profile }}</textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							Premium Merchant (untuk merchant) :<br>
 							<input type="checkbox" name="premium_merchant" value="1"{% if user.premium_merchant %} checked{% endif %}>
 						</td>

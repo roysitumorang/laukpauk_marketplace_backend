@@ -51,6 +51,7 @@ class User extends ModelBase {
 	public $password_reset_token;
 	public $deposit;
 	public $company;
+	public $company_profile;
 	public $registration_ip;
 	public $gender;
 	public $date_of_birth;
@@ -199,6 +200,12 @@ class User extends ModelBase {
 		}
 	}
 
+	function setCompanyProfile($company_profile) {
+		if ($company_profile) {
+			$this->company_profile = $this->_filter->sanitize($company_profile, ['string', 'trim']);
+		}
+	}
+
 	function setGender($gender) {
 		if ($gender && in_array($gender, static::GENDERS)) {
 			$this->gender = $gender;
@@ -305,6 +312,7 @@ class User extends ModelBase {
 			$this->minimal_purchase = null;
 			$this->admin_fee        = null;
 			$this->domain           = null;
+			$this->company_profile  = null;
 		}
 	}
 

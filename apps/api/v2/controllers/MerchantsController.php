@@ -166,12 +166,12 @@ QUERY;
 		}
 		$delivery_hours = $merchant->delivery_hours ?: range($merchant->business_opening_hour, $merchant->business_closing_hour);
 		for ($i = 0; $i < 7; $i++) {
+			$now->modify("+{$i} day");
+			$current_hour = $now->format('G');
 			if (!$i && $current_hour >= max($delivery_hours)) {
 				continue;
 			}
-			$now->modify("+{$i} day");
 			$current_day  = $now->format('l');
-			$current_hour = $now->format('G');
 			$delivery_day = [
 				'date'  => $now->format('Y-m-d'),
 				'label' => $date_formatter->format($now),
@@ -218,6 +218,17 @@ QUERY
 		$this->_response['status']                = 1;
 		$this->_response['data']['delivery_days'] = $delivery_days;
 		$this->_response['data']['categories']    = $categories;
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+		return $this->response;
+	}
+
+	function aboutAction() {
+		$this->_response = [
+			'status' => 1,
+			'data'   => [
+				'company_profile' => $this->_premium_merchant ? $this->_premium_merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
+			],
+		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 		return $this->response;
 	}

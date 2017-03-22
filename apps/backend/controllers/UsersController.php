@@ -38,6 +38,7 @@ class UsersController extends ControllerBase {
 				'a.password_reset_token',
 				'a.deposit',
 				'a.company',
+				'a.company_profile',
 				'a.registration_ip',
 				'a.gender',
 				'a.date_of_birth',
@@ -338,6 +339,7 @@ QUERY
 		$user->setAddress($this->request->getPost('address'));
 		$user->setMobilePhone($this->request->getPost('mobile_phone'));
 		$user->setCompany($this->request->getPost('company'));
+		$user->setCompanyProfile($this->request->getPost('company_profile'));
 		$user->setGender($this->request->getPost('gender'));
 		$user->setDateOfBirth($this->request->getPost('date_of_birth'));
 		$user->setNewAvatar($_FILES['new_avatar']);
