@@ -93,7 +93,7 @@ QUERY;
 				'business_closing_hour' => $item->business_closing_hour . '.00 WIB',
 				'delivery_hours'        => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 				'minimum_purchase'      => $item->minimum_purchase,
-				'shipping_cost'         => $item->shipping_cost,
+				'shipping_cost'         => $item->shipping_cost ?? 0,
 			];
 			$merchants[] = $merchant;
 		}
