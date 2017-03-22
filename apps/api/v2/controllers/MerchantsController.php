@@ -239,7 +239,7 @@ QUERY
 		$this->_response = [
 			'status' => 1,
 			'data'   => [
-				'company_profile' => $premium_merchant ? $this->merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
+				'company_profile' => $premium_merchant ? $premium_merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
 			],
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
@@ -254,7 +254,7 @@ QUERY
 		$this->_response = [
 			'status' => 1,
 			'data'   => [
-				'terms_conditions' => $premium_merchant ? $this->merchant->terms_conditions : Post::findFirstByPermalink('syarat-ketentuan')->body,
+				'terms_conditions' => $premium_merchant ? $premium_merchant->terms_conditions : Post::findFirstByPermalink('syarat-ketentuan')->body,
 			],
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
