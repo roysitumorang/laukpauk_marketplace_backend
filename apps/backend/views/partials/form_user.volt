@@ -64,6 +64,7 @@
 					<tr>
 						<td>
 							Logo Toko (* untuk premium merchant) :<br>
+							<i>Format PNG ukuran 200 x 36 px</i><br>
 							<input type="file" name="company_logo" placeholder="Logo Toko">
 							{% if user.company_logo %}
 							<br><img src="/assets/image/{{ user.company_logo }}">
@@ -72,8 +73,24 @@
 					</tr>
 					<tr>
 						<td>
+							APK Launcher Icon (* untuk premium merchant) :<br>
+							<i>Format PNG ukuran 170 x 170 px</i><br>
+							<input type="file" name="launcher_icon" placeholder="APK Launcher Icon">
+							{% if user.launcher_icon %}
+							<br><img src="/assets/image/{{ user.launcher_icon }}">
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td>
 							Profil Toko (* untuk premium merchant) :<br>
 							<textarea name="company_profile" cols="50" rows="5" placeholder="Profil toko">{{ user.company_profile }}</textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Syarat dan Ketentuan (* untuk premium merchant) :<br>
+							<textarea name="terms_conditions" cols="50" rows="5" placeholder="Syarat dan ketentuan">{{ user.terms_conditions }}</textarea>
 						</td>
 					</tr>
 					<tr>

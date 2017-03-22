@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/update/{{ user.id }}"><h2>Update Member #{{ user.id }}</h2></a>
+				<a href="/admin/users/{{ user.id }}/update"><h2>Update Member #{{ user.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -24,7 +24,7 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ partial('partials/form_user', ['action': '/admin/users/update/' ~ user.id]) }}
+				{{ partial('partials/form_user', ['action': '/admin/users/' ~ user.id ~ '/update']) }}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->

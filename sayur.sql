@@ -8627,6 +8627,8 @@ CREATE TABLE `users` (
   `company` varchar(100) DEFAULT NULL,
   `company_profile` text,
   `company_logo` char(36) DEFAULT NULL,
+  `terms_conditions` text,
+  `launcher_icon` char(36) DEFAULT NULL,
   `registration_ip` varchar(41) NOT NULL,
   `gender` tinyint(1) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
@@ -8656,6 +8658,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `merchant_token` (`merchant_token`),
   UNIQUE KEY `domain` (`domain`),
   UNIQUE KEY `company_logo` (`company_logo`),
+  UNIQUE KEY `launcher_icon` (`launcher_icon`),
   KEY `activated_at` (`activated_at`),
   KEY `created_by` (`created_by`),
   KEY `date_of_birth` (`date_of_birth`),
@@ -8673,8 +8676,8 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`id`,`role_id`,`api_key`,`premium_merchant`,`merchant_id`,`merchant_token`,`domain`,`minimum_purchase`,`admin_fee`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`company_profile`,`company_logo`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`delivery_hours`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
-(1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,0,NULL,NULL,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
+insert  into `users`(`id`,`role_id`,`api_key`,`premium_merchant`,`merchant_id`,`merchant_token`,`domain`,`minimum_purchase`,`admin_fee`,`name`,`email`,`password`,`address`,`village_id`,`mobile_phone`,`status`,`activated_at`,`activation_token`,`password_reset_token`,`deposit`,`company`,`company_profile`,`company_logo`,`terms_conditions`,`launcher_icon`,`registration_ip`,`gender`,`date_of_birth`,`avatar`,`thumbnails`,`open_on_sunday`,`open_on_monday`,`open_on_tuesday`,`open_on_wednesday`,`open_on_thursday`,`open_on_friday`,`open_on_saturday`,`business_opening_hour`,`business_closing_hour`,`delivery_hours`,`created_by`,`created_at`,`updated_by`,`updated_at`) values
+(1,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'Super Admin','admin@warungwebsite.com','$2y$10$mA4tpbWe.vMwzMsRVutb.OHdIG/pXRZ9NerP5vSqk8kUbxytE2Xdi','Jln. Jamin Ginting No. 898, Padang Bulan',124,'+6281265688889',1,'2016-10-25 01:07:27',NULL,NULL,0,NULL,NULL,NULL,NULL,NULL,'::1',0,'1981-07-06',NULL,NULL,0,0,0,0,0,0,0,NULL,NULL,NULL,1,'2016-10-25 01:07:27',NULL,'2016-12-27 12:03:01');
 
 UNLOCK TABLES;
 

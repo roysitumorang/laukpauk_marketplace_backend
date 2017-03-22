@@ -13,7 +13,7 @@ use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
 	function beforeExecuteRoute() {
-		if ($this->dispatcher->getActionName() != 'about') {
+		if (!in_array($this->dispatcher->getActionName(), ['about', 'termsConditions'])) {
 			parent::beforeExecuteRoute();
 		}
 	}
@@ -240,6 +240,21 @@ QUERY
 			'status' => 1,
 			'data'   => [
 				'company_profile' => $premium_merchant ? $this->merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
+			],
+		];
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+		return $this->response;
+	}
+
+	function termsConditionsAction() {
+		if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
+			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
+
+		}
+		$this->_response = [
+			'status' => 1,
+			'data'   => [
+				'terms_conditions' => $premium_merchant ? $this->merchant->terms_conditions : Post::findFirstByPermalink('syarat-ketentuan')->body,
 			],
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);

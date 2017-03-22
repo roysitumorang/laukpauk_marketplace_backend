@@ -54,6 +54,9 @@ class User extends ModelBase {
 	public $company_profile;
 	public $company_logo;
 	public $new_company_logo;
+	public $launcher_icon;
+	public $new_launcher_icon;
+	public $terms_conditions;
 	public $registration_ip;
 	public $gender;
 	public $date_of_birth;
@@ -214,6 +217,18 @@ class User extends ModelBase {
 		}
 	}
 
+	function setNewLauncherIcon(array $new_launcher_icon) {
+		if ($new_launcher_icon['tmp_name'] && $new_launcher_icon['size'] && !$new_launcher_icon['error']) {
+			$this->new_launcher_icon = $new_launcher_icon;
+		}
+	}
+
+	function setTermsConditions($terms_conditions) {
+		if ($terms_conditions) {
+			$this->terms_conditions = $this->_filter->sanitize($terms_conditions, 'trim');
+		}
+	}
+
 	function setGender($gender) {
 		if ($gender && in_array($gender, static::GENDERS)) {
 			$this->gender = $gender;
@@ -319,13 +334,19 @@ class User extends ModelBase {
 			$this->premium_merchant = null;
 			$this->minimal_purchase = null;
 			$this->admin_fee        = null;
-			$this->domain           = null;
-			$this->company_profile  = null;
+			if (!$this->premium_merchant) {
+				$this->domain           = null;
+				$this->company_profile  = null;
+				$this->company_logo     = null;
+				$this->launcher_icon    = null;
+				$this->terms_conditions = null;
+			}
 		}
 	}
 
 	function validation() {
 		$validator = new Validation;
+		$max_size  = $this->_upload_config->max_size;
 		$validator->add(['name', 'mobile_phone', 'deposit'], new PresenceOf([
 			'message' => [
 				'name'         => 'nama harus diisi',
@@ -384,14 +405,29 @@ class User extends ModelBase {
 					'message' => 'domain sudah ada',
 				]));
 			}
-			if ($this->premium_merchant && $this->new_company_logo) {
-				$max_size = $this->_upload_config->max_size;
-				$validator->add('new_company_logo', new FileValidator([
-					'maxSize'      => $max_size,
-					'messageSize'  => 'ukuran file maksimal ' . $max_size,
-					'allowedTypes' => ['image/jpeg', 'image/png'],
-					'messageType'  => 'format gambar harus JPG atau PNG',
-				]));
+			if ($this->premium_merchant) {
+				if ($this->new_company_logo) {
+					$max_resolution = '200x36';
+					$validator->add('new_company_logo', new FileValidator([
+						'maxSize'              => $max_size,
+						'messageSize'          => 'ukuran file maksimal ' . $max_size,
+						'allowedTypes'         => ['image/png'],
+						'messageType'          => 'format gambar harus PNG',
+						'maxResolution'        => $max_resolution,
+						"messageMaxResolution" => 'Resolusi maksimal ' . $max_resolution,
+					]));
+				}
+				if ($this->new_launcher_icon) {
+					$max_resolution = '170x170';
+					$validator->add('new_launcher_icon', new FileValidator([
+						'maxSize'              => $max_size,
+						'messageSize'          => 'ukuran file maksimal ' . $max_size,
+						'allowedTypes'         => ['image/png'],
+						'messageType'          => 'format gambar harus PNG',
+						'maxResolution'        => $max_resolution,
+						"messageMaxResolution" => 'Resolusi maksimal ' . $max_resolution,
+					]));
+				}
 			}
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
@@ -433,7 +469,6 @@ class User extends ModelBase {
 			'message' => 'deposit harus dalam bentuk angka',
 		]));
 		if ($this->new_avatar) {
-			$max_size = $this->_upload_config->max_size;
 			$validator->add('new_avatar', new FileValidator([
 				'maxSize'      => $max_size,
 				'messageSize'  => 'ukuran file maksimal ' . $max_size,
@@ -468,8 +503,16 @@ class User extends ModelBase {
 			}
 			if ($this->new_company_logo && !$this->company_logo) {
 				do {
-					$this->company_logo = $random->hex(16) . '.jpg';
+					$this->company_logo = $random->hex(16) . '.png';
 					if (!is_readable($this->_upload_config->path . $this->company_logo) && !static::findFirstByCompanyLogo($this->company_logo)) {
+						break;
+					}
+				} while (1);
+			}
+			if ($this->new_launcher_icon && !$this->launcher_icon) {
+				do {
+					$this->launcher_icon = $random->hex(16) . '.png';
+					if (!is_readable($this->_upload_config->path . $this->launcher_icon) && !static::findFirstByLauncherIcon($this->launcher_icon)) {
 						break;
 					}
 				} while (1);
@@ -496,12 +539,21 @@ class User extends ModelBase {
 			$gd->save($avatar, 100);
 			unlink($this->new_avatar['tmp_name']);
 		}
-		if ($this->premium_merchant && $this->new_company_logo) {
-			$company_logo = $this->_upload_config->path . $this->company_logo;
-			$gd           = new Gd($this->new_company_logo['tmp_name']);
-			imageinterlace($gd->getImage(), 1);
-			$gd->save($company_logo, 100);
-			unlink($this->new_company_logo['tmp_name']);
+		if ($this->premium_merchant) {
+			if ($this->new_company_logo) {
+				$company_logo = $this->_upload_config->path . $this->company_logo;
+				$gd           = new Gd($this->new_company_logo['tmp_name']);
+				imageinterlace($gd->getImage(), 1);
+				$gd->save($company_logo, 100);
+				unlink($this->new_company_logo['tmp_name']);
+			}
+			if ($this->new_launcher_icon) {
+				$launcher_icon = $this->_upload_config->path . $this->launcher_icon;
+				$gd            = new Gd($this->new_launcher_icon['tmp_name']);
+				imageinterlace($gd->getImage(), 1);
+				$gd->save($launcher_icon, 100);
+				unlink($this->new_launcher_icon['tmp_name']);
+			}
 		}
 		if ($this->delivery_hours) {
 			$this->delivery_hours = explode(',', $this->delivery_hours);
