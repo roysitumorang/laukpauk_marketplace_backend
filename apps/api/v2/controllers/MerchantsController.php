@@ -19,24 +19,14 @@ class MerchantsController extends ControllerBase {
 	}
 
 	function indexAction() {
+		$page      = $this->dispatcher->getParam('page', 'int');
+		$keyword   = $this->dispatcher->getParam('keyword', 'string');
+		$limit     = 10;
 		$merchants = [];
+		$params    = [];
 		$query     = <<<QUERY
 			SELECT
-				a.id,
-				a.company,
-				a.address,
-				a.open_on_sunday,
-				a.open_on_monday,
-				a.open_on_tuesday,
-				a.open_on_wednesday,
-				a.open_on_thursday,
-				a.open_on_friday,
-				a.open_on_saturday,
-				a.business_opening_hour,
-				a.business_closing_hour,
-				a.delivery_hours,
-				COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
-				a.shipping_cost
+				COUNT(1)
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
@@ -48,20 +38,20 @@ class MerchantsController extends ControllerBase {
 				c.village_id = {$this->_current_user->village->id} AND
 QUERY;
 		if ($this->_premium_merchant) {
-			$query .= <<<QUERY
-				a.premium_merchant = 1 AND
-				a.id = {$this->_premium_merchant->id}
-QUERY;
+			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
 		} else {
-			$query .= <<<QUERY
-				a.premium_merchant IS NULL
-QUERY;
+			$query .= ' a.premium_merchant IS NULL';
+			if ($keyword) {
+				$params[] = "%{$keyword}%";
+				$query   .= ' AND a.company LIKE ?';
+			}
 		}
-		$query .= <<<QUERY
-			GROUP BY a.id
-			ORDER BY a.company
-QUERY;
-		$result = $this->db->query($query);
+		$query          .= ' GROUP BY a.id';
+		$total_merchants = $this->db->fetchColumn($query, $params);
+		$total_pages     = ceil($total_merchants / $limit);
+		$current_page    = $page > 0 && $page <= $total_pages ? $page : 1;
+		$offset          = ($current_page - 1) * $limit;
+		$result          = $this->db->query(str_replace('COUNT(1)', 'a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase, a.shipping_cost', $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$business_days = [
@@ -107,8 +97,10 @@ QUERY;
 			])->toArray();
 			$this->_response['status'] = 1;
 			$this->_response['data']   = [
-				'merchants'  => $merchants,
-				'categories' => $categories,
+				'merchants'    => $merchants,
+				'categories'   => $categories,
+				'current_page' => $current_page,
+				'pages'        => $this->_setPaginationRange($total_pages, $current_page),
 			];
 		}
 		$this->response->setJsonContent($this->_response);
