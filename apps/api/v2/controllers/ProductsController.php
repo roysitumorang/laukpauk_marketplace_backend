@@ -108,6 +108,7 @@ QUERY;
 			'current_hour'     => $this->currentDatetime->format('G'),
 			'minimum_purchase' => $merchant->minimum_purchase,
 			'shipping_cost'    => $merchant->shipping_cost ?? 0,
+			'pages'            => $this->_setPaginationRange($total_pages, $current_page),
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;

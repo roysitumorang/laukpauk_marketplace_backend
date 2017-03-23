@@ -55,4 +55,20 @@ abstract class ControllerBase extends Controller {
 			exit($this->response->send());
 		}
 	}
+
+	protected function _setPaginationRange($total_pages, $current_page = 1) : array {
+		if ($total_pages < 2) {
+			return [];
+		}
+		$start_page = min(max($current_page - 3, 1), $total_pages);
+		$end_page   = max(min($current_page + 3, $total_pages), 1);
+		$pages      = range($start_page, $end_page);
+		if ($start_page > 1) {
+			array_unshift($pages, 1);
+		}
+		if ($end_page < $total_pages) {
+			$pages[] = $total_pages;
+		}
+		return $pages;
+	}
 }
