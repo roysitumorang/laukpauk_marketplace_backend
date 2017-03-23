@@ -46,12 +46,11 @@ QUERY;
 				$query   .= ' AND a.company LIKE ?';
 			}
 		}
-		$query          .= ' GROUP BY a.id';
 		$total_merchants = $this->db->fetchColumn($query, $params);
 		$total_pages     = ceil($total_merchants / $limit);
 		$current_page    = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset          = ($current_page - 1) * $limit;
-		$result          = $this->db->query(str_replace('COUNT(1)', 'a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase, a.shipping_cost', $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
+		$result          = $this->db->query(str_replace('COUNT(1)', 'a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase, a.shipping_cost', $query) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$business_days = [
