@@ -321,7 +321,7 @@ QUERY;
 				$device->token      = $this->_input->device_token;
 				$device->created_by = $user->id;
 				$device->create();
-			} else if ($device->user_id != $this->_current_user->id) {
+			} else if ($device->user_id != $user->id) {
 				$device->user       = $user;
 				$device->updated_by = $user->id;
 				$device->update();
