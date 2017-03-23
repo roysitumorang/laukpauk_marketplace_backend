@@ -5,7 +5,7 @@ namespace Application\Api\V2\Controllers;
 use Application\Models\Role;
 use Application\Models\Setting;
 use Application\Models\User;
-use Exception;
+use Error;
 use Phalcon\Crypt;
 use Phalcon\Mvc\Controller;
 
@@ -34,10 +34,10 @@ abstract class ControllerBase extends Controller {
 			$access_token   = str_replace('Bearer ', '', filter_input(INPUT_SERVER, 'Authorization'));
 			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
 			if (!$access_token) {
-				throw new Exception(static::INVALID_API_KEY_MESSAGE);
+				throw new Error(static::INVALID_API_KEY_MESSAGE);
 			}
 			if ($merchant_token && !($this->_premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]))) {
-				throw new Exception(static::INVALID_API_KEY_MESSAGE);
+				throw new Error(static::INVALID_API_KEY_MESSAGE);
 			}
 			$encrypted_data = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
 			$crypt          = new Crypt;
@@ -46,9 +46,9 @@ abstract class ControllerBase extends Controller {
 					? ['status = 1 AND api_key = ?0 AND ((role_id = ?1 AND id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$payload->api_key, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
 					: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id > 2 AND api_key = ?0', 'bind' => [$payload->api_key]];
 			if (($merchant_token && $payload->merchant_token != $merchant_token) || !($this->_current_user = User::findFirst($params))) {
-				throw new Exception(static::INVALID_API_KEY_MESSAGE);
+				throw new Error(static::INVALID_API_KEY_MESSAGE);
 			}
-		} catch (Exception $e) {
+		} catch (Throwable $e) {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
