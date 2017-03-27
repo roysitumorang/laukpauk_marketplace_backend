@@ -70,7 +70,7 @@
 						<tr id="{{ product.id }}">
 							<td{{ background }} class="text-right">{{ product.rank }}</td>
 							<td{{ background }} width="5%">
-								<img src="/assets/image/no_picture_120.png" border="0">
+								<img src="{{ product.thumbnail(120) }}" border="0">
 							</td>
 							<td{{ background }}>
 								<font size="4">{{ product.name }}</font><br>

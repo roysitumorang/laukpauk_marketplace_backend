@@ -1,6 +1,6 @@
 {{ flashSession.output() }}
 <i style="float:right"><font color="red"><b>*</b> harus diisi</font></i>
-<form method="POST" action="{{ action }}">
+<form method="POST" action="{{ action }}" enctype="multipart/form-data">
 	<table class="table table-striped">
 		<tr>
 			<td>
@@ -43,6 +43,31 @@
 					<option value="{{ lifetime }}"{% if lifetime == product.lifetime  %} selected{% endif %}>{{ lifetime }} hari</options>
 					{% endfor %}
 				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b><font color="#000099">Gambar</font></b>
+				<br>
+				<input type="file" name="picture">
+				{% if product.id and product.picture %}
+				<img src="/assets/image/{{ product.picture }}">
+				<a href="javascript:void(0)" class="delete" data-id="{{ product.id }}">
+					<i class="fa fa-trash-o fa-2x"></i>
+				</a>
+				<script>
+					let removal_link = document.querySelector('.delete');
+					removal_link.onclick = () => {
+						if (confirm('Anda yakin menghapus gambar ini ?')) {
+							let form = document.createElement('form');
+							form.method = 'POST',
+							form.action = '/admin/products/' + removal_link.dataset.id + '/deletePicture?next={{ next }}',
+							document.body.appendChild(form),
+							form.submit()
+						}
+					}
+				</script>
+				{% endif %}
 			</td>
 		</tr>
 		<tr>

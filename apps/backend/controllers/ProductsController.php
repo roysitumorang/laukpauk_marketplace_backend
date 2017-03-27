@@ -4,8 +4,10 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Product;
 use Application\Models\ProductCategory;
+use Error;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Throwable;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -131,6 +133,25 @@ class ProductsController extends ControllerBase {
 		return $this->response->redirect($this->request->getQuery('next'));
 	}
 
+	function deletePictureAction($id) {
+		try {
+			if (!$this->request->isPost()) {
+				throw new Error('Request tidak valid.');
+			}
+			if (!$id || !($product = Product::findFirstById($id))) {
+				throw new Error('Produk tidak ditemukan.');
+			}
+		} catch (Throwable $e) {
+			$this->flashSession->error($e->getMessage());
+			return $this->response->redirect('/admin/products');
+		}
+		if ($product->picture) {
+			$product->deletePicture();
+			$this->flashSession->success('Gambar berhasil dihapus');
+		}
+		return $this->response->redirect("/admin/products/{$product->id}/update?next=" . $this->request->get('next'));
+	}
+
 	function deleteAction($id) {
 		if ($this->request->isPost()) {
 			if (!$product = Product::findFirstById($id)) {
@@ -168,6 +189,7 @@ class ProductsController extends ControllerBase {
 		$product->setStockUnit($this->request->getPost('stock_unit'));
 		$product->setDescription($this->request->getPost('description'));
 		$product->setLifetime($this->request->getPost('lifetime'));
+		$product->setNewPicture($_FILES['picture']);
 		$product->setPublished($this->request->getPost('published'));
 	}
 }
