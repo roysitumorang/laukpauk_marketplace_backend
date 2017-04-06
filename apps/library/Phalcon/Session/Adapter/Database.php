@@ -99,7 +99,7 @@ class Database extends Adapter implements AdapterInterface {
 				$maxLifetime
 			),
 			[$sessionId, time()]
-		);
+		) ?: '';
 	}
 	/**
 	 * {@inheritdoc}
