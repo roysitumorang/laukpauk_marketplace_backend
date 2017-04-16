@@ -4,17 +4,9 @@ declare(strict_types=1);
 
 use Phalcon\Debug;
 use Phalcon\Di\FactoryDefault;
-use Phalcon\Logger\Adapter\File;
 use Phalcon\Mvc\Application;
 
 define('APP_PATH', realpath('..') . '/');
-
-register_shutdown_function(function() {
-	session_write_close();
-	$logger         = new File(APP_PATH . 'apps/logs/perf.log');
-	$execution_time = (microtime(true) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
-	$logger->log(sprintf('%s | %s | processed in %s ms | memory usage %s MB', $_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], $execution_time, memory_get_peak_usage(true) / 1048576));
-});
 
 /**
  * Enable framework debugger

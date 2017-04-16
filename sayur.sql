@@ -16,6 +16,36 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`sayur` /*!40100 DEFAULT CHARACTER SET u
 
 USE `sayur`;
 
+/*Table structure for table `api_calls` */
+
+DROP TABLE IF EXISTS `api_calls`;
+
+CREATE TABLE `api_calls` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL,
+  `url` varchar(4096) NOT NULL,
+  `request_method` varchar(7) NOT NULL,
+  `ip_address` varchar(41) NOT NULL,
+  `user_agent` text NOT NULL,
+  `execution_time` double NOT NULL,
+  `memory_usage` double NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `created_at` (`created_at`),
+  KEY `url` (`url`(191)),
+  KEY `execution_time` (`execution_time`),
+  KEY `memory_usage` (`memory_usage`),
+  KEY `request_method` (`request_method`),
+  KEY `ip_address` (`ip_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+/*Data for the table `api_calls` */
+
+LOCK TABLES `api_calls` WRITE;
+
+UNLOCK TABLES;
+
 /*Table structure for table `banner_categories` */
 
 DROP TABLE IF EXISTS `banner_categories`;

@@ -20,6 +20,18 @@ abstract class ControllerBase extends Controller {
 	protected $_input;
 
 	function initialize() {
+		register_shutdown_function(function() {
+			$this->db->insertAsDict('api_calls', [
+				'user_id'        => $this->_current_user->id,
+				'url'            => $this->request->getServer('REQUEST_URI'),
+				'request_method' => $this->request->getMethod(),
+				'ip_address'     => $this->request->getServer('REMOTE_ADDR'),
+				'user_agent'     => $this->request->getServer('HTTP_USER_AGENT'),
+				'execution_time' => (microtime(true) - $this->request->getServer('REQUEST_TIME_FLOAT')) * 1000,
+				'memory_usage'   => memory_get_peak_usage(true) / 1048576,
+				'created_at'     => $this->currentDatetime->format('Y-m-d H:i:s'),
+			]);
+		});
 		$this->_response['version'] = $this->db->fetchColumn('SELECT MAX(`version`) FROM releases');
 		if (Setting::findFirstByName('maintenance_mode')->value) {
 			$this->_response['maintenance_mode'] = 1;
