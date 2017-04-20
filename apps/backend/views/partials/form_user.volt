@@ -113,6 +113,12 @@
 					</tr>
 					<tr>
 						<td>
+							Catan Penjual (untuk merchant) :<br>
+							<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>
 							Jenis Kelamin :<br>
 							{% for gender in genders %}
 							<input type="radio" name="gender" value={{ gender }}{% if user.gender == gender %} checked{% endif %}> {{ gender }}&nbsp;&nbsp;

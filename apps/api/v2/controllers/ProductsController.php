@@ -2,7 +2,6 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Application\Models\Post;
 use Exception;
 use Phalcon\Db;
 
@@ -16,6 +15,7 @@ class ProductsController extends ControllerBase {
 			$query = <<<QUERY
 				SELECT
 					a.id,
+					a.merchant_note,
 					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
 					a.shipping_cost
 				FROM
@@ -103,7 +103,7 @@ QUERY;
 			$this->_response['status'] = 1;
 		}
 		$this->_response['data'] = [
-			'merchant_note'    => Post::findFirstByPermalink('merchant-note')->body,
+			'merchant_note'    => $merchant->merchant_note,
 			'products'         => $products,
 			'total_pages'      => $total_pages,
 			'current_page'     => $current_page,

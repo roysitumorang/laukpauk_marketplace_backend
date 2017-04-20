@@ -36,6 +36,7 @@ class User extends ModelBase {
 	public $premium_merchant;
 	public $merchant_id;
 	public $merchant_token;
+	public $merchant_note;
 	public $domain;
 	public $minimum_purchase;
 	public $shipping_cost;
@@ -131,6 +132,10 @@ class User extends ModelBase {
 
 	function setMerchantId($merchant_id) {
 		$this->merchant_id = $this->_filter->sanitize($merchant_id, 'int') ?: null;
+	}
+
+	function setMerchantNote($merchant_note) {
+		$this->merchant_note = $this->_filter->sanitize($merchant_note, 'trim') ?: null;
 	}
 
 	function setDomain($domain) {
@@ -342,6 +347,7 @@ class User extends ModelBase {
 			$this->premium_merchant = null;
 			$this->minimal_purchase = null;
 			$this->admin_fee        = null;
+			$this->merchant_note    = null;
 			if (!$this->premium_merchant) {
 				$this->domain           = null;
 				$this->company_profile  = null;
