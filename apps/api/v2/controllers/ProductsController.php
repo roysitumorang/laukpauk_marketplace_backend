@@ -76,11 +76,12 @@ QUERY;
 		if ($keyword) {
 			$query .= " AND b.name LIKE '%{$keyword}%'";
 		}
-		$total_products = $this->db->fetchColumn($query);
-		$total_pages    = ceil($total_products / $limit);
-		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
-		$offset         = ($current_page - 1) * $limit;
-		$result         = $this->db->query(str_replace('COUNT(1)', 'a.id, b.product_category_id, b.name, a.price, a.stock, b.stock_unit, order_closing_hour', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$total_products   = $this->db->fetchColumn($query);
+		$total_pages      = ceil($total_products / $limit);
+		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
+		$offset           = ($current_page - 1) * $limit;
+		$result           = $this->db->query(str_replace('COUNT(1)', 'a.id, b.product_category_id, b.name, a.price, a.stock, b.stock_unit, order_closing_hour, b.picture', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$product = [
@@ -89,6 +90,7 @@ QUERY;
 				'price'      => $row->price,
 				'stock'      => $row->stock,
 				'stock_unit' => $row->stock_unit,
+				'picture'    => $row->picture ? $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']) : null,
 			];
 			if ($row->order_closing_hour) {
 				$product['order_closing_hour'] = $row->order_closing_hour;
