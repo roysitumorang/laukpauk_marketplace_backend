@@ -102,7 +102,7 @@ QUERY;
 				'pages'        => $this->_setPaginationRange($total_pages, $current_page),
 			];
 		}
-		$this->response->setJsonContent($this->_response);
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 
