@@ -139,7 +139,6 @@ class Order extends ModelBase {
 	}
 
 	function afterCreate() {
-		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->final_bill]);
 		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
@@ -176,7 +175,6 @@ class Order extends ModelBase {
 			'status'              => array_search('CANCELLED', static::STATUS),
 			'cancellation_reason' => $cancellation_reason,
 		]);
-		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
 		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order cancelled');
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
@@ -217,7 +215,7 @@ class Order extends ModelBase {
 			'status'          => array_search('COMPLETED', static::STATUS),
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 		]);
-		$this->merchant->update(['deposit' => $this->merchant->deposit + $this->final_bill]);
+		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->final_bill]);
 		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order delivered');
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
