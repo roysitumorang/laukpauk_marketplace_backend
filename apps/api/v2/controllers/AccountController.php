@@ -144,6 +144,7 @@ class AccountController extends ControllerBase {
 					$business_hours->$hour = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 				}
 				$this->_response['data']['business_hours'] = $business_hours;
+				$this->_response['data']['deposit']        = $this->_current_user->deposit;
 			}
 			$provinces = [];
 			$query     = <<<QUERY
@@ -201,7 +202,7 @@ QUERY;
 			}
 			$this->_response['status']            = 1;
 			$this->_response['data']['provinces'] = $provinces;
-			$this->response->setJsonContent($this->_response);
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
 		$this->_current_user->setName($this->_input->name);
