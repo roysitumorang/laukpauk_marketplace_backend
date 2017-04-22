@@ -2,10 +2,16 @@
 
 namespace Application\Api\V2\Controllers;
 
+use Application\Models\Role;
+use Application\Models\User;
 use Phalcon\Db;
 
 class ProvincesController extends ControllerBase {
-	function beforeExecuteRoute() {}
+	function beforeExecuteRoute() {
+		if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
+			$this->_premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
+		}
+	}
 
 	function indexAction() {
 		$provinces = [];
