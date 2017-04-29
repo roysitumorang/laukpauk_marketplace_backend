@@ -26,9 +26,9 @@ class User extends ModelBase {
 		'opening' => 6,
 		'closing' => 22,
 	];
-	const MAX_MINIMUM_PURCHASE = 100000;
-	const MAX_ADMIN_FEE        = 10000;
-	const MAX_SHIPPING_COST    = 10000;
+	const MAX_MINIMUM_PURCHASE = 900000;
+	const MAX_ADMIN_FEE        = 90000;
+	const MAX_SHIPPING_COST    = 90000;
 
 	public $id;
 	public $role_id;
