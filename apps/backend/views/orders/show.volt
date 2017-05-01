@@ -21,33 +21,36 @@
 			<!-- start: page -->
 			<header class="panel-heading">
 				<h2 class="panel-title">Detail Order #{{ order.code }}</h2>
+				{% if order.status === 'COMPLETED' %}
 				<span style="float:right;margin-top:-20px">
 					<a href="javascript:void(0)" onclick="let popup=window.open('/admin/orders/{{ order.id }}/print','popup','height=800,width=800,resizeable=no,scrollbars=yes,toolbar=no,status=no');window.focus&&popup.focus()" title="Print Invoice"><i class="fa fa-print fa-2x"></i></a>
 				</span>
+				{% endif %}
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				{% if order.status === 1 %}
-					{% set background = ' style="background:#CCFFCC"' %}
-				{% elseif order.status === -1 %}
-					{% set background = ' style="background:#E6B800"' %}
-				{% else %}
-					{% set background = ' style="background:#FFCCCC"' %}
-				{% endif %}
 				<table class="table table-striped">
 					<tr>
-						<td{{ background }} colspan="2" width="40%">
+						<td style="background:#{% if order.status == 1 %}CCFFCC{% elseif order.status == -1 %}E6B800{% else %}FFCCCC{% endif %}" colspan="2" width="40%">
 							<b>Status Order</b>
 							<br>
 							<font size="4"><strong>{{ order.status }}</strong></font>
 						</td>
-						<td colspan="2">
-							{% if order.status === 0 %}
-							<a type="button" href="javascript:void(0)" data-id="{{ order.id }}" class="complete btn btn-primary">COMPLETE</a>&nbsp;&nbsp;
-							<a type="button" href="javascript:void(0)" data-id="{{ order.id }}" class="cancel btn btn-danger">CANCEL</a>
-							{% endif %}
+						{% if order.status === 'HOLD' %}
+						<td class="text-right">
+							<form method="POST" action="/admin/orders/{{ order.id }}/complete">
+								<button type="submit" class="complete btn btn-primary"><i class="fa fa-check"></i> COMPLETE</button>
+							</form>
 						</td>
+						<td>
+							<form method="POST" action="/admin/orders/{{ order.id }}/cancel">
+								<button type="submit" class="cancel btn btn-danger"><i class="fa fa-remove"></i> CANCEL</button>
+							</form>
+						</td>
+						{% else %}
+						<td colspan="2"></td>
+						{% endif %}
 					</tr>
 					<tr>
 						<td bgcolor="#e0ebeb" colspan="2">

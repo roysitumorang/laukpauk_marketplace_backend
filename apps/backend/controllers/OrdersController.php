@@ -124,4 +124,32 @@ class OrdersController extends ControllerBase {
 		$this->view->village = Village::findFirst($order->village_id);
 		$this->view->menu    = $this->_menu('Order');
 	}
+
+	function completeAction($id) {
+		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND id = ?0', 'bind' => [$id]]))) {
+			$this->flashSession->error('Order tidak ditemukan.');
+			return $this->dispatcher->forward('orders');
+		}
+		$order->complete();
+		$this->flashSession->success('Order #' . $order->code . ' telah selesai');
+		return $this->response->redirect("/admin/orders/{$order->id}");
+	}
+
+	function cancelAction($id) {
+		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND id = ?0', 'bind' => [$id]]))) {
+			$this->flashSession->error('Order tidak ditemukan.');
+			return $this->dispatcher->forward('orders');
+		}
+		$order->complete();
+		$this->flashSession->success('Order #' . $order->code . ' telah dicancel');
+		return $this->response->redirect("/admin/orders/{$order->id}");
+	}
+
+	function printAction($id) {
+		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 1 AND id = ?0', 'bind' => [$id]]))) {
+			$this->flashSession->error('Order tidak ditemukan.');
+			return $this->dispatcher->forward('orders');
+		}
+		$this->view->order = $order;
+	}
 }
