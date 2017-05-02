@@ -4,7 +4,12 @@ namespace Application\Models;
 
 use Application\Models\Notification;
 use Application\Models\NotificationTemplate;
+use DateInterval;
+use DatePeriod;
+use DateTimeImmutable;
+use DateTimeZone;
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Callback;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
@@ -109,9 +114,32 @@ class Order extends ModelBase {
 			'message' => 'status yang valid HOLD, CANCELLED atau COMPLETED',
 		]));
 		if (!$this->id) {
-			$validator->add('scheduled_delivery', new Date([
-				'format'  => 'Y-m-d H:i:s',
-				'message' => 'jam pengantaran tidak valid',
+			$validator->add('scheduled_delivery', new Callback([
+				'callback' => function($data) {
+					try {
+						$scheduled_delivery = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data->scheduled_delivery, new DateTimeZone($this->getDI()->getConfig()->timezone));
+						$delivery_day       = $scheduled_delivery->format('l');
+					} catch (Exception $e) {
+						return false;
+					}
+					$valid_dates = [];
+					foreach (new DatePeriod($this->getDI()->getCurrentDatetime(), new DateInterval('P1D'), 6) as $date) {
+						$valid_dates[] = $date->format('Y-m-d');
+					}
+					return in_array($scheduled_delivery->format('Y-m-d'), $valid_dates) &&
+						(($delivery_day == 'Sunday' && $this->merchant->open_on_sunday) ||
+						($delivery_day == 'Monday' && $this->merchant->open_on_monday) ||
+						($delivery_day == 'Tuesday' && $this->merchant->open_on_tuesday) ||
+						($delivery_day == 'Wednesday' && $this->merchant->open_on_wednesday) ||
+						($delivery_day == 'Thursday' && $this->merchant->open_on_thursday) ||
+						($delivery_day == 'Friday' && $this->merchant->open_on_friday) ||
+						($delivery_day == 'Saturday' && $this->merchant->open_on_saturday)) &&
+						in_array($scheduled_delivery->format('G'), $this->merchant->delivery_hours) &&
+						($scheduled_delivery->format('Y-m-d') === $this->getDI()->getCurrentDatetime()->format('Y-m-d')
+						? ($scheduled_delivery->format('U') - $this->getDI()->getCurrentDatetime()->format('U')) / 3600.0 >= 1
+						: true);
+				},
+				'message' => 'tanggal jam pengantaran tidak valid',
 			]));
 		} else if (array_search($this->status, static::STATUS) == 'CANCELLED') {
 			$validator->add('cancellation_reason', new PresenceOf([
