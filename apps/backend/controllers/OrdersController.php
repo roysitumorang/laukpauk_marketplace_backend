@@ -140,8 +140,12 @@ class OrdersController extends ControllerBase {
 			$this->flashSession->error('Order tidak ditemukan.');
 			return $this->dispatcher->forward('orders');
 		}
-		$order->complete();
-		$this->flashSession->success('Order #' . $order->code . ' telah dicancel');
+		if ($order->cancel($this->request->getPost('cancellation_reason'))) {
+			$this->flashSession->success('Order #' . $order->code . ' telah dicancel');
+		}
+		foreach ($order->getMessages() as $error) {
+			$this->flashSession->error($error);
+		}
 		return $this->response->redirect("/admin/orders/{$order->id}");
 	}
 

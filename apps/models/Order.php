@@ -141,7 +141,7 @@ class Order extends ModelBase {
 				},
 				'message' => 'tanggal jam pengantaran tidak valid',
 			]));
-		} else if (array_search($this->status, static::STATUS) == 'CANCELLED') {
+		} else if (array_search('CANCELLED', static::STATUS) === $this->status) {
 			$validator->add('cancellation_reason', new PresenceOf([
 				'message' => 'alasan pembatalan harus diisi',
 			]));
@@ -199,10 +199,11 @@ class Order extends ModelBase {
 	}
 
 	function cancel($cancellation_reason) {
-		$this->update([
-			'status'              => array_search('CANCELLED', static::STATUS),
-			'cancellation_reason' => $cancellation_reason,
-		]);
+		$this->status              = array_search('CANCELLED', static::STATUS);
+		$this->cancellation_reason = $cancellation_reason ?: null;
+		if (!$this->validation() || !$this->update()) {
+			return false;
+		}
 		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order cancelled');
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;

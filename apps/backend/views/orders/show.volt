@@ -45,6 +45,7 @@
 						</td>
 						<td>
 							<form method="POST" action="/admin/orders/{{ order.id }}/cancel">
+								<input type="text" name="cancellation_reason" placeholder="Alasan pembatalan">
 								<button type="submit" class="cancel btn btn-danger"><i class="fa fa-remove"></i> CANCEL</button>
 							</form>
 						</td>
