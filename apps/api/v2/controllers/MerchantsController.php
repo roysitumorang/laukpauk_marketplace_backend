@@ -20,7 +20,7 @@ class MerchantsController extends ControllerBase {
 
 	function indexAction() {
 		$page      = $this->dispatcher->getParam('page', 'int');
-		$keyword   = $this->dispatcher->getParam('keyword', 'string');
+		$keywords  = explode(' ', $this->dispatcher->getParam('keyword', 'string') ?: null);
 		$limit     = 10;
 		$merchants = [];
 		$params    = [];
@@ -44,11 +44,15 @@ QUERY;
 			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
 		} else {
 			$query .= ' a.premium_merchant IS NULL';
-			if ($keyword) {
-				foreach (range(1, 3) as $i) {
-					$params[] = "%{$keyword}%";
+			if ($keywords) {
+				$query .= ' AND (';
+				foreach ($keywords as $i => $keyword) {
+					$query .= ($i ? ' OR' : '') . ' a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?';
+					foreach (range(1, 3) as $i) {
+						$params[] = "%{$keyword}%";
+					}
 				}
-				$query   .= ' AND (a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?)';
+				$query .= ')';
 			}
 		}
 		$total_merchants = $this->db->fetchColumn($query, $params);
