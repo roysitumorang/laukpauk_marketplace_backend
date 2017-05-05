@@ -11,8 +11,8 @@
 	{% for setting in settings %}
 		<tr>
 			<td class="text-right">{{ setting.rank }}</td>
-			<td>{{ setting.name }}</a></td>
-			<td>{{ setting.value }}</a></td>
+			<td>{{ setting.name }}</td>
+			<td>{{ setting.value }}</td>
 			<td class="text-center">
 				<a href="/admin/settings/update/{{ setting.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 			</td>

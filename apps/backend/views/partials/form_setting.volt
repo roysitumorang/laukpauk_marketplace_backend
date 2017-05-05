@@ -4,13 +4,27 @@
 		<tr>
 			<td>
 				<b>Nama :</b>
+			</td>
+			<td>
 				{% if setting.id %}
 				<i>{{ setting.name }}</i>
 				{% else %}
 				<input type="text" name="name" value="{{ setting.name }}">
 				{% endif %}
+			</td>
+		</tr>
+		<tr>
+			<td>
 				<b>Nilai :</b>
-				<input type="text" name="value" value="{{ setting.value }}">
+			</td>
+			<td>
+				<textarea name="value" rows="4" cols="50">{{ setting.value }}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>
+			</td>
+			<td>
 				<button type="submit" class="btn btn-info">SIMPAN</button>
 			</td>
 		</tr>
