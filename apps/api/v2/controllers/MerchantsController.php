@@ -26,12 +26,15 @@ class MerchantsController extends ControllerBase {
 		$params    = [];
 		$query     = <<<QUERY
 			SELECT
-				COUNT(1)
+				COUNT(DISTINCT a.id)
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
 				JOIN settings d ON d.name = 'minimum_purchase'
+				JOIN store_items e ON a.id = e.user_id
+				JOIN products f ON e.product_id = f.id
+				JOIN product_categories g ON f.product_category_id = g.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
@@ -42,15 +45,17 @@ QUERY;
 		} else {
 			$query .= ' a.premium_merchant IS NULL';
 			if ($keyword) {
-				$params[] = "%{$keyword}%";
-				$query   .= ' AND a.company LIKE ?';
+				foreach (range(1, 3) as $i) {
+					$params[] = "%{$keyword}%";
+				}
+				$query   .= ' AND (a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?)';
 			}
 		}
 		$total_merchants = $this->db->fetchColumn($query, $params);
 		$total_pages     = ceil($total_merchants / $limit);
 		$current_page    = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset          = ($current_page - 1) * $limit;
-		$result          = $this->db->query(str_replace('COUNT(1)', 'a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase, a.shipping_cost', $query) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
+		$result          = $this->db->query(str_replace('COUNT(DISTINCT a.id)', 'a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase, a.shipping_cost', $query) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$business_days = [
