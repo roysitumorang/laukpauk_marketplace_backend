@@ -19,12 +19,12 @@ class MerchantsController extends ControllerBase {
 	}
 
 	function indexAction() {
-		$page      = $this->dispatcher->getParam('page', 'int');
-		$keywords  = explode(' ', $this->dispatcher->getParam('keyword', 'string') ?: null);
-		$limit     = 10;
-		$merchants = [];
-		$params    = [];
-		$query     = <<<QUERY
+		$page         = $this->dispatcher->getParam('page', 'int');
+		$search_query = $this->dispatcher->getParam('keyword', 'string') ?: null;
+		$limit        = 10;
+		$merchants    = [];
+		$params       = [];
+		$query        = <<<QUERY
 			SELECT
 				COUNT(DISTINCT a.id)
 			FROM
@@ -44,12 +44,21 @@ QUERY;
 			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
 		} else {
 			$query .= ' a.premium_merchant IS NULL';
-			if ($keywords) {
-				$query .= ' AND (';
-				foreach ($keywords as $i => $keyword) {
-					$query .= ($i ? ' OR' : '') . ' a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?';
-					foreach (range(1, 3) as $i) {
-						$params[] = "%{$keyword}%";
+			if ($search_query) {
+				$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
+				$keywords              = preg_split('/ /', $search_query, -1, PREG_SPLIT_NO_EMPTY);
+				$filtered_keywords     = array_diff($keywords, $stop_words);
+				$filtered_search_query = implode(' ', $filtered_keywords);
+				$query                .= ' AND (a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?';
+				foreach (range(1, 3) as $i) {
+					$params[] = "%{$filtered_search_query}%";
+				}
+				if (count($filtered_keywords) > 1) {
+					foreach ($filtered_keywords as $keyword) {
+						$query .= ' OR a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?';
+						foreach (range(1, 3) as $i) {
+							$params[] = "%{$keyword}%";
+						}
 					}
 				}
 				$query .= ')';
