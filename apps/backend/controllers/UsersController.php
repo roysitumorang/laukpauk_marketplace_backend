@@ -265,7 +265,7 @@ class UsersController extends ControllerBase {
 		$this->view->menu  = $this->_menu('Members');
 		$this->view->roles = Role::find([
 			'id IN ({ids:array})',
-			'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT]],
+			'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT, Role::BUYER]],
 			'order' => 'name',
 		]);
 		$result = $this->db->query(<<<QUERY
