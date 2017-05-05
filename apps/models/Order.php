@@ -136,7 +136,7 @@ class Order extends ModelBase {
 						($delivery_day == 'Saturday' && $this->merchant->open_on_saturday)) &&
 						in_array($scheduled_delivery->format('G'), $this->merchant->delivery_hours) &&
 						($scheduled_delivery->format('Y-m-d') === $this->getDI()->getCurrentDatetime()->format('Y-m-d')
-						? ($scheduled_delivery->format('U') - $this->getDI()->getCurrentDatetime()->format('U')) / 3600.0 >= 1
+						? ($scheduled_delivery->format('G') >= $this->getDI()->getCurrentDatetime()->format('G') + ($this->getDI()->getCurrentDatetime()->format('i') > 29 ? 2 : 1))
 						: true);
 				},
 				'message' => 'tanggal jam pengantaran tidak valid',

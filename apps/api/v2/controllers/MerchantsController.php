@@ -190,7 +190,7 @@ QUERY;
 				($current_day == 'Saturday' && !$merchant->open_on_saturday)) {
 				$delivery_day['unavailable'] = true;
 			} else {
-				$minimum_hour          = ceil($current_hour + $now->format('i') / 60) + 1;
+				$minimum_hour          = $current_hour + ($now->format('i') > 29 ? 2 : 1);
 				$delivery_day['hours'] = !$i
 					? array_values(array_filter($delivery_hours, function($v, $k) use($minimum_hour) {
 						return $v >= $minimum_hour;
