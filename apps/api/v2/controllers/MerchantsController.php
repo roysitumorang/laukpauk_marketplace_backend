@@ -189,7 +189,7 @@ QUERY;
 		}
 		$delivery_hours = $merchant->delivery_hours ?: range($merchant->business_opening_hour, $merchant->business_closing_hour);
 		for ($i = 0; $i < 7; $i++) {
-			$now->modify("+{$i} day");
+			$i && $now->modify('+1 day');
 			$current_hour = $now->format('G');
 			if (!$i && $current_hour >= max($delivery_hours)) {
 				continue;
