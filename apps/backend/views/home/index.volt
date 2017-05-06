@@ -43,7 +43,7 @@
 										</h2>
 										<div id="salesSelectorItems" class="chart-data-selector-items mt-sm">
 											<!-- Flot: Sales Porto Admin -->
-											<div class="chart chart-sm" data-sales-rel="Transaksi Harian" id="flotDashSales1" class="chart-active"></div>
+											<div class="chart chart-sm chart-active" data-sales-rel="Transaksi Harian" id="flotDashSales1"></div>
 											<script>
 												var flotDashSales1Data = [{
 												    data: {{ daily_sales }},
@@ -52,7 +52,7 @@
 												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
 											</script>
 											<!-- Flot: Sales Porto Drupal -->
-											<div class="chart chart-sm" data-sales-rel="Transaksi Bulanan" id="flotDashSales2" class="chart-hidden"></div>
+											<div class="chart chart-sm chart-hidden" data-sales-rel="Transaksi Bulanan" id="flotDashSales2"></div>
 											<script>
 												var flotDashSales2Data = [{
 												    data: {{ monthly_sales }},
@@ -61,7 +61,7 @@
 												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
 											</script>
 											<!-- Flot: Sales Porto Wordpress -->
-											<div class="chart chart-sm" data-sales-rel="Transaksi Tahunan" id="flotDashSales3" class="chart-hidden"></div>
+											<div class="chart chart-sm chart-hidden" data-sales-rel="Transaksi Tahunan" id="flotDashSales3"></div>
 											<script>
 												var flotDashSales3Data = [{
 												    data: {{ annual_sales }},
