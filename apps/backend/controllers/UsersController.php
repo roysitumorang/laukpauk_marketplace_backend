@@ -104,7 +104,7 @@ class UsersController extends ControllerBase {
 			$item->writeAttribute('status', $status[$item->status]);
 			$users[] = $item;
 		}
-		$this->view->menu                  = $this->_menu('Member');
+		$this->view->menu                  = $this->_menu('Members');
 		$this->view->users                 = $users;
 		$this->view->pages                 = $pages;
 		$this->view->page                  = $paginator->getPaginate();
