@@ -60,60 +60,60 @@
 					</table>
 				</form>
 				<table class="table table-striped">
+					<tr>
+						<td class="text-center"><b>Total Order : {{ page.total_items }}</b></td>
+						<td class="text-center"><b>Total Tagihan : Rp. {{ number_format(total_final_bill) }}</b></td>
+						<td class="text-center"><b>Total Biaya Admin : Rp. {{ number_format(total_admin_fee) }}</b></td>
+					</tr>
+				</table>
+				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th class="text-center" colspan="2"><b>Total Pembayaran : Rp. {{ number_format(total_final_bill) }}</b></th>
-							<th class="text-center" colspan="3"><b>Total Biaya Admin : Rp. {{ number_format(total_admin_fee) }}</b></th>
-							<th class="text-center" colspan="2"><b>Total Orders : {{ page.total_items }}</b></th>
-						</tr>
-						<tr>
-							<th class="text-center"><b>No</b></th>
-							<th class="text-center"><b>No. Order</b></th>
-							<th class="text-center"><b>Tgl Order</b></th>
-							<th class="text-center"><b>Pembeli</b></th>
-							<th class="text-center"><b>Merchant</b></th>
-							<th class="text-center"><b>Pembayaran / Biaya Admin</b></th>
-							<th class="text-center"><b>#</b></th>
+							<th class="text-center">No</th>
+							<th class="text-center">No. / Tgl Order</th>
+							<th class="text-center">Status / Pengantaran</th>
+							<th class="text-center">Pembeli</th>
+							<th class="text-center">Penjual</th>
+							<th class="text-center">Tagihan / Biaya Admin</th>
+							<th class="text-center">#</th>
 						</tr>
 					</thead>
 					<tbody>
 					{% for order in orders %}
 						<tr id="{{ order.id }}">
 							<td class="text-right">{{ order.rank }}</td>
-							<td{% if order.status == 0 %} style="background:#FFCCCC"{% elseif order.status == 1 %} style="background:#CCFFCC"{% elseif order.status == -1 %} style="background:#FF0000;color:#FFFFFF"{% endif %}>
+							<td class="text-nowrap" style="background:#{% if order.status == 0 %}FFCCCC{% elseif order.status == 1 %}CCFFCC{% elseif order.status == -1 %}FF0000;color:#FFFFFF{% endif %}">
 								<strong>
-									<font size="3">#{{ order.code }}</font>
-									<br>
-									Status :
+									#{{ order.code }}<br>
+									{{ date('Y-m-d H:i', strtotime(order.created_at)) }}
+								</strong>
+							</td>
+							<td class="text-nowrap" style="background:#{% if order.status == 0 %}FFCCCC{% elseif order.status == 1 %}CCFFCC{% elseif order.status == -1 %}FF0000;color:#FFFFFF{% endif %}">
+								<strong>
 									{% if order.status == 1 %}
-										COMPLETED
+										<i class="fa fa-check-circle"></i> COMPLETED
 									{% elseif order.status == -1 %}
-										CANCELLED
+										<i class="fa fa-times-circle"></i> CANCELLED
 									{% else %}
-										HOLD
+										<i class="fa fa-paper-plane"></i> HOLD
 									{% endif %}
 								</strong>
 								<br>
-								<div class="text-right">
-									Scheduled delivery: {{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}
-								</div>
-								{% if order.status == 1 %}
-								<div class="text-right">
-									Actual delivery: {{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}
-								</div>
-								{% endif %}
+								<strong>Jadwal :</strong>
+								{{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}<br>
+								<strong>Aktual :</strong>
+								{% if order.status == 1 %}{{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}{% else %}-{% endif %}
 							</td>
-							<td class="text-center">{{ date('Y-m-d', strtotime(order.created_at)) }}</td>
 							<td>
-								<font size="5">{{ order.name }}</font><br>
+								{{ order.name }}<br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.buyer_phone }}
 							</td>
 							<td>
-								<font size="5">{% if order.merchant_company %}{{ order.merchant_company }}{% else %}{{ order.merchant_name }}{% endif %}</font><br>
+								{% if order.merchant_company %}{{ order.merchant_company }}{% else %}{{ order.merchant_name }}{% endif %}<br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant_phone }}
 							</t>
 							<td class="text-right">
-								<font size="4">Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}</font><br><br>
+								Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}
 							</td>
 							<td>
 								<a href="/admin/orders/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>
