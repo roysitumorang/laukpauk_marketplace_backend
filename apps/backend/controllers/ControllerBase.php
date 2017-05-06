@@ -48,7 +48,7 @@ class ControllerBase extends Controller {
 				'icon'      => 'home',
 			], [
 				'label'     => 'Mailbox',
-				'link'      => '#',
+				'link'      => null,
 				'icon'      => 'envelope',
 				'expanded'  => $expanded == 'Mailbox',
 				'sub_items' => [
@@ -60,7 +60,7 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Content',
-				'link'      => '#',
+				'link'      => null,
 				'icon'      => 'copy',
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
@@ -70,7 +70,7 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Members',
-				'link'      => '#',
+				'link'      => null,
 				'icon'      => 'users',
 				'expanded'  => $expanded == 'Members',
 				'sub_items' => [
@@ -79,7 +79,7 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Products',
-				'link'      => '#',
+				'link'      => null,
 				'icon'      => 'coffee',
 				'expanded'  => $expanded == 'Products',
 				'sub_items' => [
@@ -90,7 +90,7 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Order',
-				'link'      => '#',
+				'link'      => null,
 				'icon'      => 'shopping-cart',
 				'expanded'  => $expanded == 'Order',
 				'sub_items' => [
@@ -98,7 +98,7 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Options',
-				'link'      => '#',
+				'link'      => null,
 				'icon'      => 'wrench',
 				'expanded'  => $expanded == 'Options',
 				'sub_items' => [

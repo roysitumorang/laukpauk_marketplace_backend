@@ -12,8 +12,8 @@
 			<nav id="menu" class="nav-main" role="navigation">
 				<ul class="nav nav-main">
 					{% for item in menu %}
-					<li{% if item['sub_items'] %} class="nav-parent{% if item['expanded'] %} nav-expanded{% endif %}"{% endif %}>
-						<a{% if item['link'] %} href="/admin/{{ item['link'] }}"{% endif %}>
+					<li class="{% if item['sub_items'] %}nav-parent{% endif %}{% if item['expanded'] %} nav-active{% if item['sub_items'] %} nav-expanded{% endif %}{% endif %}">
+						<a href="{% if item['link'] %}/admin/{{ item['link'] }}{% else %}#{% endif %}">
 							<i class="fa fa-{{ item['icon'] }}" aria-hidden="true"></i>
 							<span>{{ item['label'] }}</span>
 						</a>
