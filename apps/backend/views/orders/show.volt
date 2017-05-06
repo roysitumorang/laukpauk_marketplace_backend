@@ -32,10 +32,15 @@
 				{{ flashSession.output() }}
 				<table class="table table-striped">
 					<tr>
-						<td style="background:#{% if order.status == 1 %}CCFFCC{% elseif order.status == -1 %}E6B800{% else %}FFCCCC{% endif %}" colspan="2" width="40%">
+						<td style="background:#{% if order.status == 'COMPLETED' %}CCFFCC{% elseif order.status == 'CANCELLED' %}E6B800{% else %}FFCCCC{% endif %}" colspan="2" width="40%">
 							<b>Status Order</b>
 							<br>
-							<font size="4"><strong>{{ order.status }}</strong></font>
+							<font size="4">
+								<strong>
+									<i class="fa fa-{% if order.status == 'COMPLETED' %}check-circle{% elseif order.status == 'CANCELLED' %}times-circle{% else %}paper-plane{% endif %}"></i>
+									{{ order.status }}
+								</strong>
+							</font>
 						</td>
 						{% if order.status === 'HOLD' %}
 						<td class="text-right">
@@ -55,7 +60,7 @@
 					</tr>
 					<tr>
 						<td bgcolor="#e0ebeb" colspan="2">
-							<b><font color="#000099">Total Pembayaran</font></b>
+							<b><font color="#000099">Total Tagihan</font></b>
 							<br>
 							<font size="6">
 								<strong>
@@ -126,15 +131,24 @@
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2">
+						<td>
 							<b><font color="#000099">Tgl. Order</font></b>
 							<br>
-							{{ order.created_at }}
+							{{ date('Y-m-d H:i', strtotime(order.created_at)) }}
+						</td>
+						<td>
+							<b><font color="#000099">Jadwal Pengantaran</font></b>
+							<br>
+							{{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}
 						</td>
 						<td colspan="2">
-							<b><font color="#000099">From IP</font></b>
+							<b><font color="#000099">Aktual Pengantaran</font></b>
 							<br>
-							{{ order.ip_address }}
+							{% if order.status == 'COMPLETED' %}
+							{{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}
+							{% else %}
+							-
+							{% endif %}
 						</td>
 					</tr>
 					<tr>
