@@ -5,6 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\ProductCategory;
 use Application\Models\Product;
 use Exception;
+use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 use stdClass;
 
@@ -83,15 +84,7 @@ class ProductCategoriesController extends ControllerBase {
 	function createAction() {
 		$category = new ProductCategory;
 		if ($this->request->isPost()) {
-			$category->setParentId($this->request->getPost('parent_id'));
-			$category->setName($this->request->getPost('name'));
-			$category->setNewPermalink($this->request->getPost('new_permalink'));
-			$category->setPublished($this->request->getPost('published'));
-			$category->setDescription($this->request->getPost('description'));
-			$category->setMetaTitle($this->request->getPost('meta_title'));
-			$category->setMetaDesc($this->request->getPost('meta_desc'));
-			$category->setMetaKeyword($this->request->getPost('meta_keyword'));
-			$category->setNewPicture($_FILES['picture']);
+			$this->_set_model_attributes($category);
 			if ($category->validation() && $category->create()) {
 				$this->flashSession->success('Penambahan data berhasil.');
 				return $this->response->redirect('/admin/product_categories');
@@ -106,8 +99,7 @@ class ProductCategoriesController extends ControllerBase {
 				$category->parent_id = $parent_id;
 			}
 		}
-		$this->view->category = $category;
-		$this->view->menu     = $this->_menu('Products');
+		$this->_prepare_datas($category);
 	}
 
 	function updateAction($id) {
@@ -117,15 +109,8 @@ class ProductCategoriesController extends ControllerBase {
 		}
 		$category->thumbnail = $category->getThumbnail($this->_thumb->width, $this->_thumb->height, $this->_thumb->default_picture);
 		if ($this->request->isPost()) {
-			$category->setName($this->request->getPost('name'));
-			$category->setNewPermalink($this->request->getPost('new_permalink'));
-			$category->setPublished($this->request->getPost('published'));
-			$category->setDescription($this->request->getPost('description'));
-			$category->setMetaTitle($this->request->getPost('meta_title'));
-			$category->setMetaDesc($this->request->getPost('meta_desc'));
-			$category->setMetaKeyword($this->request->getPost('meta_keyword'));
-			$category->setNewPicture($_FILES['picture']);
-			if ($category->validation() && $category->save()) {
+			$this->_set_model_attributes($category);
+			if ($category->validation() && $category->update()) {
 				$this->flashSession->success('Update data berhasil.');
 				return $this->response->redirect("/admin/product_categories/{$category->id}/update");
 			}
@@ -134,8 +119,7 @@ class ProductCategoriesController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->category = $category;
-		$this->view->menu     = $this->_menu('Products');
+		$this->_prepare_datas($category);
 	}
 
 	function publishAction($id) {
@@ -189,5 +173,38 @@ class ProductCategoriesController extends ControllerBase {
 		} finally {
 			return $this->response->redirect('/admin/product_categories');
 		}
+	}
+
+	private function _prepare_datas($category) {
+		$categories = [];
+		$resultset  = $this->db->query('SELECT a.id, a.parent_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.parent_id IS NULL' . ($category->id ? " AND a.id != {$category->id}" : '') . ' GROUP BY a.id ORDER BY a.name ASC');
+		$resultset->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $resultset->fetch()) {
+			$sub_categories = [];
+			$sub_resultset  = $this->db->query("SELECT a.id, a.parent_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.parent_id = {$row->id}" . ($category->id ? " AND a.id != {$category->id}" : '') . ' GROUP BY a.id ORDER BY a.name ASC');
+			$sub_resultset->setFetchMode(Db::FETCH_OBJ);
+			while ($sub_row = $sub_resultset->fetch()) {
+				$row->total_products += $sub_row->total_products;
+				$sub_row->parent      = $row;
+				$sub_categories[]     = $sub_row;
+			}
+			$categories[] = $row;
+			$categories   = array_merge($categories, $sub_categories);
+		}
+		$this->view->categories = $categories;
+		$this->view->category   = $category;
+		$this->view->menu       = $this->_menu('Products');
+	}
+
+	private function _set_model_attributes(&$category) {
+		$category->setParentId($this->request->getPost('parent_id', 'int') ?: null);
+		$category->setName($this->request->getPost('name'));
+		$category->setNewPermalink($this->request->getPost('new_permalink'));
+		$category->setPublished($this->request->getPost('published'));
+		$category->setDescription($this->request->getPost('description'));
+		$category->setMetaTitle($this->request->getPost('meta_title'));
+		$category->setMetaDesc($this->request->getPost('meta_desc'));
+		$category->setMetaKeyword($this->request->getPost('meta_keyword'));
+		$category->setNewPicture($_FILES['picture']);
 	}
 }

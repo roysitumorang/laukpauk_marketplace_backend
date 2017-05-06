@@ -42,7 +42,6 @@ class ProductCategory extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->skipAttributesOnUpdate(['parent_id']);
 		$this->keepSnapshots(true);
 		$this->belongsTo('parent_id', 'Application\Models\ProductCategory', 'id', [
 			'alias'    => 'parent',

@@ -1,11 +1,19 @@
 {{ flashSession.output() }}
 <form method="POST" action="{{ action }}" enctype="multipart/form-data">
-	{% if !category.id and category.parent_id %}
-	<input type="hidden" name="parent_id" value="{{ category.parent_id }}">
-	{% endif %}
 	<table class="table table-striped">
 		<tr>
 			<td colspan="2" bgcolor="#999999"><b><font color="#FFFFFF">Input Kategori</font></b></td>
+		</tr>
+		<tr>
+			<td width="30%"><b>Induk Kategori</b></td>
+			<td>
+				<select name="parent_id">
+					<option value=""></option>
+					{% for item in categories %}
+					<option value="{{ item.id }}"{% if item.id == category.parent_id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
+					{% endfor %}
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td width="30%"><b>Nama</b></td>
