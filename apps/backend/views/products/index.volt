@@ -32,7 +32,7 @@
 								<select name="category_id">
 									<option value="">Semua</option>
 									{% for category in categories %}
-									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
+									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{% if category.parent_id %}{{ category.parent.name }} &raquo; {% endif %}{{ category.name }} ({{ category.total_products }})</option>
 									{% endfor %}
 								</select>
 								Status :

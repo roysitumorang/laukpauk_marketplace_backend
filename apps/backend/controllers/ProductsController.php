@@ -174,6 +174,7 @@ class ProductsController extends ControllerBase {
 			$sub_resultset->setFetchMode(Db::FETCH_OBJ);
 			while ($sub_row = $sub_resultset->fetch()) {
 				$row->total_products += $sub_row->total_products;
+				$sub_row->parent      = $row;
 				$sub_categories[]     = $sub_row;
 			}
 			$categories[] = $row;
