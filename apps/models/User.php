@@ -454,7 +454,7 @@ class User extends ModelBase {
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
 			$validator->add(['mobile_phone', 'merchant_id'], new Uniqueness([
-				'message' => 'nomor HP sudah ada',
+				'message' => 'nomor HP sudah terdaftar',
 			]));
 		}
 		if (!$this->id || $this->change_password || $this->new_password || $this->new_password_confirmation) {
