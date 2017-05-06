@@ -151,7 +151,7 @@ class ProductCategory extends ModelBase {
 			}
 			$this->thumbnails = [];
 		}
-		$this->thumbnails = json_encode($this->thumbnails);
+		$this->thumbnails = $this->thumbnails ? implode(',', $this->thumbnails) : null;
 	}
 
 	function afterSave() {
@@ -176,7 +176,7 @@ class ProductCategory extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = json_decode($this->thumbnails);
+		$this->thumbnails = $this->thumbnails ? explode(',', $this->thumbnails) : [];
 	}
 
 	function getThumbnail(int $width, int $height, string $default_picture = null) {
