@@ -88,7 +88,7 @@
 									{{ date('Y-m-d H:i', strtotime(order.created_at)) }}
 								</strong>
 							</td>
-							<td class="text-nowrap" style="background:#{% if order.status == 0 %}FFCCCC{% elseif order.status == 1 %}CCFFCC{% elseif order.status == -1 %}FF0000;color:#FFFFFF{% endif %}">
+							<td class="text-nowrap">
 								<strong>
 									{% if order.status == 1 %}
 										<i class="fa fa-check-circle"></i> COMPLETED
