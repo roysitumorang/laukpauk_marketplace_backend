@@ -111,7 +111,7 @@
 							<td>
 								{% if order.merchant_company %}{{ order.merchant_company }}{% else %}{{ order.merchant_name }}{% endif %}<br>
 								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant_phone }}
-							</t>
+							</td>
 							<td class="text-right">
 								Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}
 							</td>
