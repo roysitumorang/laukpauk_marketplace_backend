@@ -162,14 +162,17 @@ class AccountController extends ControllerBase {
 					JOIN cities b ON a.id = b.province_id
 					JOIN subdistricts c ON b.id = c.city_id
 					JOIN villages d ON c.id = d.subdistrict_id
+					JOIN service_areas e ON d.id = e.village_id
+					JOIN users f ON e.user_id = f.id
 				WHERE
-					EXISTS(SELECT 1 FROM service_areas e WHERE e.village_id = d.id
 QUERY;
 			if ($this->_premium_merchant) {
-				$query .= " AND e.user_id = {$this->_premium_merchant->id}";
+				$query .= " e.user_id = {$this->_premium_merchant->id}";
+			} else {
+				$query .= " f.merchant_token IS NULL";
 			}
 			$query .= <<<QUERY
-				) ORDER BY
+				ORDER BY
 					province_name,
 					city_name,
 					subdistrict_name,
