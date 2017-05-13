@@ -105,7 +105,7 @@ QUERY;
 			$merchants[] = $merchant;
 		}
 		if (!$merchants) {
-			$this->_response['message'] = $keyword ? 'Penjual tidak ditemukan.' : 'Maaf, daerah Anda di luar wilayah operasional Kami.';
+			$this->_response['message'] = $search_query ? 'Penjual tidak ditemukan.' : 'Maaf, daerah Anda di luar wilayah operasional Kami.';
 		} else {
 			$categories = ProductCategory::find([
 				'conditions' => 'published = 1',
