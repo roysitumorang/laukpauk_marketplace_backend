@@ -122,6 +122,85 @@ $di->set('router', function() {
 		'action'         => 'index',
 	]);
 
+	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller/:action/:params', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 4,
+		'params'         => 5,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/posts/:params', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'posts',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/:int', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'merchants',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/terms-conditions', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'merchants',
+		'action'         => 'termsConditions',
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/notifications/:int', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'notifications',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/orders/:int/:action', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'orders',
+		'action'         => 4,
+		'params'         => 3,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/orders/:int', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'orders',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/:int/categories/:int/products/index/:params', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'products',
+		'action'         => 'index',
+		'merchant_id'    => 3,
+		'category_id'    => 4,
+		'params'         => 5,
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 'index',
+	]);
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 'home',
+		'action'         => 'index',
+	]);
+
 	$router->add('/admin', [
 		'module'     => 'backend',
 		'controller' => 'home',

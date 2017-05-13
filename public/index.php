@@ -51,6 +51,10 @@ try {
 			'className' => 'Application\Api\V2\Module',
 			'path'      => APP_PATH . 'apps/api/v2/Module.php',
 		],
+		'v3' => [
+			'className' => 'Application\Api\V3\Module',
+			'path'      => APP_PATH . 'apps/api/v3/Module.php',
+		],
 		'backend' => [
 			'className' => 'Application\Backend\Module',
 			'path'      => APP_PATH . 'apps/backend/Module.php',
