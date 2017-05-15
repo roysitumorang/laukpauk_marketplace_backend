@@ -22,7 +22,6 @@ class ProductsController extends ControllerBase {
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
-				JOIN settings d ON d.name = 'minimum_purchase'
 				JOIN store_items e ON a.id = e.user_id
 				JOIN products f ON e.product_id = f.id
 				JOIN product_categories g ON f.product_category_id = g.id
