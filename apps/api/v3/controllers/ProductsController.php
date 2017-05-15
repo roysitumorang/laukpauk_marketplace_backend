@@ -65,9 +65,6 @@ QUERY;
 		if ($category_id) {
 			$query .= " AND g.id = {$category_id}";
 		}
-		if ($keyword) {
-			$query .= " AND f.name LIKE '%{$keyword}%'";
-		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
