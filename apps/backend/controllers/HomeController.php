@@ -4,6 +4,7 @@ namespace Application\Backend\Controllers;
 
 use DateInterval;
 use DatePeriod;
+use Ds\Vector;
 use Phalcon\Db;
 use Phalcon\Mvc\View;
 
@@ -14,11 +15,11 @@ class HomeController extends ControllerBase {
 		$annual_sales  = [];
 		$best_sales    = [];
 		$colors        = ['#0088cc', '#2baab1', '#734ba9'];
-		$dates         = [];
+		$dates         = new Vector;
 		foreach (new DatePeriod($this->currentDatetime->setDate($this->currentDatetime->format('Y'), $this->currentDatetime->format('n'), 1), new DateInterval('P1D'), $this->currentDatetime->modify('+1 day')) as $date) {
-			$dates[] = "('" . $date->format('Y-m-d') . "')";
+			$dates->push("('" . $date->format('Y-m-d') . "')");
 		}
-		$this->db->execute('INSERT IGNORE INTO dates (`name`) VALUES ' . implode(',', $dates));
+		$this->db->execute('INSERT IGNORE INTO dates (`name`) VALUES ' . $dates->join(','));
 		foreach ($this->db->fetchAll("SELECT DAY(a.name) AS `date`, COUNT(b.id) AS amount FROM dates a LEFT JOIN orders b ON a.name = DATE(b.created_at) AND b.status = 1 WHERE a.name BETWEEN ? AND ? GROUP BY `date` ORDER BY `date` + 0", Db::FETCH_OBJ, [$this->currentDatetime->format('Y-m') . '-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
 			$daily_sales[] = [$sale->date, $sale->amount];
 		}
