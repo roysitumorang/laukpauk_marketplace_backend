@@ -2,6 +2,8 @@
 
 namespace Application\Backend\Controllers;
 
+use DateInterval;
+use DatePeriod;
 use Phalcon\Db;
 use Phalcon\Mvc\View;
 
@@ -12,10 +14,15 @@ class HomeController extends ControllerBase {
 		$annual_sales  = [];
 		$best_sales    = [];
 		$colors        = ['#0088cc', '#2baab1', '#734ba9'];
-		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%e') AS `date`, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY `date` ORDER BY `date`", Db::FETCH_OBJ, [$this->currentDatetime->format('Y-m') . '-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
+		$dates         = [];
+		foreach (new DatePeriod($this->currentDatetime->setDate($this->currentDatetime->format('Y'), $this->currentDatetime->format('n'), 1), new DateInterval('P1D'), $this->currentDatetime->modify('+1 day')) as $date) {
+			$dates[] = "('" . $date->format('Y-m-d') . "')";
+		}
+		$this->db->execute('INSERT IGNORE INTO dates (`name`) VALUES ' . implode(',', $dates));
+		foreach ($this->db->fetchAll("SELECT DAY(a.name) AS `date`, COUNT(b.id) AS amount FROM dates a LEFT JOIN orders b ON a.name = DATE(b.created_at) AND b.status = 1 WHERE a.name BETWEEN ? AND ? GROUP BY `date` ORDER BY `date` + 0", Db::FETCH_OBJ, [$this->currentDatetime->format('Y-m') . '-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
 			$daily_sales[] = [$sale->date, $sale->amount];
 		}
-		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%c') AS `month_number`, DATE_FORMAT(created_at, '%b') AS `month_name`, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY `month_number` ORDER BY `month_number`", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
+		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%c') AS `month_number`, DATE_FORMAT(created_at, '%b') AS `month_name`, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY `month_number` ORDER BY `month_number` + 0", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
 			$monthly_sales[] = [$sale->month_name, $sale->amount];
 		}
 		foreach ($this->db->fetchAll("SELECT DATE_FORMAT(created_at, '%Y') AS `year`, COUNT(1) AS amount FROM orders WHERE status = 1 GROUP BY `year` ORDER BY `year`", Db::FETCH_OBJ) as $sale) {
