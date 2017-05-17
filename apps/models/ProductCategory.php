@@ -11,7 +11,7 @@ use Phalcon\Validation\Validator\Uniqueness;
 
 class ProductCategory extends ModelBase {
 	public $id;
-	public $parent_id;
+	public $user_id;
 	public $name;
 	public $permalink;
 	public $new_permalink;
@@ -43,21 +43,16 @@ class ProductCategory extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('parent_id', 'Application\Models\ProductCategory', 'id', [
-			'alias'    => 'parent',
+		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+			'alias'    => 'user',
 			'reusable' => true,
-		]);
-		$this->hasMany('id', 'Application\Models\ProductCategory', 'parent_id', [
-			'alias'      => 'sub_categories',
-			'foreignKey' => [
-				'message' => 'kategori tidak dapat dihapus karena memiliki sub kategori',
-			],
 		]);
 		$this->hasMany('id', 'Application\Models\Product', 'product_category_id', ['alias' => 'products']);
 	}
 
-	function setParentId(int $parent_id = null) {
-		$this->parent_id = $parent_id;
+	function setUserId(int $user_id = null) {
+		$user          = User::findFirst(['id = ?0 AND premium_merchant = 1', 'bind' => [$user_id]]);
+		$this->user_id = $user ? $user->id : null;
 	}
 
 	function setName(string $name) {
@@ -129,7 +124,7 @@ class ProductCategory extends ModelBase {
 	}
 
 	function beforeValidation() {
-		$this->permalink = preg_replace('/\s+/', '-', $this->new_permalink ? $this->_filter->sanitize($this->new_permalink, ['string', 'trim', 'lower']) : strtolower($this->name));
+		$this->permalink = preg_replace(['/[^\w]/', '/_/', '/[-]+/'], '-', $this->new_permalink ? $this->_filter->sanitize($this->new_permalink, ['string', 'trim', 'lower']) : strtolower($this->name));
 	}
 
 	function beforeSave() {

@@ -5,17 +5,6 @@
 			<td colspan="2" bgcolor="#999999"><b><font color="#FFFFFF">Input Kategori</font></b></td>
 		</tr>
 		<tr>
-			<td width="30%"><b>Induk Kategori</b></td>
-			<td>
-				<select name="parent_id">
-					<option value=""></option>
-					{% for item in categories %}
-					<option value="{{ item.id }}"{% if item.id == category.parent_id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
-					{% endfor %}
-				</select>
-			</td>
-		</tr>
-		<tr>
 			<td width="30%"><b>Nama</b></td>
 			<td><input type="text" name="name" value="{{ category.name }}" size="40" placeholder="Nama"></td>
 		</tr>

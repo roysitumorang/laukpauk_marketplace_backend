@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/product_categories"><h2>Category Produk</h2></a>
+				<a href="/admin/product_categories"><h2>Kategori Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li>
@@ -16,7 +16,7 @@
 								<i class="fa fa-home"></i>
 							</a>
 						</li>
-						<li><span>Category Produk</span></li>
+						<li><span>Kategori Produk</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -45,7 +45,8 @@
 					<thead>
 						<tr>
 							<th width="1%"><b>No</b></th>
-							<th><b>Category</b></th>
+							<th><b>Nama</b></th>
+							<th><b>Permalink</b></th>
 							<th><b>#</b></th>
 						</tr>
 					</thead>
@@ -61,23 +62,23 @@
 									<br>
 								{% endif %}
 								<a href="/admin/products/index/category_id:{{ category.id }}" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a>
-								<br>(<i>{{ category.permalink }}</i>)<br><br>
-								<a href="/admin/product_categories/create/parent_id:{{ category.id }}" title="Tambah Sub"><i class="fa fa-plus-square"></i>&nbsp;
-								({{ category.total_children }} Sub Category)</a>
+							</td>
+							<td>
+								<i>{{ category.permalink }}</i>
 							</td>
 							<td>
 								<a href="javascript:void(0)" class="published" data-id="{{ category.id }}" data-published="{{ category.published }}">
 									<i class="fa fa-eye{% if !category.published %}-slash{% endif %} fa-2x"></i>
 								</a>
 								<a href="/admin/product_categories/{{ category.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
-								{% if !category.total_children %}
+								{% if !category.total_products %}
 								<a href="javascript:void(0)" class="delete" data-id="{{ category.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 								{% endif %}
 							</td>
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="3"><i>Belum ada Category</i></td>
+							<td colspan="3"><i>Belum ada kategori</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>

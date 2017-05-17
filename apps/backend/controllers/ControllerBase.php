@@ -83,7 +83,7 @@ class ControllerBase extends Controller {
 				'icon'      => 'coffee',
 				'expanded'  => $expanded == 'Products',
 				'sub_items' => [
-					['label' => 'Category Produk', 'link' => 'product_categories'],
+					['label' => 'Kategori Produk', 'link' => 'product_categories'],
 					['label' => 'Tambah Produk',   'link' => 'products/create'],
 					['label' => 'Produk List'    , 'link' => 'products'],
 					['label' => 'Kupon Member'   , 'link' => 'coupons'],

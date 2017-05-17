@@ -5,7 +5,6 @@ namespace Application\Backend\Controllers;
 use Application\Models\ProductCategory;
 use Application\Models\Product;
 use Exception;
-use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 use stdClass;
 
@@ -28,7 +27,7 @@ class ProductCategoriesController extends ControllerBase {
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'id'             => 'a.id',
-				'parent_id'      => 'a.parent_id',
+				'user_id'        => 'a.user_id',
 				'a.name',
 				'permalink'      => 'a.permalink',
 				'picture'        => 'a.picture',
@@ -41,14 +40,12 @@ class ProductCategoriesController extends ControllerBase {
 				'created_at'     => 'a.created_at',
 				'updated_by'     => 'a.updated_by',
 				'updated_at'     => 'a.updated_at',
-				'total_children' => 'COUNT(DISTINCT b.id)',
-				'total_products' => 'COUNT(DISTINCT c.id)',
+				'total_products' => 'COUNT(DISTINCT b.id)',
 			])
 			->from(['a' => 'Application\Models\ProductCategory'])
-			->leftJoin('Application\Models\ProductCategory', 'a.id = b.parent_id', 'b')
-			->leftJoin('Application\Models\Product', 'a.id = c.product_category_id', 'c')
+			->leftJoin('Application\Models\Product', 'a.id = b.product_category_id', 'b')
 			->groupBy('a.id')
-			->orderBy('id DESC');
+			->orderBy('a.id DESC');
 		if ($keyword) {
 			$builder->where('a.name LIKE ?0', ["%{$keyword}%"]);
 		}
@@ -176,28 +173,12 @@ class ProductCategoriesController extends ControllerBase {
 	}
 
 	private function _prepare_datas($category) {
-		$categories = [];
-		$resultset  = $this->db->query('SELECT a.id, a.parent_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.parent_id IS NULL' . ($category->id ? " AND a.id != {$category->id}" : '') . ' GROUP BY a.id ORDER BY a.name ASC');
-		$resultset->setFetchMode(Db::FETCH_OBJ);
-		while ($row = $resultset->fetch()) {
-			$sub_categories = [];
-			$sub_resultset  = $this->db->query("SELECT a.id, a.parent_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.parent_id = {$row->id}" . ($category->id ? " AND a.id != {$category->id}" : '') . ' GROUP BY a.id ORDER BY a.name ASC');
-			$sub_resultset->setFetchMode(Db::FETCH_OBJ);
-			while ($sub_row = $sub_resultset->fetch()) {
-				$row->total_products += $sub_row->total_products;
-				$sub_row->parent      = $row;
-				$sub_categories[]     = $sub_row;
-			}
-			$categories[] = $row;
-			$categories   = array_merge($categories, $sub_categories);
-		}
-		$this->view->categories = $categories;
-		$this->view->category   = $category;
-		$this->view->menu       = $this->_menu('Products');
+		$this->view->category = $category;
+		$this->view->menu     = $this->_menu('Products');
 	}
 
 	private function _set_model_attributes(&$category) {
-		$category->setParentId($this->request->getPost('parent_id', 'int') ?: null);
+		$category->setUserId($this->request->getPost('user_id', 'int') ?: null);
 		$category->setName($this->request->getPost('name'));
 		$category->setNewPermalink($this->request->getPost('new_permalink'));
 		$category->setPublished($this->request->getPost('published'));
