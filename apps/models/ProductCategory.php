@@ -98,7 +98,7 @@ class ProductCategory extends ModelBase {
 		$validator->add('name', new PresenceOf([
 			'message' => 'nama harus diisi',
 		]));
-		$validator->add('name', new Uniqueness([
+		$validator->add(['name', 'user_id'], new Uniqueness([
 			'convert' => function(array $values) : array {
 				$values['name'] = strtolower($values['name']);
 				return $values;
@@ -106,7 +106,7 @@ class ProductCategory extends ModelBase {
 			'message' => 'nama sudah ada',
 		]));
 		if (!$this->id || $this->new_permalink) {
-			$validator->add('new_permalink', new Uniqueness([
+			$validator->add(['new_permalink', 'user_id'], new Uniqueness([
 				'attribute' => 'permalink',
 				'message'   => 'permalink sudah ada',
 			]));
