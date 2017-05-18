@@ -173,7 +173,7 @@ class Order extends ModelBase {
 		$admin_notification->link       = $admin_new_order_template->url . $this->id;
 		$admin_notification->created_by = $this->created_by;
 		$admins                         = User::find([
-			'role_id IN ({role_ids:array}) AND 1',
+			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
@@ -210,7 +210,7 @@ class Order extends ModelBase {
 		$admin_notification->link       = $admin_new_order_template->url . $this->id;
 		$admin_notification->created_by = $this->merchant->id;
 		$admins                         = User::find([
-			'role_id IN ({role_ids:array}) AND 1',
+			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
@@ -251,7 +251,7 @@ class Order extends ModelBase {
 		$admin_notification->link       = $admin_new_order_template->url . $this->id;
 		$admin_notification->created_by = $this->merchant->id;
 		$admins                         = User::find([
-			'role_id IN ({role_ids:array}) AND 1',
+			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {

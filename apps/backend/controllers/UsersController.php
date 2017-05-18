@@ -76,7 +76,6 @@ class UsersController extends ControllerBase {
 			->leftJoin('Application\Models\Province', 'e.province_id = f.id', 'f')
 			->leftJoin('Application\Models\LoginHistory', 'a.id = g.user_id', 'g')
 			->leftJoin('Application\Models\User', 'a.merchant_id = h.id', 'h')
-			->groupBy('a.id')
 			->orderBy('a.id DESC')
 			->where('a.status = ' . $current_status)
 			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory h WHERE g.user_id = h.user_id AND h.id > g.id)');
@@ -114,9 +113,9 @@ class UsersController extends ControllerBase {
 		$this->view->current_role          = $current_role;
 		$this->view->keyword               = $keyword;
 		$this->view->total_users           = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
-		$this->view->total_pending_users   = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE `status` = 0');
-		$this->view->total_active_users    = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE `status` = 1');
-		$this->view->total_suspended_users = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE `status` = -1');
+		$this->view->total_pending_users   = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 0');
+		$this->view->total_active_users    = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 1');
+		$this->view->total_suspended_users = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = -1');
 	}
 
 	function createAction() {

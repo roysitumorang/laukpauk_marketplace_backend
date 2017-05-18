@@ -26,7 +26,7 @@ class ProductCategoriesController extends ControllerBase {
 		$keyword      = $this->dispatcher->getParam('keyword');
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
-				'id'             => 'a.id',
+				'a.id',
 				'user_id'        => 'a.user_id',
 				'a.name',
 				'permalink'      => 'a.permalink',

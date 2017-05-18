@@ -10,9 +10,9 @@ return new Config([
 		'baseUri'    => '/',
 	],
 	'database' => [
-		'adapter'    => 'Mysql',
+		'adapter'    => 'Postgresql',
 		'host'       => 'localhost',
-		'username'   => 'root',
+		'username'   => 'postgres',
 		'password'   => 'tR1adpass#',
 		'dbname'     => 'sayur',
 		'persistent' => true,
