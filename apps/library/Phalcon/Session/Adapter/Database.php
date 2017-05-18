@@ -113,7 +113,7 @@ class Database extends Adapter implements AdapterInterface {
 		$request = new Request;
 		$session_exists = $this->connection->fetchColumn(
 			sprintf(
-				'SELECT COUNT(*) FROM %s WHERE %s = ?',
+				'SELECT COUNT(1) FROM %s WHERE %s = ?',
 				$this->connection->escapeIdentifier($options['table']),
 				$this->connection->escapeIdentifier($options['column_id'])
 			),
