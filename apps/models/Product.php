@@ -14,6 +14,7 @@ class Product extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
 
 	public $id;
+	public $user_id;
 	public $product_category_id;
 	public $name;
 	public $description;
@@ -22,7 +23,10 @@ class Product extends ModelBase {
 	public $picture;
 	public $new_picture;
 	public $thumbnails;
+	public $price;
+	public $stock;
 	public $published;
+	public $order_closing_hour;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -50,7 +54,14 @@ class Product extends ModelBase {
 				'message'    => 'kategori harus diisi',
 			],
 		]);
-		$this->hasManyToMany('id', 'Application\Models\StoreItem', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
+		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+			'alias'      => 'merchant',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'merchant harus diisi',
+			],
+		]);
 		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'product_id', 'linked_product_id', 'Application\Models\Product', 'id', ['alias' => 'linked_products']);
 		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'linked_product_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'linkers']);
 	}
@@ -79,23 +90,41 @@ class Product extends ModelBase {
 		}
 	}
 
+	function setPrice($price) {
+		$this->price = $this->_filter->sanitize($price, 'int') ?: 0;
+	}
+
+	function setStock($stock) {
+		$this->stock = $this->_filter->sanitize($stock, 'int') ?: 0;
+	}
+
 	function setPublished($published) {
 		$this->published = $this->_filter->sanitize($published, 'int');
+	}
+
+	function setOrderClosingHour($order_closing_hour) {
+		$this->order_closing_hour = $this->_filter->sanitize($order_closing_hour, ['string', 'trim']) ?: null;
 	}
 
 	function thumbnail(int $width) {
 		return '/assets/image/' . ($this->picture && in_array($width, static::THUMBNAIL_WIDTHS) ? str_replace('.jpg', $width . '.jpg', $this->picture) : 'no_picture_120.png');
 	}
 
+	function beforeValidation() {
+		$this->published = $this->published ?? 0;
+	}
+
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'stock_unit'], new PresenceOf([
+		$validator->add(['name', 'stock_unit', 'price', 'stock'], new PresenceOf([
 			'message' => [
 				'name'       => 'nama harus diisi',
 				'stock_unit' => 'satuan harus diisi',
+				'price'      => 'harga harus diisi',
+				'stock'      => 'stok harus diisi',
 			],
 		]));
-		$validator->add(['name', 'stock_unit', 'product_category_id'], new Uniqueness([
+		$validator->add(['name', 'stock_unit', 'product_category_id', 'user_id'], new Uniqueness([
 			'message' => 'nama, satuan dan kategori sudah ada',
 		]));
 		if ($this->new_picture) {
@@ -107,6 +136,13 @@ class Product extends ModelBase {
 				'messageType'  => 'format gambar harus JPG atau PNG',
 			]));
 		}
+		$validator->add(['price', 'stock'], new Digit([
+			'message' => [
+				'price' => 'harga harus dalam bentuk angka',
+				'stock' => 'stok harus dalam bentuk angka',
+			],
+		]));
+
 		return $this->validate($validator);
 	}
 
@@ -138,6 +174,9 @@ class Product extends ModelBase {
 		}
 		$this->thumbnails  = implode(',', array_filter($this->thumbnails)) ?: null;
 		$this->description = $this->description ?: null;
+		if (!$this->price) {
+			$this->published = 0;
+		}
 	}
 
 	function beforeDelete() {

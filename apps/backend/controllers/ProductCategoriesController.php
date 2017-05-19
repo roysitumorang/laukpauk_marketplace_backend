@@ -4,19 +4,22 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\ProductCategory;
 use Application\Models\Product;
+use Application\Models\Role;
+use Application\Models\User;
 use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 use stdClass;
 
 class ProductCategoriesController extends ControllerBase {
-	private $_thumb;
+	private $_user;
 
-	function initialize() {
-		parent::initialize();
-		$this->_thumb                  = new stdClass;
-		$this->_thumb->width           = 120;
-		$this->_thumb->height          = 120;
-		$this->_thumb->default_picture = null;
+	function beforeExecuteRoute() {
+		if (!($user_id = $this->dispatcher->getParam('user_id', 'int')) ||
+			!($this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [$user_id, Role::MERCHANT]]))) {
+			$this->flashSession->error('Member tidak ditemukan!');
+			$this->response->redirect('/admin/users');
+			$this->response->sendHeaders();
+		}
 	}
 
 	function indexAction() {
@@ -27,7 +30,7 @@ class ProductCategoriesController extends ControllerBase {
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
-				'user_id'        => 'a.user_id',
+				'a.user_id',
 				'a.name',
 				'permalink'      => 'a.permalink',
 				'picture'        => 'a.picture',
@@ -43,11 +46,12 @@ class ProductCategoriesController extends ControllerBase {
 				'total_products' => 'COUNT(DISTINCT b.id)',
 			])
 			->from(['a' => 'Application\Models\ProductCategory'])
-			->leftJoin('Application\Models\Product', 'a.id = b.product_category_id', 'b')
+			->leftJoin('Application\Models\Product', "a.id = b.product_category_id AND b.user_id = {$this->_user->id}", 'b')
 			->groupBy('a.id')
-			->orderBy('a.id DESC');
+			->orderBy('a.name ASC');
+		$builder->where('a.user_id ' . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL'));
 		if ($keyword) {
-			$builder->where('a.name LIKE ?0', ["%{$keyword}%"]);
+			$builder->andWhere('a.name ILIKE ?0', ["%{$keyword}%"]);
 		}
 		$paginator  = new PaginatorQueryBuilder([
 			'builder' => $builder,
@@ -58,24 +62,16 @@ class ProductCategoriesController extends ControllerBase {
 		$pages      = $this->_setPaginationRange($page);
 		$categories = [];
 		foreach ($page->items as $item) {
-			$category  = ProductCategory::findFirst($item->id);
-			$thumbnail = $category->getThumbnail($this->_thumb->width, $this->_thumb->height, $this->_thumb->default_picture);
+			$category = ProductCategory::findFirst($item->id);
 			$item->writeAttribute('rank', ++$offset);
-			$item->writeAttribute('thumbnail', $thumbnail);
+			$item->writeAttribute('thumbnail', $category->thumbnail(120));
 			$categories[] = $item;
 		}
-		$this->view->menu       = $this->_menu('Products');
 		$this->view->keyword    = $keyword;
 		$this->view->categories = $categories;
 		$this->view->page       = $paginator->getPaginate();
 		$this->view->pages      = $pages;
-	}
-
-	function showAction($id) {
-		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
-			$this->flashSession->error('Kategori tidak ditemukan.');
-			return $this->dispatcher->forward('product_categories');
-		}
+		$this->_prepare_datas();
 	}
 
 	function createAction() {
@@ -84,7 +80,7 @@ class ProductCategoriesController extends ControllerBase {
 			$this->_set_model_attributes($category);
 			if ($category->validation() && $category->create()) {
 				$this->flashSession->success('Penambahan data berhasil.');
-				return $this->response->redirect('/admin/product_categories');
+				return $this->response->redirect("/admin/users/{$this->_user->id}/product_categories");
 			}
 			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
@@ -100,16 +96,16 @@ class ProductCategoriesController extends ControllerBase {
 	}
 
 	function updateAction($id) {
-		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
+		if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst(['id = ?0 AND user_id ' . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL'), 'bind' => [$id]]))) {
 			$this->flashSession->error('Kategori tidak ditemukan.');
 			return $this->dispatcher->forward('product_categories');
 		}
-		$category->thumbnail = $category->getThumbnail($this->_thumb->width, $this->_thumb->height, $this->_thumb->default_picture);
+		$category->thumbnail = $category->thumbnail(120);
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($category);
 			if ($category->validation() && $category->update()) {
 				$this->flashSession->success('Update data berhasil.');
-				return $this->response->redirect("/admin/product_categories/{$category->id}/update");
+				return $this->response->redirect("/admin/users/{$this->_user->id}/product_categories/{$category->id}/update");
 			}
 			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($category->getMessages() as $error) {
@@ -121,7 +117,7 @@ class ProductCategoriesController extends ControllerBase {
 
 	function publishAction($id) {
 		if ($this->request->isPost()) {
-			$category = ProductCategory::findFirst(['id = ?0 AND published = 0', 'bind' => [$id]]);
+			$category = ProductCategory::findFirst(['id = ?0 AND user_id ' . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL') . ' AND published = 0', 'bind' => [$id]]);
 			if ($category) {
 				$category->update(['published' => 1]);
 			} else {
@@ -133,7 +129,7 @@ class ProductCategoriesController extends ControllerBase {
 
 	function unpublishAction($id) {
 		if ($this->request->isPost()) {
-			$category = ProductCategory::findFirst(['id = ?0 AND published = 1', 'bind' => [$id]]);
+			$category = ProductCategory::findFirst(['id = ?0 AND user_id ' . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL') . ' AND published = 1', 'bind' => [$id]]);
 			if ($category) {
 				$category->update(['published' => 0]);
 			} else {
@@ -145,10 +141,10 @@ class ProductCategoriesController extends ControllerBase {
 
 	function deletePictureAction($id) {
 		if ($this->request->isPost()) {
-			$category = ProductCategory::findFirst(['id = ?0 AND picture IS NOT NULL', 'bind' => [$id]]);
+			$category = ProductCategory::findFirst(['id = ?0 AND picture IS NOT NULL AND user_id ' . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL'), 'bind' => [$id]]);
 			if ($category) {
 				$category->deletePicture();
-				return $this->response->redirect("/admin/product_categories/{$category->id}/update");
+				return $this->response->redirect("/admin/users/{$this->_user->id}/product_categories/{$category->id}/update");
 			}
 			$this->flashSession->error('Kategori tidak ditemukan!');
 		}
@@ -157,10 +153,10 @@ class ProductCategoriesController extends ControllerBase {
 
 	function deleteAction($id) {
 		try {
-			if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst($id))) {
+			if (!filter_var($id, FILTER_VALIDATE_INT) || !($category = ProductCategory::findFirst(['id = ?0 AND user_id ' . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL'), 'bind' => [$id]]))) {
 				throw new Exception('Data tidak ditemukan.');
 			}
-			if (ProductCategory::findFirstByParentId($category->id) || Product::findFirstByProductCategoryId($category->id)) {
+			if (Product::findFirstByProductCategoryId($category->id)) {
 				throw new Exception('Data tidak dapat dihapus karena memilik sub kategori / product');
 			}
 			$category->delete();
@@ -168,17 +164,18 @@ class ProductCategoriesController extends ControllerBase {
 		} catch (Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
-			return $this->response->redirect('/admin/product_categories');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/product_categories");
 		}
 	}
 
-	private function _prepare_datas($category) {
+	private function _prepare_datas(ProductCategory $category = null) {
 		$this->view->category = $category;
-		$this->view->menu     = $this->_menu('Products');
+		$this->view->user     = $this->_user;
+		$this->view->menu     = $this->_menu('Members');
 	}
 
 	private function _set_model_attributes(&$category) {
-		$category->setUserId($this->request->getPost('user_id', 'int') ?: null);
+		$category->setUserId($this->_user->id);
 		$category->setName($this->request->getPost('name'));
 		$category->setNewPermalink($this->request->getPost('new_permalink'));
 		$category->setPublished($this->request->getPost('published'));

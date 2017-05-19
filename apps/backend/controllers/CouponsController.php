@@ -12,7 +12,7 @@ class CouponsController extends ControllerBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->view->menu      = $this->_menu('Products');
+		$this->view->menu      = $this->_menu('Options');
 		$this->_date_formatter = new IntlDateFormatter(
 			'id_ID',
 			IntlDateFormatter::FULL,
@@ -59,7 +59,6 @@ class CouponsController extends ControllerBase {
 			$item->writeAttribute('effective_date_end', $this->_date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
 			$coupons[] = $item;
 		}
-		$this->view->menu           = $this->_menu('Products');
 		$this->view->coupons        = $coupons;
 		$this->view->page           = $page;
 		$this->view->pages          = $pages;

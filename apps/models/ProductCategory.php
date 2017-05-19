@@ -2,6 +2,7 @@
 
 namespace Application\Models;
 
+use Phalcon\Image;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
@@ -10,6 +11,8 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class ProductCategory extends ModelBase {
+	const THUMBNAIL_WIDTHS = [120, 300];
+
 	public $id;
 	public $user_id;
 	public $name;
@@ -51,8 +54,10 @@ class ProductCategory extends ModelBase {
 	}
 
 	function setUserId(int $user_id = null) {
-		$user          = User::findFirst(['id = ?0 AND premium_merchant = 1', 'bind' => [$user_id]]);
-		$this->user_id = $user ? $user->id : null;
+		if (!$this->id) {
+			$user          = User::findFirst(['id = ?0 AND role_id = ?1 AND premium_merchant = 1', 'bind' => [$user_id, Role::MERCHANT]]);
+			$this->user_id = $user ? $user->id : null;
+		}
 	}
 
 	function setName(string $name) {
@@ -93,6 +98,10 @@ class ProductCategory extends ModelBase {
 		$this->meta_desc = substr(str_replace(['\r', '\n'], ['', ' '], $this->_filter->sanitize($meta_desc, ['string', 'trim'])), 0, 160);
 	}
 
+	function thumbnail(int $width) {
+		return '/assets/image/' . ($this->picture && in_array($width, static::THUMBNAIL_WIDTHS) ? str_replace('.jpg', $width . '.jpg', $this->picture) : 'no_picture_120.png');
+	}
+
 	function validation() {
 		$validator = new Validation;
 		$validator->add('name', new PresenceOf([
@@ -128,36 +137,32 @@ class ProductCategory extends ModelBase {
 	}
 
 	function beforeSave() {
-		if ($this->new_picture && !$this->picture) {
-			$random = new Random;
-			do {
-				$this->picture = $random->hex(16) . '.jpg';
-				if (!static::findFirstByPicture($this->picture)) {
-					break;
-				}
-			} while (1);
-		}
-	}
-
-	function beforeUpdate() {
 		if ($this->new_picture) {
-			foreach ($this->thumbnails as $thumbnail) {
-				unlink($this->_upload_config->path . $thumbnail);
+			if (!$this->picture) {
+				$random = new Random;
+				do {
+					$this->picture = $random->hex(16) . '.jpg';
+					if (!static::findFirstByPicture($this->picture)) {
+						break;
+					}
+				} while (1);
 			}
-			$this->thumbnails = [];
+			$picture = $this->_upload_config->path . $this->picture;
+			$gd      = new Gd($this->new_picture['tmp_name']);
+			imageinterlace($gd->getImage(), 1);
+			$gd->save($picture, 100);
+			foreach (static::THUMBNAIL_WIDTHS as $width) {
+				$file = str_replace('.jpg', $width . '.jpg', $this->picture);
+				$path = $this->_upload_config->path . $file;
+				in_array($file, $this->thumbnails) || $this->thumbnails[] = $file;
+				$gd = new Gd($this->new_picture['tmp_name']);
+				imageinterlace($gd->getImage(), 1);
+				$gd->resize($width, null, Image::WIDTH);
+				$gd->save($path, 100);
+			}
+			unlink($this->new_picture['tmp_name']);
 		}
-		$this->thumbnails = $this->thumbnails ? implode(',', $this->thumbnails) : null;
-	}
-
-	function afterSave() {
-		if (!$this->new_picture) {
-			return true;
-		}
-		$picture = $this->_upload_config->path . $this->picture;
-		$gd      = new Gd($this->new_picture['tmp_name']);
-		imageinterlace($gd->getImage(), 1);
-		$gd->save($picture, 100);
-		unlink($this->new_picture['tmp_name']);
+		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
 	}
 
 	function beforeDelete() {
@@ -171,33 +176,19 @@ class ProductCategory extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = $this->thumbnails ? explode(',', $this->thumbnails) : [];
-	}
-
-	function getThumbnail(int $width, int $height, string $default_picture = null) {
-		$picture = $this->picture ?? $default_picture;
-		if (!$picture) {
-			return null;
-		}
-		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $picture);
-		if (!in_array($thumbnail, $this->thumbnails)) {
-			$gd = new Gd($this->_upload_config->path . $picture);
-			$gd->resize($width, $height);
-			$gd->save($this->_upload_config->path . $thumbnail, 100);
-			if ($this->picture) {
-				$this->thumbnails[] = $thumbnail;
-				$this->setThumbnails($this->thumbnails);
-				$this->skipAttributes(['updated_by', 'updated_at']);
-				$this->save();
-			}
-		}
-		return $thumbnail;
+		$this->thumbnails = explode(',', $this->thumbnails);
 	}
 
 	function deletePicture() {
-		$this->beforeDelete();
+		if (!$this->picture) {
+			return;
+		}
+		$this->thumbnails[] = $this->picture;
+		foreach ($this->thumbnails as $thumbnail) {
+			unlink($this->_upload_config->path . $thumbnail);
+		}
 		$this->picture = null;
-		$this->setThumbnails([]);
+		$this->thumbnails = null;
 		$this->save();
 	}
 

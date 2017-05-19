@@ -78,17 +78,6 @@ class ControllerBase extends Controller {
 					['label' => 'Tambah Member', 'link' => 'users/create'],
 				],
 			], [
-				'label'     => 'Products',
-				'link'      => null,
-				'icon'      => 'coffee',
-				'expanded'  => $expanded == 'Products',
-				'sub_items' => [
-					['label' => 'Kategori Produk', 'link' => 'product_categories'],
-					['label' => 'Tambah Produk',   'link' => 'products/create'],
-					['label' => 'Produk List'    , 'link' => 'products'],
-					['label' => 'Kupon Member'   , 'link' => 'coupons'],
-				],
-			], [
 				'label'     => 'Order',
 				'link'      => null,
 				'icon'      => 'shopping-cart',
@@ -102,7 +91,8 @@ class ControllerBase extends Controller {
 				'icon'      => 'wrench',
 				'expanded'  => $expanded == 'Options',
 				'sub_items' => [
-					['label' => 'Settings', 'link' => 'settings'],
+					['label' => 'Kupon Member',    'link' => 'coupons'],
+					['label' => 'Settings',        'link' => 'settings'],
 					['label' => 'Daftar Propinsi', 'link' => 'provinces'],
 				],
 			], [

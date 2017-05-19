@@ -258,57 +258,51 @@ $di->set('router', function() {
 		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/store_items/:params', [
+	$router->add('/admin/users/:int/products/:params', [
 		'module'     => 'backend',
-		'controller' => 'store_items',
+		'controller' => 'products',
 		'action'     => 'index',
 		'user_id'    => 1,
 		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/store_items/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'store_items',
-		'action'     => 2,
-		'user_id'    => 1,
-		'params'     => 3,
-	]);
-
-	$router->add('/admin/users/:int/store_items/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'store_items',
-		'action'     => 3,
-		'user_id'    => 1,
-		'params'     => 2,
-	]);
-
-	$router->add('/admin/products/:int/:action', [
+	$router->add('/admin/users/:int/products/:action/:params', [
 		'module'     => 'backend',
 		'controller' => 'products',
 		'action'     => 2,
-		'params'     => 1,
-	]);
-
-	$router->add('/admin/products/:int/links', [
-		'module'     => 'backend',
-		'controller' => 'product_links',
-		'action'     => 'index',
-		'product_id' => 1,
-	]);
-
-	$router->add('/admin/products/:int/links/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'product_links',
-		'action'     => 2,
-		'product_id' => 1,
+		'user_id'    => 1,
 		'params'     => 3,
 	]);
 
-	$router->add('/admin/products/:int/links/:int/:action', [
+	$router->add('/admin/users/:int/products/:int/:action', [
 		'module'     => 'backend',
-		'controller' => 'product_links',
+		'controller' => 'products',
 		'action'     => 3,
-		'product_id' => 1,
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/product_categories/:params', [
+		'module'     => 'backend',
+		'controller' => 'product_categories',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/product_categories/:action/:params', [
+		'module'     => 'backend',
+		'controller' => 'product_categories',
+		'action'     => 2,
+		'user_id'    => 1,
+		'params'     => 3,
+	]);
+
+	$router->add('/admin/users/:int/product_categories/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'product_categories',
+		'action'     => 3,
+		'user_id'    => 1,
 		'params'     => 2,
 	]);
 
@@ -329,13 +323,6 @@ $di->set('router', function() {
 	$router->add('/admin/orders/:int/:action', [
 		'module'     => 'backend',
 		'controller' => 'orders',
-		'action'     => 2,
-		'params'     => 1,
-	]);
-
-	$router->add('/admin/product_categories/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'product_categories',
 		'action'     => 2,
 		'params'     => 1,
 	]);

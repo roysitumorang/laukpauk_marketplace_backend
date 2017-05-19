@@ -141,7 +141,7 @@ class UsersController extends ControllerBase {
 			$column = 'buyer_id';
 		} else if ($user->role->name == 'Merchant') {
 			$column                    = 'merchant_id';
-			$this->view->store_items   = $this->db->fetchColumn('SELECT COUNT(1) FROM store_items WHERE user_id = ?', [$user->id]);
+			$this->view->store_items   = $this->db->fetchColumn('SELECT COUNT(1) FROM products WHERE user_id = ?', [$user->id]);
 			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
 		}
 		if ($column) {
