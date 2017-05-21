@@ -4,12 +4,25 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Product;
 use Application\Models\ProductCategory;
+use Application\Models\Role;
+use Application\Models\User;
 use Error;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 use Throwable;
 
 class ProductsController extends ControllerBase {
+	private $_user;
+
+	function beforeExecuteRoute() {
+		if (!($user_id = $this->dispatcher->getParam('user_id', 'int')) ||
+			!($this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [$user_id, Role::MERCHANT]]))) {
+			$this->flashSession->error('Member tidak ditemukan!');
+			$this->response->redirect('/admin/users');
+			$this->response->sendHeaders();
+		}
+	}
+
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
@@ -17,35 +30,33 @@ class ProductsController extends ControllerBase {
 		$category_id  = $this->dispatcher->getParam('category_id', 'int');
 		$published    = filter_var($this->dispatcher->getParam('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 		$keyword      = $this->dispatcher->getParam('keyword', 'string');
-		$next         = '/admin/products/index';
-		$parameter    = [];
-		$conditions   = [[]];
+		$next         = "/admin/users/{$this->_user->id}/products/index";
+		$conditions   = ['user_id = :user_id:', 'user_id' => $this->_user->id];
 		$this->_prepare_datas();
 		if ($category_id) {
-			$conditions[0][]           = 'product_category_id = :category_id:';
+			$conditions[0]            .= ' AND product_category_id = :category_id:';
 			$conditions['category_id'] = $category_id;
 			$next                     .= "/category_id:{$category_id}";
 		}
 		if (is_int($published)) {
-			$conditions[0][]         = 'published = :published:';
+			$conditions[0]          .= ' AND published = :published:';
 			$conditions['published'] = $published;
 			$next                   .= "/published:{$published}";
 		}
 		if (filter_var($keyword, FILTER_VALIDATE_INT)) {
-			$conditions[0][]  = 'id = :id:';
+			$conditions[0]   .= ' AND id = :id:';
 			$conditions['id'] = $keyword;
 			$next            .= "/keyword:{$keyword}";
 		} else if ($keyword) {
-			$conditions[0][]    = 'name LIKE :name:';
+			$conditions[0]     .= ' AND name ILIKE :name:';
 			$conditions['name'] = '%' . $keyword . '%';
 			$next              .= "/keyword:{$keyword}";
 		}
-		if ($conditions[0]) {
-			$parameter['conditions'] = implode(' AND ', array_shift($conditions));
-			$parameter['bind']       = $conditions;
+		if ($current_page > 1) {
+			$next .= "/page:{$current_page}";
 		}
 		$paginator = new PaginatorModel([
-			'data'  => Product::find($parameter),
+			'data'  => Product::find([array_shift($conditions), 'bind' => $conditions, 'order' => 'name ASC']),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
@@ -56,7 +67,6 @@ class ProductsController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$products[] = $item;
 		}
-		$this->view->menu        = $this->_menu('Products');
 		$this->view->page        = $page;
 		$this->view->pages       = $pages;
 		$this->view->products    = $products;
@@ -72,7 +82,7 @@ class ProductsController extends ControllerBase {
 			$this->_set_model_attributes($product);
 			if ($product->validation() && $product->create()) {
 				$this->flashSession->success('Penambahan produk berhasil.');
-				return $this->response->redirect('/admin/products');
+				return $this->response->redirect("/admin/users/{$this->_user->id}/products");
 			}
 			$this->flashSession->error('Penambahan produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product->getMessages() as $error) {
@@ -80,13 +90,12 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_datas();
-		$this->view->menu     = $this->_menu('Products');
 		$this->view->product  = $product;
 		$this->view->pictures = [];
 	}
 
 	function updateAction($id) {
-		if (!$product = Product::findFirst($id)) {
+		if (!$product = Product::findFirst(['id = ?0 AND user_id = ?1', 'bind' => [$id, $this->_user->id]])) {
 			$this->flashSession->error('Produk tidak ditemukan.');
 			return $this->dispatcher->forward('products');
 		}
@@ -103,7 +112,6 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_datas();
-		$this->view->menu       = $this->_menu('Products');
 		$this->view->product    = $product;
 		$this->view->active_tab = 'product';
 		$this->view->next       = $next;
@@ -111,7 +119,7 @@ class ProductsController extends ControllerBase {
 
 	function publishAction($id) {
 		if ($this->request->isPost()) {
-			if (!$product = Product::findFirst(['id = ?0 AND published = 0', 'bind' => [$id]])) {
+			if (!$product = Product::findFirst(['id = ?0 AND user_id = ?1 AND published = 0', 'bind' => [$id, $this->_user->id]])) {
 				$this->flashSession->error('Produk tidak ditemukan.');
 			} else {
 				$product->update(['published' => 1]);
@@ -123,7 +131,7 @@ class ProductsController extends ControllerBase {
 
 	function unpublishAction($id) {
 		if ($this->request->isPost()) {
-			if (!$product = Product::findFirst(['id = ?0 AND published = 1', 'bind' => [$id]])) {
+			if (!$product = Product::findFirst(['id = ?0 AND user_id = ?1 AND published = 1', 'bind' => [$id, $this->_user->id]])) {
 				$this->flashSession->error('Produk tidak ditemukan.');
 			} else {
 				$product->update(['published' => 0]);
@@ -138,23 +146,23 @@ class ProductsController extends ControllerBase {
 			if (!$this->request->isPost()) {
 				throw new Error('Request tidak valid.');
 			}
-			if (!$id || !($product = Product::findFirstById($id))) {
+			if (!$product = Product::findFirst(['id = ?0 AND user_id = ?1', 'bind' => [$id, $this->_user->id]])) {
 				throw new Error('Produk tidak ditemukan.');
 			}
 		} catch (Throwable $e) {
 			$this->flashSession->error($e->getMessage());
-			return $this->response->redirect('/admin/products');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/products");
 		}
 		if ($product->picture) {
 			$product->deletePicture();
 			$this->flashSession->success('Gambar berhasil dihapus');
 		}
-		return $this->response->redirect("/admin/products/{$product->id}/update?next=" . $this->request->get('next'));
+		return $this->response->redirect("/admin/users/{$this->_user->id}/products/{$product->id}/update?next=" . $this->request->get('next'));
 	}
 
 	function deleteAction($id) {
 		if ($this->request->isPost()) {
-			if (!$product = Product::findFirstById($id)) {
+			if (!$product = Product::findFirst(['id = ?0 AND user_id = ?1', 'bind' => [$id, $this->_user->id]])) {
 				$this->flashSession->error('Produk tidak ditemukan.');
 			} else {
 				$product->delete();
@@ -166,16 +174,19 @@ class ProductsController extends ControllerBase {
 
 	private function _prepare_datas() {
 		$categories = [];
-		$resultset = $this->db->query('SELECT a.id, a.user_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id GROUP BY a.id ORDER BY a.name ASC');
+		$resultset  = $this->db->query("SELECT a.id, a.user_id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id AND b.user_id = {$this->_user->id} WHERE a.user_id " . ($this->_user->premium_merchant ? "= {$this->_user->id}" : 'IS NULL') . ' GROUP BY a.id ORDER BY a.name ASC');
 		$resultset->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $resultset->fetch()) {
 			$categories[] = $row;
 		}
+		$this->view->menu       = $this->_menu('Products');
 		$this->view->categories = $categories;
+		$this->view->user       = $this->_user;
 		$this->view->lifetimes  = range(1, 30);
 	}
 
 	private function _set_model_attributes(&$product) {
+		$product->merchant = $this->_user;
 		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
 		$product->setName($this->request->getPost('name'));
 		$product->setStockUnit($this->request->getPost('stock_unit'));
@@ -183,5 +194,7 @@ class ProductsController extends ControllerBase {
 		$product->setLifetime($this->request->getPost('lifetime'));
 		$product->setNewPicture($_FILES['picture']);
 		$product->setPublished($this->request->getPost('published'));
+		$product->setPrice($this->request->getPost('price'));
+		$product->setStock($this->request->getPost('stock'));
 	}
 }

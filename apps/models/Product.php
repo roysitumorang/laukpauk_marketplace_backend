@@ -6,6 +6,7 @@ use Phalcon\Image;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\File;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
@@ -26,7 +27,6 @@ class Product extends ModelBase {
 	public $price;
 	public $stock;
 	public $published;
-	public $order_closing_hour;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -100,10 +100,6 @@ class Product extends ModelBase {
 
 	function setPublished($published) {
 		$this->published = $this->_filter->sanitize($published, 'int');
-	}
-
-	function setOrderClosingHour($order_closing_hour) {
-		$this->order_closing_hour = $this->_filter->sanitize($order_closing_hour, ['string', 'trim']) ?: null;
 	}
 
 	function thumbnail(int $width) {
