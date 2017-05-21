@@ -8,7 +8,6 @@ use Application\Models\Role;
 use Application\Models\User;
 use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
-use stdClass;
 
 class ProductCategoriesController extends ControllerBase {
 	private $_user;
