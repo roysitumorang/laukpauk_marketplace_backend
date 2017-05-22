@@ -81,11 +81,12 @@
 										<td{{ background }}>
 											<font size="4">{{ product.name }}</font><br>
 											<strong>ID :</strong>&nbsp;#{{ product.id }}<br>
-											<strong>Satuan :</strong>&nbsp;{{ product.stock_unit }}<br>
+											<strong>Kategori :</strong>&nbsp;{{ product.category.name }}<br>
+											<strong>Harga :</strong>&nbsp;Rp. {{ number_format(product.price) }} @ {{ product.stock_unit }}<br>
 											{% if product.lifetime %}
 											<strong>Masa Pakai :</strong>&nbsp;{{ product.lifetime }} hari<br>
 											{% endif %}
-											<strong>Kategori :</strong>&nbsp;{{ product.category.name }}
+											<strong>Stok :</strong>&nbsp;{{ number_format(product.stock) }}
 										</td>
 										<td{{ background }} class="text-center">
 											<a href="/admin/users/{{ user.id }}/products/{{ product.id}}/update?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
