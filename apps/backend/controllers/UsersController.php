@@ -39,8 +39,6 @@ class UsersController extends ControllerBase {
 				'a.deposit',
 				'a.company',
 				'a.company_profile',
-				'a.company_logo',
-				'a.launcher_icon',
 				'a.terms_conditions',
 				'a.registration_ip',
 				'a.gender',
@@ -354,8 +352,6 @@ QUERY
 		$user->setOpenOnSaturday($this->request->getPost('open_on_saturday'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
-		$user->setNewCompanyLogo($_FILES['company_logo']);
-		$user->setNewLauncherIcon($_FILES['launcher_icon']);
 		$user->setTermsConditions($this->request->getPost('terms_conditions'));
 		$user->setShippingCost($this->request->getPost('shipping_cost'));
 		$user->setMerchantNote($this->request->getPost('merchant_note'));
