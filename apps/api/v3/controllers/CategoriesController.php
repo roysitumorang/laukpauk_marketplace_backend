@@ -14,50 +14,52 @@ class CategoriesController extends ControllerBase {
 		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			$categories[] = $row;
-		}
-		$query = <<<QUERY
-			SELECT
-				f.id,
-				d.user_id AS merchant_id,
-				d.name,
-				d.price,
-				d.stock,
-				d.stock_unit,
-				f.picture
-			FROM
-				users a
-				JOIN roles b ON a.role_id = b.id
-				JOIN service_areas c ON a.id = c.user_id
-				JOIN products d ON a.id = d.id
-				JOIN product_categories f ON d.product_category_id = f.id
-			WHERE
-				a.status = 1 AND
-				b.name = 'Merchant' AND
-				c.village_id = {$this->_current_user->village->id} AND
-				d.published = 1 AND
-				f.published = 1 AND
-				a.premium_merchant
+			$query = <<<QUERY
+				SELECT
+					d.id,
+					d.user_id AS merchant_id,
+					d.product_category_id,
+					d.name,
+					d.price,
+					d.stock,
+					d.stock_unit,
+					d.picture,
+					COALESCE(SUM(g.quantity), 0) AS total_sale
+				FROM
+					users a
+					JOIN roles b ON a.role_id = b.id
+					JOIN service_areas c ON a.id = c.user_id
+					JOIN products d ON a.id = d.id
+					JOIN product_categories f ON d.product_category_id = f.id
+					LEFT JOIN order_items g ON d.id = g.product_id
+					LEFT JOIN orders h ON g.order_id = h.id AND h.status = 1
+				WHERE
+					a.status = 1 AND
+					b.name = 'Merchant' AND
+					c.village_id = {$this->_current_user->village->id} AND
+					d.published = 1 AND
+					f.published = 1 AND
+					a.premium_merchant
 QUERY;
-		if ($this->_premium_merchant) {
-			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
-		} else {
-			$query .= ' IS NULL';
-		}
-		$query .= ' ORDER BY RANDOM() LIMIT 10 OFFSET 0';
-		$result = $this->db->query($query);
-		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($row = $result->fetch()) {
-			in_array($row->merchant_id, $merchant_ids) || $merchant_ids[] = $row->merchant_id;
-			if ($row->picture) {
-				$row->picture = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
+			if ($this->_premium_merchant) {
+				$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
 			} else {
-				unset($row->picture);
+				$query .= ' IS NULL';
 			}
-			if (!$row->order_closing_hour) {
-				unset($row->order_closing_hour);
+			$query .= " AND f.id = {$row->id} GROUP BY d.id ORDER BY total_sale DESC LIMIT 2 OFFSET 0";
+			$result = $this->db->query($query);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($sub_row = $result->fetch()) {
+				in_array($sub_row->merchant_id, $merchant_ids) || $merchant_ids[] = $sub_row->merchant_id;
+				if ($sub_row->picture) {
+					$sub_row->picture = $picture_root_url . strtr($sub_row->picture, ['.jpg' => '120.jpg']);
+				} else {
+					unset($sub_row->picture);
+				}
+				unset($sub_row->total_sale);
+				$products[] = $sub_row;
 			}
-			$products[] = $row;
+			$categories[] = $row;
 		}
 		if ($merchant_ids) {
 			$query = <<<QUERY
