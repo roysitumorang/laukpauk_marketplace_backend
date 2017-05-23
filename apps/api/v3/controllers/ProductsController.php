@@ -17,21 +17,19 @@ class ProductsController extends ControllerBase {
 		$merchants    = [];
 		$query        = <<<QUERY
 			SELECT
-				COUNT(DISTINCT f.id)
+				COUNT(DISTINCT d.id)
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
-				JOIN store_items e ON a.id = e.user_id
-				JOIN products f ON e.product_id = f.id
-				JOIN product_categories g ON f.product_category_id = g.id
+				JOIN products d ON a.id = d.user_id
+				JOIN product_categories e ON d.product_category_id = e.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
+				d.published = 1 AND
 				e.published = 1 AND
-				f.published = 1 AND
-				g.published = 1 AND
 				a.premium_merchant
 QUERY;
 		if ($this->_premium_merchant) {
@@ -46,13 +44,13 @@ QUERY;
 				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
 				$filtered_keywords     = array_diff($keywords, $stop_words);
 				$filtered_search_query = implode(' ', $filtered_keywords);
-				$query                .= ' AND (a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?';
+				$query                .= ' AND (a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
 				foreach (range(1, 3) as $i) {
 					$params[] = "%{$filtered_search_query}%";
 				}
 				if (count($filtered_keywords) > 1) {
 					foreach ($filtered_keywords as $keyword) {
-						$query .= ' OR a.company LIKE ? OR f.name LIKE ? OR g.name LIKE ?';
+						$query .= ' OR a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
 						foreach (range(1, 3) as $i) {
 							$params[] = "%{$keyword}%";
 						}
@@ -62,13 +60,13 @@ QUERY;
 			}
 		}
 		if ($category_id) {
-			$query .= " AND g.id = {$category_id}";
+			$query .= " AND e.id = {$category_id}";
 		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(str_replace('COUNT(DISTINCT f.id)', 'f.id, e.user_id AS merchant_id, f.name, e.price, e.stock, f.stock_unit, e.order_closing_hour, f.picture', $query) . " GROUP BY f.id ORDER BY f.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(str_replace('COUNT(DISTINCT d.id)', 'd.id, d.user_id AS merchant_id, d.name, d.price, d.stock, d.stock_unit, d.picture', $query) . " GROUP BY d.id ORDER BY d.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -86,6 +84,7 @@ QUERY;
 		if ($merchant_ids) {
 			$query = <<<QUERY
 				SELECT
+					DISTINCT
 					a.id,
 					a.company,
 					a.address,
@@ -99,16 +98,15 @@ QUERY;
 					a.business_opening_hour,
 					a.business_closing_hour,
 					a.delivery_hours,
-					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
+					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
 					a.shipping_cost
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
 					JOIN service_areas c ON a.id = c.user_id
 					JOIN settings d ON d.name = 'minimum_purchase'
-					JOIN store_items e ON a.id = e.user_id
-					JOIN products f ON e.product_id = f.id
-					JOIN product_categories g ON f.product_category_id = g.id
+					JOIN products e ON a.id = e.user_id
+					JOIN product_categories f ON e.product_category_id = f.id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -119,7 +117,7 @@ QUERY;
 			} else {
 				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
 			}
-			$query .= ' GROUP BY a.id ORDER BY a.company';
+			$query .= ' ORDER BY a.company';
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {

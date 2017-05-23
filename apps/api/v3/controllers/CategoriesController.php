@@ -11,7 +11,7 @@ class CategoriesController extends ControllerBase {
 		$merchant_ids     = [];
 		$merchants        = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
-		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE published = 1 ORDER BY name');
+		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$categories[] = $row;
@@ -19,27 +19,24 @@ class CategoriesController extends ControllerBase {
 		$query = <<<QUERY
 			SELECT
 				f.id,
-				e.user_id AS merchant_id,
-				f.name,
-				e.price,
-				e.stock,
-				f.stock_unit,
-				e.order_closing_hour,
+				d.user_id AS merchant_id,
+				d.name,
+				d.price,
+				d.stock,
+				d.stock_unit,
 				f.picture
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN service_areas c ON a.id = c.user_id
-				JOIN store_items e ON a.id = e.user_id
-				JOIN products f ON e.product_id = f.id
-				JOIN product_categories g ON f.product_category_id = g.id
+				JOIN products d ON a.id = d.id
+				JOIN product_categories f ON d.product_category_id = f.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
-				e.published = 1 AND
+				d.published = 1 AND
 				f.published = 1 AND
-				g.published = 1 AND
 				a.premium_merchant
 QUERY;
 		if ($this->_premium_merchant) {
@@ -47,7 +44,7 @@ QUERY;
 		} else {
 			$query .= ' IS NULL';
 		}
-		$query .= ' GROUP BY f.id ORDER BY RAND() LIMIT 10 OFFSET 0';
+		$query .= ' ORDER BY RANDOM() LIMIT 10 OFFSET 0';
 		$result = $this->db->query($query);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -65,6 +62,7 @@ QUERY;
 		if ($merchant_ids) {
 			$query = <<<QUERY
 				SELECT
+					DISTINCT
 					a.id,
 					a.company,
 					a.address,
@@ -78,16 +76,15 @@ QUERY;
 					a.business_opening_hour,
 					a.business_closing_hour,
 					a.delivery_hours,
-					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
+					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
 					a.shipping_cost
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
 					JOIN service_areas c ON a.id = c.user_id
 					JOIN settings d ON d.name = 'minimum_purchase'
-					JOIN store_items e ON a.id = e.user_id
-					JOIN products f ON e.product_id = f.id
-					JOIN product_categories g ON f.product_category_id = g.id
+					JOIN products e ON a.id = e.user_id
+					JOIN product_categories f ON e.product_category_id = f.id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -98,7 +95,7 @@ QUERY;
 			} else {
 				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
 			}
-			$query .= ' GROUP BY a.id ORDER BY a.company';
+			$query .= ' ORDER BY a.company';
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
