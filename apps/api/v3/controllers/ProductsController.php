@@ -76,9 +76,6 @@ QUERY;
 			} else {
 				unset($row->picture);
 			}
-			if (!$row->order_closing_hour) {
-				unset($row->order_closing_hour);
-			}
 			$products[] = $row;
 		}
 		if ($merchant_ids) {
@@ -140,8 +137,8 @@ QUERY;
 						}
 					}
 				}
-				$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
-				$merchant       = [
+				$delivery_hours       = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+				$merchants[$item->id] = [
 					'id'                    => $item->id,
 					'company'               => $item->company,
 					'address'               => $item->address,
@@ -152,7 +149,6 @@ QUERY;
 					'minimum_purchase'      => $item->minimum_purchase,
 					'shipping_cost'         => $item->shipping_cost ?? 0,
 				];
-				$merchants[] = $merchant;
 			}
 		}
 		if (!$total_products) {
