@@ -3,20 +3,30 @@
 namespace Application\Api\V3\Controllers;
 
 use DateTime;
+use IntlDateFormatter;
 use Phalcon\Db;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
-		$merchant_id  = $this->dispatcher->getParam('merchant_id', 'int');
-		$category_id  = $this->dispatcher->getParam('category_id', 'int');
-		$page         = $this->dispatcher->getParam('page', 'int');
-		$search_query = $this->dispatcher->getParam('keyword', 'string') ?: null;
-		$limit        = 10;
-		$params       = [];
-		$products     = [];
-		$merchant_ids = [];
-		$merchants    = [];
-		$query        = <<<QUERY
+		$merchant_id    = $this->dispatcher->getParam('merchant_id', 'int');
+		$category_id    = $this->dispatcher->getParam('category_id', 'int');
+		$page           = $this->dispatcher->getParam('page', 'int');
+		$search_query   = $this->dispatcher->getParam('keyword', 'string') ?: null;
+		$limit          = 10;
+		$params         = [];
+		$products       = [];
+		$merchant_ids   = [];
+		$merchants      = [];
+		$day_aliases    = ['Hari ini', 'Besok', 'Lusa', '3 hari lagi', '4 hari lagi', '5 hari lagi', '6 hari lagi'];
+		$date_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'EEEE, d MMM yyyy'
+		);
+		$query = <<<QUERY
 			SELECT
 				COUNT(DISTINCT d.id)
 			FROM

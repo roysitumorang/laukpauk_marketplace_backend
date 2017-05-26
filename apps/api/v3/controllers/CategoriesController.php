@@ -3,6 +3,7 @@
 namespace Application\Api\V3\Controllers;
 
 use DateTime;
+use IntlDateFormatter;
 use Phalcon\Db;
 
 class CategoriesController extends ControllerBase {
@@ -11,7 +12,16 @@ class CategoriesController extends ControllerBase {
 		$merchant_ids     = [];
 		$merchants        = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
-		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
+		$day_aliases      = ['Hari ini', 'Besok', 'Lusa', '3 hari lagi', '4 hari lagi', '5 hari lagi', '6 hari lagi'];
+		$date_formatter   = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'EEEE, d MMM yyyy'
+		);
+		$result = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($category = $result->fetch()) {
 			$category->products = [];
