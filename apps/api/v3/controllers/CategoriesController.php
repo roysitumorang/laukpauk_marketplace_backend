@@ -17,7 +17,7 @@ class CategoriesController extends ControllerBase {
 			$query              = <<<QUERY
 				SELECT
 					d.id,
-					d.user_id AS merchant_id,
+					d.user_id,
 					d.product_category_id,
 					d.name,
 					d.price,
@@ -50,7 +50,7 @@ QUERY;
 			$sub_result = $this->db->query($query);
 			$sub_result->setFetchMode(Db::FETCH_OBJ);
 			while ($product = $sub_result->fetch()) {
-				in_array($product->merchant_id, $merchant_ids) || $merchant_ids[] = $product->merchant_id;
+				in_array($product->user_id, $merchant_ids) || $merchant_ids[] = $product->user_id;
 				if ($product->picture) {
 					$product->picture = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
 				} else {
@@ -120,9 +120,8 @@ QUERY;
 						}
 					}
 				}
-				$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
-				$merchant       = [
-					'id'                    => $item->id,
+				$delivery_hours       = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+				$merchants[$item->id] = [
 					'company'               => $item->company,
 					'address'               => $item->address,
 					'business_days'         => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
@@ -132,7 +131,6 @@ QUERY;
 					'minimum_purchase'      => $item->minimum_purchase,
 					'shipping_cost'         => $item->shipping_cost ?? 0,
 				];
-				$merchants[] = $merchant;
 			}
 		}
 		$this->_response['status'] = 1;
