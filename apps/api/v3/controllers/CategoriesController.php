@@ -7,14 +7,14 @@ use Phalcon\Db;
 class CategoriesController extends ControllerBase {
 	function indexAction() {
 		$categories       = [];
-		$products         = [];
 		$merchant_ids     = [];
 		$merchants        = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
 		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($row = $result->fetch()) {
-			$query = <<<QUERY
+		while ($category = $result->fetch()) {
+			$category->products = [];
+			$query              = <<<QUERY
 				SELECT
 					d.id,
 					d.user_id AS merchant_id,
@@ -46,20 +46,20 @@ QUERY;
 			} else {
 				$query .= ' IS NULL';
 			}
-			$query .= " AND f.id = {$row->id} GROUP BY d.id ORDER BY total_sale DESC LIMIT 2 OFFSET 0";
-			$result = $this->db->query($query);
-			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($sub_row = $result->fetch()) {
-				in_array($sub_row->merchant_id, $merchant_ids) || $merchant_ids[] = $sub_row->merchant_id;
-				if ($sub_row->picture) {
-					$sub_row->picture = $picture_root_url . strtr($sub_row->picture, ['.jpg' => '120.jpg']);
+			$query .= " AND f.id = {$category->id} GROUP BY d.id ORDER BY total_sale DESC LIMIT 2 OFFSET 0";
+			$sub_result = $this->db->query($query);
+			$sub_result->setFetchMode(Db::FETCH_OBJ);
+			while ($product = $sub_result->fetch()) {
+				in_array($product->merchant_id, $merchant_ids) || $merchant_ids[] = $product->merchant_id;
+				if ($product->picture) {
+					$product->picture = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
 				} else {
-					unset($sub_row->picture);
+					unset($product->picture);
 				}
-				unset($sub_row->total_sale);
-				$products[] = $sub_row;
+				unset($product->total_sale);
+				$category->products[] = $product;
 			}
-			$categories[] = $row;
+			$categories[] = $category;
 		}
 		if ($merchant_ids) {
 			$query = <<<QUERY
@@ -138,7 +138,6 @@ QUERY;
 		$this->_response['status'] = 1;
 		$this->_response['data']   = [
 			'categories' => $categories,
-			'products'   => $products,
 			'merchants'  => $merchants,
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
