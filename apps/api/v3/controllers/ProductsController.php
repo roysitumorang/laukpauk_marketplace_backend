@@ -66,11 +66,11 @@ QUERY;
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(str_replace('COUNT(DISTINCT d.id)', 'd.id, d.user_id AS merchant_id, d.name, d.price, d.stock, d.stock_unit, d.picture', $query) . " GROUP BY d.id ORDER BY d.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(str_replace('COUNT(DISTINCT d.id)', 'd.id, d.user_id, d.name, d.price, d.stock, d.stock_unit, d.picture', $query) . " GROUP BY d.id ORDER BY d.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			in_array($row->merchant_id, $merchant_ids) || $merchant_ids[] = $row->merchant_id;
+			in_array($row->user_id, $merchant_ids) || $merchant_ids[] = $row->user_id;
 			if ($row->picture) {
 				$row->picture = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
 			} else {
