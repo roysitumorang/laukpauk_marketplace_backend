@@ -163,10 +163,7 @@ QUERY;
 		$this->_response['data'] = [
 			'products'     => $products,
 			'merchants'    => $merchants,
-			'total_pages'  => $total_pages,
-			'current_page' => $current_page,
 			'current_hour' => $this->currentDatetime->format('G'),
-			'pages'        => $this->_setPaginationRange($total_pages, $current_page),
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
