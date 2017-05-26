@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Controllers;
 
+use DateTime;
 use Phalcon\Db;
 
 class CategoriesController extends ControllerBase {
@@ -102,6 +103,8 @@ QUERY;
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
+				$delivery_days = [];
+				$now           = (new DateTime(null, $this->currentDatetime->getTimezone()))->setTimestamp($this->currentDatetime->getTimestamp());
 				$business_days = [
 					$item->open_on_monday    ? 'Senin'  : ',',
 					$item->open_on_tuesday   ? 'Selasa' : ',',
@@ -112,6 +115,7 @@ QUERY;
 					$item->open_on_sunday    ? 'Minggu' : ',',
 				];
 				$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
+				$delivery_hours = $item->delivery_hours ? explode(',', $item->delivery_hours) : $business_hours;
 				if ($hours = explode(',', $item->delivery_hours)) {
 					foreach ($business_hours as &$hour) {
 						if (!in_array($hour, $hours)) {
@@ -121,16 +125,48 @@ QUERY;
 						}
 					}
 				}
-				$delivery_hours       = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+				$stringified_delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+				foreach ($day_aliases as $i => $alias) {
+					$i && $now->modify('+1 day');
+					$current_hour = $now->format('G');
+					if (!$i && $current_hour >= max($delivery_hours)) {
+						continue;
+					}
+					$current_day  = $now->format('l');
+					$delivery_day = [
+						'date'  => $now->format('Y-m-d'),
+						'label' => $date_formatter->format($now) . ' (' . $alias . ')',
+					];
+					if (($current_day == 'Sunday' && !$item->open_on_sunday) ||
+						($current_day == 'Monday' && !$item->open_on_monday) ||
+						($current_day == 'Tuesday' && !$item->open_on_tuesday) ||
+						($current_day == 'Wednesday' && !$item->open_on_wednesday) ||
+						($current_day == 'Thursday' && !$item->open_on_thursday) ||
+						($current_day == 'Friday' && !$item->open_on_friday) ||
+						($current_day == 'Saturday' && !$item->open_on_saturday)) {
+						$delivery_day['unavailable'] = true;
+					} else {
+						$minimum_hour          = $current_hour + ($now->format('i') > 29 ? 2 : 1);
+						$delivery_day['hours'] = !$i
+							? array_values(array_filter($delivery_hours, function($v, $k) use($minimum_hour) {
+								return $v >= $minimum_hour;
+							}, ARRAY_FILTER_USE_BOTH))
+							: $delivery_hours;
+					}
+					$delivery_days[] = $delivery_day;
+				}
 				$merchants[$item->id] = [
-					'company'               => $item->company,
-					'address'               => $item->address,
-					'business_days'         => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
-					'business_opening_hour' => $item->business_opening_hour . '.00',
-					'business_closing_hour' => $item->business_closing_hour . '.00 WIB',
-					'delivery_hours'        => $delivery_hours ? $delivery_hours . ' WIB' : '-',
-					'minimum_purchase'      => $item->minimum_purchase,
-					'shipping_cost'         => $item->shipping_cost ?? 0,
+					'id'                         => $item->id,
+					'company'                    => $item->company,
+					'address'                    => $item->address,
+					'business_days'              => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
+					'business_opening_hour'      => $item->business_opening_hour . '.00',
+					'business_closing_hour'      => $item->business_closing_hour . '.00 WIB',
+					'stringified_delivery_hours' => $stringified_delivery_hours ? $stringified_delivery_hours . ' WIB' : '-',
+					'minimum_purchase'           => $item->minimum_purchase,
+					'shipping_cost'              => $item->shipping_cost ?? 0,
+					'delivery_hours'             => $delivery_hours,
+					'delivery_days'              => $delivery_days,
 				];
 			}
 		}
