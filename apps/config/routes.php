@@ -177,14 +177,14 @@ $di->set('router', function() {
 		'params'         => 3,
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/:int/categories/:int/products/index/:params', [
+	$router->add('/api/v3(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
 		'module'         => 'v3',
 		'merchant_token' => 2,
 		'controller'     => 'products',
 		'action'         => 'index',
-		'merchant_id'    => 3,
-		'category_id'    => 4,
-		'params'         => 5,
+		'merchant_id'    => 4,
+		'category_id'    => 6,
+		'params'         => 7,
 	]);
 
 	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller', [
