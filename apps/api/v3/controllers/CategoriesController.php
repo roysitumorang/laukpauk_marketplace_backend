@@ -5,6 +5,7 @@ namespace Application\Api\V3\Controllers;
 use DateTime;
 use IntlDateFormatter;
 use Phalcon\Db;
+use stdClass;
 
 class CategoriesController extends ControllerBase {
 	function indexAction() {
@@ -142,11 +143,9 @@ QUERY;
 					if (!$i && $current_hour >= max($delivery_hours)) {
 						continue;
 					}
-					$current_day  = $now->format('l');
-					$delivery_day = [
-						'date'  => $now->format('Y-m-d'),
-						'label' => $date_formatter->format($now) . ' (' . $alias . ')',
-					];
+					$current_day         = $now->format('l');
+					$delivery_day        = new stdClass;
+					$delivery_day->label = $date_formatter->format($now) . ' (' . $alias . ')';
 					if (($current_day == 'Sunday' && !$item->open_on_sunday) ||
 						($current_day == 'Monday' && !$item->open_on_monday) ||
 						($current_day == 'Tuesday' && !$item->open_on_tuesday) ||
@@ -154,16 +153,16 @@ QUERY;
 						($current_day == 'Thursday' && !$item->open_on_thursday) ||
 						($current_day == 'Friday' && !$item->open_on_friday) ||
 						($current_day == 'Saturday' && !$item->open_on_saturday)) {
-						$delivery_day['unavailable'] = true;
+						$delivery_day->unavailable = true;
 					} else {
-						$minimum_hour          = $current_hour + ($now->format('i') > 29 ? 2 : 1);
-						$delivery_day['hours'] = !$i
+						$minimum_hour        = $current_hour + ($now->format('i') > 29 ? 2 : 1);
+						$delivery_day->hours = !$i
 							? array_values(array_filter($delivery_hours, function($v, $k) use($minimum_hour) {
 								return $v >= $minimum_hour;
 							}, ARRAY_FILTER_USE_BOTH))
 							: $delivery_hours;
 					}
-					$delivery_days[] = $delivery_day;
+					$delivery_days[$now->format('Y-m-d')] = $delivery_day;
 				}
 				$merchants[$item->id] = [
 					'id'                         => $item->id,
