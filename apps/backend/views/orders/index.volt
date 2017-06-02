@@ -152,7 +152,6 @@
 	search.addEventListener('submit', event => {
 		event.preventDefault();
 		['from', 'to', 'code', 'status', 'mobile_phone'].forEach(function(attribute) {
-			console.log(attribute);
 			if (search[attribute].value) {
 				url += '/' + attribute + ':' + search[attribute].value.trim().replace(/ |:|\//g, match => {
 					return replacement[match];
