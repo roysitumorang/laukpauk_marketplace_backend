@@ -18,7 +18,6 @@ class ProductsController extends ControllerBase {
 		$products       = [];
 		$merchant_ids   = [];
 		$merchants      = [];
-		$day_aliases    = ['Hari ini', 'Besok', 'Lusa', '3 hari lagi', '4 hari lagi', '5 hari lagi', '6 hari lagi'];
 		$date_formatter = new IntlDateFormatter(
 			'id_ID',
 			IntlDateFormatter::FULL,
@@ -153,7 +152,7 @@ QUERY;
 					}
 				}
 				$stringified_delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
-				foreach ($day_aliases as $i => $alias) {
+				for ($i = 0; $i < 7; $i++) {
 					$i && $now->modify('+1 day');
 					$current_hour = $now->format('G');
 					if (!$i && $current_hour >= max($delivery_hours)) {
@@ -161,7 +160,7 @@ QUERY;
 					}
 					$current_day         = $now->format('l');
 					$delivery_day        = new stdClass;
-					$delivery_day->label = $date_formatter->format($now) . ' (' . $alias . ')';
+					$delivery_day->label = $date_formatter->format($now);
 					if (($current_day == 'Sunday' && !$item->open_on_sunday) ||
 						($current_day == 'Monday' && !$item->open_on_monday) ||
 						($current_day == 'Tuesday' && !$item->open_on_tuesday) ||
