@@ -180,4 +180,114 @@ QUERY;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 		return $this->response;
 	}
+
+	function deliveryDatesAction() {
+		$merchant_ids   = explode('-', $this->dispatcher->getParam('merchant_ids'));
+		$delivery_dates = [];
+		$current_hour   = $this->currentDatetime->format('G');
+		$days_of_week   = [];
+		$day_formatter  = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'EEEE'
+		);
+		$date_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'd MMM yyyy'
+		);
+		for ($i = 0; $i < 7; $i++) {
+			$now = clone $this->currentDatetime->modify("+{$i} day");
+			if (!$i) {
+				$day = 'Hari Ini';
+			} else if ($i === 1) {
+				$day = 'Besok';
+			} else if ($i === 2) {
+				$day = 'Lusa';
+			} else {
+				$day = $day_formatter->format($now) . ' Depan';
+			}
+			$day           .= ' / ' . $date_formatter->format($now);
+			$days_of_week[] = [$now, $day];
+		}
+		$query = <<<QUERY
+			SELECT
+				a.id,
+				a.open_on_sunday,
+				a.open_on_monday,
+				a.open_on_tuesday,
+				a.open_on_wednesday,
+				a.open_on_thursday,
+				a.open_on_friday,
+				a.open_on_saturday,
+				a.business_opening_hour,
+				a.business_closing_hour,
+				a.delivery_hours
+			FROM
+				users a
+				JOIN roles b ON a.role_id = b.id
+				JOIN service_areas c ON a.id = c.user_id
+				JOIN products d ON a.id = d.user_id
+			WHERE
+				a.status = 1 AND
+				b.name = 'Merchant' AND
+				c.village_id = {$this->_current_user->village->id} AND
+QUERY;
+		if ($this->_premium_merchant) {
+			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
+		} else {
+			$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
+		}
+		$query .= ' GROUP BY a.id';
+		$result = $this->db->query($query);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($item = $result->fetch()) {
+			$delivery_dates = [];
+			$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
+			$delivery_hours = [];
+			foreach ($item->delivery_hours ? explode(',', $item->delivery_hours) : $business_hours as $hour) {
+				$delivery_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
+			}
+			foreach ($days_of_week as $i => $day) {
+				if (!$i && $current_hour >= max($delivery_hours)) {
+					continue;
+				}
+				$current_day         = $day[0]->format('l');
+				$delivery_day        = new stdClass;
+				$delivery_day->label = $day[1];
+				if (($current_day == 'Sunday' && !$item->open_on_sunday) ||
+					($current_day == 'Monday' && !$item->open_on_monday) ||
+					($current_day == 'Tuesday' && !$item->open_on_tuesday) ||
+					($current_day == 'Wednesday' && !$item->open_on_wednesday) ||
+					($current_day == 'Thursday' && !$item->open_on_thursday) ||
+					($current_day == 'Friday' && !$item->open_on_friday) ||
+					($current_day == 'Saturday' && !$item->open_on_saturday)) {
+					$delivery_day->unavailable = true;
+				} else {
+					$minimum_hour        = $current_hour + ($day[0]->format('i') > 29 ? 2 : 1);
+					$delivery_day->hours = $delivery_hours;
+					$delivery_day->hours = !$i
+						? array_filter($delivery_hours, function($k) use($minimum_hour) {
+							return $k >= $minimum_hour;
+						}, ARRAY_FILTER_USE_KEY)
+						: $delivery_hours;
+				}
+				$delivery_dates[$item->id][] = $delivery_day;
+			}
+		}
+		if (!$delivery_dates) {
+			$this->_response['message'] = 'Maaf, Supplier tidak ditemukan.';
+		} else {
+			$this->_response['status']                 = 1;
+			$this->_response['data']['delivery_dates'] = $delivery_dates;
+		}
+		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
 }
