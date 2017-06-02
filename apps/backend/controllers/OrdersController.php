@@ -13,43 +13,37 @@ class OrdersController extends ControllerBase {
 		$limit          = $this->config->per_page;
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset         = ($current_page - 1) * $limit;
-		$query_string   = [];
 		$parameters     = [];
 		$conditions     = [];
 		$status         = Order::STATUS;
 		$current_status = filter_var($this->dispatcher->getParam('status'), FILTER_VALIDATE_INT);
 		if ($date = $this->dispatcher->getParam('from')) {
 			try {
-				$from                 = (new DateTimeImmutable($date))->format('Y-m-d');
-				$conditions[]         = "DATE(a.created_at) >= '{$from}'";
-				$query_string['from'] = $from;
+				$from         = (new DateTimeImmutable($date))->format('Y-m-d');
+				$conditions[] = "DATE(a.created_at) >= '{$from}'";
 			} catch (Exception $e) {
 				unset($from);
 			}
 		}
 		if ($date = $this->dispatcher->getParam('to')) {
 			try {
-				$to                 = (new DateTimeImmutable($date))->format('Y-m-d');
-				$conditions[]       = "DATE(a.created_at) <= '{$to}'";
-				$query_string['to'] = $to;
+				$to           = (new DateTimeImmutable($date))->format('Y-m-d');
+				$conditions[] = "DATE(a.created_at) <= '{$to}'";
 			} catch (Exception $e) {
 				unset($to);
 			}
 		}
 		if ($code = $this->dispatcher->getParam('code', 'int')) {
-			$conditions[]         = "a.code = {$code}";
-			$query_string['code'] = $code;
+			$conditions[] = "a.code = '{$code}'";
 		}
 		if (array_key_exists($current_status, $status)) {
-			$conditions[]           = "a.status = {$current_status}";
-			$query_string['status'] = $current_status;
+			$conditions[] = "a.status = {$current_status}";
 		}
 		if ($conditions) {
 			$parameters[] = implode(' AND ', $conditions);
 		}
 		if ($mobile_phone = $this->dispatcher->getParam('mobile_phone')) {
-			$conditions[]                 = "b.mobile_phone = '{$mobile_phone}'";
-			$query_string['mobile_phone'] = $to;
+			$conditions[] = "b.mobile_phone = '{$mobile_phone}'";
 		}
 		$parameters['order'] = 'a.id DESC';
 		$builder             = $this->modelsManager->createBuilder()
@@ -105,7 +99,6 @@ class OrdersController extends ControllerBase {
 		$this->view->current_status         = $current_status;
 		$this->view->code                   = $code;
 		$this->view->mobile_phone           = $mobile_phone;
-		$this->view->query_string           = http_build_query($query_string);
 		$this->view->total_final_bill       = $this->db->fetchColumn('SELECT SUM(a.final_bill) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0;
 		$this->view->total_admin_fee        = $this->db->fetchColumn('SELECT SUM(a.admin_fee) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0;
 		$this->view->total_orders           = $this->db->fetchColumn('SELECT COUNT(1) FROM orders');

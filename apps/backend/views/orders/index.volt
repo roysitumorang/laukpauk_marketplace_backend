@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/orders{% if page.current > 1 %}/index/page:{{ page.current }}{% endif %}"><h2>Order List</h2></a>
+				<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"><h2>Order List</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/orders{% if page.current > 1 %}/index/page:{{ page.current }}{% endif %}">Order List</a></span></li>
+						<li><span><a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"">Order List</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -134,7 +134,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/orders/index/page:{{ i }}{% if query_string %}?{{ query_string }}{% endif %}">{{ i }}</a>
+							<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}/page:{{ i }}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
