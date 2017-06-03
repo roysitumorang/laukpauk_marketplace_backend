@@ -63,7 +63,7 @@ QUERY;
 		}
 		$total_merchants = $this->db->fetchColumn($query, $params);
 		$total_pages     = ceil($total_merchants / $limit);
-		$current_page    = $page > 0 && $page <= $total_pages ? $page : 1;
+		$current_page    = $page > 0 ? $page : 1;
 		$offset          = ($current_page - 1) * $limit;
 		$result          = $this->db->query(str_replace('COUNT(DISTINCT a.id)', 'DISTINCT a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase, a.shipping_cost', $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
@@ -100,7 +100,11 @@ QUERY;
 			];
 		}
 		if (!$merchants) {
-			$this->_response['message'] = $search_query ? 'Penjual tidak ditemukan.' : 'Maaf, daerah Anda di luar wilayah operasional Kami.';
+			if ($search_query) {
+				$this->_response['message'] = 'Penjual tidak ditemukan.';
+			} else if (!$total_pages) {
+				$this->_response['message'] = 'Maaf, daerah Anda di luar wilayah operasional Kami.';
+			}
 		} else {
 			$this->_response['status']            = 1;
 			$this->_response['data']['merchants'] = $merchants;
