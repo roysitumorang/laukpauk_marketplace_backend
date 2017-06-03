@@ -75,7 +75,7 @@ QUERY;
 		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
-		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
+		$current_page     = $page > 0 ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
 		$result           = $this->db->query(str_replace('COUNT(DISTINCT d.id)', 'd.id, d.user_id, d.name, d.price, d.stock, d.stock_unit, d.picture', $query) . " GROUP BY d.id ORDER BY d.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
@@ -195,7 +195,11 @@ QUERY;
 			}
 		}
 		if (!$total_products) {
-			$this->_response['message'] = $keyword ? 'Produk tidak ditemukan.' : 'Produk belum ada.';
+			if ($keyword) {
+				$this->_response['message'] = 'Produk tidak ditemukan.';
+			} else if (!$total_pages) {
+				$this->_response['message'] = 'Produk belum ada.';
+			}
 		} else {
 			$this->_response['status'] = 1;
 		}
