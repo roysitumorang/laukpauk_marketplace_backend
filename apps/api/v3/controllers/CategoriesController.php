@@ -64,7 +64,8 @@ QUERY;
 			while ($product = $sub_result->fetch()) {
 				in_array($product->user_id, $merchant_ids) || $merchant_ids[] = $product->user_id;
 				if ($product->picture) {
-					$product->picture = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
+					$product->thumbnail = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
+					$product->picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
 				} else {
 					unset($product->picture);
 				}
