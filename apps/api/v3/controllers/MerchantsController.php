@@ -256,4 +256,7 @@ QUERY;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
+
+	function reviewDeliveryScheduleAction() {
+	}
 }
