@@ -153,11 +153,11 @@ $di->set('router', function() {
 		'action'         => 'termsConditions',
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/(\d+(-\d+)*)/delivery-dates', [
+	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/(\d+(-\d+)*)/delivery-schedules', [
 		'module'         => 'v3',
 		'merchant_token' => 2,
 		'controller'     => 'merchants',
-		'action'         => 'deliveryDates',
+		'action'         => 'deliverySchedules',
 		'merchant_ids'   => 3,
 	]);
 

@@ -143,7 +143,7 @@ QUERY;
 		return $this->response;
 	}
 
-	function deliveryDatesAction() {
+	function deliverySchedulesAction() {
 		$merchant_ids   = explode('-', $this->dispatcher->getParam('merchant_ids'));
 		$delivery_dates = [];
 		$current_hour   = $this->currentDatetime->format('G');
