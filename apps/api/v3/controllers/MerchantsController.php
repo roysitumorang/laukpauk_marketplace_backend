@@ -210,12 +210,10 @@ QUERY;
 		$result = $this->db->query($query);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
-			$delivery_dates = [];
-			$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
-			$delivery_hours = [];
-			foreach ($item->delivery_hours ? explode(',', $item->delivery_hours) : $business_hours as $hour) {
-				$delivery_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
-			}
+			$delivery_dates[$item->id] = [];
+			$delivery_hours            = $item->delivery_hours
+							? explode(',', $item->delivery_hours)
+							: range($item->business_opening_hour, $item->business_closing_hour);
 			foreach ($days_of_week as $i => $day) {
 				if (!$i && $current_hour >= max($delivery_hours)) {
 					continue;
@@ -230,7 +228,7 @@ QUERY;
 					($current_day == 'Thursday' && !$item->open_on_thursday) ||
 					($current_day == 'Friday' && !$item->open_on_friday) ||
 					($current_day == 'Saturday' && !$item->open_on_saturday)) {
-					$delivery_day->unavailable = true;
+					$delivery_day->status = -1;
 				} else {
 					$minimum_hour        = $current_hour + ($day[0]->format('i') > 29 ? 2 : 1);
 					$delivery_day->hours = $delivery_hours;
@@ -240,7 +238,7 @@ QUERY;
 						}, ARRAY_FILTER_USE_KEY)
 						: $delivery_hours;
 				}
-				$delivery_dates[$item->id][] = $delivery_day;
+				$delivery_dates[$item->id][$day[0]->format('Y-m-d')] = $delivery_day;
 			}
 		}
 		if (!$delivery_dates) {
