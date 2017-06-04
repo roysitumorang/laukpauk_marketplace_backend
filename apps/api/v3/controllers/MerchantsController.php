@@ -149,6 +149,7 @@ QUERY;
 		$merchant_ids   = explode('-', $this->dispatcher->getParam('merchant_ids'));
 		$delivery_dates = [];
 		$current_hour   = $this->currentDatetime->format('G');
+		$minimum_hour   = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
 		$days_of_week   = [];
 		$day_formatter  = new IntlDateFormatter(
 			'id_ID',
@@ -233,14 +234,14 @@ QUERY;
 					($current_day == 'Thursday' && $item->open_on_thursday) ||
 					($current_day == 'Friday' && $item->open_on_friday) ||
 					($current_day == 'Saturday' && $item->open_on_saturday)) {
-					$minimum_hour                         = $current_hour + ($day->format('i') > 29 ? 2 : 1);
 					$delivery_dates[$current_date]->hours = array_merge(
 						$delivery_dates[$current_date]->hours,
 						$day === $this->currentDatetime
 						? array_filter($delivery_hours, function($k) use($minimum_hour) {
 							return $k >= $minimum_hour;
 						}, ARRAY_FILTER_USE_KEY)
-						: $delivery_hours);
+						: $delivery_hours
+					);
 				}
 			}
 		}
