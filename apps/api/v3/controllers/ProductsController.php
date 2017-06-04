@@ -83,7 +83,8 @@ QUERY;
 		while ($row = $result->fetch()) {
 			in_array($row->user_id, $merchant_ids) || $merchant_ids[] = $row->user_id;
 			if ($row->picture) {
-				$row->picture = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
+				$row->thumbnail = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
+				$row->picture   = $picture_root_url . $row->picture;
 			} else {
 				unset($row->picture);
 			}
