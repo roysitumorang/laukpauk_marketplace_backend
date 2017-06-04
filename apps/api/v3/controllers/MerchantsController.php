@@ -175,8 +175,8 @@ QUERY;
 			} else {
 				$day = $day_formatter->format($now) . ' Depan';
 			}
-			$day           .= ' / ' . $date_formatter->format($now);
-			$days_of_week[] = [$now, $day];
+			$day               .= ' / ' . $date_formatter->format($now);
+			$days_of_week[$day] = $now;
 		}
 		$query = <<<QUERY
 			SELECT
@@ -210,42 +210,48 @@ QUERY;
 		$result = $this->db->query($query);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
-			$delivery_dates[$item->id] = [];
-			$delivery_hours            = $item->delivery_hours
-							? explode(',', $item->delivery_hours)
-							: range($item->business_opening_hour, $item->business_closing_hour);
-			foreach ($days_of_week as $i => $day) {
-				if (!$i && $current_hour >= max($delivery_hours)) {
+			$delivery_hours = $item->delivery_hours
+					? explode(',', $item->delivery_hours)
+					: range($item->business_opening_hour, $item->business_closing_hour);
+			foreach ($days_of_week as $label => $day) {
+				if ($day === $this->currentDatetime && $current_hour >= max($delivery_hours)) {
 					continue;
 				}
-				$current_day         = $day[0]->format('l');
-				$delivery_day        = new stdClass;
-				$delivery_day->label = $day[1];
-				if (($current_day == 'Sunday' && !$item->open_on_sunday) ||
-					($current_day == 'Monday' && !$item->open_on_monday) ||
-					($current_day == 'Tuesday' && !$item->open_on_tuesday) ||
-					($current_day == 'Wednesday' && !$item->open_on_wednesday) ||
-					($current_day == 'Thursday' && !$item->open_on_thursday) ||
-					($current_day == 'Friday' && !$item->open_on_friday) ||
-					($current_day == 'Saturday' && !$item->open_on_saturday)) {
-					$delivery_day->status = -1;
-				} else {
-					$minimum_hour        = $current_hour + ($day[0]->format('i') > 29 ? 2 : 1);
-					$delivery_day->hours = $delivery_hours;
-					$delivery_day->hours = !$i
+				$current_day  = $day->format('l');
+				$current_date = $day->format('Y-m-d');
+				if (!isset($delivery_dates[$current_date])) {
+					$delivery_dates[$current_date]        = new stdClass;
+					$delivery_dates[$current_date]->label = $label;
+					$delivery_dates[$current_date]->hours = [];
+				}
+				if (($current_day == 'Sunday' && $item->open_on_sunday) ||
+					($current_day == 'Monday' && $item->open_on_monday) ||
+					($current_day == 'Tuesday' && $item->open_on_tuesday) ||
+					($current_day == 'Wednesday' && $item->open_on_wednesday) ||
+					($current_day == 'Thursday' && $item->open_on_thursday) ||
+					($current_day == 'Friday' && $item->open_on_friday) ||
+					($current_day == 'Saturday' && $item->open_on_saturday)) {
+					$minimum_hour                         = $current_hour + ($day->format('i') > 29 ? 2 : 1);
+					$delivery_dates[$current_date]->hours = array_merge(
+						$delivery_dates[$current_date]->hours,
+						$day === $this->currentDatetime
 						? array_filter($delivery_hours, function($k) use($minimum_hour) {
 							return $k >= $minimum_hour;
 						}, ARRAY_FILTER_USE_KEY)
-						: $delivery_hours;
+						: $delivery_hours);
 				}
-				$delivery_dates[$item->id][$day[0]->format('Y-m-d')] = $delivery_day;
 			}
 		}
 		if (!$delivery_dates) {
 			$this->_response['message'] = 'Maaf, Supplier tidak ditemukan.';
 		} else {
+			array_walk($delivery_dates, function(&$item, $key) {
+				$item->hours = array_values(array_unique($item->hours));
+			});
 			$this->_response['status']                 = 1;
-			$this->_response['data']['delivery_dates'] = $delivery_dates;
+			$this->_response['data']['delivery_dates'] = array_filter($delivery_dates, function($item, $key) {
+										return !empty($item->hours);
+									}, ARRAY_FILTER_USE_BOTH);
 		}
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
