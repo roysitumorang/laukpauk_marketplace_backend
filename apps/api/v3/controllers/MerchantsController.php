@@ -5,6 +5,8 @@ namespace Application\Api\V3\Controllers;
 use Application\Models\Post;
 use Application\Models\User;
 use Application\Models\Role;
+use DatePeriod;
+use DateInterval;
 use IntlDateFormatter;
 use Phalcon\Db;
 use stdClass;
@@ -164,8 +166,8 @@ QUERY;
 			IntlDateFormatter::GREGORIAN,
 			'd MMM yyyy'
 		);
-		for ($i = 0; $i < 7; $i++) {
-			$now = clone $this->currentDatetime->modify("+{$i} day");
+		foreach (new DatePeriod($this->currentDatetime, new DateInterval('P1D'), 6) as $i => $date) {
+			$date = clone $this->currentDatetime->modify("+{$i} day");
 			if (!$i) {
 				$day = 'Hari Ini';
 			} else if ($i === 1) {
@@ -173,10 +175,10 @@ QUERY;
 			} else if ($i === 2) {
 				$day = 'Lusa';
 			} else {
-				$day = $day_formatter->format($now) . ' Depan';
+				$day = $day_formatter->format($date) . ' Depan';
 			}
-			$day               .= ' / ' . $date_formatter->format($now);
-			$days_of_week[$day] = $now;
+			$day               .= ' / ' . $date_formatter->format($date);
+			$days_of_week[$day] = $date;
 		}
 		$query = <<<QUERY
 			SELECT
