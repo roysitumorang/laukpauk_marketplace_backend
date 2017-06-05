@@ -8,13 +8,13 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/coupons/update/{{ coupon.id }}"><h2>Update Kupon #{{ coupon.id }}</h2></a>
+				<a href="/admin/coupons/{{ coupon.id }}/update"><h2>Update Kupon #{{ coupon.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/coupons">Kupon</a></span></li>
-						<li><span><a href="/admin/coupons/show/{{ coupon.id }}">Detail Kupon #{{ coupon.id }}</a></span></li>
-						<li><span><a href="/admin/banners/update/{{ coupon.id }}">Update Kupon #{{ coupon.id }}</a></span></li>
+						<li><span><a href="/admin/coupons/{{ coupon.id }}">Detail Kupon #{{ coupon.id }}</a></span></li>
+						<li><span><a href="/admin/coupons/{{ coupon.id }}/update">Update Kupon #{{ coupon.id }}</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -25,7 +25,7 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ partial('partials/form_coupon', ['action': '/admin/coupons/update/' ~ coupon.id, 'discount_types': discount_types, 'status': status, 'usage_types': usage_types]) }}
+				{{ partial('partials/form_coupon', ['action': '/admin/coupons/' ~ coupon.id ~ '/update', 'discount_types': discount_types, 'status': status, 'usage_types': usage_types]) }}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->

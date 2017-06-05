@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/coupons/create">New Coupon</a></p>
+				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/coupons/create">Tambah Kupon</a></p>
 				<form method="GET" action="/admin/coupons">
 					<table class="table table-striped">
 						<tr>
@@ -58,25 +58,24 @@
 						<tr>
 							<td>{{ coupon.rank }}</td>
 							<td>
-								<font size="4" color="#006bb3"><strong><a href="/admin/coupons/show/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>&nbsp;
+								<font size="4" color="#006bb3"><strong><a href="/admin/coupons/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>&nbsp;
 								<img src="/assets/image/bullet-{% if coupon.status == 1 %}green{% else %}red{% endif %}.png" border="0"><br>
-								{{ coupon.usage }}
+								{{ coupon.multiple_use }}
 								<br><br>
 								Min. Pembelian: Rp. {{ number_format(coupon.minimum_purchase) }}
 							</td>
 							<td>
 								<font size="4">
 									{% if coupon.discount_type == 1 %}
-									Rp. {{ number_format(coupon.discount_amount) }}
+									Rp. {{ number_format(coupon.price_discount) }}
 									{% else %}
-									{{ coupon.discount_amount }} %
+									{{ coupon.price_discount }} %
 									{% endif %}
 								</font>
 							</td>
 							<td>{{ coupon.effective_date_start }} s/d {{ coupon.effective_date_end }}</td>
 							<td>
-								<a href="/admin/coupons/usage/{{ coupon.id }}" title="Penggunaan Kupon"><i class="fa fa-folder-open-o fa-2x"></i></a>&nbsp;
-								<a href="/admin/coupons/update/{{ coupon.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+								<a href="/admin/coupons/{{ coupon.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
@@ -94,7 +93,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/banners/index/banner_category_id:{{ banner_category.id }}/page:{{ i }}">{{ i }}</a>
+							<a href="/admin/coupons{% if i > 1%}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

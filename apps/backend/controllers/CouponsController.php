@@ -54,7 +54,7 @@ class CouponsController extends ControllerBase {
 		$coupons = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$item->writeAttribute('usage', Coupon::USAGE_TYPES[$item->usage]);
+			$item->writeAttribute('multiple_use', Coupon::USAGE_TYPES[$item->multiple_use]);
 			$item->writeAttribute('effective_date_start', $this->_date_formatter->format(new DateTime($item->effective_date, $this->currentDatetime->getTimezone())));
 			$item->writeAttribute('effective_date_end', $this->_date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
 			$coupons[] = $item;
@@ -75,7 +75,7 @@ class CouponsController extends ControllerBase {
 		}
 		$coupon->effective_date_start = $this->_date_formatter->format(new DateTime($coupon->effective_date, $this->currentDatetime->getTimezone()));
 		$coupon->effective_date_end   = $this->_date_formatter->format((new DateTime($coupon->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day'));
-		$coupon->usage_type           = Coupon::USAGE_TYPES[$coupon->usage];
+		$coupon->usage_type           = Coupon::USAGE_TYPES[$coupon->multiple_use];
 		$this->view->coupon           = $coupon;
 	}
 
@@ -126,13 +126,13 @@ class CouponsController extends ControllerBase {
 			$coupon->code = $this->request->getPost('code');
 		}
 		$coupon->assign([
-			'discount_amount'  => $this->request->getPost('discount_amount'),
+			'price_discount'   => $this->request->getPost('price_discount'),
 			'discount_type'    => $this->request->getPost('discount_type'),
 			'effective_date'   => $this->request->getPost('effective_date'),
 			'expiry_date'      => $this->request->getPost('expiry_date'),
 			'minimum_purchase' => $this->request->getPost('minimum_purchase'),
 			'status'           => $this->request->getPost('status'),
-			'usage'            => $this->request->getPost('usage'),
+			'multiple_use'     => $this->request->getPost('multiple_use'),
 			'description'      => $this->request->getPost('description'),
 		]);
 	}

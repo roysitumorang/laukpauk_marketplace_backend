@@ -344,6 +344,21 @@ $di->set('router', function() {
 		'params'     => 1,
 	]);
 
+	$router->add('/admin/coupons/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'coupons',
+		'action'     => 2,
+		'params'     => 1,
+	]);
+
+	$router->add('/admin/coupons/:int', [
+		'module'     => 'backend',
+		'controller' => 'coupons',
+		'action'     => 'show',
+		'params'     => 1,
+	]);
+
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',

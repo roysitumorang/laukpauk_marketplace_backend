@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/coupons/show/{{ coupon.id }}"><h2>Detail Kupon #{{ coupon.id }}</h2></a>
+				<a href="/admin/coupons/{{ coupon.id }}"><h2>Detail Kupon #{{ coupon.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -82,46 +82,6 @@
 					<tbody>
 						<tr>
 							<td>{{ coupon.usage_type }}</td>
-						</tr>
-					</tbody>
-				</table>
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th><b>Berlaku untuk Member</b></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-							{% if count(coupon.users) %}
-								<a href="/admin/coupon_users/index/coupon_id:{{ coupon.id }}">{{ count(coupon.users) }} member</a>
-							{% else %}
-								Berlaku untuk semua Member
-							{% endif %}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th><b>Berlaku untuk kelurahan</b></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>
-							{% if count(coupon.villages) %}
-								<ul>
-								{% for village in coupon.villages %}
-									<li>{{ village.name }}</li>
-								{% endfor %}
-								</ul>
-							{% else %}
-								Semua kelurahan
-							{% endif %}
-							</td>
 						</tr>
 					</tbody>
 				</table>

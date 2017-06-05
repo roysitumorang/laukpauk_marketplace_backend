@@ -10,7 +10,7 @@
 		<tr>
 			<td>
 				<b>Diskon :</b><br>
-				<input type="text" name="discount_amount" value="{{ coupon.discount_amount }}" size="40" class="form form-control form-30">
+				<input type="text" name="price_discount" value="{{ coupon.price_discount }}" size="40" class="form form-control form-30">
 				<select name="discount_type" class="form form-control form-20">
 				{% for key, value in discount_types %}
 					<option value="{{ key }}"{% if coupon.discount_type == key %} selected{% endif %}>{{ value }}</option>
@@ -50,9 +50,9 @@
 		<tr>
 			<td>
 				<b>Cara Penggunaan :</b><br>
-				<select name="usage" class="form form-control form-30">
+				<select name="multiple_use" class="form form-control form-30">
 				{% for key, value in usage_types %}
-					<option value="{{ key }}"{% if coupon.usage == key %} selected{% endif %}>{{ value }}</option>
+					<option value="{{ key }}"{% if coupon.multiple_use == key %} selected{% endif %}>{{ value }}</option>
 				{% endfor %}
 				</select>
 			</td>
