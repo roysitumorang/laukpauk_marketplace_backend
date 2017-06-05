@@ -12,7 +12,7 @@ use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
-use Exception;
+use Error;
 use IntlDateFormatter;
 use Phalcon\Db;
 
@@ -45,13 +45,13 @@ class OrdersController extends ControllerBase {
 	function createAction() {
 		try {
 			if (!$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
+				throw new Error('Request tidak valid!');
 			}
 			if ($this->_current_user->role->name != 'Buyer') {
-				throw new Exception('Hanya pembeli yang bisa melakukan pemesanan!');
+				throw new Error('Hanya pembeli yang bisa melakukan pemesanan!');
 			}
 			if (!$this->_post->items) {
-				throw new Exception('Order item kosong!');
+				throw new Error('Order item kosong!');
 			}
 			if ($this->_premium_merchant) {
 				$merchant = $this->_premium_merchant;
@@ -72,7 +72,7 @@ class OrdersController extends ControllerBase {
 					(!empty($coupon->users) && empty($coupon->getRelated('users', ['user_id IN ({ids:array})', 'bind' => ['ids' => [$this->_current_user->id, $merchant->id]]]))) ||
 					($coupon->usage == array_search('Sekali Pakai', Coupon::USAGE_TYPES) && $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE buyer_id = ? AND coupon_id = ?', [$this->_current_user->id, $coupon->id]))
 					) {
-					throw new Exception('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
+					throw new Error('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
 				}
 			}
 			$order         = new Order;
@@ -103,13 +103,13 @@ class OrdersController extends ControllerBase {
 			$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
 			$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
 			if ($order->original_bill < $minimum_purchase) {
-				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
+				throw new Error('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			$order->final_bill = $order->original_bill;
 			$order->discount   = 0;
 			if ($coupon) {
 				if ($coupon->minimum_purchase && $order->original_bill < $coupon->minimum_purchase) {
-					throw new Exception('Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase));
+					throw new Error('Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase));
 				}
 				$order->coupon     = $coupon;
 				$order->discount   = $coupon->discount_type == 1 ? $coupon->discount_amount : ceil($coupon->discount_amount * $order->original_bill / 100.0);
@@ -124,14 +124,14 @@ class OrdersController extends ControllerBase {
 				}
 				$this->_response['status']        = 1;
 				$this->_response['data']['order'] = ['id' => $order->id];
-				throw new Exception('Pemesanan berhasil!');
+				throw new Error('Pemesanan berhasil!');
 			}
 			$errors = [];
 			foreach ($order->getMessages() as $error) {
 				$errors[] = $error->getMessage();
 			}
-			throw new Exception(implode('<br>', $errors));
-		} catch (Exception $e) {
+			throw new Error(implode('<br>', $errors));
+		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
