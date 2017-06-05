@@ -2,10 +2,8 @@
 
 namespace Application\Api\V3\Controllers;
 
-use DateTime;
 use IntlDateFormatter;
 use Phalcon\Db;
-use stdClass;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
