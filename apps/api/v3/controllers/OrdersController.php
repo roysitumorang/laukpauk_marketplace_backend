@@ -50,7 +50,7 @@ class OrdersController extends ControllerBase {
 			if ($this->_current_user->role->name != 'Buyer') {
 				throw new Exception('Hanya pembeli yang bisa melakukan pemesanan!');
 			}
-			if (!$this->_input->items) {
+			if (!$this->_post->items) {
 				throw new Exception('Order item kosong!');
 			}
 			if ($this->_premium_merchant) {
@@ -58,13 +58,13 @@ class OrdersController extends ControllerBase {
 			} else {
 				$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
 					Role::MERCHANT,
-					$this->_input->merchant_id
+					$this->_post->merchant_id
 				]]);
 			}
-			if ($this->_input->coupon_code) {
+			if ($this->_post->coupon_code) {
 				$current_date = $this->currentDatetime->format('Y-m-d');
 				$coupon       = Coupon::findFirst(['status = 1 AND code = ?0 AND effective_date <= ?1 AND expiry_date > ?2', 'bind' => [
-					$this->_input->coupon_code,
+					$this->_post->coupon_code,
 					$current_date,
 					$current_date,
 				]]);
@@ -77,19 +77,19 @@ class OrdersController extends ControllerBase {
 			}
 			$order         = new Order;
 			$order_items   = [];
-			$delivery_date = new DateTime($this->_input->scheduled_delivery->date, $this->currentDatetime->getTimezone());
-			$delivery_date->setTime($this->_input->scheduled_delivery->hour, 0, 0);
+			$delivery_date = new DateTime($this->_post->scheduled_delivery->date, $this->currentDatetime->getTimezone());
+			$delivery_date->setTime($this->_post->scheduled_delivery->hour, 0, 0);
 			$order->merchant           = $merchant;
 			$order->name               = $this->_current_user->name;
 			$order->mobile_phone       = $this->_current_user->mobile_phone;
-			$order->address            = $this->_input->address;
+			$order->address            = $this->_post->address;
 			$order->village_id         = $this->_current_user->village_id;
 			$order->original_bill      = 0;
 			$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
-			$order->note               = $this->_input->note;
+			$order->note               = $this->_post->note;
 			$order->buyer              = $this->_current_user;
 			$order->created_by         = $this->_current_user->id;
-			foreach ($this->_input->items as $item) {
+			foreach ($this->_post->items as $item) {
 				$store_item             = StoreItem::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->product_price_id ?: $item->store_item_id]]);
 				$order_item             = new OrderItem;
 				$order_item->product_id = $store_item->product->id;
@@ -120,7 +120,7 @@ class OrdersController extends ControllerBase {
 			$order->items         = $order_items;
 			if ($order->validation() && $order->create()) {
 				if (!$this->_current_user->address) {
-					$this->_current_user->update(['address' => $this->_input->address]);
+					$this->_current_user->update(['address' => $this->_post->address]);
 				}
 				$this->_response['status']        = 1;
 				$this->_response['data']['order'] = ['id' => $order->id];
@@ -170,7 +170,7 @@ class OrdersController extends ControllerBase {
 			'bind' => [$id]
 		])->getFirst();
 		if ($order) {
-			$order->cancel($this->_input->cancellation_reason);
+			$order->cancel($this->_post->cancellation_reason);
 			$this->_response['status']  = 1;
 			$this->_response['message'] = 'Order #' . $order->code . ' telah dicancel!';
 		} else {

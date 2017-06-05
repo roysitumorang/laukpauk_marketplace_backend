@@ -28,13 +28,13 @@ class AccountController extends ControllerBase {
 		if ($merchant_token) {
 			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
 		}
-		$village_id    = filter_var($this->_input->village_id, FILTER_VALIDATE_INT);
+		$village_id    = filter_var($this->_post->village_id, FILTER_VALIDATE_INT);
 		$user          = new User;
 		$user->village = Village::findFirst($village_id);
-		$user->setName($this->_input->name);
-		$user->setNewPassword($this->_input->new_password);
-		$user->setNewPasswordConfirmation($this->_input->new_password);
-		$user->setMobilePhone($this->_input->mobile_phone);
+		$user->setName($this->_post->name);
+		$user->setNewPassword($this->_post->new_password);
+		$user->setNewPasswordConfirmation($this->_post->new_password);
+		$user->setMobilePhone($this->_post->mobile_phone);
 		$user->setDeposit(0);
 		$user->role_id = Role::findFirstByName('Buyer')->id;
 		if ($premium_merchant) {
@@ -51,12 +51,12 @@ class AccountController extends ControllerBase {
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
-		if ($this->_input->device_token) {
-			$device = Device::findFirstByToken($this->_input->device_token);
+		if ($this->_post->device_token) {
+			$device = Device::findFirstByToken($this->_post->device_token);
 			if (!$device) {
 				$device             = new Device;
 				$device->user       = $user;
-				$device->token      = $this->_input->device_token;
+				$device->token      = $this->_post->device_token;
 				$device->created_by = $user->id;
 				$device->create();
 			} else {
@@ -208,22 +208,22 @@ QUERY;
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$this->_current_user->setName($this->_input->name);
-		$this->_current_user->setMobilePhone($this->_input->mobile_phone);
-		$this->_current_user->setAddress($this->_input->address);
-		$this->_current_user->village = Village::findFirst($this->_input->village_id);
+		$this->_current_user->setName($this->_post->name);
+		$this->_current_user->setMobilePhone($this->_post->mobile_phone);
+		$this->_current_user->setAddress($this->_post->address);
+		$this->_current_user->village = Village::findFirst($this->_post->village_id);
 		if ($this->_current_user->role->name == 'Merchant') {
-			$this->_current_user->setBusinessOpeningHour($this->_input->business_opening_hour);
-			$this->_current_user->setBusinessClosingHour($this->_input->business_closing_hour);
-			$this->_current_user->setOpenOnSunday($this->_input->open_on_sunday);
-			$this->_current_user->setOpenOnMonday($this->_input->open_on_monday);
-			$this->_current_user->setOpenOnTuesday($this->_input->open_on_tuesday);
-			$this->_current_user->setOpenOnWednesday($this->_input->open_on_wednesday);
-			$this->_current_user->setOpenOnThursday($this->_input->open_on_thursday);
-			$this->_current_user->setOpenOnFriday($this->_input->open_on_friday);
-			$this->_current_user->setOpenOnSaturday($this->_input->open_on_saturday);
-			$this->_current_user->setMinimumPurchase($this->_input->minimum_purchase);
-			$this->_current_user->setDeliveryHours($this->_input->delivery_hours);
+			$this->_current_user->setBusinessOpeningHour($this->_post->business_opening_hour);
+			$this->_current_user->setBusinessClosingHour($this->_post->business_closing_hour);
+			$this->_current_user->setOpenOnSunday($this->_post->open_on_sunday);
+			$this->_current_user->setOpenOnMonday($this->_post->open_on_monday);
+			$this->_current_user->setOpenOnTuesday($this->_post->open_on_tuesday);
+			$this->_current_user->setOpenOnWednesday($this->_post->open_on_wednesday);
+			$this->_current_user->setOpenOnThursday($this->_post->open_on_thursday);
+			$this->_current_user->setOpenOnFriday($this->_post->open_on_friday);
+			$this->_current_user->setOpenOnSaturday($this->_post->open_on_saturday);
+			$this->_current_user->setMinimumPurchase($this->_post->minimum_purchase);
+			$this->_current_user->setDeliveryHours($this->_post->delivery_hours);
 		}
 		if (!$this->_current_user->validation() || !$this->_current_user->update()) {
 			$errors = [];
@@ -289,10 +289,10 @@ QUERY;
 			return $this->response;
 		}
 		$errors = [];
-		if (!$this->_input->mobile_phone) {
+		if (!$this->_post->mobile_phone) {
 			$errors['mobile_phone'] = 'nomor HP harus diisi';
 		}
-		if (!$this->_input->password) {
+		if (!$this->_post->password) {
 			$errors['password'] = 'password harus diisi';
 		}
 		if ($errors) {
@@ -300,15 +300,15 @@ QUERY;
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		if ($premium_merchant && $premium_merchant->mobile_phone == $this->_input->mobile_phone) {
+		if ($premium_merchant && $premium_merchant->mobile_phone == $this->_post->mobile_phone) {
 			$user = $premium_merchant;
 		} else {
 			$params = $premium_merchant
-				? ['status = 1 AND mobile_phone = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$this->_input->mobile_phone, Role::MERCHANT, $premium_merchant->id, Role::BUYER, $premium_merchant->id]]
-				: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id IN ({role_ids:array}) AND mobile_phone = :mobile_phone:', 'bind' => ['role_ids' => [Role::BUYER, Role::MERCHANT], 'mobile_phone' => $this->_input->mobile_phone]];
+				? ['status = 1 AND mobile_phone = ?0 AND ((role_id = ?1 AND merchant_id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$this->_post->mobile_phone, Role::MERCHANT, $premium_merchant->id, Role::BUYER, $premium_merchant->id]]
+				: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id IN ({role_ids:array}) AND mobile_phone = :mobile_phone:', 'bind' => ['role_ids' => [Role::BUYER, Role::MERCHANT], 'mobile_phone' => $this->_post->mobile_phone]];
 			$user = User::findFirst($params);
 		}
-		if (!$user || !$this->security->checkHash($this->_input->password, $user->password)) {
+		if (!$user || !$this->security->checkHash($this->_post->password, $user->password)) {
 			$this->_response['message'] = 'Nomor HP dan/atau password salah!';
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
@@ -317,12 +317,12 @@ QUERY;
 		$login_history          = new LoginHistory;
 		$login_history->user_id = $user->id;
 		$login_history->create();
-		if ($this->_input->device_token) {
-			$device = Device::findFirstByToken($this->_input->device_token);
+		if ($this->_post->device_token) {
+			$device = Device::findFirstByToken($this->_post->device_token);
 			if (!$device) {
 				$device             = new Device;
 				$device->user       = $user;
-				$device->token      = $this->_input->device_token;
+				$device->token      = $this->_post->device_token;
 				$device->created_by = $user->id;
 				$device->create();
 			} else if ($device->user_id != $user->id) {

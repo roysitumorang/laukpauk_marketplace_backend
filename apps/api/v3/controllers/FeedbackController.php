@@ -7,7 +7,7 @@ use Application\Models\Feedback;
 class FeedbackController extends ControllerBase {
 	function createAction() {
 		$feedback             = new Feedback;
-		$feedback->content    = $this->_input->content;
+		$feedback->content    = $this->_post->content;
 		$feedback->user       = $this->_current_user;
 		$feedback->created_at = $this->currentDatetime->format('Y-m-d H:i:s');
 		if ($feedback->validation() && $feedback->create()) {
