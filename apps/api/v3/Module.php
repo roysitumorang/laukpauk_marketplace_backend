@@ -84,7 +84,7 @@ class Module implements ModuleDefinitionInterface {
 			$response->setContentType('application/json', 'UTF-8');
 			$response->setHeader('Access-Control-Allow-Origin', '*');
 			$response->setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-			$response->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Range, Content-Disposition, Content-Type, Authorization');
+			$response->setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Range, Content-Disposition, Content-Type, Authorization, User-Data');
 			$response->setHeader('Access-Control-Allow-Credentials', 'true');
 			return $response;
 		});

@@ -18,6 +18,7 @@ abstract class ControllerBase extends Controller {
 	protected $_current_user;
 	protected $_premium_merchant;
 	protected $_post;
+	protected $_server;
 
 	function initialize() {
 		register_shutdown_function(function() {
@@ -38,7 +39,8 @@ abstract class ControllerBase extends Controller {
 			$this->response->setJsonContent($this->_response);
 			exit($this->response->send());
 		}
-		$this->_post = $this->request->getJsonRawBody();
+		$this->_post   = $this->request->getJsonRawBody();
+		$this->_server = json_decode($this->request->getServer('HTTP_USER_DATA'));
 	}
 
 	function beforeExecuteRoute() {
