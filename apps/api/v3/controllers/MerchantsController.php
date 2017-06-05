@@ -286,6 +286,8 @@ QUERY;
 		$delivery_date = $this->dispatcher->getParam('date');
 		$delivery_hour = filter_var($this->dispatcher->getParam('hour'), FILTER_VALIDATE_INT);
 		$current_hour  = $this->currentDatetime->format('G');
+		$coupons       = [];
+		$today         = $this->currentDatetime->format('Y-m-d');
 		$minimum_hour  = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
 		$days_of_week  = [];
 		$day_formatter = new IntlDateFormatter(
@@ -380,7 +382,41 @@ QUERY;
 					throw new Error("{$item->company} tidak melayani pengantaran pada jam tersebut, silahkan ganti jam atau hapus pesanan dari supplier tersebut!");
 				}
 			}
-			$this->_response['status'] = 1;
+			$query = <<<QUERY
+				SELECT
+					a.id,
+					a.code,
+					a.discount_amount,
+					a.discount_type,
+					a.multiple_use,
+					a.minimum_purchase,
+					COUNT(b.id) AS usages
+				FROM
+					coupons a
+					LEFT JOIN orders b ON a.id = b.coupon_id AND b.buyer_id = {$this->_current_user->id} AND b.status = '1'
+				WHERE
+					a.status = '1' AND
+					a.effective_date <= '{$today}' AND
+					a.expiry_date > '{$today}' AND
+					a.user_id
+QUERY;
+			if ($this->_premium_merchant) {
+				$query .= " = {$this->_premium_merchant->id}";
+			} else {
+				$query .= ' IS NULL';
+			}
+			$query .= ' GROUP BY a.id';
+			$result = $this->db->query($query);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($item = $result->fetch()) {
+				if ($item->multiple_use == 1 && $item->usage > 1) {
+					continue;
+				}
+				unset($item->multiple_use, $item->usages);
+				$coupons[$item->code] = $item;
+			}
+			$this->_response['status']          = 1;
+			$this->_response['data']['coupons'] = $coupons;
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 		}
