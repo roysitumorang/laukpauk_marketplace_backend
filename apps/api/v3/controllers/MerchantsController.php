@@ -69,7 +69,26 @@ QUERY;
 		$total_pages     = ceil($total_merchants / $limit);
 		$current_page    = $page > 0 ? $page : 1;
 		$offset          = ($current_page - 1) * $limit;
-		$result          = $this->db->query(str_replace('COUNT(DISTINCT a.id)', 'DISTINCT a.id, a.company, a.address, a.open_on_sunday, a.open_on_monday, a.open_on_tuesday, a.open_on_wednesday, a.open_on_thursday, a.open_on_friday, a.open_on_saturday, a.business_opening_hour, a.business_closing_hour, a.delivery_hours, COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase, a.shipping_cost', $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
+		$result          = $this->db->query(str_replace('COUNT(DISTINCT a.id)', <<<QUERY
+			DISTINCT
+			a.id,
+			a.company,
+			a.address,
+			a.open_on_sunday,
+			a.open_on_monday,
+			a.open_on_tuesday,
+			a.open_on_wednesday,
+			a.open_on_thursday,
+			a.open_on_friday,
+			a.open_on_saturday,
+			a.business_opening_hour,
+			a.business_closing_hour,
+			a.delivery_hours,
+			COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
+			a.shipping_cost,
+			a.merchant_note
+QUERY
+			, $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$business_days = [
@@ -101,6 +120,7 @@ QUERY;
 				'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 				'minimum_purchase' => $item->minimum_purchase,
 				'shipping_cost'    => $item->shipping_cost ?? 0,
+				'merchant_note'    => $item->merchant_note,
 			];
 		}
 		if (!$merchants) {

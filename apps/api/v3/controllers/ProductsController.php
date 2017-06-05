@@ -106,7 +106,8 @@ QUERY;
 					a.business_closing_hour,
 					a.delivery_hours,
 					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
-					a.shipping_cost
+					a.shipping_cost,
+					a.merchant_note
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
@@ -157,6 +158,7 @@ QUERY;
 					'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 					'minimum_purchase' => $item->minimum_purchase,
 					'shipping_cost'    => $item->shipping_cost ?? 0,
+					'merchant_note'    => $item->merchant_note,
 				];
 			}
 		}
