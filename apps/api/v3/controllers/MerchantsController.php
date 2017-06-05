@@ -258,9 +258,9 @@ QUERY;
 					$delivery_dates[$current_date]->hours = array_merge(
 						$delivery_dates[$current_date]->hours,
 						$day == $this->currentDatetime
-						? array_filter($delivery_hours, function($k) use($minimum_hour) {
-							return $k >= $minimum_hour;
-						}, ARRAY_FILTER_USE_KEY)
+						? array_values(array_filter($delivery_hours, function($v, $k) use($minimum_hour) {
+							return $v >= $minimum_hour;
+						}, ARRAY_FILTER_USE_BOTH))
 						: $delivery_hours
 					);
 				}
