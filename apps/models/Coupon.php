@@ -17,13 +17,14 @@ class Coupon extends ModelBase {
 	];
 
 	public $id;
+	public $user_id;
 	public $code;
 	public $effective_date;
 	public $expiry_date;
-	public $discount_amount;
+	public $price_discount;
 	public $discount_type;
 	public $status;
-	public $usage;
+	public $multiple_use;
 	public $minimum_purchase;
 	public $description;
 	public $created_by;
@@ -38,7 +39,10 @@ class Coupon extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->hasMany('id', 'Application\Models\Order', 'coupon_id', ['alias' => 'orders']);
-		$this->hasManyToMany('id', 'Application\Models\CouponUser', 'coupon_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'users']);
+		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+			'alias'    => 'user',
+			'reusable' => true,
+		]);
 	}
 
 	function setCode($code) {
@@ -53,15 +57,15 @@ class Coupon extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['code', 'effective_date', 'expiry_date', 'discount_amount', 'discount_type', 'status', 'usage', 'minimum_purchase'], new PresenceOf([
+		$validator->add(['code', 'effective_date', 'expiry_date', 'price_discount', 'discount_type', 'status', 'multiple_use', 'minimum_purchase'], new PresenceOf([
 			'message' => [
 				'code'             => 'kode kupon harus diisi',
 				'effective_date'   => 'tanggal berlaku harus diisi',
 				'expiry_date'      => 'tanggal expired harus diisi',
-				'discount_amount'  => 'diskon harus diisi',
+				'price_discount'  => 'diskon harus diisi',
 				'discount_type'    => 'tipe diskon harus diisi',
 				'status'           => 'status harus diisi',
-				'usage'            => 'penggunaan harus diisi',
+				'multiple_use'     => 'penggunaan harus diisi',
 				'minimum_purchase' => 'belanja minimal harus diisi',
 			],
 		]));
@@ -75,21 +79,21 @@ class Coupon extends ModelBase {
 				'expiry_date'    => 'tanggal expired tidak valid',
 			],
 		]));
-		$validator->add(['discount_amount', 'minimum_purchase'], new Digit([
+		$validator->add(['price_discount', 'minimum_purchase'], new Digit([
 			'message' => [
-				'discount_amount'  => 'diskon tidak valid',
+				'price_discount'   => 'diskon tidak valid',
 				'minimum_purchase' => 'belanja minimal tidak valid',
 			],
 		]));
-		$validator->add(['discount_type', 'usage', 'status'], new InclusionIn([
+		$validator->add(['discount_type', 'multiple_use', 'status'], new InclusionIn([
 			'domain'  => [
 				'discount_type' => array_keys(static::DISCOUNT_TYPES),
-				'usage'         => array_keys(static::USAGE_TYPES),
+				'multiple_use'  => array_keys(static::USAGE_TYPES),
 				'status'        => array_keys(static::STATUS),
 			],
 			'message' => [
 				'discount_type' => 'tipe diskon tidak valid',
-				'usage'         => 'penggunaan tidak valid',
+				'multiple_use'  => 'penggunaan tidak valid',
 				'status'        => 'status tidak valid',
 			],
 		]));
