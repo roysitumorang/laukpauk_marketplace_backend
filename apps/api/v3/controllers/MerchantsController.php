@@ -189,7 +189,7 @@ QUERY
 			IntlDateFormatter::GREGORIAN,
 			'd MMM yyyy'
 		);
-		foreach (new DatePeriod($this->currentDatetime, new DateInterval('P1D'), 6) as $i => $date) {
+		foreach (new DatePeriod($this->currentDatetime, new DateInterval('P1D'), 1) as $i => $date) {
 			if (!$i) {
 				$day = 'Hari Ini';
 			} else if ($i === 1) {
