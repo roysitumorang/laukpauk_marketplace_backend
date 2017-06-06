@@ -39,7 +39,7 @@ QUERY
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL');
 				$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
-					throw new Error("Kode voucher {$coupon_code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
+					throw new Error("Kode voucher {$order->coupon_code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 				}
 				$params = [<<<QUERY
 					SELECT
@@ -67,7 +67,7 @@ QUERY
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
 				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$coupon || ($coupon->multiple_use && $coupon->usage > 1)) {
-					throw new Error("Kode voucher {$coupon_code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
+					throw new Error("Kode voucher {$order->coupon_code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 				}
 				$original_bill = 0;
 				$order_items = $this->_server->items[$merchant->id];
@@ -80,7 +80,7 @@ QUERY
 					$original_bill += $product->price * min($item->quantity, $product->stock);
 				}
 				if ($coupon->minimum_purchase && $original_bill < $coupon->minimum_purchase) {
-					throw new Error("Kode voucher {$coupon_code} berlaku jika belanja minimal Rp. " . number_format($coupon->minimum_purchase));
+					throw new Error("Kode voucher {$order->coupon_code} berlaku jika belanja minimal Rp. " . number_format($coupon->minimum_purchase));
 				}
 				$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $original_bill / 100.0);
 				if ($discount) {
