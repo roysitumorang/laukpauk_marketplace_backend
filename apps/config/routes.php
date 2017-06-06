@@ -153,23 +153,6 @@ $di->set('router', function() {
 		'action'         => 'termsConditions',
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/(\d+(-\d+)*)/delivery-schedules', [
-		'module'         => 'v3',
-		'merchant_token' => 2,
-		'controller'     => 'merchants',
-		'action'         => 'deliverySchedules',
-		'merchant_ids'   => 3,
-	]);
-
-	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/(\d+(-\d+)*)/review-delivery-schedule/:params', [
-		'module'         => 'v3',
-		'merchant_token' => 2,
-		'controller'     => 'merchants',
-		'action'         => 'reviewDeliverySchedule',
-		'merchant_ids'   => 3,
-		'params'         => 5,
-	]);
-
 	$router->add('/api/v3(/([a-z0-9]{32}))?/notifications/:int', [
 		'module'         => 'v3',
 		'merchant_token' => 2,
