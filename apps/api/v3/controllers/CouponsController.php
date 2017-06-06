@@ -55,14 +55,14 @@ QUERY
 						a.status = '1' AND
 						a.effective_date <= ? AND
 						a.expiry_date > ? AND
-						a.code = ? AND
+						LOWER(a.code) = ? AND
 						a.user_id
 QUERY
 					,
 					$this->_current_user->id,
 					$today,
 					$today,
-					$order->coupon_code,
+					strtolower($order->coupon_code),
 				];
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
 				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
