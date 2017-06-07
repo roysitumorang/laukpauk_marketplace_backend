@@ -24,19 +24,16 @@ class OrdersController extends ControllerBase {
 		} else if ($this->_current_user->role->name == 'Merchant') {
 			$field = 'merchant_id';
 		}
-		$total_pages  = ceil($this->db->fetchColumn("SELECT COUNT(1) FROM orders WHERE {$field} = {$this->_current_user->id}") / $limit);
 		$page         = $this->dispatcher->getParam('page', 'int');
-		$current_page = $page > 0 && $page <= $total_pages ? $page : 1;
+		$current_page = $page > 0 ? $page : 1;
 		$offset       = ($current_page - 1) * $limit;
-		foreach ($this->db->fetchAll("SELECT id, code, status, final_bill, scheduled_delivery FROM orders WHERE {$field} = {$this->_current_user->id} ORDER BY id DESC LIMIT {$limit} OFFSET {$offset}", Db::FETCH_OBJ) as $order) {
+		$result       = $this->db->query("SELECT id, code, status, final_bill, scheduled_delivery FROM orders WHERE {$field} = {$this->_current_user->id} ORDER BY id DESC LIMIT {$limit} OFFSET {$offset}");
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($order = $result->fetch()) {
 			$orders[] = $order;
 		}
 		$this->_response['status'] = 1;
-		$this->_response['data']   = [
-			'orders'       => $orders,
-			'total_pages'  => $total_pages,
-			'current_page' => $current_page,
-		];
+		$this->_response['data']   = ['orders' => $orders];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
