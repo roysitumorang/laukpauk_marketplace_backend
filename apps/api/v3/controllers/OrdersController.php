@@ -2,10 +2,9 @@
 
 namespace Application\Api\V3\Controllers;
 
-use Application\Models\Coupon;
 use Application\Models\Order;
 use Application\Models\OrderItem;
-use Application\Models\StoreItem;
+use Application\Models\Product;
 use Application\Models\Role;
 use Application\Models\ServiceArea;
 use Application\Models\Setting;
@@ -50,89 +49,68 @@ class OrdersController extends ControllerBase {
 			if ($this->_current_user->role->name != 'Buyer') {
 				throw new Error('Hanya pembeli yang bisa melakukan pemesanan!');
 			}
-			if (!$this->_post->items) {
+			if (!$this->_post->orders) {
 				throw new Error('Order item kosong!');
 			}
-			if ($this->_premium_merchant) {
-				$merchant = $this->_premium_merchant;
-			} else {
-				$merchant = User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [
-					Role::MERCHANT,
-					$this->_post->merchant_id
-				]]);
-			}
-			if ($this->_post->coupon_code) {
-				$current_date = $this->currentDatetime->format('Y-m-d');
-				$coupon       = Coupon::findFirst(['status = 1 AND code = ?0 AND effective_date <= ?1 AND expiry_date > ?2', 'bind' => [
-					$this->_post->coupon_code,
-					$current_date,
-					$current_date,
-				]]);
-				if (!$coupon ||
-					(!empty($coupon->users) && empty($coupon->getRelated('users', ['user_id IN ({ids:array})', 'bind' => ['ids' => [$this->_current_user->id, $merchant->id]]]))) ||
-					($coupon->usage == array_search('Sekali Pakai', Coupon::USAGE_TYPES) && $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE buyer_id = ? AND coupon_id = ?', [$this->_current_user->id, $coupon->id]))
-					) {
-					throw new Error('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
+			$orders        = [];
+			$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
+			$delivery_date->setTime($this->_post->delivery->hour, 0, 0);
+			foreach ($this->_post->orders as $cart) {
+				$merchant = $this->_premium_merchant ? $this->_premium_merchant : User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND premium_merchant IS NULL AND id = ?1', 'bind' => [Role::MERCHANT, $cart->merchant_id]]);
+				if (!$merchant) {
+					throw new Error('Order Anda tidak valid!');
 				}
-			}
-			$order         = new Order;
-			$order_items   = [];
-			$delivery_date = new DateTime($this->_post->scheduled_delivery->date, $this->currentDatetime->getTimezone());
-			$delivery_date->setTime($this->_post->scheduled_delivery->hour, 0, 0);
-			$order->merchant           = $merchant;
-			$order->name               = $this->_current_user->name;
-			$order->mobile_phone       = $this->_current_user->mobile_phone;
-			$order->address            = $this->_post->address;
-			$order->village_id         = $this->_current_user->village_id;
-			$order->original_bill      = 0;
-			$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
-			$order->note               = $this->_post->note;
-			$order->buyer              = $this->_current_user;
-			$order->created_by         = $this->_current_user->id;
-			foreach ($this->_post->items as $item) {
-				$store_item             = StoreItem::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->product_price_id ?: $item->store_item_id]]);
-				$order_item             = new OrderItem;
-				$order_item->product_id = $store_item->product->id;
-				$order_item->name       = $store_item->product->name;
-				$order_item->unit_price = $store_item->price;
-				$order_item->stock_unit = $store_item->product->stock_unit;
-				$order_item->quantity   = min($item->quantity, $store_item->stock);
-				$order->original_bill  += $order_item->quantity * $order_item->unit_price;
-				$order_items[]          = $order_item;
-			}
-			$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
-			$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
-			if ($order->original_bill < $minimum_purchase) {
-				throw new Error('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
-			}
-			$order->final_bill = $order->original_bill;
-			$order->discount   = 0;
-			if ($coupon) {
-				if ($coupon->minimum_purchase && $order->original_bill < $coupon->minimum_purchase) {
-					throw new Error('Voucher berlaku jika belanja minimal Rp. ' . number_format($coupon->minimum_purchase));
+				$order                     = new Order;
+				$order_items               = [];
+				$order->merchant           = $merchant;
+				$order->name               = $this->_current_user->name;
+				$order->mobile_phone       = $this->_current_user->mobile_phone;
+				$order->address            = $this->_post->delivery->address;
+				$order->village_id         = $this->_current_user->village_id;
+				$order->original_bill      = 0;
+				$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
+				$order->note               = $cart->note;
+				$order->buyer              = $this->_current_user;
+				$order->created_by         = $this->_current_user->id;
+				foreach ($cart->products as $item) {
+					$product = Product::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->id]]);
+					if (!$product) {
+						throw new Error('Order Anda tidak valid');
+					}
+					$order_item             = new OrderItem;
+					$order_item->product_id = $product->id;
+					$order_item->name       = $product->name;
+					$order_item->unit_price = $product->price;
+					$order_item->stock_unit = $product->stock_unit;
+					$order_item->quantity   = min($item->quantity, $product->stock);
+					$order->original_bill  += $order_item->quantity * $product->price;
+					$order_items[]          = $order_item;
 				}
-				$order->coupon     = $coupon;
-				$order->discount   = $coupon->discount_type == 1 ? $coupon->discount_amount : ceil($coupon->discount_amount * $order->original_bill / 100.0);
-				$order->final_bill = $order->original_bill - $order->discount;
-			}
-			$order->shipping_cost = $merchant->shipping_cost ?? 0;
-			$order->final_bill   += $order->shipping_cost;
-			$order->items         = $order_items;
-			if ($order->validation() && $order->create()) {
-				if (!$this->_current_user->address) {
-					$this->_current_user->update(['address' => $this->_post->address]);
+				$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
+				$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
+				if ($order->original_bill < $minimum_purchase) {
+					throw new Error('Order Anda tidak valid!');
 				}
-				$this->_response['status']        = 1;
-				$this->_response['data']['order'] = ['id' => $order->id];
-				throw new Error('Pemesanan berhasil!');
+				$order->final_bill    = $order->original_bill;
+				$order->discount      = 0;
+				$order->shipping_cost = $merchant->shipping_cost ?? 0;
+				$order->final_bill   += $order->shipping_cost;
+				$order->items         = $order_items;
+				if (!$order->validation()) {
+					throw new Error('Pemesanan berhasil!');
+				}
+				$orders[] = $order;
 			}
-			$errors = [];
-			foreach ($order->getMessages() as $error) {
-				$errors[] = $error->getMessage();
+			foreach ($orders as $order) {
+				$order->create();
 			}
-			throw new Error(implode('<br>', $errors));
+			if (!$this->_current_user->address) {
+				$this->_current_user->update(['address' => $this->_post->delivery->address]);
+			}
+			$this->_response['status'] = 1;
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
+		} finally {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
