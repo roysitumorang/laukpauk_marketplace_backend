@@ -52,9 +52,49 @@ class OrdersController extends ControllerBase {
 			if (!$this->_post->orders) {
 				throw new Error('Order item kosong!');
 			}
-			$orders        = [];
-			$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
+			$orders = [];
+			$total  = 0;
+			$today  = $this->currentDatetime->format('Y-m-d');
+			try {
+				$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
+			} catch (Error $ex) {
+				throw new Error('Order Anda tidak valid!');
+			}
+			if (!filter_var($this->_post->delivery->hour, FILTER_VALIDATE_INT)) {
+				throw new Error('Order Anda tidak valid!');
+			}
 			$delivery_date->setTime($this->_post->delivery->hour, 0, 0);
+			if ($this->_post->coupon_code) {
+				$params = [<<<QUERY
+					SELECT
+						a.id,
+						a.price_discount,
+						a.discount_type,
+						a.multiple_use,
+						a.minimum_purchase,
+						COUNT(1) AS usage
+					FROM
+						coupons a
+						LEFT JOIN orders b ON a.id = b.coupon_id AND b.status = '1' AND b.buyer_id = ?
+					WHERE
+						a.status = '1' AND
+						a.effective_date <= ? AND
+						a.expiry_date > ? AND
+						LOWER(a.code) = ? AND
+						a.user_id
+QUERY
+					,
+					$this->_current_user->id,
+					$today,
+					$today,
+					strtolower($this->_post->coupon_code),
+				];
+				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
+				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				if (!$coupon || ($coupon->multiple_use && $coupon->usage > 1)) {
+					throw new Error('Order Anda tidak valid!');
+				}
+			}
 			foreach ($this->_post->orders as $cart) {
 				$merchant = $this->_premium_merchant ? $this->_premium_merchant : User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND premium_merchant IS NULL AND id = ?1', 'bind' => [Role::MERCHANT, $cart->merchant_id]]);
 				if (!$merchant) {
@@ -97,17 +137,23 @@ class OrdersController extends ControllerBase {
 				$order->final_bill   += $order->shipping_cost;
 				$order->items         = $order_items;
 				if (!$order->validation()) {
-					throw new Error('Pemesanan berhasil!');
+					throw new Error('Order Anda tidak valid!');
 				}
+				$total   += $order->final_bill;
 				$orders[] = $order;
 			}
+			if ($coupon && $total < $coupon->minimum_purchase) {
+				throw new Error('Order Anda tidak valid!');
+			}
 			foreach ($orders as $order) {
+				$coupon && $order->coupon_id = $coupon->id;
 				$order->create();
 			}
 			if (!$this->_current_user->address) {
 				$this->_current_user->update(['address' => $this->_post->delivery->address]);
 			}
-			$this->_response['status'] = 1;
+			$this->_response['status']  = 1;
+			$this->_response['message'] = 'Terima kasih, order Anda segera kami proses.';
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
