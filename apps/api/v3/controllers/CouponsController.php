@@ -8,9 +8,9 @@ use Phalcon\Db;
 
 class CouponsController extends ControllerBase {
 	function validateAction() {
-		$code     = $this->_server->coupon_code;
-		$discount = 0;
-		$today    = $this->currentDatetime->format('Y-m-d');
+		$code  = $this->_server->coupon_code;
+		$total = 0;
+		$today = $this->currentDatetime->format('Y-m-d');
 		try {
 			if (!$this->request->isOptions() || $this->_current_user->role->name != 'Buyer' || !$code) {
 				throw new Error('Request tidak valid!');
@@ -67,7 +67,6 @@ QUERY
 				if (!$merchant) {
 					throw new Error("Kode voucher {$code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 				}
-				$total = 0;
 				foreach ($order->items as $item) {
 					$product = $this->db->fetchOne('SELECT price, stock FROM products WHERE published = 1 AND price > 0 AND stock > 0 AND user_id = ? AND id = ?', Db::FETCH_OBJ, [$merchant->id, $item->product_id]);
 					if (!$product) {
@@ -75,13 +74,12 @@ QUERY
 					}
 					$total += $product->price * min($item->quantity, $product->stock);
 				}
-				if ($coupon->minimum_purchase && $total < $coupon->minimum_purchase) {
-					throw new Error("Kode voucher {$code} berlaku untuk belanja minimal Rp. " . number_format($coupon->minimum_purchase));
-				}
-				$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100.0);
+			}
+			if ($coupon->minimum_purchase && $total < $coupon->minimum_purchase) {
+				throw new Error("Kode voucher {$code} berlaku untuk belanja minimal Rp. " . number_format($coupon->minimum_purchase));
 			}
 			$this->_response['status']           = 1;
-			$this->_response['data']['discount'] = $discount;
+			$this->_response['data']['discount'] = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100.0);
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 		}
