@@ -123,7 +123,7 @@ class Order extends ModelBase {
 						return false;
 					}
 					$valid_dates = [];
-					foreach (new DatePeriod($this->getDI()->getCurrentDatetime(), new DateInterval('P1D'), 6) as $date) {
+					foreach (new DatePeriod($this->getDI()->getCurrentDatetime(), new DateInterval('P1D'), 1) as $date) {
 						$valid_dates[] = $date->format('Y-m-d');
 					}
 					return in_array($scheduled_delivery->format('Y-m-d'), $valid_dates) &&
