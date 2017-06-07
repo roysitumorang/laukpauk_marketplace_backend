@@ -43,7 +43,7 @@ QUERY
 			if (!$coupon || ($coupon->multiple_use && $coupon->usage > 1)) {
 				throw new Error("Kode voucher {$code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 			}
-			foreach ($this->_server->orders as $merchant_id => $order) {
+			foreach ($this->_server->orders as $order) {
 				$params = [<<<QUERY
 					SELECT
 						a.id,
@@ -61,14 +61,14 @@ QUERY
 						b.village_id = ? AND
 						a.premium_merchant
 QUERY
-					, Role::MERCHANT, $merchant_id, $this->_current_user->village_id];
+					, Role::MERCHANT, $order->merchant_id, $this->_current_user->village_id];
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL');
 				$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new Error("Kode voucher {$code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 				}
-				foreach ($order->items as $item) {
-					$product = $this->db->fetchOne('SELECT price, stock FROM products WHERE published = 1 AND price > 0 AND stock > 0 AND user_id = ? AND id = ?', Db::FETCH_OBJ, [$merchant->id, $item->product_id]);
+				foreach ($order->products as $item) {
+					$product = $this->db->fetchOne('SELECT price, stock FROM products WHERE published = 1 AND price > 0 AND stock > 0 AND user_id = ? AND id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
 						throw new Error("Produk {$merchant->company} tidak valid! Silahkan cek pesanan Anda kembali atau hapus pesanan dari penjual tersebut untuk melanjutkan pemesanan!");
 					}
