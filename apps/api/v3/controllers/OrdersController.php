@@ -14,22 +14,62 @@ use DateTime;
 use Error;
 use IntlDateFormatter;
 use Phalcon\Db;
+use stdClass;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
 		$orders = [];
 		$limit  = 10;
 		if ($this->_current_user->role->name == 'Buyer') {
-			$field = 'buyer_id';
+			$field = 'a.buyer_id';
 		} else if ($this->_current_user->role->name == 'Merchant') {
-			$field = 'merchant_id';
+			$field = 'a.merchant_id';
 		}
+		$date_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'EEEE, d MMM yyyy'
+		);
 		$page         = $this->dispatcher->getParam('page', 'int');
 		$current_page = $page > 0 ? $page : 1;
 		$offset       = ($current_page - 1) * $limit;
-		$result       = $this->db->query("SELECT id, code, status, final_bill, scheduled_delivery FROM orders WHERE {$field} = {$this->_current_user->id} ORDER BY id DESC LIMIT {$limit} OFFSET {$offset}");
+		$result       = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				a.code,
+				a.status,
+				a.final_bill,
+				a.scheduled_delivery,
+				b.company,
+				b.address
+			FROM
+				orders a
+				JOIN users b ON a.merchant_id = b.id
+			WHERE {$field} = {$this->_current_user->id}
+			ORDER BY a.id DESC
+			LIMIT {$limit} OFFSET {$offset}
+QUERY
+		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($order = $result->fetch()) {
+			$schedule        = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
+			$order->delivery = new stdClass;
+			$order->merchant = new stdClass;
+			if ($order->status == 1) {
+				$order->delivery->status = 'Selesai';
+			} else if ($order->status == -1) {
+				$order->delivery->status = 'Dibatalkan';
+			} else {
+				$order->delivery->status = 'Sedang Diproses';
+			}
+			$order->delivery->day     = $date_formatter->format($schedule);
+			$order->delivery->hour    = $schedule->format('G');
+			$order->merchant->company = $order->company;
+			$order->merchant->address = $order->address;
+			unset($order->status, $order->company, $order->address);
 			$orders[] = $order;
 		}
 		$this->_response['status'] = 1;
@@ -232,26 +272,37 @@ QUERY
 			);
 			$scheduled_delivery = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$payload            = [
-				'code'               => $order->code,
-				'status'             => $order->status,
-				'name'               => $order->name,
-				'mobile_phone'       => $order->mobile_phone,
-				'address'            => $order->address,
-				'village'            => $village->name,
-				'subdistrict'        => $village->subdistrict->name,
-				'city'               => $village->subdistrict->city->name,
-				'province'           => $village->subdistrict->city->province->name,
-				'final_bill'         => $order->final_bill,
-				'discount'           => $order->discount,
-				'original_bill'      => $order->original_bill,
-				'shipping_cost'      => $order->shipping_cost,
-				'scheduled_delivery' => [
-					'date' => $date_formatter->format($scheduled_delivery),
-					'hour' => $scheduled_delivery->format('H:i'),
+				'code'          => $order->code,
+				'status'        => $order->status,
+				'name'          => $order->name,
+				'mobile_phone'  => $order->mobile_phone,
+				'address'       => $order->address,
+				'village'       => $village->name,
+				'subdistrict'   => $village->subdistrict->name,
+				'city'          => $village->subdistrict->city->name,
+				'province'      => $village->subdistrict->city->province->name,
+				'final_bill'    => $order->final_bill,
+				'discount'      => $order->discount,
+				'original_bill' => $order->original_bill,
+				'shipping_cost' => $order->shipping_cost,
+				'delivery'      => [
+					'status' => call_user_func(function() use($order) {
+						if ($order->status == 1) {
+							return 'Selesai';
+						} else if ($order->status == -1) {
+							return 'Dibatalkan';
+						}
+						return 'Sedang Diproses';
+					}),
+					'day'    => $date_formatter->format($scheduled_delivery),
+					'hour'   => $scheduled_delivery->format('G'),
 				],
-				'note'               => $order->note,
-				'merchant'           => $merchant->company ?: $merchant->name,
-				'items'              => $items,
+				'note'          => $order->note,
+				'merchant'      => [
+					'company' => $merchant->company,
+					'address' => $merchant->address,
+				],
+				'items'         => $items,
 			];
 			if ($order->status == -1) {
 				$payload['cancellation_reason'] = $order->cancellation_reason;
