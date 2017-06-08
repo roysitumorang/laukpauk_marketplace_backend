@@ -409,6 +409,33 @@ QUERY
 		return $this->response;
 	}
 
+	function provincesAction() {
+		$provinces = [];
+		$result    = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				a.name
+			FROM
+				provinces a
+				JOIN cities b ON a.id = b.province_id
+				JOIN subdistricts c ON b.id = c.city_id
+				JOIN villages d ON c.id = d.subdistrict_id
+				JOIN service_areas e ON d.id = e.village_id
+				JOIN users f ON e.user_id = f.id
+			WHERE
+QUERY
+			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY a.id ORDER BY a.name'
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$provinces[] = $row;
+		}
+		$this->_response['status']            = 1;
+		$this->_response['data']['provinces'] = $provinces;
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
 	function citiesAction($id) {
 		$cities = [];
 		$result = $this->db->query(<<<QUERY
