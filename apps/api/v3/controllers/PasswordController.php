@@ -2,26 +2,32 @@
 
 namespace Application\Api\V3\Controllers;
 
+use Error;
+
 class PasswordController extends ControllerBase {
 	function saveAction() {
-		if (!$this->_post->old_password) {
-			$this->_response['message'] = 'Password Lama harus diisi.';
-		} else if (!$this->security->checkHash($this->_post->old_password, $this->_current_user->password)) {
-			$this->_response['message'] = 'Password Lama salah.';
-		} else if (!$this->_post->new_password) {
-			$this->_response['message'] = 'Password Baru harus diisi.';
-		} else if (!$this->_current_user->validation() || !$this->_current_user->update()) {
-			$errors = [];
-			foreach ($this->_current_user->getMessages() as $error) {
-				$errors[] = $error->getMessage();
+		try {
+			if (!$this->_post->old_password) {
+				throw new Error('Password Lama harus diisi.');
 			}
-			$this->_response['message'] = implode('<br>', $errors);
-		} else {
-			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Ganti password berhasil!';
+			if (!$this->security->checkHash($this->_post->old_password, $this->_current_user->password)) {
+				throw new Error('Password Lama salah.');
+			}
+			if (!$this->_post->new_password) {
+				throw new Error('Password Baru harus diisi.');
+			}
+			$this->_current_user->setNewPassword($this->_post->new_password);
+			$this->_current_user->setNewPasswordConfirmation($this->_post->new_password);
+			if ($this->_current_user->validation() && $this->_current_user->update()) {
+				$this->_response['status']  = 1;
+				throw new Error('Ganti password berhasil!');
+			}
+			throw new Error('Ganti password tidak berhasil!');
+		} catch (Error $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response);
+			return $this->response;
 		}
-		$this->response->setJsonContent($this->_response);
-		return $this->response;
 	}
-
 }
