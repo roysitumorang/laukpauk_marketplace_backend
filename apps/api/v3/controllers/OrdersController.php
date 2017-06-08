@@ -31,7 +31,7 @@ class OrdersController extends ControllerBase {
 			IntlDateFormatter::NONE,
 			$this->currentDatetime->getTimezone(),
 			IntlDateFormatter::GREGORIAN,
-			'EEEE, d MMM yyyy'
+			'd MMM yyyy'
 		);
 		$page         = $this->dispatcher->getParam('page', 'int');
 		$current_page = $page > 0 ? $page : 1;
@@ -268,7 +268,7 @@ QUERY
 				IntlDateFormatter::NONE,
 				$this->currentDatetime->getTimezone(),
 				IntlDateFormatter::GREGORIAN,
-				'EEEE, d MMM yyyy'
+				'd MMM yyyy'
 			);
 			$scheduled_delivery = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$payload            = [
