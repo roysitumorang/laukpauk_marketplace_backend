@@ -2,7 +2,7 @@
 
 namespace Application\Models;
 
-use Phalcon\Image\Adapter\Gd;
+Use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\File as FileValidator;
@@ -148,9 +148,9 @@ class Banner extends ModelBase {
 			return true;
 		}
 		$file_name = $this->_upload_config->path . $this->file_name;
-		$gd      = new Gd($this->new_file['tmp_name']);
-		imageinterlace($gd->getImage(), 1);
-		$gd->save($file_name, 100);
+		$image     = new Imagick($this->new_file['tmp_name']);
+		$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+		$image->writeImage($file_name);
 		unlink($this->new_file['tmp_name']);
 	}
 
@@ -172,10 +172,10 @@ class Banner extends ModelBase {
 		}
 		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $picture);
 		if (!in_array($thumbnail, $this->thumbnails)) {
-			$gd = new Gd($this->_upload_config->path . $picture);
-			imageinterlace($gd->getImage(), 1);
-			$gd->resize($width, $height);
-			$gd->save($this->_upload_config->path . $thumbnail, 100);
+			$image = new Imagick($this->_upload_config->path . $picture);
+			$image->thumbnailImage($width, $height);
+			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$image->writeImage($this->_upload_config->path . $thumbnail);
 			if ($this->file_name) {
 				$this->thumbnails[] = $thumbnail;
 				$this->skipAttributes(['updated_by', 'updated_at']);

@@ -2,8 +2,7 @@
 
 namespace Application\Models;
 
-use Phalcon\Image;
-use Phalcon\Image\Adapter\Gd;
+use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Digit;
@@ -154,17 +153,17 @@ class Product extends ModelBase {
 				} while (1);
 			}
 			$picture = $this->_upload_config->path . $this->picture;
-			$gd      = new Gd($this->new_picture['tmp_name']);
-			imageinterlace($gd->getImage(), 1);
-			$gd->save($picture, 100);
+			$image   = new Imagick($this->new_picture['tmp_name']);
+			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$image->writeImage($picture);
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
 				$file = str_replace('.jpg', $width . '.jpg', $this->picture);
 				$path = $this->_upload_config->path . $file;
 				in_array($file, $this->thumbnails) || $this->thumbnails[] = $file;
-				$gd = new Gd($this->new_picture['tmp_name']);
-				imageinterlace($gd->getImage(), 1);
-				$gd->resize($width, null, Image::WIDTH);
-				$gd->save($path, 100);
+				$image = new Imagick($this->new_picture['tmp_name']);
+				$image->thumbnailImage($width, 0);
+				$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+				$image->writeImage($path);
 			}
 			unlink($this->new_picture['tmp_name']);
 		}
