@@ -146,17 +146,14 @@ class AccountController extends ControllerBase {
 				$this->_response['data']['business_hours'] = $business_hours;
 				$this->_response['data']['deposit']        = $this->_current_user->deposit;
 			}
-			$provinces = [];
-			$query     = <<<QUERY
+			$provinces    = [];
+			$cities       = [];
+			$subdistricts = [];
+			$villages     = [];
+			$result       = $this->db->query(<<<QUERY
 				SELECT
-					a.id AS province_id,
-					a.name AS province_name,
-					b.id AS city_id,
-					CONCAT_WS(' ', b.type, b.name) AS city_name,
-					c.id AS subdistrict_id,
-					c.name AS subdistrict_name,
-					d.id AS village_id,
-					d.name AS village_name
+					a.id,
+					a.name
 				FROM
 					provinces a
 					JOIN cities b ON a.id = b.province_id
@@ -165,46 +162,70 @@ class AccountController extends ControllerBase {
 					JOIN service_areas e ON d.id = e.village_id
 					JOIN users f ON e.user_id = f.id
 				WHERE
-QUERY;
-			if ($this->_premium_merchant) {
-				$query .= " e.user_id = {$this->_premium_merchant->id}";
-			} else {
-				$query .= " f.merchant_token IS NULL";
-			}
-			$query .= <<<QUERY
-				ORDER BY
-					province_name,
-					city_name,
-					subdistrict_name,
-					village_name
-QUERY;
-			$result = $this->db->query($query);
+QUERY
+				. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY a.id ORDER BY a.name'
+			);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($row = $result->fetch()) {
-				if (!isset($provinces[$row->province_id])) {
-					$provinces[$row->province_id] = [
-						'name'   => $row->province_name,
-						'cities' => [],
-					];
-				}
-				if (!isset($provinces[$row->province_id]['cities'][$row->city_id])) {
-					$provinces[$row->province_id]['cities'][$row->city_id] = [
-						'name'         => $row->city_name,
-						'subdistricts' => [],
-					];
-				}
-				if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id])) {
-					$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id] = [
-						'name'     => $row->subdistrict_name,
-						'villages' => [],
-					];
-				}
-				if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id])) {
-					$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id] = $row->village_name;
-				}
+				$provinces[] = $row;
 			}
-			$this->_response['status']            = 1;
-			$this->_response['data']['provinces'] = $provinces;
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					b.id,
+					CONCAT_WS(' ', b.type, b.name) AS name
+				FROM
+					cities b
+					JOIN subdistricts c ON b.id = c.city_id
+					JOIN villages d ON c.id = d.subdistrict_id
+					JOIN service_areas e ON d.id = e.village_id
+					JOIN users f ON e.user_id = f.id
+				WHERE
+QUERY
+				. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY CONCAT_WS(' ', b.type, b.name)"
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				$cities[] = $row;
+			}
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					c.id,
+					c.name
+				FROM
+					subdistricts c
+					JOIN villages d ON c.id = d.subdistrict_id
+					JOIN service_areas e ON d.id = e.village_id
+					JOIN users f ON e.user_id = f.id
+				WHERE
+QUERY
+				. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY c.id ORDER BY c.name'
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				$subdistricts[] = $row;
+			}
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					d.id,
+					d.name
+				FROM
+					subdistricts c
+					JOIN villages d ON c.id = d.subdistrict_id
+					JOIN service_areas e ON d.id = e.village_id
+					JOIN users f ON e.user_id = f.id
+				WHERE
+QUERY
+				. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " AND c.id = {$this->_current_user->village->subdistrict->id} GROUP BY d.id ORDER BY d.name"
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				$villages[] = $row;
+			}
+			$this->_response['status']               = 1;
+			$this->_response['data']['provinces']    = $provinces;
+			$this->_response['data']['cities']       = $cities;
+			$this->_response['data']['subdistricts'] = $subdistricts;
+			$this->_response['data']['villages']     = $villages;
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
@@ -384,6 +405,87 @@ QUERY;
 			]),
 			'current_user' => $current_user,
 		];
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function citiesAction($id) {
+		$cities = [];
+		$result = $this->db->query(<<<QUERY
+			SELECT
+				b.id,
+				CONCAT_WS(' ', b.type, b.name) AS name
+			FROM
+				provinces a
+				JOIN cities b ON a.id = b.province_id
+				JOIN subdistricts c ON b.id = c.city_id
+				JOIN villages d ON c.id = d.subdistrict_id
+				JOIN service_areas e ON d.id = e.village_id
+				JOIN users f ON e.user_id = f.id
+			WHERE
+				a.id = {$id} AND
+QUERY
+			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY CONCAT_WS(' ', b.type, b.name)"
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$cities[] = $row;
+		}
+		$this->_response['status']         = 1;
+		$this->_response['data']['cities'] = $cities;
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function subdistrictsAction($id) {
+		$subdistricts = [];
+		$result       = $this->db->query(<<<QUERY
+			SELECT
+				c.id,
+				c.name
+			FROM
+				cities b
+				JOIN subdistricts c ON b.id = c.city_id
+				JOIN villages d ON c.id = d.subdistrict_id
+				JOIN service_areas e ON d.id = e.village_id
+				JOIN users f ON e.user_id = f.id
+			WHERE
+				b.id = {$id} AND
+QUERY
+			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY c.id ORDER BY c.name'
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$subdistricts[] = $row;
+		}
+		$this->_response['status']               = 1;
+		$this->_response['data']['subdistricts'] = $subdistricts;
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function villagesAction($id) {
+		$villages = [];
+		$result   = $this->db->query(<<<QUERY
+			SELECT
+				d.id,
+				d.name
+			FROM
+				subdistricts c
+				JOIN villages d ON c.id = d.subdistrict_id
+				JOIN service_areas e ON d.id = e.village_id
+				JOIN users f ON e.user_id = f.id
+			WHERE
+				c.id = {$id} AND
+QUERY
+			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY d.id ORDER BY d.name'
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$villages[] = $row;
+		}
+		$this->_response['status']           = 1;
+		$this->_response['data']['villages'] = $villages;
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
