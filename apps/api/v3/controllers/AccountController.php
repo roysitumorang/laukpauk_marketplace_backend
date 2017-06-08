@@ -297,7 +297,7 @@ QUERY
 			$current_user['delivery_hours']        = array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1);
 		}
 		$this->_response['status']               = 1;
-		$this->_response['message']              = 'Update profile berhasil!';
+		$this->_response['message']              = 'Edit profil berhasil!';
 		$this->_response['data']['current_user'] = $current_user;
 		$this->response->setJsonContent($this->_response);
 		return $this->response;
