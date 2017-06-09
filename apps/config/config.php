@@ -32,4 +32,8 @@ return new Config([
 		'app_id'  => '4d5abdc5-c536-4832-a67a-fb247d99c669',
 		'api_key' => 'NWFiNWZlNjgtNWFjYi00OGE2LTljOTYtNWVkYjRkZGYyNWVm',
 	],
+	'sms' => [
+		'username' => '',
+		'password' => '',
+	],
 ]);

@@ -122,6 +122,7 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
 		$this->hasMany('id', 'Application\Models\ProductCategory', 'user_id', ['alias' => 'product_categories']);
 		$this->hasMany('id', 'Application\Models\Coupon', 'user_id', ['alias' => 'coupons']);
+		$this->hasManyToMany('id', 'Application\Models\SmsRecipient', 'user_id', 'sms_id', 'Application\Models\Sms', 'id', ['alias' => 'sms']);
 	}
 
 	function setPremiumMerchant($premium_merchant) {
