@@ -607,7 +607,7 @@ class User extends ModelBase {
 		try {
 			$random = new Random;
 			do {
-				$password_reset_token = $random->hex(16);
+				$password_reset_token = $random->hex(3);
 				if (!static::findFirstByPasswordResetToken($password_reset_token)) {
 					break;
 				}
@@ -626,23 +626,20 @@ class User extends ModelBase {
 				$device->updated_by = $this->id;
 				$device->update();
 			}
-			$template     = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'password reset token'");
-			$notification = new Notification([
-				'subject'    => $template->subject,
-				'link'       => $template->url,
+			$sms = new Sms([
+				'body'       => 'Kode reset password Anda: ' . $password_reset_token,
 				'created_by' => $this->id,
 			]);
-			$notification->template   = $template;
-			$notification->recipients = [$this];
-			if (!$notification->push([$device->token], ['subject' => 'Kode Reset Password', 'content' => 'Kode Reset Password'], ['state' => 'tab.reset-password', 'mobile_phone' => $this->mobile_phone, 'password_reset_token' => $password_reset_token])) {
-				throw new Error('Notifikasi tidak terkirim.');
+			$sms->recipients = [$this];
+			if (!$sms->send()) {
+				throw new Error('Sms tidak terkirim.');
 			}
 			$db->commit();
 		} catch (Error $e) {
 			$db->rollback();
 			return false;
 		}
-		return $notification->create();
+		return true;
 	}
 
 	function resetPassword($new_password) {
