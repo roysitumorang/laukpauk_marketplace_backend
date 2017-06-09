@@ -2,6 +2,7 @@
 
 namespace Application\Models;
 
+use Error;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
@@ -610,18 +611,20 @@ class User extends ModelBase {
 					break;
 				}
 			} while (1);
-			$this->update(['password_reset_token' => $password_reset_token]);
+			$this->setPasswordResetToken($password_reset_token);
+			$this->save();
 			$device = Device::findFirstByToken($device_token);
 			if (!$device) {
 				$device             = new Device;
 				$device->user       = $this;
 				$device->token      = $device_token;
 				$device->created_by = $this->id;
-			} else {
-				$device->user       = $this;
+				$device->create();
+			} else if ($device->user_id != $this->id) {
+				$device->user_id    = $this->id;
 				$device->updated_by = $this->id;
+				$device->update();
 			}
-			$device->save();
 			$template     = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'password reset token'");
 			$notification = new Notification([
 				'subject'    => $template->subject,
@@ -630,7 +633,7 @@ class User extends ModelBase {
 			]);
 			$notification->template   = $template;
 			$notification->recipients = [$this];
-			if (!$notification->push([$device->token], ['title' => 'Kode Reset Password', 'content' => 'Kode Reset Password'], ['password_reset_token' => $password_reset_token])) {
+			if (!$notification->push([$device->token], ['subject' => 'Kode Reset Password', 'content' => 'Kode Reset Password'], ['password_reset_token' => $password_reset_token])) {
 				throw new Error('Notifikasi tidak terkirim.');
 			}
 			$db->commit();
