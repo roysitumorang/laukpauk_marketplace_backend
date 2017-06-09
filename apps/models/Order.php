@@ -167,7 +167,7 @@ class Order extends ModelBase {
 	}
 
 	function afterCreate() {
-		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin new order');
+		$admin_new_order_template       = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
 		$admin_notification->link       = $admin_new_order_template->url . $this->id;
@@ -181,19 +181,18 @@ class Order extends ModelBase {
 		}
 		$admin_notification->recipients    = $recipients;
 		$admin_notification->create();
-		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api new order');
+		$merchant_new_order_template       = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
+		$device_tokens                     = [];
 		$merchant_notification             = new Notification;
 		$merchant_notification->subject    = $merchant_new_order_template->subject;
 		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
 		$merchant_notification->created_by = $this->created_by;
 		$merchant_notification->recipients = [$this->merchant];
-		$merchant_notification->create();
-		$tokens = [];
 		foreach ($this->merchant->devices as $device) {
-			$tokens[] = $device->token;
+			$device_tokens[] = $device->token;
 		}
-		$this->_sendPushNotification($tokens, [
-			'title'   => 'Order Baru #' . $this->code,
+		$merchant_notification->push($device_tokens, [
+			'subject' => 'Order Baru #' . $this->code,
 			'content' => 'Order Baru #' . $this->code,
 		]);
 	}
@@ -204,7 +203,7 @@ class Order extends ModelBase {
 		if (!$this->validation() || !$this->update()) {
 			return false;
 		}
-		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order cancelled');
+		$admin_new_order_template       = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order cancelled'");
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
 		$admin_notification->link       = $admin_new_order_template->url . $this->id;
@@ -218,19 +217,19 @@ class Order extends ModelBase {
 		}
 		$admin_notification->recipients    = $recipients;
 		$admin_notification->create();
-		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api order cancelled');
+		$merchant_new_order_template       = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order cancelled'");
+		$device_tokens                     = [];
 		$merchant_notification             = new Notification;
 		$merchant_notification->subject    = $merchant_new_order_template->subject;
 		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
 		$merchant_notification->create();
-		$tokens = [];
 		foreach ($this->buyer->devices as $device) {
-			$tokens[] = $device->token;
+			$device_tokens[] = $device->token;
 		}
-		$this->_sendPushNotification($tokens, [
-			'title'   => 'Order #' . $this->code . ' Dibatalkan',
+		$merchant_notification->push($device_tokens, [
+			'subject' => 'Order #' . $this->code . ' Dibatalkan',
 			'content' => 'Order #' . $this->code . ' Dibatalkan',
 		]);
 	}
@@ -260,18 +259,18 @@ class Order extends ModelBase {
 		$admin_notification->recipients    = $recipients;
 		$admin_notification->create();
 		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api order delivered');
+		$device_tokens                     = [];
 		$merchant_notification             = new Notification;
 		$merchant_notification->subject    = $merchant_new_order_template->subject;
 		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
 		$merchant_notification->create();
-		$tokens = [];
 		foreach ($this->buyer->devices as $device) {
-			$tokens[] = $device->token;
+			$device_tokens[] = $device->token;
 		}
-		$this->_sendPushNotification($tokens, [
-			'title'   => 'Order #' . $this->code . ' Diterima',
+		$merchant_notification->push($device_tokens, [
+			'subject' => 'Order #' . $this->code . ' Diterima',
 			'content' => 'Order #' . $this->code . ' Diterima',
 		]);
 	}
