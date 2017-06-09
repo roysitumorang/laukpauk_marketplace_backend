@@ -633,7 +633,7 @@ class User extends ModelBase {
 			]);
 			$notification->template   = $template;
 			$notification->recipients = [$this];
-			if (!$notification->push([$device->token], ['subject' => 'Kode Reset Password', 'content' => 'Kode Reset Password'], ['password_reset_token' => $password_reset_token])) {
+			if (!$notification->push([$device->token], ['subject' => 'Kode Reset Password', 'content' => 'Kode Reset Password'], ['state' => 'tab.reset-password', 'mobile_phone' => $this->mobile_phone, 'password_reset_token' => $password_reset_token])) {
 				throw new Error('Notifikasi tidak terkirim.');
 			}
 			$db->commit();
