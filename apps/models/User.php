@@ -598,4 +598,53 @@ class User extends ModelBase {
 		$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
 		return $delivery_hours ? $delivery_hours . ' WIB' : '-';
 	}
+
+	function sendPasswordResetToken($device_token) {
+		$db = $this->getDI()->getDb();
+		$db->begin();
+		try {
+			$random = new Random;
+			do {
+				$password_reset_token = $random->hex(16);
+				if (!static::findFirstByPasswordResetToken($password_reset_token)) {
+					break;
+				}
+			} while (1);
+			$this->update(['password_reset_token' => $password_reset_token]);
+			$device = Device::findFirstByToken($device_token);
+			if (!$device) {
+				$device             = new Device;
+				$device->user       = $this;
+				$device->token      = $device_token;
+				$device->created_by = $this->id;
+			} else {
+				$device->user       = $this;
+				$device->updated_by = $this->id;
+			}
+			$device->save();
+			$template     = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'password reset token'");
+			$notification = new Notification([
+				'subject'    => $template->subject,
+				'link'       => $template->url,
+				'created_by' => $this->id,
+			]);
+			$notification->template   = $template;
+			$notification->recipients = [$this];
+			if (!$notification->push([$device->token], ['title' => 'Kode Reset Password', 'content' => 'Kode Reset Password'], ['password_reset_token' => $password_reset_token])) {
+				throw new Error('Notifikasi tidak terkirim.');
+			}
+			$db->commit();
+		} catch (Error $e) {
+			$db->rollback();
+			return false;
+		}
+		return $notification->create();
+	}
+
+	function resetPassword($new_password) {
+		$this->setNewPassword($new_password);
+		$this->setNewPasswordConfirmation($new_password);
+		$this->setPasswordResetToken(null);
+		return $this->update();
+	}
 }
