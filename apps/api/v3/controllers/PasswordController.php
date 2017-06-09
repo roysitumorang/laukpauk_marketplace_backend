@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Controllers;
 
+use Application\Models\User;
 use Error;
 
 class PasswordController extends ControllerBase {
@@ -19,10 +20,55 @@ class PasswordController extends ControllerBase {
 			$this->_current_user->setNewPassword($this->_post->new_password);
 			$this->_current_user->setNewPasswordConfirmation($this->_post->new_password);
 			if ($this->_current_user->validation() && $this->_current_user->update()) {
-				$this->_response['status']  = 1;
+				$this->_response['status'] = 1;
 				throw new Error('Ganti password berhasil!');
 			}
 			throw new Error('Ganti password tidak berhasil!');
+		} catch (Error $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response);
+			return $this->response;
+		}
+	}
+
+	function sendResetTokenAction() {
+		try {
+			if (!$this->_post->mobile_phone && !($user = User::findFirst(['mobile_phone = ?0', 'bind' => [$this->_post->mobile_phone]]))) {
+				throw new Error('No HP tidak terdaftar!');
+			}
+			if ($user->status == -1) {
+				throw new Error('Akun Anda telah dinonaktifkan!');
+			}
+			if (!$this->_post->device_token) {
+				throw new Error('Token device tidak valid, silahkan instal ulang aplikasi di HP Anda.');
+			}
+			if ($user->sendPasswordResetToken($this->_post->device_token)) {
+				$this->_response['status'] = 1;
+				throw new Error('Token reset password telah terkirim!');
+			}
+			throw new Error('Token reset password tidak terkirim!');
+		} catch (Error $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response);
+			return $this->response;
+		}
+	}
+
+	function resetAction() {
+		try {
+			if (!$this->_post->password_reset_token && !($user = User::findFirst(['password_reset_token = ?0 AND status = 1', 'bind' => [$this->_post->password_reset_token]]))) {
+				throw new Error('Token reset password tidak valid!.');
+			}
+			if (!$this->_post->new_password) {
+				throw new Error('Password baru harus diisi.');
+			}
+			if ($user->resetPassword($this->_post->new_password)) {
+				$this->_response['status'] = 1;
+				throw new Error('Reset password berhasil!');
+			}
+			throw new Error('Reset password tidak berhasil!');
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {

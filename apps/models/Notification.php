@@ -8,6 +8,7 @@ use Phalcon\Validation\Validator\PresenceOf;
 
 class Notification extends ModelBase {
 	public $id;
+	public $notification_template_id;
 	public $subject;
 	public $link;
 	public $created_by;
@@ -25,6 +26,10 @@ class Notification extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
+		$this->belongsTo('notification_template_id', 'Application\Models\NotificationTemplate', 'id', [
+			'alias'    => 'template',
+			'reusable' => true,
+		]);
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'notification_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'recipients']);
 	}
 
@@ -45,5 +50,34 @@ class Notification extends ModelBase {
 			],
 		]));
 		return $this->validate($validator);
+	}
+
+	function push(array $tokens, array $message, array $payload = []) {
+		$ch = curl_init();
+		curl_setopt_array($ch, [
+			CURLOPT_URL            => 'https://onesignal.com/api/v1/notifications',
+			CURLOPT_POST           => 1,
+			CURLOPT_HTTPHEADER     => [
+				'Content-Type: application/json; charset=utf-8',
+				'Authorization: Basic ' . $this->getDI()->getConfig()->onesignal->api_key,
+			],
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_SSL_VERIFYPEER => 0,
+			CURLOPT_POSTFIELDS     => json_encode([
+				'app_id'             => $this->getDI()->getConfig()->onesignal->app_id,
+				'include_player_ids' => $tokens,
+				'priority'           => 10,
+				'headings'           => ['en' => $message['subject']],
+				'contents'           => ['en' => $message['content']],
+				'data'               => $payload,
+			]),
+		]);
+		$response = curl_exec($ch);
+		curl_close($ch);
+		$result = json_decode($response);
+		if ($result->errors) {
+			return false;
+		}
+		return $this->create();
 	}
 }
