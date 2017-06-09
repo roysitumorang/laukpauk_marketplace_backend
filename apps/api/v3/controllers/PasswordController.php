@@ -6,6 +6,12 @@ use Application\Models\User;
 use Error;
 
 class PasswordController extends ControllerBase {
+	function beforeExecuteRoute() {
+		if ($this->dispatcher->getActionName() === 'save') {
+			parent::beforeExecuteRoute();
+		}
+	}
+
 	function saveAction() {
 		try {
 			if (!$this->_post->old_password) {
@@ -34,7 +40,7 @@ class PasswordController extends ControllerBase {
 
 	function sendResetTokenAction() {
 		try {
-			if (!$this->_post->mobile_phone && !($user = User::findFirst(['mobile_phone = ?0', 'bind' => [$this->_post->mobile_phone]]))) {
+			if (!$this->_post->mobile_phone || !($user = User::findFirstByMobilePhone($this->_post->mobile_phone))) {
 				throw new Error('No HP tidak terdaftar!');
 			}
 			if ($user->status == -1) {
@@ -47,7 +53,7 @@ class PasswordController extends ControllerBase {
 				$this->_response['status'] = 1;
 				throw new Error('Token reset password telah terkirim!');
 			}
-			throw new Error('Token reset password tidak terkirim!');
+			throw new Error('Mohon maaf, sistem error.');
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {

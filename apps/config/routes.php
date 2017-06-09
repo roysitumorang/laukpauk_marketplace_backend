@@ -128,7 +128,14 @@ $di->set('router', function() {
 		'controller'     => 3,
 		'action'         => 4,
 		'params'         => 5,
-	]);
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', $old_action);
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return implode('', $parts);
+	});
 
 	$router->add('/api/v3(/([a-z0-9]{32}))?/posts/:params', [
 		'module'         => 'v3',
