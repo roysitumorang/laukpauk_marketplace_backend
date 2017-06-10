@@ -92,22 +92,14 @@ QUERY;
 					$delivery_dates[$current_date]->label = $label;
 					$delivery_dates[$current_date]->hours = [];
 				}
-				if (($current_day == 'Sunday' && $item->open_on_sunday) ||
-					($current_day == 'Monday' && $item->open_on_monday) ||
-					($current_day == 'Tuesday' && $item->open_on_tuesday) ||
-					($current_day == 'Wednesday' && $item->open_on_wednesday) ||
-					($current_day == 'Thursday' && $item->open_on_thursday) ||
-					($current_day == 'Friday' && $item->open_on_friday) ||
-					($current_day == 'Saturday' && $item->open_on_saturday)) {
-					$delivery_dates[$current_date]->hours = array_merge(
-						$delivery_dates[$current_date]->hours,
-						$day == $this->currentDatetime
-						? array_values(array_filter($delivery_hours, function($v, $k) use($minimum_hour) {
-							return $v >= $minimum_hour;
-						}, ARRAY_FILTER_USE_BOTH))
-						: $delivery_hours
-					);
-				}
+				$delivery_dates[$current_date]->hours = array_merge(
+					$delivery_dates[$current_date]->hours,
+					$day == $this->currentDatetime
+					? array_values(array_filter($delivery_hours, function($v, $k) use($minimum_hour) {
+						return $v >= $minimum_hour;
+					}, ARRAY_FILTER_USE_BOTH))
+					: $delivery_hours
+				);
 			}
 		}
 		if (!$delivery_dates) {
