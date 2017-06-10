@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Controllers;
 
+use Application\Models\Device;
 use Application\Models\Order;
 use Application\Models\OrderItem;
 use Application\Models\Product;
@@ -188,6 +189,19 @@ QUERY
 			}
 			if (!$this->_current_user->address) {
 				$this->_current_user->update(['address' => $this->_post->delivery->address]);
+			}
+			if ($this->_post->device_token) {
+				$device = Device::findByToken($this->_post->device_token);
+				if (!$device) {
+					$device             = new Device;
+					$device->token      = $this->_post->device_token;
+					$device->user_id    = $this->_current_user->id;
+					$device->created_by = $this->_current_user->id;
+					$device->create();
+				} else if ($device->user_id != $this->_current_user->id) {
+					$device->user_id = $this->_current_user->id;
+					$device->update();
+				}
 			}
 			$this->_response['status']  = 1;
 			$this->_response['message'] = 'Terima kasih, order Anda segera kami proses.';
