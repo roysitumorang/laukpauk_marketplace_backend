@@ -180,11 +180,22 @@ QUERY
 				$total   += $order->final_bill;
 				$orders[] = $order;
 			}
-			if ($coupon && $total < $coupon->minimum_purchase) {
-				throw new Error('Order Anda tidak valid!');
+			if ($coupon) {
+				if ($total < $coupon->minimum_purchase) {
+					throw new Error('Order Anda tidak valid!');
+				}
+				$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100);
+				foreach ($orders as &$order) {
+					$order->coupon_id   = $coupon->id;
+					$order->discount    = min($order->final_bill, $discount);
+					$order->final_bill -= $discount;
+					$discount           = max($discount - $order->discount, 0);
+					if (!$discount) {
+						break;
+					}
+				}
 			}
 			foreach ($orders as $order) {
-				$coupon && $order->coupon_id = $coupon->id;
 				$order->create();
 			}
 			if (!$this->_current_user->address) {
@@ -199,7 +210,8 @@ QUERY
 					$device->created_by = $this->_current_user->id;
 					$device->create();
 				} else if ($device->user_id != $this->_current_user->id) {
-					$device->user_id = $this->_current_user->id;
+					$device->user_id    = $this->_current_user->id;
+					$device->updated_by = $this->_current_user->id;
 					$device->update();
 				}
 			}

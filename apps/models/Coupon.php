@@ -62,7 +62,7 @@ class Coupon extends ModelBase {
 				'code'             => 'kode kupon harus diisi',
 				'effective_date'   => 'tanggal berlaku harus diisi',
 				'expiry_date'      => 'tanggal expired harus diisi',
-				'price_discount'  => 'diskon harus diisi',
+				'price_discount'   => 'diskon harus diisi',
 				'discount_type'    => 'tipe diskon harus diisi',
 				'status'           => 'status harus diisi',
 				'multiple_use'     => 'penggunaan harus diisi',
