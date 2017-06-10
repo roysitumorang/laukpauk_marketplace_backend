@@ -35,7 +35,7 @@ abstract class ControllerBase extends Controller {
 		});
 		$this->_response['version'] = $this->db->fetchColumn('SELECT MAX(version) FROM releases');
 		if (Setting::findFirstByName('maintenance_mode')->value) {
-			$this->_response['maintenance_mode'] = 1;
+			$this->_response['offline'] = 1;
 			$this->response->setJsonContent($this->_response);
 			exit($this->response->send());
 		}
