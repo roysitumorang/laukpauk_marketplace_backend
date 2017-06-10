@@ -59,7 +59,7 @@ class PasswordController extends ControllerBase {
 
 	function resetAction() {
 		try {
-			if (!$this->_post->password_reset_token && !($user = User::findFirst(['password_reset_token = ?0 AND status = 1', 'bind' => [$this->_post->password_reset_token]]))) {
+			if (!$this->_post->password_reset_token || !($user = User::findFirst(['password_reset_token = ?0 AND status = 1', 'bind' => [$this->_post->password_reset_token]]))) {
 				throw new Error('Token reset password tidak valid!.');
 			}
 			if (!$this->_post->new_password) {
