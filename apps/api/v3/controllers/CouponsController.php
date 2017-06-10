@@ -7,7 +7,7 @@ use Error;
 use Phalcon\Db;
 
 class CouponsController extends ControllerBase {
-	function validateAction() {
+	function checkAction() {
 		$code  = $this->_server->coupon_code;
 		$total = 0;
 		$today = $this->currentDatetime->format('Y-m-d');

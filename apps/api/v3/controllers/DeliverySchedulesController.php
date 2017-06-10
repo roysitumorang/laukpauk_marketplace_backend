@@ -117,7 +117,7 @@ QUERY;
 		return $this->response;
 	}
 
-	function validateAction() {
+	function checkAction() {
 		$merchant_ids  = $this->_server->merchant_ids;
 		$delivery_date = $this->_server->delivery->date;
 		$delivery_hour = filter_var($this->_server->delivery->hour, FILTER_VALIDATE_INT);
