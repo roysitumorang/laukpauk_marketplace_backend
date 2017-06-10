@@ -4,6 +4,7 @@ namespace Application\Api\V3\Controllers;
 
 use Application\Models\User;
 use Error;
+use Phalcon\Crypt;
 
 class PasswordController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -66,7 +67,60 @@ class PasswordController extends ControllerBase {
 				throw new Error('Password baru harus diisi.');
 			}
 			if ($user->resetPassword($this->_post->new_password)) {
+				$crypt        = new Crypt;
+				$current_user = [
+					'id'           => $user->id,
+					'name'         => $user->name,
+					'role'         => $user->role->name,
+					'mobile_phone' => $user->mobile_phone,
+					'address'      => $user->address,
+					'subdistrict'  => [
+						'id'   => $user->village->subdistrict->id,
+						'name' => $user->village->subdistrict->name,
+					],
+					'village'      => [
+						'id'   => $user->village->id,
+						'name' => $user->village->name,
+					],
+					'subdistrict'  => [
+						'id'   => $user->village->subdistrict->id,
+						'name' => $user->village->subdistrict->name,
+					],
+					'city'         => [
+						'id'   => $user->village->subdistrict->city->id,
+						'name' => $user->village->subdistrict->city->name,
+					],
+					'province'     => [
+						'id'   => $user->village->subdistrict->city->province->id,
+						'name' => $user->village->subdistrict->city->province->name,
+					],
+				];
+				if ($user->role->name === 'Merchant') {
+					$current_user['open_on_sunday']        = $user->open_on_sunday;
+					$current_user['open_on_monday']        = $user->open_on_monday;
+					$current_user['open_on_tuesday']       = $user->open_on_tuesday;
+					$current_user['open_on_wednesday']     = $user->open_on_wednesday;
+					$current_user['open_on_thursday']      = $user->open_on_thursday;
+					$current_user['open_on_friday']        = $user->open_on_friday;
+					$current_user['open_on_saturday']      = $user->open_on_saturday;
+					$current_user['business_opening_hour'] = $user->business_opening_hour;
+					$current_user['business_closing_hour'] = $user->business_closing_hour;
+					$current_user['minimum_purchase']      = $user->minimum_purchase;
+					$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
+				}
+				$payload = ['api_key' => $user->api_key];
+				if ($merchant_token) {
+					$payload['merchant_token'] = $merchant_token;
+				}
 				$this->_response['status'] = 1;
+				$this->_response['data']   = [
+					'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
+						'+' => '-',
+						'/' => '_',
+						'=' => ',',
+					]),
+					'current_user' => $current_user,
+				];
 				throw new Error('Reset password berhasil!');
 			}
 			throw new Error('Reset password tidak berhasil!');
