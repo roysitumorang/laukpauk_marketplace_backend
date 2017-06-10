@@ -2,7 +2,6 @@
 
 namespace Application\Models;
 
-use Error;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
