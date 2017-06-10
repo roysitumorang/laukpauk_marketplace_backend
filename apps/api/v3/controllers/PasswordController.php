@@ -46,14 +46,9 @@ class PasswordController extends ControllerBase {
 			if ($user->status == -1) {
 				throw new Error('Akun Anda telah dinonaktifkan!');
 			}
-			if (!$this->_post->device_token) {
-				throw new Error('Token device tidak valid, silahkan instal ulang aplikasi di HP Anda.');
-			}
-			if ($user->sendPasswordResetToken($this->_post->device_token)) {
-				$this->_response['status'] = 1;
-				throw new Error('Token reset password telah terkirim!');
-			}
-			throw new Error('Mohon maaf, sistem error.');
+			$user->sendPasswordResetToken();
+			$this->_response['status'] = 1;
+			throw new Error('Token password telah dikirim via sms!');
 		} catch (Error $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {

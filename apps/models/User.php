@@ -601,45 +601,22 @@ class User extends ModelBase {
 		return $delivery_hours ? $delivery_hours . ' WIB' : '-';
 	}
 
-	function sendPasswordResetToken($device_token) {
-		$db = $this->getDI()->getDb();
-		$db->begin();
-		try {
-			$random = new Random;
-			do {
-				$password_reset_token = $random->hex(3);
-				if (!static::findFirstByPasswordResetToken($password_reset_token)) {
-					break;
-				}
-			} while (1);
-			$this->setPasswordResetToken($password_reset_token);
-			$this->save();
-			$device = Device::findFirstByToken($device_token);
-			if (!$device) {
-				$device             = new Device;
-				$device->user       = $this;
-				$device->token      = $device_token;
-				$device->created_by = $this->id;
-				$device->create();
-			} else if ($device->user_id != $this->id) {
-				$device->user_id    = $this->id;
-				$device->updated_by = $this->id;
-				$device->update();
+	function sendPasswordResetToken() {
+		$random = new Random;
+		do {
+			$password_reset_token = $random->hex(3);
+			if (!static::findFirstByPasswordResetToken($password_reset_token)) {
+				break;
 			}
-			$sms = new Sms([
-				'body'       => 'Kode reset password Anda: ' . $password_reset_token,
-				'created_by' => $this->id,
-			]);
-			$sms->recipients = [$this];
-			if (!$sms->send()) {
-				throw new Error('Sms tidak terkirim.');
-			}
-			$db->commit();
-		} catch (Error $e) {
-			$db->rollback();
-			return false;
-		}
-		return true;
+		} while (1);
+		$this->setPasswordResetToken($password_reset_token);
+		$this->save();
+		$sms = new Sms([
+			'body'       => 'Token password Anda: ' . $password_reset_token,
+			'created_by' => $this->id,
+		]);
+		$sms->recipients = [$this];
+		return $sms->send();
 	}
 
 	function resetPassword($new_password) {
