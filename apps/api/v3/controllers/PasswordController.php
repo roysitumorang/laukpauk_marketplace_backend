@@ -32,12 +32,12 @@ class PasswordController extends ControllerBase {
 					$device = Device::findFirstByToken($this->_post->device_token);
 					if (!$device) {
 						$device             = new Device;
-						$device->user       = $this->_current_user;
+						$device->user_id    = $this->_current_user->id;
 						$device->token      = $this->_post->device_token;
 						$device->created_by = $this->_current_user->id;
 						$device->create();
-					} else {
-						$device->user       = $this->_current_user;
+					} else if ($device->user_id != $this->_current_user->id) {
+						$device->user_id    = $this->_current_user->id;
 						$device->updated_by = $this->_current_user->id;
 						$device->update();
 					}
@@ -86,12 +86,12 @@ class PasswordController extends ControllerBase {
 					$device = Device::findFirstByToken($this->_post->device_token);
 					if (!$device) {
 						$device             = new Device;
-						$device->user       = $user;
+						$device->user_id    = $user->id;
 						$device->token      = $this->_post->device_token;
 						$device->created_by = $user->id;
 						$device->create();
-					} else {
-						$device->user       = $user;
+					} else if ($device->user_id != $user->id) {
+						$device->user_id    = $user->id;
 						$device->updated_by = $user->id;
 						$device->update();
 					}
