@@ -244,7 +244,7 @@ class Order extends ModelBase {
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 		]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->admin_fee]);
-		$admin_new_order_template       = NotificationTemplate::findFirstByName('admin order delivered');
+		$admin_new_order_template       = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order delivered'");
 		$admin_notification             = new Notification;
 		$admin_notification->subject    = $admin_new_order_template->subject;
 		$admin_notification->link       = $admin_new_order_template->url . $this->id;
@@ -258,14 +258,13 @@ class Order extends ModelBase {
 		}
 		$admin_notification->recipients    = $recipients;
 		$admin_notification->create();
-		$merchant_new_order_template       = NotificationTemplate::findFirstByName('api order delivered');
+		$merchant_new_order_template       = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order delivered'");
 		$device_tokens                     = [];
 		$merchant_notification             = new Notification;
 		$merchant_notification->subject    = $merchant_new_order_template->subject;
 		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
 		$merchant_notification->created_by = $this->merchant->id;
 		$merchant_notification->recipients = [$this->buyer];
-		$merchant_notification->create();
 		foreach ($this->buyer->devices as $device) {
 			$device_tokens[] = $device->token;
 		}
