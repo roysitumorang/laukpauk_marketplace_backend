@@ -43,12 +43,12 @@ class Sms extends ModelBase {
 			$destinations[] = $recipient->mobile_phone;
 		}
 		curl_setopt_array($ch, [
-			CURLOPT_URL            => sprintf('https://www.isms.com.my/isms_send.php?un=%s&pwd=%s&dstno=%s&msg=%s&type=1', urlencode($config->username), urlencode($config->password), implode(';', $destinations)),
+			CURLOPT_URL            => sprintf('https://reguler.zenziva.net/apps/smsapi.php?userkey=%s&passkey=%s&nohp=%s&pesan=%s', urlencode($config->username), urlencode($config->password), implode(';', $destinations), urlencode($this->body)),
 			CURLOPT_RETURNTRANSFER => 1,
 			CURLOPT_SSL_VERIFYPEER => 0,
 		]);
-		$result = curl_exec($ch);
+		curl_exec($ch);
 		curl_close($ch);
-		return $result == 2000 ? $this->create() : false;
+		return $this->create();
 	}
 }

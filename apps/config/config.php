@@ -33,7 +33,7 @@ return new Config([
 		'api_key' => 'NWFiNWZlNjgtNWFjYi00OGE2LTljOTYtNWVkYjRkZGYyNWVm',
 	],
 	'sms' => [
-		'username' => '',
-		'password' => '',
+		'username' => '3cg4o9',
+		'password' => 'l4ukp@uk',
 	],
 ]);
