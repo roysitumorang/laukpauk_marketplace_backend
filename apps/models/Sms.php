@@ -47,8 +47,9 @@ class Sms extends ModelBase {
 			CURLOPT_RETURNTRANSFER => 1,
 			CURLOPT_SSL_VERIFYPEER => 0,
 		]);
-		curl_exec($ch);
+		$response = curl_exec($ch);
 		curl_close($ch);
-		return $this->create();
+		$result = new SimpleXMLElement($response);
+		return $result && $result->message && $result->message->status == 0 ? $this->create() : false;
 	}
 }
