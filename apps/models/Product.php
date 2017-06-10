@@ -63,6 +63,7 @@ class Product extends ModelBase {
 		]);
 		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'product_id', 'linked_product_id', 'Application\Models\Product', 'id', ['alias' => 'linked_products']);
 		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'linked_product_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'linkers']);
+		$this->hasManyToMany('id', 'Application\Models\ProductGroup', 'product_id', 'group_id', 'Application\Models\Group', 'id', ['alias' => 'groups']);
 	}
 
 	function setName($name) {
