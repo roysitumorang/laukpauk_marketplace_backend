@@ -615,7 +615,7 @@ class User extends ModelBase {
 			'created_by' => $this->id,
 		]);
 		$sms->recipients = [$this];
-		return $sms->send();
+		return $sms->send([$this->mobile_phone]);
 	}
 
 	function resetPassword($new_password) {

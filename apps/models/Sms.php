@@ -4,6 +4,7 @@ namespace Application\Models;
 
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\StringLength;
+use SimpleXMLElement;
 
 class Sms extends ModelBase {
 	public $id;
@@ -35,13 +36,9 @@ class Sms extends ModelBase {
 		return $this->validate($validator);
 	}
 
-	function send() {
-		$ch           = curl_init();
-		$config       = $this->getDI()->getConfig()->sms;
-		$destinations = [];
-		foreach ($this->recipients as $recipient) {
-			$destinations[] = $recipient->mobile_phone;
-		}
+	function send(array $destinations) {
+		$ch     = curl_init();
+		$config = $this->getDI()->getConfig()->sms;
 		curl_setopt_array($ch, [
 			CURLOPT_URL            => sprintf('https://reguler.zenziva.net/apps/smsapi.php?userkey=%s&passkey=%s&nohp=%s&pesan=%s', urlencode($config->username), urlencode($config->password), implode(';', $destinations), urlencode($this->body)),
 			CURLOPT_RETURNTRANSFER => 1,
