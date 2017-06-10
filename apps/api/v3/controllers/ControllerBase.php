@@ -37,7 +37,8 @@ abstract class ControllerBase extends Controller {
 		if (Setting::findFirstByName('maintenance_mode')->value) {
 			$this->_response['offline'] = 1;
 			$this->response->setJsonContent($this->_response);
-			exit($this->response->send());
+			$this->response->send();
+			exit;
 		}
 		$this->_post   = $this->request->getJsonRawBody();
 		$this->_server = json_decode($this->request->getServer('HTTP_USER_DATA'));
