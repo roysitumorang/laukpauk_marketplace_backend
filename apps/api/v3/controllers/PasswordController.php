@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Controllers;
 
+use Application\Models\Device;
 use Application\Models\User;
 use Error;
 use Phalcon\Crypt;
@@ -27,6 +28,20 @@ class PasswordController extends ControllerBase {
 			$this->_current_user->setNewPassword($this->_post->new_password);
 			$this->_current_user->setNewPasswordConfirmation($this->_post->new_password);
 			if ($this->_current_user->validation() && $this->_current_user->update()) {
+				if ($this->_post->device_token) {
+					$device = Device::findFirstByToken($this->_post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->user       = $this->_current_user;
+						$device->token      = $this->_post->device_token;
+						$device->created_by = $this->_current_user->id;
+						$device->create();
+					} else {
+						$device->user       = $this->_current_user;
+						$device->updated_by = $this->_current_user->id;
+						$device->update();
+					}
+				}
 				$this->_response['status'] = 1;
 				throw new Error('Ganti password berhasil!');
 			}
@@ -67,6 +82,20 @@ class PasswordController extends ControllerBase {
 				throw new Error('Password baru harus diisi.');
 			}
 			if ($user->resetPassword($this->_post->new_password)) {
+				if ($this->_post->device_token) {
+					$device = Device::findFirstByToken($this->_post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->user       = $user;
+						$device->token      = $this->_post->device_token;
+						$device->created_by = $user->id;
+						$device->create();
+					} else {
+						$device->user       = $user;
+						$device->updated_by = $user->id;
+						$device->update();
+					}
+				}
 				$crypt        = new Crypt;
 				$current_user = [
 					'id'           => $user->id,

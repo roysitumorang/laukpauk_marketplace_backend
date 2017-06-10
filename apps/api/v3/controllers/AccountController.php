@@ -255,6 +255,20 @@ QUERY
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
+		if ($this->_post->device_token) {
+			$device = Device::findFirstByToken($this->_post->device_token);
+			if (!$device) {
+				$device             = new Device;
+				$device->user       = $this->_current_user;
+				$device->token      = $this->_post->device_token;
+				$device->created_by = $this->_current_user->id;
+				$device->create();
+			} else {
+				$device->user       = $this->_current_user;
+				$device->updated_by = $this->_current_user->id;
+				$device->update();
+			}
+		}
 		$current_user = [
 			'id'           => $this->_current_user->id,
 			'name'         => $this->_current_user->name,
@@ -333,6 +347,20 @@ QUERY
 			$this->_response['message'] = 'Nomor HP dan/atau password salah!';
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
+		}
+		if ($this->_post->device_token) {
+			$device = Device::findFirstByToken($this->_post->device_token);
+			if (!$device) {
+				$device             = new Device;
+				$device->user       = $user;
+				$device->token      = $this->_post->device_token;
+				$device->created_by = $user->id;
+				$device->create();
+			} else if ($device->user_id != $user->id) {
+				$device->user       = $user;
+				$device->updated_by = $user->id;
+				$device->update();
+			}
 		}
 		$crypt                  = new Crypt;
 		$login_history          = new LoginHistory;
