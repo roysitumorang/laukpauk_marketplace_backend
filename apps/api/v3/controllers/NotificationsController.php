@@ -12,7 +12,7 @@ class NotificationsController extends ControllerBase {
 			'order' => 'Application\Models\Notification.id DESC',
 		]);
 		foreach ($resultset as $notification) {
-			$notifications[$notification->id] = $notification->subject;
+			$notifications[] = ['id' => $notification->id, 'subject' => $notification->subject];
 		}
 		$this->_response['status']                = 1;
 		$this->_response['data']['notifications'] = $notifications;
@@ -26,7 +26,7 @@ class NotificationsController extends ControllerBase {
 			'bind' => [$id]
 		])->getFirst();
 		if ($notification) {
-			$notification_recipient                  = NotificationRecipient::findFirst([
+			$notification_recipient = NotificationRecipient::findFirst([
 				'user_id = :user_id: AND notification_id = :notification_id:',
 				'bind' => [
 					'user_id'         => $this->_current_user->id,
