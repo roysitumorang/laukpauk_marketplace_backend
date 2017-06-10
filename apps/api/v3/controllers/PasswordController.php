@@ -40,7 +40,7 @@ class PasswordController extends ControllerBase {
 
 	function sendResetTokenAction() {
 		try {
-			if (!$this->_post->mobile_phone || !($user = User::findFirstByMobilePhone($this->_post->mobile_phone))) {
+			if (!$this->_post->mobile_phone || !($user = User::findFirst(['mobile_phone = ?0 AND ' . ($this->_premium_merchant ? "(merchant_id = {$this->_premium_merchant->id} OR id = {$this->_premium_merchant->id})" : 'premium_merchant IS NULL'), 'bind' => [$this->_post->mobile_phone]]))) {
 				throw new Error('No HP tidak terdaftar!');
 			}
 			if ($user->status == -1) {
