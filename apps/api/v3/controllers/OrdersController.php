@@ -203,7 +203,7 @@ QUERY
 				$this->_current_user->update(['address' => $this->_post->delivery->address]);
 			}
 			if ($this->_post->device_token) {
-				$device = Device::findByToken($this->_post->device_token);
+				$device = Device::findFirstByToken($this->_post->device_token);
 				if (!$device) {
 					$device             = new Device;
 					$device->token      = $this->_post->device_token;
