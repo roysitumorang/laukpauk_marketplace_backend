@@ -50,7 +50,7 @@
 											<strong>Nama Produk</strong>
 											<input type="text" name="keyword" value="{{ keyword }}" placeholder="Nama produk">
 											<button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i> Cari</button>
-											<a type="button" href="/admin/product_group_members/create/product_group_id:{{ product_group.id }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tambah Produk</button>
+											<a type="button" href="/admin/product_group_members/create/product_group_id:{{ product_group.id }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tambah Produk Ke Group</button>
 										</td>
 									</tr>
 								</table>
