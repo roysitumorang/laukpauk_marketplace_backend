@@ -193,7 +193,7 @@ QUERY
 					if ($discount) {
 						$order->coupon_id   = $coupon->id;
 						$order->discount    = min($order->final_bill, $discount);
-						$order->final_bill -= $discount;
+						$order->final_bill -= $order->discount;
 						$discount           = max($discount - $order->discount, 0);
 					}
 					$order->create();
