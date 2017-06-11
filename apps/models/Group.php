@@ -3,12 +3,14 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class Group extends ModelBase {
 	public $id;
 	public $name;
+	public $published;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -27,6 +29,10 @@ class Group extends ModelBase {
 		$this->name = $name;
 	}
 
+	function setPublished(string $published) {
+		$this->published = $published;
+	}
+
 	function validation() {
 		$validator = new Validation;
 		$validator->add('name', new PresenceOf([
@@ -38,6 +44,11 @@ class Group extends ModelBase {
 				return $values;
 			},
 			'message' => 'nama sudah ada',
+		]));
+		$validator->add('published', new Between([
+			'minimum' => 0,
+			'maximum' => 1,
+			'message' => 'tampilkan harus antara 0 and 1',
 		]));
 		return $this->validate($validator);
 	}
