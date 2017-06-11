@@ -28,19 +28,33 @@
 					<div class="tab-content">
 						<div id="groups" class="tab-pane active">
 							{{ flashSession.output() }}
-							<table class="table table-striped">
-								<tr>
-									<td>
-										<strong>Group Produk</strong>
-										<select name="group_id" onchange="location.href='/admin/group_products/index/group_id:'+this.value">
-										{% for item in groups %}
-											<option value="{{ item.id }}"{% if item.id == group.id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
-										{% endfor %}
-										</select>
-										<a type="button" href="/admin/group_products/create/group_id:{{ group.id }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tambah Produk</a>
-									</td>
-								</tr>
-							</table>
+							<form method="GET" action="/admin/group_products/index" id="search">
+								<table class="table table-striped">
+									<tr>
+										<td>
+											<strong>Group Produk</strong>
+											<select name="group_id">
+												{% for item in groups %}
+													<option value="{{ item.id }}"{% if item.id == group.id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
+												{% endfor %}
+											</select>
+											<br>
+											<br>
+											<strong>Kategori Produk</strong>
+											<select name="product_category_id">
+												<option value=""></option>
+												{% for item in product_categories %}
+													<option value="{{ item.id }}"{% if item.id == product_category_id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
+												{% endfor %}
+											</select>
+											<strong>Nama Produk</strong>
+											<input type="text" name="keyword" value="{{ keyword }}" placeholder="Nama produk">
+											<button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i> Cari</button>
+											<a type="button" href="/admin/group_products/create/group_id:{{ group.id }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tambah Produk</button>
+										</td>
+									</tr>
+								</table>
+							</form>
 							{% if count(products) %}
 								<div class="panel panel-default">
 									<div class="panel-body">
@@ -71,6 +85,20 @@
 									<div class="panel-body">Tidak ada produk dalam group</div>
 								</div>
 							{% endif %}
+							{% if page.total_pages > 1 %}
+								<div class="weepaging">
+									<p>
+										<b>Halaman:</b>&nbsp;&nbsp;
+										{% for i in pages %}
+											{% if i == page.current %}
+											<b>{{ i }}</b>
+											{% else %}
+											<a href="/admin/group_products/index/group_id:{{ group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
+											{% endif %}
+										{% endfor %}
+									</p>
+								</div>
+							{% endif %}
 						</div>
 					</div>
 				</div>
@@ -81,3 +109,19 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
+	search.addEventListener('submit', event => {
+		event.preventDefault();
+		url += '/group_id:' + search.group_id.value;
+		if (search.product_category_id.value) {
+			url += '/product_category_id:' + search.product_category_id.value;
+		}
+		if (search.keyword.value) {
+			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+				return replacement[match];
+			});
+		}
+		location.href = url;
+	}, false);
+</script>
