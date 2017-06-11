@@ -167,34 +167,41 @@ class Order extends ModelBase {
 	}
 
 	function afterCreate() {
-		$admin_new_order_template       = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
-		$admin_notification             = new Notification;
-		$admin_notification->subject    = $admin_new_order_template->subject;
-		$admin_notification->link       = $admin_new_order_template->url . $this->id;
-		$admin_notification->created_by = $this->created_by;
-		$admins                         = User::find([
+		$recipients    = [];
+		$device_tokens = [];
+		$admins        = User::find([
 			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
 			$recipients[] = $admin;
 		}
-		$admin_notification->recipients    = $recipients;
-		$admin_notification->create();
-		$merchant_new_order_template       = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
-		$device_tokens                     = [];
-		$merchant_notification             = new Notification;
-		$merchant_notification->subject    = $merchant_new_order_template->subject;
-		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
-		$merchant_notification->created_by = $this->created_by;
-		$merchant_notification->recipients = [$this->merchant];
 		foreach ($this->merchant->devices as $device) {
 			$device_tokens[] = $device->token;
 		}
-		$merchant_notification->push($device_tokens, [
-			'subject' => 'Order Baru #' . $this->code,
-			'content' => 'Order Baru #' . $this->code,
-		]);
+		if ($recipients) {
+			$template                               = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
+			$notification                           = new Notification;
+			$notification->notification_template_id = $template->id;
+			$notification->subject                  = $template->subject;
+			$notification->link                     = $template->url . $this->id;
+			$notification->created_by               = $this->created_by;
+			$notification->recipients               = $recipients;
+			$notification->create();
+		}
+		if ($device_tokens) {
+			$template                               = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
+			$notification                           = new Notification;
+			$notification->notification_template_id = $template->id;
+			$notification->subject                  = $template->subject;
+			$notification->link                     = $template->url . $this->id;
+			$notification->created_by               = $this->created_by;
+			$notification->recipients               = [$this->merchant];
+			$notification->push($device_tokens, [
+				'subject' => 'Order Baru #' . $this->code,
+				'content' => 'Order Baru #' . $this->code,
+			]);
+		}
 	}
 
 	function cancel($cancellation_reason) {
@@ -203,38 +210,47 @@ class Order extends ModelBase {
 		if (!$this->validation() || !$this->update()) {
 			return false;
 		}
-		$admin_new_order_template       = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order cancelled'");
-		$admin_notification             = new Notification;
-		$admin_notification->subject    = $admin_new_order_template->subject;
-		$admin_notification->link       = $admin_new_order_template->url . $this->id;
-		$admin_notification->created_by = $this->merchant->id;
-		$admins                         = User::find([
+		$recipients    = [];
+		$device_tokens = [];
+		$admins        = User::find([
 			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
 			$recipients[] = $admin;
 		}
-		$admin_notification->recipients    = $recipients;
-		$admin_notification->create();
-		$merchant_new_order_template       = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order cancelled'");
-		$device_tokens                     = [];
-		$merchant_notification             = new Notification;
-		$merchant_notification->subject    = $merchant_new_order_template->subject;
-		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
-		$merchant_notification->created_by = $this->merchant->id;
-		$merchant_notification->recipients = [$this->buyer];
-		$merchant_notification->create();
 		foreach ($this->buyer->devices as $device) {
 			$device_tokens[] = $device->token;
 		}
-		$merchant_notification->push($device_tokens, [
-			'subject' => 'Order #' . $this->code . ' Dibatalkan',
-			'content' => 'Order #' . $this->code . ' Dibatalkan',
-		]);
+		if ($recipients) {
+			$template                               = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order cancelled'");
+			$notification                           = new Notification;
+			$notification->notification_template_id = $template->id;
+			$notification->subject                  = $template->subject;
+			$notification->link                     = $template->url . $this->id;
+			$notification->created_by               = $this->merchant->id;
+			$notification->recipients               = $recipients;
+			$notification->create();
+		}
+		if ($device_tokens) {
+			$template                               = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order cancelled'");
+			$notification                           = new Notification;
+			$notification->notification_template_id = $template->id;
+			$notification->subject                  = $template->subject;
+			$notification->link                     = $template->url . $this->id;
+			$notification->created_by               = $this->merchant->id;
+			$notification->recipients               = [$this->buyer];
+			$notification->create();
+			$notification->push($device_tokens, [
+				'subject' => 'Order #' . $this->code . ' Dibatalkan',
+				'content' => 'Order #' . $this->code . ' Dibatalkan',
+			]);
+		}
 	}
 
 	function complete() {
+		$recipients    = [];
+		$device_tokens = [];
 		foreach ($this->items as $item) {
 			$product = Product::findFirst($item->product_id);
 			$product->update(['stock' => max(0, $product->stock - $item->quantity)]);
@@ -244,33 +260,38 @@ class Order extends ModelBase {
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 		]);
 		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->admin_fee]);
-		$admin_new_order_template       = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order delivered'");
-		$admin_notification             = new Notification;
-		$admin_notification->subject    = $admin_new_order_template->subject;
-		$admin_notification->link       = $admin_new_order_template->url . $this->id;
-		$admin_notification->created_by = $this->merchant->id;
-		$admins                         = User::find([
+		$admins = User::find([
 			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
 			$recipients[] = $admin;
 		}
-		$admin_notification->recipients    = $recipients;
-		$admin_notification->create();
-		$merchant_new_order_template       = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order delivered'");
-		$device_tokens                     = [];
-		$merchant_notification             = new Notification;
-		$merchant_notification->subject    = $merchant_new_order_template->subject;
-		$merchant_notification->link       = $merchant_new_order_template->url . $this->id;
-		$merchant_notification->created_by = $this->merchant->id;
-		$merchant_notification->recipients = [$this->buyer];
 		foreach ($this->buyer->devices as $device) {
 			$device_tokens[] = $device->token;
 		}
-		$merchant_notification->push($device_tokens, [
-			'subject' => 'Order #' . $this->code . ' Diterima',
-			'content' => 'Order #' . $this->code . ' Diterima',
-		]);
+		if ($recipients) {
+			$template                               = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order delivered'");
+			$notification                           = new Notification;
+			$notification->notification_template_id = $template->id;
+			$notification->subject                  = $template->subject;
+			$notification->link                     = $template->url . $this->id;
+			$notification->created_by               = $this->merchant->id;
+			$notification->recipients               = $recipients;
+			$notification->create();
+		}
+		if ($device_tokens) {
+			$template                               = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order delivered'");
+			$notification                           = new Notification;
+			$notification->notification_template_id = $template->id;
+			$notification->subject                  = $template->subject;
+			$notification->link                     = $template->url . $this->id;
+			$notification->created_by               = $this->merchant->id;
+			$notification->recipients               = [$this->buyer];
+			$notification->push($device_tokens, [
+				'subject' => 'Order #' . $this->code . ' Diterima',
+				'content' => 'Order #' . $this->code . ' Diterima',
+			]);
+		}
 	}
 }
