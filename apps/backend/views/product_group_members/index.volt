@@ -8,10 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/product_groups"><h2>Group Produk</h2></a>
+				<a href="/admin/product_groups"><h2>Daftar Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
+						<li><a href="/admin/product_groups">Group Produk</a></li>
 						<li><span>Daftar Produk</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
