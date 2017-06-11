@@ -2,29 +2,20 @@
 
 namespace Application\Api\V3\Controllers;
 
-use IntlDateFormatter;
 use Phalcon\Db;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
-		$merchant_id    = $this->dispatcher->getParam('merchant_id', 'int');
-		$category_id    = $this->dispatcher->getParam('category_id', 'int');
-		$page           = $this->dispatcher->getParam('page', 'int');
-		$search_query   = $this->dispatcher->getParam('keyword', 'string') ?: null;
-		$limit          = 10;
-		$params         = [];
-		$products       = [];
-		$merchant_ids   = [];
-		$merchants      = [];
-		$date_formatter = new IntlDateFormatter(
-			'id_ID',
-			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE,
-			$this->currentDatetime->getTimezone(),
-			IntlDateFormatter::GREGORIAN,
-			'EEEE, d MMM yyyy'
-		);
-		$query = <<<QUERY
+		$merchant_id  = $this->dispatcher->getParam('merchant_id', 'int');
+		$category_id  = $this->dispatcher->getParam('category_id', 'int');
+		$page         = $this->dispatcher->getParam('page', 'int');
+		$search_query = $this->dispatcher->getParam('keyword', 'string') ?: null;
+		$limit        = 10;
+		$params       = [];
+		$products     = [];
+		$merchant_ids = [];
+		$merchants    = [];
+		$query        = <<<QUERY
 			SELECT
 				COUNT(DISTINCT d.id)
 			FROM
