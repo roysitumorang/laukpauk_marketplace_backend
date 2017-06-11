@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/groups"><h2>Group Produk</h2></a>
+				<a href="/admin/product_groups"><h2>Group Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -24,25 +24,25 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				<div class="tabs">
-					{{ partial('partials/tabs_group', ['expand': 'index']) }}
+					{{ partial('partials/tabs_product_group', ['expand': 'index']) }}
 					<div class="tab-content">
-						<div id="groups" class="tab-pane active">
+						<div id="group" class="tab-pane active">
 							{{ flashSession.output() }}
-							<form method="GET" action="/admin/group_products/index" id="search">
+							<form method="GET" action="/admin/product_group_members/index" id="search">
 								<table class="table table-striped">
 									<tr>
 										<td>
 											<strong>Group Produk</strong>
-											<select name="group_id">
-												{% for item in groups %}
-													<option value="{{ item.id }}"{% if item.id == group.id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
+											<select name="product_group_id">
+												{% for item in product_groups %}
+													<option value="{{ item.id }}"{% if item.id == product_group.id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
 												{% endfor %}
 											</select>
 											<br>
 											<br>
 											<strong>Kategori Produk</strong>
 											<select name="product_category_id">
-												<option value=""></option>
+												<option value="">Semua Kategori</option>
 												{% for item in product_categories %}
 													<option value="{{ item.id }}"{% if item.id == product_category_id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
 												{% endfor %}
@@ -50,7 +50,7 @@
 											<strong>Nama Produk</strong>
 											<input type="text" name="keyword" value="{{ keyword }}" placeholder="Nama produk">
 											<button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i> Cari</button>
-											<a type="button" href="/admin/group_products/create/group_id:{{ group.id }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tambah Produk</button>
+											<a type="button" href="/admin/product_group_members/create/product_group_id:{{ product_group.id }}" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Tambah Produk</button>
 										</td>
 									</tr>
 								</table>
@@ -58,8 +58,8 @@
 							{% if count(products) %}
 								<div class="panel panel-default">
 									<div class="panel-body">
-										<form method="POST" action="/admin/group_products/truncate/group_id:{{ group.id }}" onsubmit="return confirm('Hapus semua produk dari group ?')">
-											<strong>Total Produk : {{ number_format(group.total_products) }}</strong>
+										<form method="POST" action="/admin/product_group_members/truncate/product_group_id:{{ group.id }}" onsubmit="return confirm('Hapus semua produk dari group ?')">
+											<strong>Total Produk : {{ number_format(product_group.total_products) }}</strong>
 											<button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Hapus semua produk</button>
 										</form>
 									</div>
@@ -71,7 +71,7 @@
 											<img src="/assets/image/{% if product.picture %}{{ product.thumbnails[0] }}{% else %}no_picture_120.png{% endif %}" border="0" width="150" height="150">
 											<br>
 											<strong>{{ product.name }}<br>({{ product.stock_unit }})</strong><br>
-											<form method="POST" action="/admin/group_products/delete/group_id:{{ group.id }}/product_id:{{ product.id }}" onsubmit="return confirm('Hapus produk ini dari group ?')">
+											<form method="POST" action="/admin/product_group_members/delete/product_group_id:{{ product_group.id }}/product_id:{{ product.id }}" onsubmit="return confirm('Hapus produk ini dari group ?')">
 												Rp. {{ number_format(product.price) }}
 												<button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>
 												{% if !product.published %} <font color="#FF0000"><i class="fa fa-eye-slash"></i></font>{% endif %}
@@ -93,7 +93,7 @@
 											{% if i == page.current %}
 											<b>{{ i }}</b>
 											{% else %}
-											<a href="/admin/group_products/index/group_id:{{ group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
+											<a href="/admin/product_group_members/index/product_group_id:{{ product_group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
 											{% endif %}
 										{% endfor %}
 									</p>
@@ -113,7 +113,7 @@
 	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
 	search.addEventListener('submit', event => {
 		event.preventDefault();
-		url += '/group_id:' + search.group_id.value;
+		url += '/product_group_id:' + search.product_group_id.value;
 		if (search.product_category_id.value) {
 			url += '/product_category_id:' + search.product_category_id.value;
 		}

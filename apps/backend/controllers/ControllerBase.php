@@ -91,7 +91,7 @@ class ControllerBase extends Controller {
 				'icon'      => 'wrench',
 				'expanded'  => $expanded == 'Options',
 				'sub_items' => [
-					['label' => 'Group Produk',    'link' => 'groups'],
+					['label' => 'Group Produk',    'link' => 'product_groups'],
 					['label' => 'Kupon Member',    'link' => 'coupons'],
 					['label' => 'Settings',        'link' => 'settings'],
 					['label' => 'Daftar Propinsi', 'link' => 'provinces'],

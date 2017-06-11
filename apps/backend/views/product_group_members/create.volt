@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/groups/create"><h2>Tambah Produk Ke Group</h2></a>
+				<a href="/admin/product_groups/create"><h2>Tambah Produk Ke Group</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/groups">Group Produk</a></span></li>
+						<li><span><a href="/admin/product_groups">Group Produk</a></span></li>
 						<li><span>Tambah Produk Ke Group</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -25,25 +25,25 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				<div class="tabs">
-					{{ partial('partials/tabs_group', ['expand': 'create']) }}
+					{{ partial('partials/tabs_product_group', ['expand': 'create']) }}
 					<div class="tab-content">
-						<div id="groups" class="tab-pane active">
+						<div id="group" class="tab-pane active">
 							{{ flashSession.output() }}
-							<form method="GET" action="/admin/group_products/create" id="search">
+							<form method="GET" action="/admin/product_group_members/create" id="search">
 								<table class="table table-striped">
 									<tr>
 										<td>
 											<strong>Group Produk</strong>
-											<select name="group_id">
-												{% for item in groups %}
-													<option value="{{ item.id }}"{% if item.id == group.id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
+											<select name="product_group_id">
+												{% for item in product_groups %}
+													<option value="{{ item.id }}"{% if item.id == product_group.id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
 												{% endfor %}
 											</select>
 											<br>
 											<br>
 											<strong>Kategori Produk</strong>
 											<select name="product_category_id">
-												<option value=""></option>
+												<option value="">Semua Kategori</option>
 												{% for item in product_categories %}
 													<option value="{{ item.id }}"{% if item.id == product_category_id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
 												{% endfor %}
@@ -56,9 +56,9 @@
 								</table>
 							</form>
 							{% if products %}
-								<div><i class="fa fa-plus"></i> Centang produk yang ingin ditambahkan pada slot <strong>{{ group.name }}</strong></div>
-								<div><input type="checkbox" onclick="var checked=this.checked;document.querySelectorAll('input[type=checkbox]').forEach(function(item){item.checked=checked})"> <i>check / uncheck all</i> | <strong>Total Produk :</strong> {{ count(products) }}</div>
-								<form method="POST" action="/admin/group_products/create/group_id:{{ group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+								<div><i class="fa fa-plus"></i> Checklist produk yang ingin ditambahkan pada slot <strong>{{ group.name }}</strong></div>
+								<div><input type="checkbox" onclick="var checked=this.checked;document.querySelectorAll('input[type=checkbox]').forEach(function(item){item.checked=checked})"> <i>Check / Uncheck All</i> | <strong>Total Produk :</strong> {{ count(products) }}</div>
+								<form method="POST" action="/admin/product_group_members/create/product_group_id:{{ product_group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
 									<div class="row">
 									{% for product in products %}
 										<div class="col-md-3 panel">
@@ -72,7 +72,7 @@
 										</div>
 									{% endfor %}
 									</div>
-									<a type="button" href="/admin/group_products/index/group_id:{{ group.id }}" class="btn btn-default"><i class="fa fa-chevron-left"></i> Kembali</a>
+									<a type="button" href="/admin/product_group_members/index/product_group_id:{{ product_group.id }}" class="btn btn-default"><i class="fa fa-chevron-left"></i> Kembali</a>
 									<button type="submit" class="btn btn-primary"><i class="fa fa-checked"></i> Tambahkan</button>
 								</form>
 							{% else %}
@@ -88,7 +88,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/group_products/create/group_id:{{ group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
+										<a href="/admin/product_group_members/create/product_group_id:{{ product_group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -107,7 +107,7 @@
 	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
 	search.addEventListener('submit', event => {
 		event.preventDefault();
-		url += '/group_id:' + search.group_id.value;
+		url += '/product_group_id:' + search.product_group_id.value;
 		if (search.product_category_id.value) {
 			url += '/product_category_id:' + search.product_category_id.value;
 		}
