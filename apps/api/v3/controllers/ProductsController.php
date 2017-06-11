@@ -24,6 +24,8 @@ class ProductsController extends ControllerBase {
 				JOIN service_areas c ON a.id = c.user_id
 				JOIN products d ON a.id = d.user_id
 				JOIN product_categories e ON d.product_category_id = e.id
+				LEFT JOIN product_group_member f ON d.id = f.product_id
+				LEFT JOIN product_groups g ON f.product_group_id = g.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
@@ -40,23 +42,28 @@ QUERY;
 				$query .= " AND a.id = {$merchant_id}";
 			}
 			if ($search_query) {
-				$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
-				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
-				$filtered_keywords     = array_diff($keywords, $stop_words);
-				$filtered_search_query = implode(' ', $filtered_keywords);
-				$query                .= ' AND (a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
-				foreach (range(1, 3) as $i) {
-					$params[] = "%{$filtered_search_query}%";
-				}
-				if (count($filtered_keywords) > 1) {
-					foreach ($filtered_keywords as $keyword) {
-						$query .= ' OR a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
-						foreach (range(1, 3) as $i) {
-							$params[] = "%{$keyword}%";
+				if ($this->db->fetchColumn('SELECT COUNT(1) FROM product_groups WHERE published = 1 AND name = ?', [$search_query])) {
+					$query   .= ' AND g.published = 1 AND g.name = ?';
+					$params[] = $search_query;
+				} else {
+					$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
+					$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
+					$filtered_keywords     = array_diff($keywords, $stop_words);
+					$filtered_search_query = implode(' ', $filtered_keywords);
+					$query                .= ' AND (a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
+					foreach (range(1, 3) as $i) {
+						$params[] = "%{$filtered_search_query}%";
+					}
+					if (count($filtered_keywords) > 1) {
+						foreach ($filtered_keywords as $keyword) {
+							$query .= ' OR a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
+							foreach (range(1, 3) as $i) {
+								$params[] = "%{$keyword}%";
+							}
 						}
 					}
+					$query .= ')';
 				}
-				$query .= ')';
 			}
 		}
 		if ($category_id) {
