@@ -52,8 +52,8 @@
 			for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
 				let notification = notifications[i];
 				notification.onclick = () => {
-					fetch('/admin/notifications/update/' + notification.dataset.id + '/read:1', { credentials: 'include', method: 'POST' }).then(() => {
-						location.href = notification.dataset.link
+					fetch('/admin/web_notifications/update/' + notification.dataset.id + '/read:1', { credentials: 'include', method: 'POST' }).then(() => {
+						location.href = notification.dataset.targetUrl
 					})
 				}
 			}

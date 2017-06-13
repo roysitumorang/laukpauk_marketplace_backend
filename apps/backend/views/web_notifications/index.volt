@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/notifications"><h2>Notifikasi</h2></a>
+				<a href="/admin/web_notifications"><h2>Notifikasi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/notifications">Notifikasi</a></span></li>
+						<li><span><a href="/admin/web_notifications">Notifikasi</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -35,7 +35,7 @@
 					</thead>
 					<tbody>
 					{% for notification in notifications %}
-						<tr class="notification"{% if !notification.read_at %} data-id="{{ notification.id }}"{% endif %} data-link="{{ notification.link }}">
+						<tr class="notification"{% if !notification.read_at %} data-id="{{ notification.id }}"{% endif %} data-target-url="{{ notification.target_url }}">
 							<td>{{ notification.rank }}</td>
 							<td>{{ notification.title }}<br><strong>Link:</strong>&nbsp;{{ notification.target_url }}</td>
 							<td>{{ notification.created_at }}</td>
@@ -56,7 +56,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/notifications/index/page:{{ i }}">{{ i }}</a>
+							<a href="/admin/web_notifications/index/page:{{ i }}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -73,11 +73,11 @@
 	for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
 		let notification = notifications[i];
 		notification.setAttribute('style', 'cursor:pointer'),
-		notification.onclick = function() {
+		notification.onclick = () => {
 			if (this.dataset.id) {
-				fetch('/admin/notifications/update/' + this.dataset.id + '/read:1')
+				fetch('/admin/web_notifications/update/' + this.dataset.id + '/read:1')
 			}
-			location.href = this.dataset.link
+			location.href = this.dataset.targetUrl;
 		}
 	}
 </script>

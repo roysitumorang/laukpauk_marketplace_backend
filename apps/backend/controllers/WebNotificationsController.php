@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\NotificationRecipient;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class NotificationsController extends ControllerBase {
+class WebNotificationsController extends ControllerBase {
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;

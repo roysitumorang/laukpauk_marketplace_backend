@@ -1,7 +1,7 @@
 <header class="header">
 	<div class="logo-container">
 		<a href="/admin" class="logo">
-			<img src="/backend/images/logo.png" height="35" alt="Ikoma-Home Admin">
+			<img src="/backend/images/logo.png" height="35" alt="Laukpauk.id Admin">
 		</a>
 		<div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
 			<i class="fa fa-bars" aria-label="Toggle sidebar"></i>
@@ -9,15 +9,6 @@
 	</div>
 	<!-- start: search & user box -->
 	<div class="header-right">
-		<form action="/admin/products" class="search nav-form" method="GET">
-			<div class="input-group input-search">
-				<input type="text" name="keyword" id="keyword" value="{{ product_keyword }}" placeholder="Cari Produk" class="form-control">
-				<span class="input-group-btn">
-					<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
-				</span>
-			</div>
-		</form>
-		<span class="separator"></span>
 		<span id="inbox">
 			{{ partial('partials/inbox', ['unread_notifications': unread_notifications, 'unread_messages': unread_messages]) }}
 		</span>

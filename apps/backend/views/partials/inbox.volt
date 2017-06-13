@@ -52,14 +52,14 @@
 				<ul>
 				{% for notification in unread_notifications %}
 					<li>
-						<a href="javascript:void(0)" data-id="{{ notification.id }}" data-link="{{ notification.link }}" class="clearfix notification">
+						<a href="javascript:void(0)" data-id="{{ notification.id }}" data-target-url="{{ notification.target_url }}" class="clearfix notification">
 							<span class="title">{{ notification.created_at }}</span>
 							<span class="message">{{ notification.subject }}</span>
 						</a>
 					</li>
 				{% elsefor %}
 					<li>
-						<a href="/admin/notifications" class="clearfix">
+						<a href="/admin/web_notifications" class="clearfix">
 							<span class="title">Maaf</span>
 							<span class="message">Belum ada notifikasi</span>
 						</a>
@@ -68,7 +68,7 @@
 				</ul>
 				<hr>
 				<div class="text-right">
-					<a href="/admin/notifications" class="view-more">Tampilkan Semua</a>
+					<a href="/admin/web_notifications" class="view-more">Tampilkan Semua</a>
 				</div>
 			</div>
 		</div>
