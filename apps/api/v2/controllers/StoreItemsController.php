@@ -44,11 +44,13 @@ class StoreItemsController extends ControllerBase {
 			$products = Product::find(['user_id = ?0 AND id IN({product_ids:array})', 'bind' => [$this->_current_user->id, 'product_ids' => $product_ids]]);
 			foreach ($products as $product) {
 				$attributes = $this->_input->{"{$product->id}"};
-				$product->setPrice($attributes->price);
-				$product->setStock($attributes->stock);
-				$product->setPublished($attributes->published);
-				$product->updated_by = $this->_current_user->id;
-				$product->update();
+				if ($product->price != $attributes->price || $product->stock != $attributes->stock || $product->published != $attributes->published) {
+					$product->setPrice($attributes->price);
+					$product->setStock($attributes->stock);
+					$product->setPublished($attributes->published);
+					$product->updated_by = $this->_current_user->id;
+					$product->update();
+				}
 			}
 		}
 		$this->_response['status']  = 1;
