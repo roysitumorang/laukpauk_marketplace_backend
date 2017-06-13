@@ -67,7 +67,8 @@ abstract class ControllerBase extends Controller {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
-			exit($this->response->send());
+			$this->response->send();
+			exit;
 		}
 	}
 
