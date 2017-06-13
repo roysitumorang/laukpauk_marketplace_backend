@@ -5,6 +5,8 @@ namespace Application\Api\V1\Controllers;
 use Phalcon\Mvc\Controller;
 
 class ErrorsController extends Controller {
+	private $_response = ['status' => -1];
+
 	function notFoundAction() {
 		$this->_response['message'] = 'Halaman tidak ditemukan';
 		$this->response->setStatusCode(404, 'Not Found');
