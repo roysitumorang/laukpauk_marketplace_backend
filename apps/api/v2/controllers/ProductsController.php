@@ -16,7 +16,7 @@ class ProductsController extends ControllerBase {
 				SELECT
 					a.id,
 					a.merchant_note,
-					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value) AS minimum_purchase,
+					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
 					a.shipping_cost
 				FROM
 					users a
@@ -57,18 +57,16 @@ QUERY;
 			SELECT
 				COUNT(1)
 			FROM
-				store_items a
-				JOIN products b ON a.product_id = b.id
+				products b
 				JOIN product_categories c ON b.product_category_id = c.id
 			WHERE
-				a.published = 1 AND
 				b.published = 1 AND
 				c.published = 1 AND
 QUERY;
 		if ($this->_premium_merchant) {
-			$query .= " a.user_id = {$this->_premium_merchant->id}";
+			$query .= " b.user_id = {$this->_premium_merchant->id}";
 		} else {
-			$query .= " a.user_id = {$merchant->id}";
+			$query .= " b.user_id = {$merchant->id}";
 		}
 		if ($category_id && $category = $this->db->fetchOne("SELECT id FROM product_categories WHERE id = {$category_id}", Db::FETCH_OBJ)) {
 			$query .= " AND c.id = {$category->id}";
@@ -80,7 +78,7 @@ QUERY;
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(str_replace('COUNT(1)', 'a.id, b.product_category_id, b.name, a.price, a.stock, b.stock_unit, order_closing_hour, b.picture', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result           = $this->db->query(str_replace('COUNT(1)', 'b.id, b.product_category_id, b.name, b.price, b.stock, b.stock_unit, b.picture', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -92,9 +90,6 @@ QUERY;
 				'stock_unit' => $row->stock_unit,
 				'picture'    => $row->picture ? $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']) : null,
 			];
-			if ($row->order_closing_hour) {
-				$product['order_closing_hour'] = $row->order_closing_hour;
-			}
 			$products[] = $product;
 		}
 		if (!$total_products) {

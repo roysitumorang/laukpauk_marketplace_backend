@@ -5,7 +5,7 @@ namespace Application\Api\V2\Controllers;
 use Application\Models\Coupon;
 use Application\Models\Order;
 use Application\Models\OrderItem;
-use Application\Models\StoreItem;
+use Application\Models\Product;
 use Application\Models\Role;
 use Application\Models\ServiceArea;
 use Application\Models\Setting;
@@ -90,13 +90,13 @@ class OrdersController extends ControllerBase {
 			$order->buyer              = $this->_current_user;
 			$order->created_by         = $this->_current_user->id;
 			foreach ($this->_input->items as $item) {
-				$store_item             = StoreItem::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->product_price_id ?: $item->store_item_id]]);
+				$product                = Product::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->store_item_id]]);
 				$order_item             = new OrderItem;
-				$order_item->product_id = $store_item->product->id;
-				$order_item->name       = $store_item->product->name;
-				$order_item->unit_price = $store_item->price;
-				$order_item->stock_unit = $store_item->product->stock_unit;
-				$order_item->quantity   = min($item->quantity, $store_item->stock);
+				$order_item->product_id = $product->id;
+				$order_item->name       = $product->name;
+				$order_item->unit_price = $product->price;
+				$order_item->stock_unit = $product->stock_unit;
+				$order_item->quantity   = min($item->quantity, $product->stock);
 				$order->original_bill  += $order_item->quantity * $order_item->unit_price;
 				$order_items[]          = $order_item;
 			}
