@@ -98,23 +98,23 @@ class AccountController extends ControllerBase {
 			'mobile_phone' => $user->mobile_phone,
 			'address'      => $user->address,
 			'subdistrict'  => [
-				'id'   => $user->village->subdistrict->id,
+				'id'   => "{$user->village->subdistrict->id}",
 				'name' => $user->village->subdistrict->name,
 			],
 			'village'      => [
-				'id'   => $user->village->id,
+				'id'   => "{$user->village->id}",
 				'name' => $user->village->name,
 			],
 			'subdistrict'  => [
-				'id'   => $user->village->subdistrict->id,
+				'id'   => "{$user->village->subdistrict->id}",
 				'name' => $user->village->subdistrict->name,
 			],
 			'city'         => [
-				'id'   => $user->village->subdistrict->city->id,
+				'id'   => "{$user->village->subdistrict->city->id}",
 				'name' => $user->village->subdistrict->city->name,
 			],
 			'province'     => [
-				'id'   => $user->village->subdistrict->city->province->id,
+				'id'   => "{$user->village->subdistrict->city->province->id}",
 				'name' => $user->village->subdistrict->city->province->name,
 			],
 		];
@@ -241,23 +241,23 @@ QUERY;
 			'mobile_phone' => $this->_current_user->mobile_phone,
 			'address'      => $this->_current_user->address,
 			'subdistrict'  => [
-				'id'   => $this->_current_user->village->subdistrict->id,
+				'id'   => "{$this->_current_user->village->subdistrict->id}",
 				'name' => $this->_current_user->village->subdistrict->name,
 			],
 			'village'      => [
-				'id'   => $this->_current_user->village->id,
+				'id'   => "{$this->_current_user->village->id}",
 				'name' => $this->_current_user->village->name,
 			],
 			'subdistrict'  => [
-				'id'   => $this->_current_user->village->subdistrict->id,
+				'id'   => "{$this->_current_user->village->subdistrict->id}",
 				'name' => $this->_current_user->village->subdistrict->name,
 			],
 			'city'         => [
-				'id'   => $this->_current_user->village->subdistrict->city->id,
+				'id'   => "{$this->_current_user->village->subdistrict->city->id}",
 				'name' => $this->_current_user->village->subdistrict->city->name,
 			],
 			'province'     => [
-				'id'   => $this->_current_user->village->subdistrict->city->province->id,
+				'id'   => "{$this->_current_user->village->subdistrict->city->province->id}",
 				'name' => $this->_current_user->village->subdistrict->city->province->name,
 			],
 		];
