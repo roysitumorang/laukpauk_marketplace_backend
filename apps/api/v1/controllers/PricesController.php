@@ -3,7 +3,6 @@
 namespace Application\Api\V1\Controllers;
 
 use Application\Models\Product;
-use Application\Models\StoreItem;
 use DateTimeImmutable;
 use Phalcon\Db;
 
@@ -13,16 +12,16 @@ class PricesController extends ControllerBase {
 		$order_closing_hours = [];
 		$limit               = 10;
 		$keyword             = $this->dispatcher->getParam('keyword', 'string');
-		$query               = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id LEFT JOIN store_items c ON b.id = c.product_id AND c.user_id = {$this->_current_user->id} WHERE a.published = 1";
+		$query               = "SELECT COUNT(1) FROM product_categories a JOIN products b ON a.id = b.product_category_id WHERE b.user_id = {$this->_current_user->id}";
 		if ($keyword) {
-			$query .= " AND b.name LIKE '%{$keyword}%'";
+			$query .= " AND b.name ILIKE '%{$keyword}%'";
 		}
 		$total_products = $this->db->fetchColumn($query);
 		$total_pages    = ceil($total_products / $limit);
 		$page           = $this->dispatcher->getParam('page', 'int');
 		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset         = ($current_page - 1) * $limit;
-		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, c.price, c.stock, c.published, c.order_closing_hour', $query) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, a.name AS category, b.name, b.stock_unit, b.price, b.stock, b.published', $query) . " ORDER BY b.name || b.stock_unit LIMIT {$limit} OFFSET {$offset}");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($product = $result->fetch()) {
 			$products[] = $product;
@@ -46,22 +45,19 @@ class PricesController extends ControllerBase {
 	}
 
 	function saveAction() {
-		foreach ($this->_input as $product_id => $attributes) {
-			$product = Product::findFirstById($product_id);
-			if (!$product) {
-				continue;
+		$product_ids = array_keys(get_object_vars($this->_input));
+		if ($product_ids) {
+			$products = Product::find(['user_id = ?0 AND id IN({product_ids:array})', 'bind' => [$this->_current_user->id, 'product_ids' => $product_ids]]);
+			foreach ($products as $product) {
+				$attributes = $this->_input->{"{$product->id}"};
+				if ($product->price != $attributes->price || $product->stock != $attributes->stock || $product->published != $attributes->published) {
+					$product->setPrice($attributes->price);
+					$product->setStock($attributes->stock);
+					$product->setPublished($attributes->published);
+					$product->updated_by = $this->_current_user->id;
+					$product->update();
+				}
 			}
-			$store_item = StoreItem::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_current_user->id, $product_id]]);
-			if (!$store_item) {
-				$store_item          = new StoreItem;
-				$store_item->user    = $this->_current_user;
-				$store_item->product = $product;
-			}
-			$store_item->setPrice($attributes->price);
-			$store_item->setStock($attributes->stock);
-			$store_item->setPublished($attributes->published);
-			$store_item->setOrderClosingHour(DateTimeImmutable::createFromFormat('H:i', $attributes->order_closing_hour) ? $attributes->order_closing_hour : null);
-			$store_item->save();
 		}
 		$this->_response = [
 			'status'  => 1,

@@ -20,7 +20,8 @@ abstract class ControllerBase extends Controller {
 		if (Setting::findFirstByName('maintenance_mode')->value) {
 			$this->_response['maintenance_mode'] = 1;
 			$this->response->setJsonContent($this->_response);
-			exit($this->response->send());
+			$this->response->send();
+			exit;
 		}
 		$this->_input = $this->request->getJsonRawBody();
 	}
@@ -45,7 +46,8 @@ abstract class ControllerBase extends Controller {
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
-			exit($this->response->send());
+			$this->response->send();
+			exit;
 		}
 	}
 }

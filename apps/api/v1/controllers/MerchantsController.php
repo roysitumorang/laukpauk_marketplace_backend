@@ -75,7 +75,7 @@ QUERY
 			$this->_response['message'] = 'Maaf, daerah Anda di luar wilayah operasional Kami.';
 		} else {
 			$categories = ProductCategory::find([
-				'conditions' => 'published = 1',
+				'conditions' => 'published = 1 AND user_id IS NULL',
 				'columns'    => 'id, name',
 				'order'      => 'name',
 			])->toArray();
@@ -166,9 +166,9 @@ QUERY
 				$delivery_day['unavailable'] = true;
 			} else {
 				$delivery_day['hours'] = !$i
-					? array_filter($delivery_hours, function($v, $k) use($current_hour) {
+					? array_values(array_filter($delivery_hours, function($v, $k) use($current_hour) {
 						return $v > $current_hour;
-					}, ARRAY_FILTER_USE_BOTH)
+					}, ARRAY_FILTER_USE_BOTH))
 					: $delivery_hours;
 			}
 			$delivery_days[] = $delivery_day;

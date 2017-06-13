@@ -41,18 +41,18 @@ QUERY
 		$keyword     = $this->dispatcher->getParam('keyword', 'string');
 		$limit       = 10;
 		$products    = [];
-		$query       = "SELECT COUNT(1) FROM store_items a JOIN products b ON a.product_id = b.id JOIN product_categories c ON b.product_category_id = c.id WHERE a.user_id = {$merchant->id} AND a.published = 1 AND b.published = 1 AND c.published = 1";
-		if ($category_id && $category = $this->db->fetchOne("SELECT id FROM product_categories WHERE id = {$category_id}", Db::FETCH_OBJ)) {
-			$query .= " AND c.id = {$category->id}";
+		$query       = "SELECT COUNT(1) FROM products b JOIN product_categories c ON b.product_category_id = c.id WHERE b.user_id = {$merchant->id} AND b.published = 1 AND c.published = 1";
+		if ($category_id && $category = $this->db->fetchOne("SELECT id FROM product_categories WHERE id = {$category_id} AND user_id IS NULL", Db::FETCH_OBJ)) {
+			$query .= " AND b.product_category_id = {$category->id}";
 		}
 		if ($keyword) {
-			$query .= " AND b.name LIKE '%{$keyword}%'";
+			$query .= " AND b.name ILIKE '%{$keyword}%'";
 		}
 		$total_products = $this->db->fetchColumn($query);
 		$total_pages    = ceil($total_products / $limit);
 		$current_page   = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset         = ($current_page - 1) * $limit;
-		$result         = $this->db->query(str_replace('COUNT(1)', 'a.id, b.product_category_id, b.name, a.price, a.stock, b.stock_unit, order_closing_hour', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result         = $this->db->query(str_replace('COUNT(1)', 'b.id, b.product_category_id, b.name, b.price, b.stock, b.stock_unit', $query) . " GROUP BY b.id ORDER BY b.name || b.stock_unit LIMIT {$limit} OFFSET {$offset}");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$product = [
@@ -62,9 +62,6 @@ QUERY
 				'stock'      => $row->stock,
 				'stock_unit' => $row->stock_unit,
 			];
-			if ($row->order_closing_hour) {
-				$product['order_closing_hour'] = $row->order_closing_hour;
-			}
 			$products[] = $product;
 		}
 		if (!$total_products) {

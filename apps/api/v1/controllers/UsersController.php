@@ -87,23 +87,23 @@ class UsersController extends ControllerBase {
 			'mobile_phone' => $user->mobile_phone,
 			'address'      => $user->address,
 			'subdistrict'  => [
-				'id'   => $user->village->subdistrict->id,
+				'id'   => "{$user->village->subdistrict->id}",
 				'name' => $user->village->subdistrict->name,
 			],
 			'village'      => [
-				'id'   => $user->village->id,
+				'id'   => "{$user->village->id}",
 				'name' => $user->village->name,
 			],
 			'subdistrict'  => [
-				'id'   => $user->village->subdistrict->id,
+				'id'   => "{$user->village->subdistrict->id}",
 				'name' => $user->village->subdistrict->name,
 			],
 			'city'         => [
-				'id'   => $user->village->subdistrict->city->id,
+				'id'   => "{$user->village->subdistrict->city->id}",
 				'name' => $user->village->subdistrict->city->name,
 			],
 			'province'     => [
-				'id'   => $user->village->subdistrict->city->province->id,
+				'id'   => "{$user->village->subdistrict->city->province->id}",
 				'name' => $user->village->subdistrict->city->province->name,
 			],
 		];
@@ -125,6 +125,9 @@ class UsersController extends ControllerBase {
 
 	function updateAction() {
 		if ($this->request->isGet()) {
+			$subdistricts = [];
+			$provinces    = [];
+			$city         = City::findFirstByName('Medan');
 			if ($this->_current_user->role->name == 'Merchant') {
 				$business_hours = new stdClass;
 				foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
@@ -132,53 +135,44 @@ class UsersController extends ControllerBase {
 				}
 				$this->_response['data']['business_hours'] = $business_hours;
 			}
-			if (!$this->cache->exists('subdistricts')) {
-				$subdistricts = [];
-				$city         = City::findFirstByName('Medan');
-				foreach ($city->subdistricts as $subdistrict) {
-					$villages = [];
-					foreach ($subdistrict->villages as $village) {
-						$villages[$village->id] = $village->name;
-					}
-					$subdistricts[$subdistrict->id] = [
-						'name'     => $subdistrict->name,
-						'villages' => $villages,
+			foreach ($city->subdistricts as $subdistrict) {
+				$villages = [];
+				foreach ($subdistrict->villages as $village) {
+					$villages[$village->id] = $village->name;
+				}
+				$subdistricts[$subdistrict->id] = [
+					'name'     => $subdistrict->name,
+					'villages' => $villages,
+				];
+			}
+			$result    = $this->db->query("SELECT a.id AS province_id, a.name AS province_name, b.id AS city_id, CONCAT_WS(' ', b.type, b.name) AS city_name, c.id AS subdistrict_id, c.name AS subdistrict_name, d.id AS village_id, d.name AS village_name FROM provinces a JOIN cities b ON a.id = b.province_id JOIN subdistricts c ON b.id = c.city_id JOIN villages d ON c.id = d.subdistrict_id ORDER BY province_name, city_name, subdistrict_name, village_name");
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				if (!isset($provinces[$row->province_id])) {
+					$provinces[$row->province_id] = [
+						'name'   => $row->province_name,
+						'cities' => [],
 					];
 				}
-				$this->cache->save('subdistricts', $subdistricts);
-			}
-			if (!$this->cache->exists('provinces')) {
-				$provinces = [];
-				$result    = $this->db->query("SELECT a.id AS province_id, a.name AS province_name, b.id AS city_id, CONCAT_WS(' ', b.type, b.name) AS city_name, c.id AS subdistrict_id, c.name AS subdistrict_name, d.id AS village_id, d.name AS village_name FROM provinces a JOIN cities b ON a.id = b.province_id JOIN subdistricts c ON b.id = c.city_id JOIN villages d ON c.id = d.subdistrict_id ORDER BY province_name, city_name, subdistrict_name, village_name");
-				$result->setFetchMode(Db::FETCH_OBJ);
-				while ($row = $result->fetch()) {
-					if (!isset($provinces[$row->province_id])) {
-						$provinces[$row->province_id] = [
-							'name'   => $row->province_name,
-							'cities' => [],
-						];
-					}
-					if (!isset($provinces[$row->province_id]['cities'][$row->city_id])) {
-						$provinces[$row->province_id]['cities'][$row->city_id] = [
-							'name'         => $row->city_name,
-							'subdistricts' => [],
-						];
-					}
-					if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id])) {
-						$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id] = [
-							'name'     => $row->subdistrict_name,
-							'villages' => [],
-						];
-					}
-					if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id])) {
-						$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id] = $row->village_name;
-					}
+				if (!isset($provinces[$row->province_id]['cities'][$row->city_id])) {
+					$provinces[$row->province_id]['cities'][$row->city_id] = [
+						'name'         => $row->city_name,
+						'subdistricts' => [],
+					];
 				}
-				$this->cache->save('provinces', $provinces);
+				if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id])) {
+					$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id] = [
+						'name'     => $row->subdistrict_name,
+						'villages' => [],
+					];
+				}
+				if (!isset($provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id])) {
+					$provinces[$row->province_id]['cities'][$row->city_id]['subdistricts'][$row->subdistrict_id]['villages'][$row->village_id] = $row->village_name;
+				}
 			}
 			$this->_response['status']               = 1;
-			$this->_response['data']['subdistricts'] = $this->cache->get('subdistricts');
-			$this->_response['data']['provinces']    = $this->cache->get('provinces');
+			$this->_response['data']['subdistricts'] = $subdistricts;
+			$this->_response['data']['provinces']    = $provinces;
 			$this->response->setJsonContent($this->_response);
 			return $this->response;
 		}
@@ -215,23 +209,23 @@ class UsersController extends ControllerBase {
 			'mobile_phone' => $this->_current_user->mobile_phone,
 			'address'      => $this->_current_user->address,
 			'subdistrict'  => [
-				'id'   => $this->_current_user->village->subdistrict->id,
+				'id'   => "{$this->_current_user->village->subdistrict->id}",
 				'name' => $this->_current_user->village->subdistrict->name,
 			],
 			'village'      => [
-				'id'   => $this->_current_user->village->id,
+				'id'   => "{$this->_current_user->village->id}",
 				'name' => $this->_current_user->village->name,
 			],
 			'subdistrict'  => [
-				'id'   => $this->_current_user->village->subdistrict->id,
+				'id'   => "{$this->_current_user->village->subdistrict->id}",
 				'name' => $this->_current_user->village->subdistrict->name,
 			],
 			'city'         => [
-				'id'   => $this->_current_user->village->subdistrict->city->id,
+				'id'   => "{$this->_current_user->village->subdistrict->city->id}",
 				'name' => $this->_current_user->village->subdistrict->city->name,
 			],
 			'province'     => [
-				'id'   => $this->_current_user->village->subdistrict->city->province->id,
+				'id'   => "{$this->_current_user->village->subdistrict->city->province->id}",
 				'name' => $this->_current_user->village->subdistrict->city->province->name,
 			],
 		];
@@ -243,8 +237,8 @@ class UsersController extends ControllerBase {
 			$current_user['open_on_thursday']      = $this->_current_user->open_on_thursday;
 			$current_user['open_on_friday']        = $this->_current_user->open_on_friday;
 			$current_user['open_on_saturday']      = $this->_current_user->open_on_saturday;
-			$current_user['business_opening_hour'] = $this->_current_user->business_opening_hour;
-			$current_user['business_closing_hour'] = $this->_current_user->business_closing_hour;
+			$current_user['business_opening_hour'] = "{$this->_current_user->business_opening_hour}";
+			$current_user['business_closing_hour'] = "{$this->_current_user->business_closing_hour}";
 			$current_user['minimum_purchase']      = $this->_current_user->minimum_purchase;
 			$current_user['delivery_hours']        = $this->_current_user->delivery_hours;
 			$current_user['delivery_hours']        = array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1);

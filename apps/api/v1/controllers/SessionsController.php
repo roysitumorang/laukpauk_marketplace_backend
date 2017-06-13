@@ -74,23 +74,23 @@ class SessionsController extends ControllerBase {
 			'mobile_phone' => $user->mobile_phone,
 			'address'      => $user->address,
 			'subdistrict'  => [
-				'id'   => $user->village->subdistrict->id,
+				'id'   => "{$user->village->subdistrict->id}",
 				'name' => $user->village->subdistrict->name,
 			],
 			'village'      => [
-				'id'   => $user->village->id,
+				'id'   => "{$user->village->id}",
 				'name' => $user->village->name,
 			],
 			'subdistrict'  => [
-				'id'   => $user->village->subdistrict->id,
+				'id'   => "{$user->village->subdistrict->id}",
 				'name' => $user->village->subdistrict->name,
 			],
 			'city'         => [
-				'id'   => $user->village->subdistrict->city->id,
+				'id'   => "{$user->village->subdistrict->city->id}",
 				'name' => $user->village->subdistrict->city->name,
 			],
 			'province'     => [
-				'id'   => $user->village->subdistrict->city->province->id,
+				'id'   => "{$user->village->subdistrict->city->province->id}",
 				'name' => $user->village->subdistrict->city->province->name,
 			],
 		];
@@ -102,8 +102,8 @@ class SessionsController extends ControllerBase {
 			$current_user['open_on_thursday']      = $user->open_on_thursday;
 			$current_user['open_on_friday']        = $user->open_on_friday;
 			$current_user['open_on_saturday']      = $user->open_on_saturday;
-			$current_user['business_opening_hour'] = $user->business_opening_hour;
-			$current_user['business_closing_hour'] = $user->business_closing_hour;
+			$current_user['business_opening_hour'] = "{$user->business_opening_hour}";
+			$current_user['business_closing_hour'] = "{$user->business_closing_hour}";
 			$current_user['minimum_purchase']      = $user->minimum_purchase;
 			$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
 		}
