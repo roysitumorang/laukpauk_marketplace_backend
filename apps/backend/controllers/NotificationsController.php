@@ -12,8 +12,9 @@ class NotificationsController extends ControllerBase {
 		$offset       = ($current_page - 1) * $limit;
 		$paginator    = new PaginatorModel([
 			'data'  => $this->currentUser->getRelated('notifications', [
-				'columns' => 'Application\Models\Notification.id, Application\Models\Notification.subject, Application\Models\Notification.link, Application\Models\Notification.created_at, Application\Models\NotificationRecipient.read_at',
-				'order'   => 'Application\Models\Notification.id DESC',
+				'conditions' => "Application\Models\Notification.type = 'web'",
+				'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.title, Application\Models\Notification.target_url, Application\Models\Notification.created_at, Application\Models\NotificationRecipient.read_at',
+				'order'      => 'Application\Models\Notification.id DESC',
 			]),
 			'limit' => $limit,
 			'page'  => $current_page,
