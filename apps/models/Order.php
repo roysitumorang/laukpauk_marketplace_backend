@@ -180,26 +180,29 @@ class Order extends ModelBase {
 			$device_tokens[] = $device->token;
 		}
 		if ($recipients) {
-			$template                               = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
-			$notification                           = new Notification;
-			$notification->notification_template_id = $template->id;
-			$notification->subject                  = $template->subject;
-			$notification->link                     = $template->url . $this->id;
-			$notification->created_by               = $this->created_by;
-			$notification->recipients               = $recipients;
+			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
+			$notification             = new Notification;
+			$notification->type       = $template->notification_type;
+			$notification->title      = $template->subject;
+			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->created_by = $this->created_by;
+			$notification->recipients = $recipients;
 			$notification->create();
 		}
 		if ($device_tokens) {
-			$template                               = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
-			$notification                           = new Notification;
-			$notification->notification_template_id = $template->id;
-			$notification->subject                  = $template->subject;
-			$notification->link                     = $template->url . $this->id;
-			$notification->created_by               = $this->created_by;
-			$notification->recipients               = [$this->merchant];
+			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
+			$notification             = new Notification;
+			$notification->type       = $template->notification_type;
+			$notification->title      = $template->subject;
+			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->created_by = $this->created_by;
+			$notification->recipients = [$this->merchant];
 			$notification->push($device_tokens, [
-				'subject' => 'Order Baru #' . $this->code,
-				'content' => 'Order Baru #' . $this->code,
+				'title'   => 'Order Baru #' . $this->code,
+				'message' => 'Order Baru #' . $this->code,
+			], [
+				'target_url'   => 'tab.order',
+				'target_param' => ['orderId' => $this->id],
 			]);
 		}
 	}
@@ -223,27 +226,30 @@ class Order extends ModelBase {
 			$device_tokens[] = $device->token;
 		}
 		if ($recipients) {
-			$template                               = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order cancelled'");
-			$notification                           = new Notification;
-			$notification->notification_template_id = $template->id;
-			$notification->subject                  = $template->subject;
-			$notification->link                     = $template->url . $this->id;
-			$notification->created_by               = $this->merchant->id;
-			$notification->recipients               = $recipients;
+			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order cancelled'");
+			$notification             = new Notification;
+			$notification->type       = $template->notification_type;
+			$notification->title      = $template->subject;
+			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->recipients = $recipients;
 			$notification->create();
 		}
 		if ($device_tokens) {
-			$template                               = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order cancelled'");
-			$notification                           = new Notification;
-			$notification->notification_template_id = $template->id;
-			$notification->subject                  = $template->subject;
-			$notification->link                     = $template->url . $this->id;
-			$notification->created_by               = $this->merchant->id;
-			$notification->recipients               = [$this->buyer];
+			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order cancelled'");
+			$notification             = new Notification;
+			$notification->type       = $template->notification_type;
+			$notification->title      = $template->subject;
+			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->recipients = [$this->buyer];
 			$notification->create();
 			$notification->push($device_tokens, [
-				'subject' => 'Order #' . $this->code . ' Dibatalkan',
-				'content' => 'Order #' . $this->code . ' Dibatalkan',
+				'title'   => 'Order #' . $this->code . ' Dibatalkan',
+				'message' => 'Order #' . $this->code . ' Dibatalkan',
+			], [
+				'target_url'   => 'tab.order',
+				'target_param' => ['orderId' => $this->id],
 			]);
 		}
 	}
@@ -271,26 +277,29 @@ class Order extends ModelBase {
 			$device_tokens[] = $device->token;
 		}
 		if ($recipients) {
-			$template                               = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order delivered'");
-			$notification                           = new Notification;
-			$notification->notification_template_id = $template->id;
-			$notification->subject                  = $template->subject;
-			$notification->link                     = $template->url . $this->id;
-			$notification->created_by               = $this->merchant->id;
-			$notification->recipients               = $recipients;
+			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order delivered'");
+			$notification             = new Notification;
+			$notification->type       = $template->notification_type;
+			$notification->title      = $template->subject;
+			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->recipients = $recipients;
 			$notification->create();
 		}
 		if ($device_tokens) {
-			$template                               = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order delivered'");
-			$notification                           = new Notification;
-			$notification->notification_template_id = $template->id;
-			$notification->subject                  = $template->subject;
-			$notification->link                     = $template->url . $this->id;
-			$notification->created_by               = $this->merchant->id;
-			$notification->recipients               = [$this->buyer];
+			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order delivered'");
+			$notification             = new Notification;
+			$notification->type       = $template->notification_type;
+			$notification->title      = $template->subject;
+			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->recipients = [$this->buyer];
 			$notification->push($device_tokens, [
-				'subject' => 'Order #' . $this->code . ' Diterima',
-				'content' => 'Order #' . $this->code . ' Diterima',
+				'title'   => 'Order #' . $this->code . ' Diterima',
+				'message' => 'Order #' . $this->code . ' Diterima',
+			], [
+				'target_url'   => 'tab.order',
+				'target_param' => ['orderId' => $this->id],
 			]);
 		}
 	}

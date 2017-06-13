@@ -5,13 +5,12 @@ namespace Application\Models;
 use Application\Models\ModelBase;
 
 class NotificationRecipient extends ModelBase {
-	public $id;
 	public $notification_id;
 	public $user_id;
 	public $read_at;
 
 	function getSource() {
-		return 'notification_recipients';
+		return 'notification_recipient';
 	}
 
 	function initialize() {
