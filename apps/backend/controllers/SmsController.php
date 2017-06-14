@@ -4,6 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Sms;
 use Application\Models\User;
+use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model;
 
 class SmsController extends ControllerBase {
