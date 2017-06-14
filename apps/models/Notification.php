@@ -4,6 +4,7 @@ namespace Application\Models;
 
 use Application\Models\ModelBase;
 use Phalcon\Validation;
+use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\StringLength;
 
@@ -36,6 +37,10 @@ class Notification extends ModelBase {
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'notification_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'recipients']);
 	}
 
+	function setType($type) {
+		$this->type = $type;
+	}
+
 	function setTitle($title) {
 		$this->title = $this->_filter->sanitize($title, ['string', 'trim']);
 	}
@@ -50,10 +55,6 @@ class Notification extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['type', 'message'], new PresenceOf([
-			'type'    => 'tipe notifikasi harus diisi',
-			'message' => 'pesan harus diisi',
-		]));
 		$validator->add('type', new InclusionIn([
 			'domain'  => static::TYPES,
 			'message' => 'tipe salah satu dari mobile atau web',

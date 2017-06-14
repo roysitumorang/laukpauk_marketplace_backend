@@ -52,11 +52,13 @@ class ControllerBase extends Controller {
 				'icon'      => 'envelope',
 				'expanded'  => $expanded == 'Mailbox',
 				'sub_items' => [
-					['label' => 'Inbox',       'link' => 'messages/index/unread:1'],
-					['label' => 'Outbox',      'link' => 'messages/index/read:1'],
-					['label' => 'Kirim Pesan', 'link' => 'messages/create'],
-					['label' => 'Semua Pesan', 'link' => 'messages'],
-					['label' => 'Feedbacks',   'link' => 'feedbacks'],
+					['label' => 'Inbox',             'link' => 'messages/index/unread:1'],
+					['label' => 'Outbox',            'link' => 'messages/index/read:1'],
+					['label' => 'Kirim Pesan',       'link' => 'messages/create'],
+					['label' => 'Semua Pesan',       'link' => 'messages'],
+					['label' => 'Feedbacks',         'link' => 'feedbacks'],
+					['label' => 'Notifikasi Mobile', 'link' => 'mobile_notifications'],
+					['label' => 'SMS',               'link' => 'sms'],
 				],
 			], [
 				'label'     => 'Content',
