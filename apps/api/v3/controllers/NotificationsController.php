@@ -37,7 +37,8 @@ class NotificationsController extends ControllerBase {
 			$this->_response['status']               = 1;
 			$this->_response['data']['notification'] = [
 				'id'         => $notification->id,
-				'subject'    => $notification->subject,
+				'title'      => $notification->title,
+				'message'    => $notification->message,
 				'target_url' => $notification->target_url,
 			];
 		} else {
