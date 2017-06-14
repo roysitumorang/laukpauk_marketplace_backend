@@ -11,7 +11,7 @@ class MobileNotificationsController extends ControllerBase {
 	function initialize() {
 		parent::initialize();
 		$this->view->menu  = $this->_menu('Mailbox');
-		$this->view->users = User::find(['premium_merchant IS NULL AND merchant_id IS NULL', 'order' => 'name ASC']);
+		$this->view->users = User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'order' => 'name ASC']);
 	}
 
 	function indexAction() {
@@ -74,12 +74,12 @@ class MobileNotificationsController extends ControllerBase {
 			$notification->setTargetUrl('#/tabs/home');
 			$user_id = $this->request->getPost('user_id');
 			$db      = $this->getDI()->getDb();
-			if ($user_id && $recipient = User::findFirst(['id = ?0 AND premium_merchant IS NULL AND merchant_id IS NULL', 'bind' => [$user_id]])) {
+			if ($user_id && $recipient = User::findFirst(['id = ?0 AND premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'bind' => [$user_id]])) {
 				$notification->recipients = [$recipient];
-				$result                   = $db->query("SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.id = {$recipient->id}");
+				$result                   = $db->query("SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1 AND b.id = {$recipient->id}");
 			} else {
 				$notification->recipients = $this->view->users;
-				$result                   = $db->query('SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL');
+				$result                   = $db->query('SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1');
 			}
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($row = $result->fetch()) {
