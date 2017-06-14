@@ -9,7 +9,7 @@ class SmsRecipient extends ModelBase {
 	public $user_id;
 
 	function getSource() {
-		return 'sms_recipients';
+		return 'sms_recipient';
 	}
 
 	function initialize() {
