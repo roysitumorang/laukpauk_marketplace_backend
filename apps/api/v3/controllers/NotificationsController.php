@@ -8,11 +8,11 @@ class NotificationsController extends ControllerBase {
 	function indexAction() {
 		$notifications = [];
 		$resultset     = $this->_current_user->getRelated('notifications', [
-			'Application\Models\NotificationRecipient.read_at IS NULL',
+			"Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL",
 			'order' => 'Application\Models\Notification.id DESC',
 		]);
 		foreach ($resultset as $notification) {
-			$notifications[] = ['id' => $notification->id, 'subject' => $notification->subject];
+			$notifications[] = ['id' => $notification->id, 'title' => $notification->title];
 		}
 		$this->_response['status']                = 1;
 		$this->_response['data']['notifications'] = $notifications;
@@ -22,23 +22,23 @@ class NotificationsController extends ControllerBase {
 
 	function showAction($id) {
 		$notification = $this->_current_user->getRelated('notifications', [
-			'Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0',
+			"Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0",
 			'bind' => [$id]
 		])->getFirst();
 		if ($notification) {
 			$notification_recipient = NotificationRecipient::findFirst([
-				'user_id = :user_id: AND notification_id = :notification_id:',
+				'user_id = ?0 AND notification_id = ?1',
 				'bind' => [
-					'user_id'         => $this->_current_user->id,
-					'notification_id' => $notification->id,
+					$this->_current_user->id,
+					$notification->id,
 				],
 			]);
 			$notification_recipient->read();
 			$this->_response['status']               = 1;
 			$this->_response['data']['notification'] = [
-				'id'      => $notification->id,
-				'subject' => $notification->subject,
-				'link'    => $notification->link,
+				'id'         => $notification->id,
+				'subject'    => $notification->subject,
+				'target_url' => $notification->target_url,
 			];
 		} else {
 			$this->_response['message'] = 'Notifikasi tidak ditemukan!';
