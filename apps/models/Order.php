@@ -183,7 +183,8 @@ class Order extends ModelBase {
 			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
 			$notification             = new Notification;
 			$notification->type       = $template->notification_type;
-			$notification->title      = $template->subject;
+			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
+			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
 			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
 			$notification->created_by = $this->created_by;
 			$notification->recipients = $recipients;
@@ -193,13 +194,14 @@ class Order extends ModelBase {
 			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
 			$notification             = new Notification;
 			$notification->type       = $template->notification_type;
-			$notification->title      = $template->subject;
+			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
+			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
 			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
 			$notification->created_by = $this->created_by;
 			$notification->recipients = [$this->merchant];
 			$notification->push($device_tokens, [
-				'title'   => 'Order Baru #' . $this->code,
-				'message' => 'Order Baru #' . $this->code,
+				'title'   => strtr($template->subject, '{order_id}', $this->code),
+				'message' => strtr($template->subject, '{order_id}', $this->code),
 			], [
 				'target_url'   => 'tab.order',
 				'target_param' => ['orderId' => $this->id],
@@ -226,27 +228,29 @@ class Order extends ModelBase {
 			$device_tokens[] = $device->token;
 		}
 		if ($recipients) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order cancelled'");
+			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'cancelled order'");
 			$notification             = new Notification;
 			$notification->type       = $template->notification_type;
-			$notification->title      = $template->subject;
+			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
+			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
 			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = $recipients;
 			$notification->create();
 		}
 		if ($device_tokens) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order cancelled'");
+			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'cancelled order'");
 			$notification             = new Notification;
 			$notification->type       = $template->notification_type;
-			$notification->title      = $template->subject;
+			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
+			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
 			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->create();
 			$notification->push($device_tokens, [
-				'title'   => 'Order #' . $this->code . ' Dibatalkan',
-				'message' => 'Order #' . $this->code . ' Dibatalkan',
+				'title'   => strtr($template->subject, '{order_id}', $this->code),
+				'message' => strtr($template->subject, '{order_id}', $this->code),
 			], [
 				'target_url'   => 'tab.order',
 				'target_param' => ['orderId' => $this->id],
@@ -277,26 +281,28 @@ class Order extends ModelBase {
 			$device_tokens[] = $device->token;
 		}
 		if ($recipients) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'order delivered'");
+			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'delivered order'");
 			$notification             = new Notification;
 			$notification->type       = $template->notification_type;
-			$notification->title      = $template->subject;
+			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
+			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
 			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = $recipients;
 			$notification->create();
 		}
 		if ($device_tokens) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'order delivered'");
+			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'delivered order'");
 			$notification             = new Notification;
 			$notification->type       = $template->notification_type;
-			$notification->title      = $template->subject;
+			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
+			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
 			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->push($device_tokens, [
-				'title'   => 'Order #' . $this->code . ' Diterima',
-				'message' => 'Order #' . $this->code . ' Diterima',
+				'title'   => strtr($template->subject, '{order_id}', $this->code),
+				'message' => strtr($template->subject, '{order_id}', $this->code),
 			], [
 				'target_url'   => 'tab.order',
 				'target_param' => ['orderId' => $this->id],
