@@ -33,7 +33,9 @@ return new Config([
 		'api_key' => 'NWFiNWZlNjgtNWFjYi00OGE2LTljOTYtNWVkYjRkZGYyNWVm',
 	],
 	'sms' => [
-		'username' => '3cg4o9',
-		'password' => 'l4ukp@uk',
+		'send_endpoint'    => 'https://reguler.zenziva.net/apps/smsapi.php',
+		'balance_endpoint' => 'https://reguler.zenziva.net/apps/smsapibalance.php',
+		'username'         => '3cg4o9',
+		'password'         => 'l4ukp@uk',
 	],
 ]);
