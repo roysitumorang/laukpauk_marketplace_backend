@@ -61,7 +61,7 @@ class Notification extends ModelBase {
 		]));
 		$validator->add(['title', 'message'], new StringLength([
 			'min' => [
-				'title'   => 0,
+				'title'   => 1,
 				'message' => 1,
 			],
 			'max' => [
@@ -69,6 +69,7 @@ class Notification extends ModelBase {
 				'message' => 1024,
 			],
 			'messageMinimum' => [
+				'title'   => 'judul harus diisi',
 				'message' => 'pesan harus diisi',
 			],
 			'messageMaximum' => [
