@@ -250,6 +250,19 @@ class UsersController extends ControllerBase {
 		return $this->response->redirect('/admin/users?status=1#' . $user->id);
 	}
 
+	function excelAction() {
+		$this->response->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0');
+		$this->response->setHeader('Content-Type', 'application/octet-stream');
+		$this->response->setHeader('Content-Disposition', 'attachment; filename=users.csv');
+		$output = fopen('php://output', 'w');
+		foreach (User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'columns' => 'name, mobile_phone', 'order' => 'name']) as $user) {
+			fputs($output, sprintf('"%s","","%s"' . "\r\n", strtr($user->name, '"', '\"'), strtr($user->mobile_phone, '-', '')));
+		}
+		fclose($output);
+		$this->response->send();
+		exit;
+	}
+
 	private function _prepare_form_datas(User $user) {
 		$provinces      = [];
 		$cities         = [];

@@ -28,7 +28,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/users/create" title="Tambah Member">Tambah Member</a><br><br>
+				<a href="/admin/users/create" title="Tambah Member"><i class="fa fa-plus-square"></i> Tambah Member</a><br><br>
 				<div style="padding:10px;background:#e5f2ff;font-size:14px;color:#333333">
 					<strong>Total Members:</strong>&nbsp;{{ total_users }} members /
 					<font size="2">
@@ -55,7 +55,8 @@
 									{% endfor %}
 								</select>&nbsp;&nbsp;
 								<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Name / Email / Phone">&nbsp;
-								<button type="submit" class="btn btn-info">CARI</button>
+								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
+								<a type="button" href="/admin/users/excel" target="_blank" class="btn btn-success"><i class="fa fa-file-excel-o"></i> Excel</a>
 							</form>
 						</td>
 					</tr>
