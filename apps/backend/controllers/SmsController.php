@@ -31,7 +31,7 @@ class SmsController extends ControllerBase {
 				$recipients .= 'Semua Member';
 			} else {
 				$i      = 0;
-				$result = $this->db->query("SELECT a.name FROM users a JOIN sms b ON a.id = b.user_id WHERE b.sms_id = {$item->id} ORDER BY a.name");
+				$result = $this->db->query("SELECT a.name FROM users a JOIN sms_recipient b ON a.id = b.user_id WHERE b.sms_id = {$item->id} ORDER BY a.name");
 				$result->setFetchMode(Db::FETCH_OBJ);
 				while ($row = $result->fetch()) {
 					$recipients .= ($i++ ? ', ' : '') . ' ' . $row->name;
