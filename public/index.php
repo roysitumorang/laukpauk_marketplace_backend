@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Phalcon\Debug;
 use Phalcon\Di\FactoryDefault;
+use Phalcon\Exception;
 use Phalcon\Mvc\Application;
 
 define('APP_PATH', realpath('..') . '/');
@@ -65,6 +66,6 @@ try {
 	$response = $application->handle();
 
 	$response->send();
-} catch (Throwable $e) {
+} catch (Exception $e) {
 	echo $e->getMessage() . ' @file: ' . $e->getFile() . ', line: ' . $e->getLine();
 }
