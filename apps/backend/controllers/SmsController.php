@@ -59,8 +59,7 @@ class SmsController extends ControllerBase {
 			} else {
 				$recipients = $this->view->users;
 			}
-			$sms->recipients = $recipients;
-			if ($sms->validation() && $sms->send()) {
+			if ($sms->validation() && $sms->send($recipients)) {
 				$this->flashSession->success('SMS berhasil dikirim.');
 				return $this->response->redirect('/admin/sms');
 			}

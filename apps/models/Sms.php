@@ -10,7 +10,6 @@ use SimpleXMLElement;
 class Sms extends ModelBase {
 	public $id;
 	public $body;
-	public $recipients;
 	public $created_by;
 	public $created_at;
 
@@ -59,14 +58,14 @@ class Sms extends ModelBase {
 		return $this->validate($validator);
 	}
 
-	function send() {
-		if (!$this->recipients) {
+	function send(array $recipients) {
+		if (!$recipients) {
 			return false;
 		}
 		$ch = curl_init();
-		foreach ($this->recipients as $recipient) {
+		foreach ($recipients as $recipient) {
 			curl_setopt_array($ch, [
-				CURLOPT_URL            => sprintf('%s?userkey=%s&passkey=%s&nohp=%s&pesan=%s', $this->_config->send_endpoint, urlencode($this->_config->username), urlencode($this->_config->password), $recipient, urlencode($this->body)),
+				CURLOPT_URL            => sprintf('%s?userkey=%s&passkey=%s&nohp=%s&pesan=%s', $this->_config->send_endpoint, urlencode($this->_config->username), urlencode($this->_config->password), $recipient->mobile_phone, urlencode($this->body)),
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_SSL_VERIFYPEER => 0,
 			]);
@@ -78,6 +77,7 @@ class Sms extends ModelBase {
 			}
 		}
 		curl_close($ch);
+		$this->__set('recipients', $recipients);
 		return $this->create();
 	}
 }
