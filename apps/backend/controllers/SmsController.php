@@ -4,7 +4,6 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Sms;
 use Application\Models\User;
-use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model;
 
 class SmsController extends ControllerBase {
@@ -27,17 +26,7 @@ class SmsController extends ControllerBase {
 		$pages = $this->_setPaginationRange($page);
 		$texts = [];
 		foreach ($page->items as $item) {
-			$recipients = '';
-			if ($this->db->fetchColumn("SELECT COUNT(1) FROM sms_recipient WHERE sms_id = {$item->id}") > 1) {
-				$recipients .= 'Semua Member';
-			} else {
-				$i      = 0;
-				$result = $this->db->query("SELECT a.name FROM users a JOIN sms_recipient b ON a.id = b.user_id WHERE b.sms_id = {$item->id} ORDER BY a.name");
-				$result->setFetchMode(Db::FETCH_OBJ);
-				while ($row = $result->fetch()) {
-					$recipients .= ($i++ ? ', ' : '') . ' ' . $row->name;
-				}
-			}
+			$recipients = $item->countRecipients() > 1 ? 'Semua Member' : $item->getRelated('recipients')->getFirst()->name;
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('recipients', $recipients);
 			$texts[] = $item;
