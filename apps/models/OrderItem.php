@@ -66,11 +66,11 @@ class OrderItem extends ModelBase {
 				'quantity'   => 1,
 			],
 			'maximum' => [
-				'unit_price' => 200000,
+				'unit_price' => 500000,
 				'quantity'   => 10,
 			],
 			'message' => [
-				'unit_price' => 'harga satuan minimal 1',
+				'unit_price' => 'harga satuan minimal 1, maksimal 500.000',
 				'quantity'   => 'jumlah minimal 1',
 			],
 		]));
