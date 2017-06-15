@@ -15,6 +15,7 @@ class Notification extends ModelBase {
 	public $user_id;
 	public $title;
 	public $message;
+	public $link;
 	public $target_url;
 	public $target_parameters;
 	public $created_by;
@@ -47,6 +48,10 @@ class Notification extends ModelBase {
 
 	function setMessage($message) {
 		$this->message = $this->_filter->sanitize($message, ['string', 'trim']);
+	}
+
+	function setLink($link) {
+		$this->link = $this->_filter->sanitize($link, ['string', 'trim']);
 	}
 
 	function setTargetUrl($target_url) {

@@ -185,7 +185,7 @@ class Order extends ModelBase {
 			$notification->type       = $template->notification_type;
 			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
 			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
-			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->target_url = strtr($template->target_url, '{order_id}', $this->id);
 			$notification->created_by = $this->created_by;
 			$notification->recipients = $recipients;
 			$notification->create();
@@ -196,14 +196,15 @@ class Order extends ModelBase {
 			$notification->type       = $template->notification_type;
 			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
 			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
-			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->link       = strtr($template->link, '{order_id}', $this->id);
+			$notification->target_url = $template->target_url;
 			$notification->created_by = $this->created_by;
 			$notification->recipients = [$this->merchant];
 			$notification->push($device_tokens, [
 				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
 				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
 			], [
-				'target_url'        => 'tab.order',
+				'target_url'        => $template->target_url,
 				'target_parameters' => ['orderId' => $this->id],
 			]);
 		}
@@ -233,7 +234,7 @@ class Order extends ModelBase {
 			$notification->type       = $template->notification_type;
 			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
 			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
-			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->target_url = strtr($template->target_url, '{order_id}', $this->id);
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = $recipients;
 			$notification->create();
@@ -244,7 +245,8 @@ class Order extends ModelBase {
 			$notification->type       = $template->notification_type;
 			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
 			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
-			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->link       = strtr($template->link, '{order_id}', $this->id);
+			$notification->target_url = $template->target_url;
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->create();
@@ -252,7 +254,7 @@ class Order extends ModelBase {
 				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
 				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
 			], [
-				'target_url'        => 'tab.order',
+				'target_url'        => $template->target_url,
 				'target_parameters' => ['orderId' => $this->id],
 			]);
 		}
@@ -286,7 +288,7 @@ class Order extends ModelBase {
 			$notification->type       = $template->notification_type;
 			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
 			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
-			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->target_url = strtr($template->target_url, '{order_id}', $this->id);
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = $recipients;
 			$notification->create();
@@ -297,14 +299,15 @@ class Order extends ModelBase {
 			$notification->type       = $template->notification_type;
 			$notification->title      = strtr($template->subject, '{order_id}', $this->code);
 			$notification->message    = strtr($template->subject, '{order_id}', $this->code);
-			$notification->target_url = strtr($template->target_url, '{id}', $this->id);
+			$notification->link       = strtr($template->link, '{order_id}', $this->id);
+			$notification->target_url = $template->target_url;
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->push($device_tokens, [
 				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
 				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
 			], [
-				'target_url'        => 'tab.order',
+				'target_url'        => $template->target_url,
 				'target_parameters' => ['orderId' => $this->id],
 			]);
 		}

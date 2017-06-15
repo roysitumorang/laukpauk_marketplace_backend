@@ -13,6 +13,7 @@ class NotificationTemplate extends ModelBase {
 	public $notification_type;
 	public $name;
 	public $subject;
+	public $link;
 	public $target_url;
 	public $created_by;
 	public $created_at;
@@ -37,6 +38,10 @@ class NotificationTemplate extends ModelBase {
 
 	function setSubject($subject) {
 		$this->subject = $this->_filter->sanitize($subject, ['string', 'trim']);
+	}
+
+	function setLink($link) {
+		$this->link = $this->_filter->sanitize($link, ['string', 'trim']);
 	}
 
 	function setTargetUrl($target_url) {
