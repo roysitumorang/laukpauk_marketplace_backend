@@ -12,9 +12,9 @@ use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
-use Error;
 use IntlDateFormatter;
 use Phalcon\Db;
+use Phalcon\Exception;
 use stdClass;
 
 class OrdersController extends ControllerBase {
@@ -82,24 +82,24 @@ QUERY
 	function createAction() {
 		try {
 			if (!$this->request->isPost()) {
-				throw new Error('Request tidak valid!');
+				throw new Exception('Request tidak valid!');
 			}
 			if ($this->_current_user->role->name != 'Buyer') {
-				throw new Error('Hanya pembeli yang bisa melakukan pemesanan!');
+				throw new Exception('Hanya pembeli yang bisa melakukan pemesanan!');
 			}
 			if (!$this->_post->orders) {
-				throw new Error('Order item kosong!');
+				throw new Exception('Order item kosong!');
 			}
 			$orders = [];
 			$total  = 0;
 			$today  = $this->currentDatetime->format('Y-m-d');
 			try {
 				$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
-			} catch (Error $ex) {
-				throw new Error('Order Anda tidak valid!');
+			} catch (Exception $ex) {
+				throw new Exception('Order Anda tidak valid!');
 			}
 			if (!filter_var($this->_post->delivery->hour, FILTER_VALIDATE_INT)) {
-				throw new Error('Order Anda tidak valid!');
+				throw new Exception('Order Anda tidak valid!');
 			}
 			$delivery_date->setTime($this->_post->delivery->hour, 0, 0);
 			if ($this->_post->coupon_code) {
@@ -130,13 +130,13 @@ QUERY
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
 				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$coupon || ($coupon->multiple_use && $coupon->usage > 1)) {
-					throw new Error('Order Anda tidak valid!');
+					throw new Exception('Order Anda tidak valid!');
 				}
 			}
 			foreach ($this->_post->orders as $cart) {
 				$merchant = $this->_premium_merchant ? $this->_premium_merchant : User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND premium_merchant IS NULL AND id = ?1', 'bind' => [Role::MERCHANT, $cart->merchant_id]]);
 				if (!$merchant) {
-					throw new Error('Order Anda tidak valid!');
+					throw new Exception('Order Anda tidak valid!');
 				}
 				$order                     = new Order;
 				$order_items               = [];
@@ -153,7 +153,7 @@ QUERY
 				foreach ($cart->products as $item) {
 					$product = Product::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->id]]);
 					if (!$product) {
-						throw new Error('Order Anda tidak valid');
+						throw new Exception('Order Anda tidak valid');
 					}
 					$order_item             = new OrderItem;
 					$order_item->product_id = $product->id;
@@ -167,7 +167,7 @@ QUERY
 				$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
 				$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
 				if ($order->original_bill < $minimum_purchase) {
-					throw new Error('Order Anda tidak valid!');
+					throw new Exception('Order Anda tidak valid!');
 				}
 				$order->final_bill    = $order->original_bill;
 				$order->discount      = 0;
@@ -175,7 +175,7 @@ QUERY
 				$order->final_bill   += $order->shipping_cost;
 				$order->items         = $order_items;
 				if (!$order->validation()) {
-					throw new Error('Order Anda tidak valid!');
+					throw new Exception('Order Anda tidak valid!');
 				}
 				if (!$coupon) {
 					$order->create();
@@ -186,7 +186,7 @@ QUERY
 			}
 			if ($coupon) {
 				if ($total < $coupon->minimum_purchase) {
-					throw new Error('Order Anda tidak valid!');
+					throw new Exception('Order Anda tidak valid!');
 				}
 				$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100);
 				foreach ($orders as $order) {
@@ -218,7 +218,7 @@ QUERY
 			}
 			$this->_response['status']  = 1;
 			$this->_response['message'] = 'Terima kasih, order Anda segera kami proses.';
-		} catch (Error $e) {
+		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
