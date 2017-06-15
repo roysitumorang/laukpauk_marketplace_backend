@@ -200,8 +200,8 @@ class Order extends ModelBase {
 			$notification->created_by = $this->created_by;
 			$notification->recipients = [$this->merchant];
 			$notification->push($device_tokens, [
-				'title'   => strtr($template->subject, '{order_id}', $this->code),
-				'message' => strtr($template->subject, '{order_id}', $this->code),
+				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
+				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
 			], [
 				'target_url'        => 'tab.order',
 				'target_parameters' => ['orderId' => $this->id],
@@ -249,8 +249,8 @@ class Order extends ModelBase {
 			$notification->recipients = [$this->buyer];
 			$notification->create();
 			$notification->push($device_tokens, [
-				'title'   => strtr($template->subject, '{order_id}', $this->code),
-				'message' => strtr($template->subject, '{order_id}', $this->code),
+				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
+				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
 			], [
 				'target_url'        => 'tab.order',
 				'target_parameters' => ['orderId' => $this->id],
@@ -301,8 +301,8 @@ class Order extends ModelBase {
 			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->push($device_tokens, [
-				'title'   => strtr($template->subject, '{order_id}', $this->code),
-				'message' => strtr($template->subject, '{order_id}', $this->code),
+				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
+				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
 			], [
 				'target_url'        => 'tab.order',
 				'target_parameters' => ['orderId' => $this->id],
