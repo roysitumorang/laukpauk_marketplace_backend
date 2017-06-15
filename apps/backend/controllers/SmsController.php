@@ -19,7 +19,7 @@ class SmsController extends ControllerBase {
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
 		$paginator    = new Model([
-			'data'  => Sms::find(['order' => 'id DESC']),
+			'data'  => $this->currentUser->getRelated('own_sms', ['order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
@@ -54,10 +54,13 @@ class SmsController extends ControllerBase {
 			$recipients = [];
 			$user_id    = $this->request->getPost('user_id');
 			$sms->setBody($this->request->getPost('body'));
+			$sms->user_id = $this->currentUser->id;
 			if ($user_id && $recipient = User::findFirst(['id = ?0 AND premium_merchant IS NULL AND merchant_id IS NULL', 'bind' => [$user_id]])) {
 				$recipients[] = $recipient;
 			} else {
-				$recipients = $this->view->users;
+				foreach ($this->view->users as $user) {
+					$recipients[] = $user;
+				}
 			}
 			if ($sms->validation() && $sms->send($recipients)) {
 				$this->flashSession->success('SMS berhasil dikirim.');

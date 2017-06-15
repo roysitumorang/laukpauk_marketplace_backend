@@ -9,6 +9,7 @@ use SimpleXMLElement;
 
 class Sms extends ModelBase {
 	public $id;
+	public $user_id;
 	public $body;
 	public $created_by;
 	public $created_at;
@@ -25,6 +26,10 @@ class Sms extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
+		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+			'alias'    => 'user',
+			'reusable' => true,
+		]);
 		$this->hasManyToMany('id', 'Application\Models\SmsRecipient', 'sms_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'recipients']);
 	}
 
@@ -69,12 +74,7 @@ class Sms extends ModelBase {
 				CURLOPT_RETURNTRANSFER => 1,
 				CURLOPT_SSL_VERIFYPEER => 0,
 			]);
-			$response = curl_exec($ch);
-			$result   = new SimpleXMLElement($response);
-			if (!$response || !$result || !$result->message || $result->message->status != 0) {
-				curl_close($ch);
-				return false;
-			}
+			curl_exec($ch);
 		}
 		curl_close($ch);
 		$this->__set('recipients', $recipients);
