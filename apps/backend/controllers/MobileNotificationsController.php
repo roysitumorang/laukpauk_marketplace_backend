@@ -42,24 +42,27 @@ class MobileNotificationsController extends ControllerBase {
 		$user_id      = '';
 		if ($this->request->isPost()) {
 			$device_tokens = [];
+			$recipients    = [];
 			$content       = [
 				'title'   => $this->request->getPost('title'),
 				'message' => $this->request->getPost('message'),
 			];
-			$notification->user_id = $this->getDI()->getCurrentUser()->id;
+			$notification->user_id = $this->currentUser->id;
 			$notification->setType('mobile');
 			$notification->setTitle($this->request->getPost('title'));
 			$notification->setMessage($this->request->getPost('message'));
-			$notification->setTargetUrl('#/tabs/home');
 			$user_id = $this->request->getPost('user_id');
 			$db      = $this->getDI()->getDb();
 			if ($user_id && $recipient = User::findFirst(['id = ?0 AND premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'bind' => [$user_id]])) {
-				$notification->recipients = [$recipient];
-				$result                   = $db->query("SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1 AND b.id = {$recipient->id}");
+				$recipients[] = $recipient;
+				$result       = $db->query("SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1 AND b.id = {$recipient->id}");
 			} else {
-				$notification->recipients = $this->view->users;
-				$result                   = $db->query('SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1');
+				foreach ($this->view->users as $user) {
+					$recipients[] = $user;
+				}
+				$result = $db->query('SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1');
 			}
+			$notification->recipients = $recipients;
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($row = $result->fetch()) {
 				$device_tokens[] = $row->token;

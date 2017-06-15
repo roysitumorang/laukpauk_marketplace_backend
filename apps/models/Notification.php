@@ -16,6 +16,7 @@ class Notification extends ModelBase {
 	public $title;
 	public $message;
 	public $target_url;
+	public $target_parameters;
 	public $created_by;
 	public $created_at;
 
@@ -58,40 +59,58 @@ class Notification extends ModelBase {
 			'domain'  => static::TYPES,
 			'message' => 'tipe salah satu dari mobile atau web',
 		]));
-		$validator->add(['title', 'message'], new StringLength([
+		$validator->add(['title', 'message', 'target_url'], new StringLength([
 			'min' => [
-				'title'   => 1,
-				'message' => 1,
+				'title'      => 1,
+				'message'    => 1,
+				'target_url' => 1,
 			],
 			'max' => [
-				'title'   => 200,
-				'message' => 1024,
+				'title'      => 200,
+				'message'    => 1024,
+				'target_url' => 200,
 			],
 			'messageMinimum' => [
-				'title'   => 'judul harus diisi',
-				'message' => 'pesan harus diisi',
+				'title'      => 'judul harus diisi',
+				'message'    => 'pesan harus diisi',
+				'target_url' => 'link target harus diisi',
 			],
 			'messageMaximum' => [
-				'title'   => 'judul maksimal 200 karakter',
-				'message' => 'pesan maksimal 1024 karakter',
+				'title'      => 'judul maksimal 200 karakter',
+				'message'    => 'pesan maksimal 1024 karakter',
+				'target_url' => 'link target maksimal 200 karakter',
 			]
 		]));
 		return $this->validate($validator);
 	}
 
 	function push(array $tokens, array $content, array $payload = []) {
-		$ch = curl_init();
+		if (!isset($payload['target_url'])) {
+			$payload['target_url'] = $this->target_url = 'tab.notification';
+		}
+		if (is_array($payload['target_parameters']) && !empty($payload['target_parameters'])) {
+			$this->target_parameters = json_encode($payload['target_parameters']);
+		}
+		if (!$this->create()) {
+			return false;
+		}
+		if (!isset($payload['target_parameters'])) {
+			$payload['target_parameters'] = ['notificationId' => $this->id];
+			$this->update(['target_parameters' => json_encode($payload['target_parameters'])]);
+		}
+		$config = $this->getDI()->getConfig()->onesignal;
+		$ch     = curl_init();
 		curl_setopt_array($ch, [
 			CURLOPT_URL            => 'https://onesignal.com/api/v1/notifications',
 			CURLOPT_POST           => 1,
 			CURLOPT_HTTPHEADER     => [
 				'Content-Type: application/json; charset=utf-8',
-				'Authorization: Basic ' . $this->getDI()->getConfig()->onesignal->api_key,
+				'Authorization: Basic ' . $config->api_key,
 			],
 			CURLOPT_RETURNTRANSFER => 1,
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_POSTFIELDS     => json_encode([
-				'app_id'             => $this->getDI()->getConfig()->onesignal->app_id,
+				'app_id'             => $config->app_id,
 				'include_player_ids' => $tokens,
 				'priority'           => 10,
 				'headings'           => ['en' => $content['title'] ?: ''],
@@ -99,9 +118,8 @@ class Notification extends ModelBase {
 				'data'               => $payload,
 			]),
 		]);
-		$response = curl_exec($ch);
+		curl_exec($ch);
 		curl_close($ch);
-		$result = json_decode($response);
-		return $result->errors ? false : $this->create();
+		return true;
 	}
 }

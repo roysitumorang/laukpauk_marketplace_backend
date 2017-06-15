@@ -203,8 +203,8 @@ class Order extends ModelBase {
 				'title'   => strtr($template->subject, '{order_id}', $this->code),
 				'message' => strtr($template->subject, '{order_id}', $this->code),
 			], [
-				'target_url'   => 'tab.order',
-				'target_param' => ['orderId' => $this->id],
+				'target_url'        => 'tab.order',
+				'target_parameters' => ['orderId' => $this->id],
 			]);
 		}
 	}
@@ -252,8 +252,8 @@ class Order extends ModelBase {
 				'title'   => strtr($template->subject, '{order_id}', $this->code),
 				'message' => strtr($template->subject, '{order_id}', $this->code),
 			], [
-				'target_url'   => 'tab.order',
-				'target_param' => ['orderId' => $this->id],
+				'target_url'        => 'tab.order',
+				'target_parameters' => ['orderId' => $this->id],
 			]);
 		}
 	}
@@ -304,8 +304,8 @@ class Order extends ModelBase {
 				'title'   => strtr($template->subject, '{order_id}', $this->code),
 				'message' => strtr($template->subject, '{order_id}', $this->code),
 			], [
-				'target_url'   => 'tab.order',
-				'target_param' => ['orderId' => $this->id],
+				'target_url'        => 'tab.order',
+				'target_parameters' => ['orderId' => $this->id],
 			]);
 		}
 	}
