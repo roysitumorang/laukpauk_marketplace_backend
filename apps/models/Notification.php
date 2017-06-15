@@ -5,7 +5,6 @@ namespace Application\Models;
 use Application\Models\ModelBase;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\StringLength;
 
 class Notification extends ModelBase {
