@@ -358,8 +358,8 @@ class User extends ModelBase {
 			],
 		]));
 		$validator->add('mobile_phone', new Regex([
-			'pattern' => '/^(\+62)?\d+$/',
-			'message' => 'nomor HP harus dalam bentuk angka',
+			'pattern' => '/^(\+?0?62)?0?8\d{8,10}$/',
+			'message' => 'nomor HP tidak valid',
 		]));
 		if ($this->role_id == Role::MERCHANT) {
 			$validator->add('company', new PresenceOf(['message' => 'nama toko harus diisi']));
