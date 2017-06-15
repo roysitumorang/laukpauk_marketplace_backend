@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Notification;
 use Application\Models\User;
 use Phalcon\Db;
-use Phalcon\Paginator\Adapter\QueryBuilder;
+use Phalcon\Paginator\Adapter\Model;
 
 class MobileNotificationsController extends ControllerBase {
 	function initialize() {
@@ -18,37 +18,16 @@ class MobileNotificationsController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$builder      = $this->modelsManager->createBuilder()
-			->columns([
-				'id',
-				'title',
-				'message',
-				'target_url',
-				'created_at',
-			])
-			->from('Application\Models\Notification')
-			->orderBy('id DESC')
-			->where("type = 'mobile' AND user_id = {$this->currentUser->id}");
-		$paginator = new QueryBuilder([
-			'builder' => $builder,
-			'limit'   => $limit,
-			'page'    => $current_page,
+		$paginator    = new Model([
+			'data'  => $this->currentUser->getRelated('own_notifications', ["type = 'mobile'", 'order' => 'id DESC']),
+			'limit' => $limit,
+			'page'  => $current_page,
 		]);
 		$page          = $paginator->getPaginate();
 		$pages         = $this->_setPaginationRange($page);
 		$notifications = [];
 		foreach ($page->items as $item) {
-			$recipients = '';
-			if ($this->db->fetchColumn("SELECT COUNT(1) FROM notification_recipient WHERE notification_id = {$item->id}") > 1) {
-				$recipients .= 'Semua Member';
-			} else {
-				$i      = 0;
-				$result = $this->db->query("SELECT a.name FROM users a JOIN notification_recipient b ON a.id = b.user_id WHERE b.notification_id = {$item->id}");
-				$result->setFetchMode(Db::FETCH_OBJ);
-				while ($row = $result->fetch()) {
-					$recipients .= ($i++ ? ', ' : '') . ' ' . $row->name;
-				}
-			}
+			$recipients = $item->countRecipients() > 1 ? 'Semua Member' : $item->getRelated('recipients')->getFirst()->name;
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('recipients', $recipients);
 			$notifications[] = $item;
