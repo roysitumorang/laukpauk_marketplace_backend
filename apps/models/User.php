@@ -357,6 +357,10 @@ class User extends ModelBase {
 				'deposit'      => 'deposit harus diisi',
 			],
 		]));
+		$validator->add('name', new Regex([
+			'pattern' => "/^[A-Za-z' ]+$/",
+			'message' => 'nama tidak valid',
+		]));
 		$validator->add('mobile_phone', new Regex([
 			'pattern' => '/^(\+?0?62)?0?8\d{8,10}$/',
 			'message' => 'nomor HP tidak valid',
