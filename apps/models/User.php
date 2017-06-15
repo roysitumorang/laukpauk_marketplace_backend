@@ -13,6 +13,7 @@ use Phalcon\Validation\Validator\Email;
 use Phalcon\Validation\Validator\File as FileValidator;
 use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Regex;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class User extends ModelBase {
@@ -355,6 +356,10 @@ class User extends ModelBase {
 				'mobile_phone' => 'nomor HP harus diisi',
 				'deposit'      => 'deposit harus diisi',
 			],
+		]));
+		$validator->add('mobile_phone', new Regex([
+			'pattern' => '/^(\+62)?\d+$/',
+			'message' => 'nomor HP harus dalam bentuk angka',
 		]));
 		if ($this->role_id == Role::MERCHANT) {
 			$validator->add('company', new PresenceOf(['message' => 'nama toko harus diisi']));
