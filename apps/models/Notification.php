@@ -86,12 +86,13 @@ class Notification extends ModelBase {
 
 	function push(array $tokens, array $content, array $payload = []) {
 		if (!isset($payload['target_url'])) {
-			$payload['target_url'] = $this->target_url = 'tab.notification';
+			$payload['target_url'] = 'tab.notification';
 		}
+		$this->target_url = $payload['target_url'];
 		if (is_array($payload['target_parameters']) && !empty($payload['target_parameters'])) {
 			$this->target_parameters = json_encode($payload['target_parameters']);
 		}
-		if (!$this->create()) {
+		if (!$this->validation() || !$this->create()) {
 			return false;
 		}
 		if (!isset($payload['target_parameters'])) {

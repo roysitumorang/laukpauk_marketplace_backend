@@ -67,7 +67,7 @@ class MobileNotificationsController extends ControllerBase {
 			while ($row = $result->fetch()) {
 				$device_tokens[] = $row->token;
 			}
-			if ($notification->validation() && $notification->push($device_tokens, $content)) {
+			if ($notification->push($device_tokens, $content)) {
 				$this->flashSession->success('Notifikasi berhasil dikirim.');
 				return $this->response->redirect('/admin/mobile_notifications');
 			}
