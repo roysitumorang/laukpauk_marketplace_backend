@@ -13,6 +13,7 @@ use Phalcon\Validation\Validator\Callback;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Regex;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class Order extends ModelBase {
@@ -106,6 +107,10 @@ class Order extends ModelBase {
 				'scheduled_delivery' => 'waktu pengantaran harus diisi',
 			],
 		]));
+		$validator->add('name', new Regex([
+			'pattern' => "/^[A-Za-z'\. ]+$/",
+			'message' => 'nama tidak valid',
+		]));
 		$validator->add('code', new Uniqueness([
 			'message' => 'kode order sudah ada',
 		]));
@@ -167,6 +172,9 @@ class Order extends ModelBase {
 	}
 
 	function afterCreate() {
+		$this->buyer->setName($this->name);
+		$this->buyer->setAddress($this->address);
+		$this->buyer->update();
 		$recipients    = [];
 		$device_tokens = [];
 		$admins        = User::find([

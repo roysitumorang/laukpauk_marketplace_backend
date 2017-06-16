@@ -141,7 +141,7 @@ QUERY
 				$order                     = new Order;
 				$order_items               = [];
 				$order->merchant           = $merchant;
-				$order->name               = $this->_current_user->name;
+				$order->name               = $this->_post->delivery->name;
 				$order->mobile_phone       = $this->_current_user->mobile_phone;
 				$order->address            = $this->_post->delivery->address;
 				$order->village_id         = $this->_current_user->village_id;
@@ -198,9 +198,6 @@ QUERY
 					}
 					$order->create();
 				}
-			}
-			if (!$this->_current_user->address) {
-				$this->_current_user->update(['address' => $this->_post->delivery->address]);
 			}
 			if ($this->_post->device_token) {
 				$device = Device::findFirstByToken($this->_post->device_token);
