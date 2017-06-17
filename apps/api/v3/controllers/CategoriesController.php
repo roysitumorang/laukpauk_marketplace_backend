@@ -16,30 +16,18 @@ class CategoriesController extends ControllerBase {
 			$category->products = [];
 			$query              = <<<QUERY
 				SELECT
-					d.id,
-					d.user_id,
-					d.product_category_id,
-					d.name,
-					d.price,
-					d.stock,
-					d.stock_unit,
-					d.picture,
-					COALESCE(SUM(g.quantity), 0) AS total_sale
+					COUNT(1)
 				FROM
 					users a
-					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
-					JOIN products d ON a.id = d.id
-					JOIN product_categories f ON d.product_category_id = f.id
-					LEFT JOIN order_items g ON d.id = g.product_id
-					LEFT JOIN orders h ON g.order_id = h.id AND h.status = 1
+					JOIN service_areas b ON a.id = b.user_id
+					JOIN villages c ON b.village_id = c.id
+					JOIN products d ON a.id = d.user_id
+					JOIN order_items e ON d.id = e.product_id
+					JOIN orders f ON e.order_id = f.id AND f.status = 1
 				WHERE
 					a.status = 1 AND
-					b.name = 'Merchant' AND
-					c.village_id = {$this->_current_user->village->id} AND
+					c.subdistrict_id = {$this->_current_user->village->subdistrict->id} AND
 					d.published = 1 AND
-					d.stock > 0 AND
-					f.published = 1 AND
 					a.premium_merchant
 QUERY;
 			if ($this->_premium_merchant) {
@@ -47,7 +35,14 @@ QUERY;
 			} else {
 				$query .= ' IS NULL';
 			}
-			$query .= " AND f.id = {$category->id} GROUP BY d.id ORDER BY total_sale DESC LIMIT 2 OFFSET 0";
+			$query .= " AND d.product_category_id = {$category->id}";
+			if ($this->db->fetchColumn($query)) {
+				$query  = strtr($query, ['COUNT(1)' => 'd.id, d.user_id, d.product_category_id, d.name, d.price, d.stock, d.stock_unit, d.picture, COALESCE(SUM(e.quantity), 0) AS total_sale']);
+				$query .= ' GROUP BY d.id ORDER BY total_sale DESC LIMIT 2 OFFSET 0';
+			} else {
+				$query  = strtr($query, ['COUNT(1)' => 'd.id, d.user_id, d.product_category_id, d.name, d.price, d.stock, d.stock_unit, d.picture', 'JOIN order_items e ON d.id = e.product_id' => '', 'JOIN orders f ON e.order_id = f.id AND f.status = 1' => '']);
+				$query .= ' GROUP BY d.id LIMIT 2 OFFSET FLOOR(RANDOM() * ' . $this->db->fetchColumn('SELECT COUNT(1) FROM products') . ')';
+			}
 			$sub_result = $this->db->query($query);
 			$sub_result->setFetchMode(Db::FETCH_OBJ);
 			while ($product = $sub_result->fetch()) {
