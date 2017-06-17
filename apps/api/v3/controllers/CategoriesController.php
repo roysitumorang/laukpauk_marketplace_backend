@@ -56,7 +56,9 @@ QUERY;
 				unset($product->total_sale);
 				$category->products[] = $product;
 			}
-			$categories[] = $category;
+			if ($category->products) {
+				$categories[] = $category;
+			}
 		}
 		if ($merchant_ids) {
 			$query = <<<QUERY
