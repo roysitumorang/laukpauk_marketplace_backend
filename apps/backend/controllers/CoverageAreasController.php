@@ -3,13 +3,13 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Village;
-use Application\Models\ServiceArea;
+use Application\Models\CoverageArea;
 use Application\Models\Role;
 use Application\Models\User;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
-class ServiceAreasController extends ControllerBase {
+class CoverageAreasController extends ControllerBase {
 	private $_user;
 
 	function onConstruct() {
@@ -25,25 +25,25 @@ class ServiceAreasController extends ControllerBase {
 	}
 
 	function indexAction() {
-		$this->_render(new ServiceArea);
+		$this->_render(new CoverageArea);
 	}
 
 	function createAction() {
-		$service_area = new ServiceArea;
+		$coverage_area = new CoverageArea;
 		if ($this->request->isPost()) {
-			$service_area->user_id    = $this->_user->id;
-			$service_area->village_id = Village::findFirstById($this->request->getPost('village_id', 'int'))->id;
-			$service_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
-			if ($service_area->validation() && $service_area->create()) {
+			$coverage_area->user_id    = $this->_user->id;
+			$coverage_area->village_id = Village::findFirstById($this->request->getPost('village_id', 'int'))->id;
+			$coverage_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
+			if ($coverage_area->validation() && $coverage_area->create()) {
 				$this->flashSession->success('Penambahan area operasional berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas");
+				return $this->response->redirect("/admin/users/{$this->_user->id}/coverage_areas");
 			}
-			foreach ($service_area->getMessages() as $error) {
+			foreach ($coverage_area->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_render($service_area);
-		$this->view->render('service_areas', 'index');
+		$this->_render($coverage_area);
+		$this->view->render('coverage_areas', 'index');
 	}
 
 	function updateAction() {
@@ -54,33 +54,33 @@ class ServiceAreasController extends ControllerBase {
 				'minimum_purchase' => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
 			]);
 			foreach ($input['id'] as $k => $id) {
-				$service_area = ServiceArea::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_user->id, $id]]);
-				if ($service_area) {
-					$service_area->setMinimumPurchase($input['minimum_purchase'][$k]);
-					$service_area->update();
+				$coverage_area = CoverageArea::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_user->id, $id]]);
+				if ($coverage_area) {
+					$coverage_area->setMinimumPurchase($input['minimum_purchase'][$k]);
+					$coverage_area->update();
 				}
 			}
-			$this->flashSession->success('Update produk berhasil!');
-			return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
+			$this->flashSession->success('Update area operasional berhasil!');
+			return $this->response->redirect("/admin/users/{$this->_user->id}/coverage_areas" . ($page > 1 ? '/index/page:' . $page : ''));
 		}
-		$this->_render($service_area);
+		$this->_render($coverage_area);
 	}
 
 
 	function deleteAction($id) {
 		$page = $this->request->get('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
-			if (!($service_area = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
+			if (!($coverage_area = CoverageArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
 				$this->flashSession->error('Area operasional tidak ditemukan');
 			} else {
-				$service_area->delete();
+				$coverage_area->delete();
 				$this->flashSession->success('Area operasional berhasil dihapus');
 			}
 		}
-		return $this->response->redirect("/admin/users/{$this->_user->id}/service_areas" . ($page > 1 ? '/index/page:' . $page : ''));
+		return $this->response->redirect("/admin/users/{$this->_user->id}/coverage_areas" . ($page > 1 ? '/index/page:' . $page : ''));
 	}
 
-	private function _render(ServiceArea $service_area = null) {
+	private function _render(CoverageArea $coverage_area = null) {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -93,7 +93,7 @@ class ServiceAreasController extends ControllerBase {
 				a.id AS province_id,
 				a.name AS province_name,
 				b.id AS city_id,
-				CONCAT_WS(' ', b.type, b.name) AS city_name,
+				b.type || ' ' || b.name AS city_name,
 				c.id AS subdistrict_id,
 				c.name AS subdistrict_name,
 				d.id AS village_id,
@@ -102,7 +102,7 @@ class ServiceAreasController extends ControllerBase {
 			JOIN cities b ON a.id = b.province_id
 			JOIN subdistricts c ON b.id = c.city_id
 			JOIN villages d ON c.id = d.subdistrict_id
-			WHERE NOT EXISTS(SELECT 1 FROM service_areas e WHERE e.village_id = d.id AND e.user_id = {$this->_user->id})
+			WHERE NOT EXISTS(SELECT 1 FROM coverage_area e WHERE e.village_id = d.id AND e.user_id = {$this->_user->id})
 			ORDER BY province_name, city_name, subdistrict_name, village_name
 QUERY
 		);
@@ -134,14 +134,14 @@ QUERY
 		$current_subdistricts   = $subdistricts[$current_city_id];
 		$current_subdistrict_id = array_keys($current_subdistricts)[0];
 		$current_villages       = $villages[$current_subdistrict_id];
-		$services_areas         = [];
+		$coverage_areas         = [];
 		$builder                = $this->modelsManager->createBuilder()
 			->columns([
 				'e.id',
 				'province_id'      => 'a.id',
 				'province_name'    => 'a.name',
 				'city_id'          => 'b.id',
-				'city_name'        => "CONCAT_WS(' ', b.type, b.name)",
+				'city_name'        => "b.type || ' ' || b.name",
 				'subdistrict_id'   => 'c.id',
 				'subdistrict_name' => 'c.name',
 				'village_id'       => 'd.id',
@@ -152,7 +152,7 @@ QUERY
 			->join('Application\Models\City', 'a.id = b.province_id', 'b')
 			->join('Application\Models\Subdistrict', 'b.id = c.city_id', 'c')
 			->join('Application\Models\Village', 'c.id = d.subdistrict_id', 'd')
-			->join('Application\Models\ServiceArea', 'd.id = e.village_id', 'e')
+			->join('Application\Models\CoverageArea', 'd.id = e.village_id', 'e')
 			->where('e.user_id = ' . $this->_user->id)
 			->orderBy('province_name, city_name, subdistrict_name, village_name');
 		$paginator = new QueryBuilder([
@@ -164,13 +164,13 @@ QUERY
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$services_areas[] = $item;
+			$coverage_areas[] = $item;
 		}
 		$this->view->menu                 = $this->_menu('Members');
 		$this->view->pages                = $pages;
 		$this->view->page                 = $page;
 		$this->view->user                 = $this->_user;
-		$this->view->service_areas        = $services_areas;
+		$this->view->coverage_areas       = $coverage_areas;
 		$this->view->provinces            = $provinces;
 		$this->view->cities               = $cities;
 		$this->view->subdistricts         = $subdistricts;
@@ -178,8 +178,8 @@ QUERY
 		$this->view->current_cities       = $current_cities;
 		$this->view->current_subdistricts = $current_subdistricts;
 		$this->view->current_villages     = $current_villages;
-		if ($service_area) {
-			$this->view->service_area = $service_area;
+		if ($coverage_area) {
+			$this->view->coverage_area = $coverage_area;
 		}
 	}
 }

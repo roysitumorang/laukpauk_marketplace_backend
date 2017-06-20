@@ -5,7 +5,6 @@ namespace Application\Models;
 use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\File;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;

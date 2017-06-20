@@ -2,6 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
+use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
@@ -138,9 +139,9 @@ class UsersController extends ControllerBase {
 		if ($user->role->name == 'Buyer') {
 			$column = 'buyer_id';
 		} else if ($user->role->name == 'Merchant') {
-			$column                    = 'merchant_id';
-			$this->view->store_items   = $this->db->fetchColumn('SELECT COUNT(1) FROM products WHERE user_id = ?', [$user->id]);
-			$this->view->service_areas = $this->db->fetchColumn('SELECT COUNT(1) FROM service_areas WHERE user_id = ?', [$user->id]);
+			$column                           = 'merchant_id';
+			$this->view->total_products       = $user->countProducts();
+			$this->view->total_coverage_areas = $user->countCoverageAreas();
 		}
 		if ($column) {
 			$total = $this->db->fetchOne("
@@ -164,7 +165,7 @@ class UsersController extends ControllerBase {
 		$this->view->menu       = $this->_menu('Members');
 		$this->view->user       = $user;
 		$this->view->status     = User::STATUS;
-		$this->view->last_login = $this->db->fetchColumn('SELECT a.sign_in_at FROM login_history a WHERE a.id = ? AND NOT EXISTS(SELECT 1 FROM login_history b WHERE b.user_id = b.user_id AND b.id > a.id)', [$user->id]);
+		$this->view->last_login = LoginHistory::maximum(['user_id = ?0', 'bind' => [$user->id], 'column' => 'sign_in_at']);
 	}
 
 	function updateAction($id) {

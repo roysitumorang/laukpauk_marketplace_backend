@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/{{ user.id }}/service_areas/update{% if page.current > 1%}/page:{{ page.current }}{% endif %}"><h2>Update Area Operasional</h2></a>
+				<a href="/admin/users/{{ user.id }}/coverage_areas/update{% if page.current > 1%}/page:{{ page.current }}{% endif %}"><h2>Update Area Operasional</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -30,8 +30,8 @@
 					<div class="tab-content">
 						<div id="areas" class="tab-pane active">
 							{{ flashSession.output() }}
-							{% if service_areas %}
-							<form method="POST" action="/admin/users/{{ user.id }}/service_areas/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+							{% if coverage_areas %}
+							<form method="POST" action="/admin/users/{{ user.id }}/coverage_areas/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
 							{% endif %}
 								<table class="table table-striped">
 									<thead>
@@ -46,21 +46,21 @@
 										</tr>
 									</thead>
 									<tbody>
-									{% for service_area in service_areas %}
+									{% for coverage_area in coverage_areas %}
 										<tr>
 											<td>
-												{{ service_area.rank }}
-												<input type="hidden" name="id[]" value="{{ service_area.id }}">
+												{{ coverage_area.rank }}
+												<input type="hidden" name="id[]" value="{{ coverage_area.id }}">
 											</td>
-											<td>{{ service_area.province_name }}</td>
-											<td>{{ service_area.city_name }}</td>
-											<td>{{ service_area.subdistrict_name }}</td>
-											<td>{{ service_area.village_name }}</td>
+											<td>{{ coverage_area.province_name }}</td>
+											<td>{{ coverage_area.city_name }}</td>
+											<td>{{ coverage_area.subdistrict_name }}</td>
+											<td>{{ coverage_area.village_name }}</td>
 											<td>
-												<input type="text" name="minimum_purchase[]" value="{{ service_area.minimum_purchase }}">
+												<input type="text" name="minimum_purchase[]" value="{{ coverage_area.minimum_purchase }}">
 											</td>
 											<td>
-												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ service_area.village_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+												<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ coverage_area.village_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 											</td>
 										</tr>
 									{% elsefor %}
@@ -68,7 +68,7 @@
 											<td colspan="7"><i>Belum ada area operasional</i></td>
 										</tr>
 									{% endfor %}
-									{% if service_areas %}
+									{% if coverage_areas %}
 										<tr>
 											<td colspan="7" class="text-right">
 												<button type="submit" class="btn btn-info">SIMPAN</button>
@@ -77,7 +77,7 @@
 									{% endif %}
 									</tbody>
 								</table>
-							{% if service_areas %}
+							{% if coverage_areas %}
 							</form>
 							{% endif %}
 							{% if page.total_pages > 1 %}
@@ -88,7 +88,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/users/{{ user.id }}/service_areas{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/{{ user.id }}/coverage_areas{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>

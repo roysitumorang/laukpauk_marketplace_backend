@@ -241,25 +241,25 @@ $di->set('router', function() {
 		'params'     => 1,
 	]);
 
-	$router->add('/admin/users/:int/service_areas/:params', [
+	$router->add('/admin/users/:int/coverage_areas/:params', [
 		'module'     => 'backend',
-		'controller' => 'service_areas',
+		'controller' => 'coverage_areas',
 		'action'     => 'index',
 		'user_id'    => 1,
 		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/service_areas/:action/:params', [
+	$router->add('/admin/users/:int/coverage_areas/:action/:params', [
 		'module'     => 'backend',
-		'controller' => 'service_areas',
+		'controller' => 'coverage_areas',
 		'action'     => 2,
 		'user_id'    => 1,
 		'params'     => 3,
 	]);
 
-	$router->add('/admin/users/:int/service_areas/:int/:action', [
+	$router->add('/admin/users/:int/coverage_areas/:int/:action', [
 		'module'     => 'backend',
-		'controller' => 'service_areas',
+		'controller' => 'coverage_areas',
 		'action'     => 3,
 		'user_id'    => 1,
 		'params'     => 2,
@@ -267,7 +267,7 @@ $di->set('router', function() {
 
 	$router->add('/admin/users/:int/products/:params', [
 		'module'     => 'backend',
-		'controller' => 'products',
+		'controller' => 'user_products',
 		'action'     => 'index',
 		'user_id'    => 1,
 		'params'     => 2,
@@ -275,7 +275,7 @@ $di->set('router', function() {
 
 	$router->add('/admin/users/:int/products/:action/:params', [
 		'module'     => 'backend',
-		'controller' => 'products',
+		'controller' => 'user_products',
 		'action'     => 2,
 		'user_id'    => 1,
 		'params'     => 3,
@@ -283,7 +283,7 @@ $di->set('router', function() {
 
 	$router->add('/admin/users/:int/products/:int/:action', [
 		'module'     => 'backend',
-		'controller' => 'products',
+		'controller' => 'user_products',
 		'action'     => 3,
 		'user_id'    => 1,
 		'params'     => 2,

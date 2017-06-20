@@ -37,7 +37,7 @@
 										{% if user.merchant %}
 										<th><b>Merchant</b></th>
 										{% endif %}
-										<th><b>Membership</b></td>
+										<th><b>Login Terakhir</b></td>
 										<th><b>Status</b></td>
 										<th><b>Dompet</b></td>
 									</tr>
@@ -127,14 +127,14 @@
 									<td>Total Order / Pending / Completed / Cancelled</td>
 									<td>{{ total.orders }} / {{ total.pending_orders }} / {{ total.completed_orders }} / {{ total.cancelled_orders }}</td>
 								</tr>
-								{% if roles['Merchant'] %}
+								{% if user.role.name == 'Merchant' %}
 								<tr>
 									<td>Produk</td>
-									<td>{{ store_items }}</td>
+									<td>{{ total_products }}</td>
 								</tr>
 								<tr>
 									<td>Service Area</td>
-									<td>{{ service_areas }}</td>
+									<td>{{ total_coverage_areas }}</td>
 								</tr>
 								{% endif %}
 							</table>
