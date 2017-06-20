@@ -116,7 +116,7 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyerOrders']);
 		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchantOrders']);
 		$this->hasManyToMany('id', 'Application\Models\UserProduct', 'user_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
-		$this->hasManyToMany('id', 'Application\Models\ServiceArea', 'user_id', 'village_id', 'Application\Models\Village', 'id', ['alias' => 'serviceAreas']);
+		$this->hasManyToMany('id', 'Application\Models\CoverageArea', 'user_id', 'village_id', 'Application\Models\Village', 'id', ['alias' => 'coverageAreas']);
 		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);

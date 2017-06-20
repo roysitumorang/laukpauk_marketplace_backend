@@ -7,7 +7,7 @@ use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
-class ServiceArea extends ModelBase {
+class CoverageArea extends ModelBase {
 	public $id;
 	public $user_id;
 	public $village_id;
@@ -18,7 +18,7 @@ class ServiceArea extends ModelBase {
 	public $updated_at;
 
 	function getSource() {
-		return 'service_areas';
+		return 'coverage_area';
 	}
 
 	function initialize() {

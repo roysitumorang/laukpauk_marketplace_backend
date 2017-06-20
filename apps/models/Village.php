@@ -26,7 +26,7 @@ class Village extends ModelBase {
 			'reusable' => true,
 		]);
 		$this->hasMany('id', 'Application\Models\User', 'village_id', ['alias' => 'users']);
-		$this->hasManyToMany('id', 'Application\Models\ServiceArea', 'village_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
+		$this->hasManyToMany('id', 'Application\Models\CoverageArea', 'village_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
 	}
 
 	function setName($name) {
