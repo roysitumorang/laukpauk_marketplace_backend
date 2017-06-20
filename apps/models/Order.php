@@ -60,7 +60,7 @@ class Order extends ModelBase {
 			'reusable'   => true,
 			'foreignKey' => [
 				'allowNulls' => false,
-				'message'    => 'penjual harus diisi',
+				'message'    => 'merchant harus diisi',
 			],
 		]);
 		$this->belongsTo('buyer_id', 'Application\Models\User', 'id', [
@@ -76,9 +76,10 @@ class Order extends ModelBase {
 			'reusable'   => true,
 			'foreignKey' => ['allowNulls' => true],
 		]);
-		$this->hasMany('id', 'Application\Models\OrderItem', 'order_id', [
-			'alias' => 'items',
+		$this->hasMany('id', 'Application\Models\OrderProduct', 'order_id', [
+			'alias' => 'orderProducts',
 		]);
+		$this->hasManyToMany('id', 'Application\Models\OrderProduct', 'order_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
 	}
 
 	function beforeValidationOnCreate() {

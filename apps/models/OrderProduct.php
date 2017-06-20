@@ -4,24 +4,21 @@ namespace Application\Models;
 
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Digit;
-use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class OrderItem extends ModelBase {
+class OrderProduct extends ModelBase {
 	public $id;
 	public $order_id;
 	public $product_id;
 	public $name;
-	public $unit_price;
+	public $price;
 	public $stock_unit;
 	public $quantity;
 	public $created_by;
 	public $created_at;
-	public $updated_by;
-	public $updated_at;
 
 	function getSource() {
-		return 'order_items';
+		return 'order_product';
 	}
 
 	function initialize() {
@@ -46,32 +43,18 @@ class OrderItem extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'unit_price', 'stock_unit', 'quantity'], new PresenceOf([
+		$validator->add(['name', 'price', 'stock_unit', 'quantity'], new PresenceOf([
 			'message' => [
 				'name'       => 'nama produk harus diisi',
-				'unit_price' => 'harga satuan harus diisi',
+				'price'      => 'harga satuan harus diisi',
 				'stock_unit' => 'satuan harus diisi',
 				'quantity'   => 'jumlah harus diisi',
 			],
 		]));
-		$validator->add(['unit_price', 'quantity'], new Digit([
+		$validator->add(['price', 'quantity'], new Digit([
 			'message' => [
-				'unit_price' => 'harga satuan harus dalam angka',
-				'quantity'   => 'jumlah harus dalam angka',
-			],
-		]));
-		$validator->add(['unit_price', 'quantity'], new Between([
-			'minimum' => [
-				'unit_price' => 1,
-				'quantity'   => 1,
-			],
-			'maximum' => [
-				'unit_price' => 500000,
-				'quantity'   => 10,
-			],
-			'message' => [
-				'unit_price' => 'harga satuan minimal 1, maksimal 500.000',
-				'quantity'   => 'jumlah minimal 1',
+				'price'    => 'harga satuan harus dalam angka',
+				'quantity' => 'jumlah harus dalam angka',
 			],
 		]));
 		return $this->validate($validator);

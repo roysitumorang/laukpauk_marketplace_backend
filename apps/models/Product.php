@@ -7,6 +7,7 @@ use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Digit;
 use Phalcon\Validation\Validator\File;
+use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -23,8 +24,6 @@ class Product extends ModelBase {
 	public $picture;
 	public $new_picture;
 	public $thumbnails;
-	public $price;
-	public $stock;
 	public $published;
 	public $created_by;
 	public $created_at;
@@ -38,8 +37,9 @@ class Product extends ModelBase {
 	}
 
 	function onConstruct() {
-		$this->_upload_config = $this->getDI()->getConfig()->upload;
-		$this->_filter        = $this->getDI()->getFilter();
+		$di                   = $this->getDI();
+		$this->_upload_config = $di->getConfig()->upload;
+		$this->_filter        = $di->getFilter();
 	}
 
 	function initialize() {
@@ -61,9 +61,9 @@ class Product extends ModelBase {
 				'message'    => 'merchant harus diisi',
 			],
 		]);
-		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'product_id', 'linked_product_id', 'Application\Models\Product', 'id', ['alias' => 'linked_products']);
-		$this->hasManyToMany('id', 'Application\Models\ProductLink', 'linked_product_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'linkers']);
 		$this->hasManyToMany('id', 'Application\Models\ProductGroupMember', 'product_id', 'product_group_id', 'Application\Models\ProductGroup', 'id', ['alias' => 'groups']);
+		$this->hasManyToMany('id', 'Application\Models\UserProduct', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
+		$this->hasManyToMany('id', 'Application\Models\OrderProduct', 'product_id', 'order_id', 'Application\Models\Order', 'id', ['alias' => 'orders']);
 	}
 
 	function setName($name) {
@@ -90,14 +90,6 @@ class Product extends ModelBase {
 		}
 	}
 
-	function setPrice($price) {
-		$this->price = $this->_filter->sanitize($price, 'int') ?: 0;
-	}
-
-	function setStock($stock) {
-		$this->stock = $this->_filter->sanitize($stock, 'int') ?: 0;
-	}
-
 	function setPublished($published) {
 		$this->published = $this->_filter->sanitize($published, 'int');
 	}
@@ -112,15 +104,13 @@ class Product extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['name', 'stock_unit', 'price', 'stock'], new PresenceOf([
+		$validator->add(['name', 'stock_unit'], new PresenceOf([
 			'message' => [
 				'name'       => 'nama harus diisi',
 				'stock_unit' => 'satuan harus diisi',
-				'price'      => 'harga harus diisi',
-				'stock'      => 'stok harus diisi',
 			],
 		]));
-		$validator->add(['name', 'stock_unit', 'product_category_id', 'user_id'], new Uniqueness([
+		$validator->add(['user_id', 'product_category_id', 'name', 'stock_unit'], new Uniqueness([
 			'message' => 'nama, satuan dan kategori sudah ada',
 		]));
 		if ($this->new_picture) {
@@ -132,13 +122,10 @@ class Product extends ModelBase {
 				'messageType'  => 'format gambar harus JPG atau PNG',
 			]));
 		}
-		$validator->add(['price', 'stock'], new Digit([
-			'message' => [
-				'price' => 'harga harus dalam bentuk angka',
-				'stock' => 'stok harus dalam bentuk angka',
-			],
+		$validator->add('published', new InclusionIn([
+			'message' => 'tampilkan antara 0 atau 1',
+			'domain'  => [0, 1],
 		]));
-
 		return $this->validate($validator);
 	}
 
