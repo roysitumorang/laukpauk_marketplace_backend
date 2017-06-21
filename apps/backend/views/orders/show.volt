@@ -156,13 +156,13 @@
 							<b><font color="#000099">Order Items</font></b>
 						</td>
 					</tr>
-					{% for item in order.items %}
+					{% for item in order.orderProducts %}
 					<tr>
 						<td colspan="2">
 							<b>{{ item.name }}</b><br>
-							{{ item.quantity }} x Rp. {{ number_format(item.unit_price) }} @ {{ item.stock_unit }}
+							{{ item.quantity }} x Rp. {{ number_format(item.price) }} @ {{ item.stock_unit }}
 						</td>
-						<td colspan="2"><b>Rp. {{ number_format(item.quantity * item.unit_price) }}</b></td>
+						<td colspan="2"><b>Rp. {{ number_format(item.quantity * item.price) }}</b></td>
 					</tr>
 					{% endfor %}
 					<tr>

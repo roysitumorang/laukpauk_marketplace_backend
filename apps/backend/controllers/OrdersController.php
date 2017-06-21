@@ -5,8 +5,8 @@ namespace Application\Backend\Controllers;
 use Application\Models\Order;
 use Application\Models\Village;
 use DateTimeImmutable;
-use Exception;
-use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
+use Phalcon\Exception;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
@@ -77,7 +77,7 @@ class OrdersController extends ControllerBase {
 			$builder->where(implode(' AND ', $conditions));
 		}
 		$builder->orderBy($parameters['order']);
-		$paginator = new PaginatorQueryBuilder([
+		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
