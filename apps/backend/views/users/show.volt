@@ -21,15 +21,14 @@
 			<!-- start: page -->
 			<header class="panel-heading">
 				<h2 class="panel-title">{{ user.name }}</h2>
-				<span style="float:right;margin-top:-20px"><a href="/admin/users/{{ user.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a></span>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
 				<div class="tabs">
-					{{ partial('partials/tabs_user', ['user': user, 'expand': 'profile']) }}
+					{{ partial('partials/tabs_user', ['user': user, 'expand': 'show_user']) }}
 					<div class="tab-content">
-						<div id="profile" class="tab-pane active">
+						<div id="show_user" class="tab-pane active">
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -39,7 +38,7 @@
 										{% endif %}
 										<th><b>Login Terakhir</b></td>
 										<th><b>Status</b></td>
-										<th><b>Dompet</b></td>
+										<th><b>Deposit</b></td>
 									</tr>
 								</thead>
 								<tbody>
