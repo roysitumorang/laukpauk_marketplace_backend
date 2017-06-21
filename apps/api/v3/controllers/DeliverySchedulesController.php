@@ -5,9 +5,9 @@ namespace Application\Api\V3\Controllers;
 use DateInterval;
 use DatePeriod;
 use DateTime;
-use Error;
 use IntlDateFormatter;
 use Phalcon\Db;
+use Phalcon\Exception;
 use stdClass;
 
 class DeliverySchedulesController extends ControllerBase {
@@ -62,8 +62,9 @@ class DeliverySchedulesController extends ControllerBase {
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
-				JOIN service_areas c ON a.id = c.user_id
-				JOIN products d ON a.id = d.user_id
+				JOIN coverage_area c ON a.id = c.user_id
+				JOIN user_product d ON a.id = d.user_id
+				JOIN products e ON d.product_id = e.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
@@ -159,10 +160,10 @@ QUERY;
 				}
 			}
 			if (!$valid_date) {
-				throw new Error('Tanggal tidak valid!');
+				throw new Exception('Tanggal tidak valid!');
 			}
 			if (!$delivery_hour) {
-				throw new Error('Jam tidak valid!');
+				throw new Exception('Jam tidak valid!');
 			}
 			$delivery_schedule = new DateTime($delivery_date, $this->currentDatetime->getTimezone());
 			$delivery_day      = $delivery_schedule->format('l');
@@ -183,8 +184,9 @@ QUERY;
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
-					JOIN products d ON a.id = d.user_id
+					JOIN coverage_area c ON a.id = c.user_id
+					JOIN user_product d ON a.id = d.user_id
+					JOIN products e ON d.product_id = e.id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -206,18 +208,18 @@ QUERY;
 					($delivery_day == 'Thursday' && !$item->open_on_thursday) ||
 					($delivery_day == 'Friday' && !$item->open_on_friday) ||
 					($delivery_day == 'Saturday' && !$item->open_on_saturday)) {
-					throw new Error("{$item->company} tutup pada tanggal tersebut, silahkan ganti tanggal atau hapus pesanan dari supplier tersebut!");
+					throw new Exception("{$item->company} tutup pada tanggal tersebut, silahkan ganti tanggal atau hapus pesanan dari supplier tersebut!");
 				}
 				$delivery_hours = $item->delivery_hours
 						? explode(',', $item->delivery_hours)
 						: range($item->business_opening_hour, $item->business_closing_hour);
 				if (($delivery_schedule->format('Y-m-d') === $this->currentDatetime->format('Y-m-d') && ($current_hour >= max($delivery_hours) || $delivery_hour < $minimum_hour))
 					|| !in_array($delivery_hour, $delivery_hours)) {
-					throw new Error("{$item->company} tidak melayani pengantaran pada jam tersebut, silahkan ganti jam atau hapus pesanan dari supplier tersebut!");
+					throw new Exception("{$item->company} tidak melayani pengantaran pada jam tersebut, silahkan ganti jam atau hapus pesanan dari supplier tersebut!");
 				}
 			}
 			$this->_response['status'] = 1;
-		} catch (Error $e) {
+		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		}
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
