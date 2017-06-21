@@ -26,6 +26,7 @@ class CategoriesController extends ControllerBase {
 					a.status = 1 AND
 					b.village_id = {$this->_current_user->village->id} AND
 					c.published = 1 AND
+					c.stock > 0 AND
 					d.published = 1 AND
 					a.premium_merchant
 QUERY;
