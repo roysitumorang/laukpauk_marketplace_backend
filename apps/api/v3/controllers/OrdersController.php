@@ -292,11 +292,11 @@ QUERY
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
 			$merchant = $this->_premium_merchant ?: User::findFirst($order->merchant_id);
-			foreach ($order->items as $item) {
+			foreach ($order->orderProducts as $item) {
 				$items[$item->id] = [
 					'name'       => $item->name,
 					'stock_unit' => $item->stock_unit,
-					'unit_price' => $item->unit_price,
+					'unit_price' => $item->price,
 					'quantity'   => $item->quantity,
 				];
 			}
@@ -344,11 +344,6 @@ QUERY
 			];
 			if ($order->status == -1) {
 				$payload['cancellation_reason'] = $order->cancellation_reason;
-			}
-			if ($coupon = $order->coupon) {
-				$payload['discount'] = $coupon->discount_type == 1
-							? $coupon->discount_amount
-							: ($order->original_bill * $coupon->discount_amount / 100);
 			}
 			$this->_response['status']        = 1;
 			$this->_response['data']['order'] = $payload;
