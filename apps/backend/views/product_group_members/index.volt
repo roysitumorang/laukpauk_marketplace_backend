@@ -73,7 +73,6 @@
 											<br>
 											<strong>{{ product.name }}<br>({{ product.stock_unit }})</strong><br>
 											<form method="POST" action="/admin/product_group_members/delete/product_group_id:{{ product_group.id }}/product_id:{{ product.id }}" onsubmit="return confirm('Hapus produk ini dari group ?')">
-												Rp. {{ number_format(product.price) }}
 												<button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></button>
 												{% if !product.published %} <font color="#FF0000"><i class="fa fa-eye-slash"></i></font>{% endif %}
 											</form>

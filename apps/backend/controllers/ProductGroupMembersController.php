@@ -49,21 +49,22 @@ class ProductGroupMembersController extends ControllerBase {
 		$limit               = 16;
 		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$products            = [];
-		$builder = $this->modelsManager->createBuilder()
+		$builder             = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
 				'a.name',
 				'a.stock_unit',
-				'a.price',
 				'a.published',
 				'a.picture',
 				'a.thumbnails',
 			])
 			->from(['a' => 'Application\Models\Product'])
-			->join('Application\Models\User', 'a.user_id = b.id', 'b')
-			->join('Application\Models\ProductGroupMember', 'a.id = c.product_id', 'c')
-			->where('b.premium_merchant IS NULL')
-			->andWhere('c.product_group_id = ?0', [$this->_product_group->id])
+			->join('Application\Models\UserProduct', 'a.id = b.product_id', 'b')
+			->join('Application\Models\User', 'b.user_id = c.id', 'c')
+			->join('Application\Models\ProductGroupMember', 'a.id = d.product_id AND d.product_group_id = ' . $this->_product_group->id, 'd')
+			->where('c.premium_merchant IS NULL')
+			->andWhere("d.product_group_id = {$this->_product_group->id}")
+			->groupBy('a.id')
 			->orderBy('a.name ASC, a.stock_unit ASC');
 		if ($product_category_id) {
 			$builder->andWhere("a.product_category_id = {$product_category_id}");
@@ -95,7 +96,7 @@ class ProductGroupMembersController extends ControllerBase {
 		$product_ids = [];
 		if ($this->request->isPost() && ($product_ids = $this->request->getPost('product_ids'))) {
 			foreach ($product_ids as $product_id) {
-				if ($this->db->fetchColumn('SELECT COUNT(1) FROM products a JOIN users b ON a.user_id = b.id WHERE a.id = ? AND b.premium_merchant IS NULL', [$product_id]) && !$this->db->fetchColumn('SELECT COUNT(1) FROM product_group_member WHERE product_group_id = ? AND product_id = ?', [$this->_product_group->id, $product_id])) {
+				if ($this->db->fetchColumn('SELECT COUNT(1) FROM products a JOIN user_product b ON a.id = b.product_id JOIN users c ON b.user_id = c.id WHERE a.id = ? AND c.premium_merchant IS NULL', [$product_id]) && !$this->db->fetchColumn('SELECT COUNT(1) FROM product_group_member WHERE product_group_id = ? AND product_id = ?', [$this->_product_group->id, $product_id])) {
 					$link = new ProductGroupMember;
 					$link->create(['product_group_id' => $this->_product_group->id, 'product_id' => $product_id]);
 				}
@@ -114,21 +115,22 @@ class ProductGroupMembersController extends ControllerBase {
 		$limit               = 16;
 		$current_page        = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$products            = [];
-		$builder = $this->modelsManager->createBuilder()
+		$builder             = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
 				'a.name',
 				'a.stock_unit',
-				'a.price',
 				'a.published',
 				'a.picture',
 				'a.thumbnails',
 			])
 			->from(['a' => 'Application\Models\Product'])
-			->join('Application\Models\User', 'a.user_id = b.id', 'b')
-			->leftJoin('Application\Models\ProductGroupMember', 'a.id = c.product_id AND c.product_group_id = ' . $this->_product_group->id, 'c')
-			->where('b.premium_merchant IS NULL')
-			->andWhere('c.product_id IS NULL')
+			->join('Application\Models\UserProduct', 'a.id = b.product_id', 'b')
+			->join('Application\Models\User', 'b.user_id = c.id', 'c')
+			->leftJoin('Application\Models\ProductGroupMember', 'a.id = d.product_id AND d.product_group_id = ' . $this->_product_group->id, 'd')
+			->where('c.premium_merchant IS NULL')
+			->andWhere('d.product_id IS NULL')
+			->groupBy('a.id')
 			->orderBy('a.name ASC, a.stock_unit ASC');
 		if ($product_category_id) {
 			$builder->andWhere("a.product_category_id = {$product_category_id}");
@@ -160,16 +162,15 @@ class ProductGroupMembersController extends ControllerBase {
 	function deleteAction() {
 		try {
 			$product_id = $this->dispatcher->getParam('product_id', 'int');
-			if (!$product_id || !($link = ProductGroupMember::findFirst(['group_id = ?0 AND product_id = ?1', 'bind' => [$this->_product_group->id, $product_id]]))) {
+			if (!$product_id || !($link = ProductGroupMember::findFirst(['product_group_id = ?0 AND product_id = ?1', 'bind' => [$this->_product_group->id, $product_id]]))) {
 				throw new Error('Data tidak ditemukan.');
 			}
 			$link->delete();
 			$this->flashSession->success('Data berhasil dihapus');
 		} catch (Error $e) {
 			$this->flashSession->error($e->getMessage());
-		} finally {
-			return $this->response->redirect("/admin/product_group_members/index/product_group_id:{$this->_product_group->id}");
 		}
+			return $this->response->redirect("/admin/product_group_members/index/product_group_id:{$this->_product_group->id}");
 	}
 
 	function truncateAction() {

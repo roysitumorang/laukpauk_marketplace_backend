@@ -66,7 +66,6 @@
 												<input type="checkbox" name="product_ids[]" value="{{ product.id }}"{% if in_array(product.id, product_ids) %} checked{% endif %}><br>
 												<img src="/assets/image/{% if product.picture %}{{ product.thumbnails[0] }}{% else %}no_picture_120.png{% endif %}" border="0" width="150" height="150"><br>
 												<strong>{{ product.name }}<br>({{ product.stock_unit }})</strong><br>
-												Rp. {{ number_format(product.price) }}
 												{% if !product.published %} <font color="#FF0000"><i class="fa fa-eye-slash"></i></font>{% endif %}
 											</div>
 										</div>
