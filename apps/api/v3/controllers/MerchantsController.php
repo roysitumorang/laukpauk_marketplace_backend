@@ -26,10 +26,11 @@ class MerchantsController extends ControllerBase {
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
-				JOIN service_areas c ON a.id = c.user_id
+				JOIN coverage_area c ON a.id = c.user_id
 				JOIN settings d ON d.name = 'minimum_purchase'
-				JOIN products e ON a.id = e.user_id
-				JOIN product_categories f ON e.product_category_id = f.id
+				JOIN user_product e ON a.id = e.user_id
+				JOIN products f ON e.product_id = f.id
+				JOIN product_categories g ON f.product_category_id = g.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
@@ -44,13 +45,13 @@ QUERY;
 				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
 				$filtered_keywords     = array_diff($keywords, $stop_words);
 				$filtered_search_query = implode(' ', $filtered_keywords);
-				$query                .= ' AND (a.company ILIKE ? OR e.name ILIKE ? OR f.name ILIKE ?';
+				$query                .= ' AND (a.company ILIKE ? OR f.name ILIKE ? OR g.name ILIKE ?';
 				foreach (range(1, 3) as $i) {
 					$params[] = "%{$filtered_search_query}%";
 				}
 				if (count($filtered_keywords) > 1) {
 					foreach ($filtered_keywords as $keyword) {
-						$query .= ' OR a.company ILIKE ? OR e.name ILIKE ? OR f.name ILIKE ?';
+						$query .= ' OR a.company ILIKE ? OR f.name ILIKE ? OR g.name ILIKE ?';
 						foreach (range(1, 3) as $i) {
 							$params[] = "%{$keyword}%";
 						}
@@ -95,7 +96,8 @@ QUERY
 				$item->open_on_sunday    ? 'Minggu' : ',',
 			];
 			$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
-			if ($hours = explode(',', $item->delivery_hours)) {
+			$hours          = explode(',', $item->delivery_hours);
+			if ($hours) {
 				foreach ($business_hours as &$hour) {
 					if (!in_array($hour, $hours)) {
 						$hour = ',';
