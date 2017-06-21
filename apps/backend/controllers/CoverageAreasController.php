@@ -93,7 +93,7 @@ class CoverageAreasController extends ControllerBase {
 				a.id AS province_id,
 				a.name AS province_name,
 				b.id AS city_id,
-				b.type || ' ' || b.name AS city_name,
+				CONCAT_WS(' ', b.type, b.name) AS city_name,
 				c.id AS subdistrict_id,
 				c.name AS subdistrict_name,
 				d.id AS village_id,
@@ -102,7 +102,9 @@ class CoverageAreasController extends ControllerBase {
 			JOIN cities b ON a.id = b.province_id
 			JOIN subdistricts c ON b.id = c.city_id
 			JOIN villages d ON c.id = d.subdistrict_id
-			WHERE NOT EXISTS(SELECT 1 FROM coverage_area e WHERE e.village_id = d.id AND e.user_id = {$this->_user->id})
+			WHERE
+				b.id = {$this->_user->village->subdistrict->city->id} AND
+				NOT EXISTS(SELECT 1 FROM coverage_area e WHERE e.village_id = d.id AND e.user_id = {$this->_user->id})
 			ORDER BY province_name, city_name, subdistrict_name, village_name
 QUERY
 		);
@@ -141,7 +143,7 @@ QUERY
 				'province_id'      => 'a.id',
 				'province_name'    => 'a.name',
 				'city_id'          => 'b.id',
-				'city_name'        => "b.type || ' ' || b.name",
+				'city_name'        => "CONCAT(' ', b.type, b.name)",
 				'subdistrict_id'   => 'c.id',
 				'subdistrict_name' => 'c.name',
 				'village_id'       => 'd.id',
