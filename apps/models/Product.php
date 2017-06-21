@@ -53,12 +53,8 @@ class Product extends ModelBase {
 			],
 		]);
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'      => 'merchant',
-			'reusable'   => true,
-			'foreignKey' => [
-				'allowNulls' => false,
-				'message'    => 'merchant harus diisi',
-			],
+			'alias'    => 'user',
+			'reusable' => true,
 		]);
 		$this->hasManyToMany('id', 'Application\Models\ProductGroupMember', 'product_id', 'product_group_id', 'Application\Models\ProductGroup', 'id', ['alias' => 'groups']);
 		$this->hasManyToMany('id', 'Application\Models\UserProduct', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
