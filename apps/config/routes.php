@@ -241,20 +241,6 @@ $di->set('router', function() {
 		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'users',
-		'action'     => 2,
-		'params'     => 1,
-	]);
-
-	$router->add('/admin/users/:int', [
-		'module'     => 'backend',
-		'controller' => 'users',
-		'action'     => 'show',
-		'params'     => 1,
-	]);
-
 	$router->add('/admin/users/:int/coverage_areas/:params', [
 		'module'     => 'backend',
 		'controller' => 'coverage_areas',
@@ -325,41 +311,6 @@ $di->set('router', function() {
 		'action'     => 3,
 		'user_id'    => 1,
 		'params'     => 2,
-	]);
-
-	$router->add('/admin/orders/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'orders',
-		'action'     => 1,
-		'params'     => 2,
-	]);
-
-	$router->add('/admin/orders/:int', [
-		'module'     => 'backend',
-		'controller' => 'orders',
-		'action'     => 'show',
-		'params'     => 1,
-	]);
-
-	$router->add('/admin/orders/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'orders',
-		'action'     => 2,
-		'params'     => 1,
-	]);
-
-	$router->add('/admin/coupons/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'coupons',
-		'action'     => 2,
-		'params'     => 1,
-	]);
-
-	$router->add('/admin/coupons/:int', [
-		'module'     => 'backend',
-		'controller' => 'coupons',
-		'action'     => 'show',
-		'params'     => 1,
 	]);
 
 	$router->notFound([
