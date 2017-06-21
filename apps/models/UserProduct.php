@@ -36,7 +36,7 @@ class UserProduct extends ModelBase {
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'      => 'merchant',
+			'alias'      => 'user',
 			'reusable'   => true,
 			'foreignKey' => [
 				'allowNulls' => false,

@@ -28,9 +28,9 @@ class UserProductsController extends ControllerBase {
 	function createAction() {
 		$user_product = new UserProduct;
 		if ($this->request->isPost()) {
-			$product_id            = $this->request->getPost('product_id', 'int');
-			$user_product->product = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]]);
-			$user_product->user    = $this->_user;
+			$product_id               = $this->request->getPost('product_id', 'int');
+			$user_product->product_id = Product::findFirst(['published = 1 AND id = ?0', 'bind' => [$product_id]])->id;
+			$user_product->user_id    = $this->_user->id;
 			$user_product->setPrice($this->request->getPost('price'));
 			$user_product->setStock($this->request->getPost('stock'));
 			if ($user_product->validation() && $user_product->create()) {
