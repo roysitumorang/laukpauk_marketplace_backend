@@ -152,9 +152,6 @@ class Product extends ModelBase {
 		}
 		$this->thumbnails  = implode(',', array_filter($this->thumbnails)) ?: null;
 		$this->description = $this->description ?: null;
-		if (!$this->price) {
-			$this->published = 0;
-		}
 	}
 
 	function beforeDelete() {

@@ -61,7 +61,7 @@
 						if (confirm('Anda yakin menghapus gambar ini ?')) {
 							let form = document.createElement('form');
 							form.method = 'POST',
-							form.action = '/admin/products/' + removal_link.dataset.id + '/deletePicture?next={{ next }}',
+							form.action = '/admin/products/' + removal_link.dataset.id + '/delete_picture?next={{ next }}',
 							document.body.appendChild(form),
 							form.submit()
 						}
