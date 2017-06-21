@@ -4,11 +4,8 @@ namespace Application\Api\V3\Controllers;
 
 use Application\Models\Device;
 use Application\Models\Order;
-use Application\Models\OrderItem;
-use Application\Models\Product;
+use Application\Models\OrderProduct;
 use Application\Models\Role;
-use Application\Models\ServiceArea;
-use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
@@ -118,14 +115,14 @@ QUERY
 						a.status = '1' AND
 						a.effective_date <= ? AND
 						a.expiry_date > ? AND
-						LOWER(a.code) = ? AND
+						a.code = ? AND
 						a.user_id
 QUERY
 					,
 					$this->_current_user->id,
 					$today,
 					$today,
-					strtolower($this->_post->coupon_code),
+					$this->_post->coupon_code,
 				];
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
 				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
@@ -134,13 +131,31 @@ QUERY
 				}
 			}
 			foreach ($this->_post->orders as $cart) {
-				$merchant = $this->_premium_merchant ? $this->_premium_merchant : User::findFirst(['conditions' => 'status = 1 AND role_id = ?0 AND premium_merchant IS NULL AND id = ?1', 'bind' => [Role::MERCHANT, $cart->merchant_id]]);
+				$params = [<<<QUERY
+					SELECT
+						a.id,
+						COALESCE(a.shipping_cost, 1) AS shipping_cost,
+						COALESCE(b.minimum_purchase, a.minimum_purchase, c.value::int) AS minimum_purchase
+					FROM
+						users a
+						JOIN coverage_area b ON a.id = b.user_id
+						JOIN settings c ON c.name = 'minimum_purchase'
+					WHERE
+						a.status = 1 AND
+						a.role_id = ? AND
+						a.id = ? AND
+						b.village_id = ? AND
+						a.premium_merchant
+QUERY
+					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
+				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL');
+				$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new Exception('Order Anda tidak valid!');
 				}
 				$order                     = new Order;
-				$order_items               = [];
-				$order->merchant           = $merchant;
+				$order_products            = [];
+				$order->merchant_id        = $merchant->id;
 				$order->name               = $this->_post->delivery->name;
 				$order->mobile_phone       = $this->_current_user->mobile_phone;
 				$order->address            = $this->_post->delivery->address;
@@ -148,32 +163,31 @@ QUERY
 				$order->original_bill      = 0;
 				$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
 				$order->note               = $cart->note;
-				$order->buyer              = $this->_current_user;
+				$order->buyer_id           = $this->_current_user->id;
 				$order->created_by         = $this->_current_user->id;
 				foreach ($cart->products as $item) {
-					$product = Product::findFirst(['published = 1 AND price > 0 AND stock > 0 AND user_id = ?0 AND id = ?1', 'bind' => [$merchant->id, $item->id]]);
+					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
 						throw new Exception('Order Anda tidak valid');
 					}
-					$order_item             = new OrderItem;
-					$order_item->product_id = $product->id;
-					$order_item->name       = $product->name;
-					$order_item->unit_price = $product->price;
-					$order_item->stock_unit = $product->stock_unit;
-					$order_item->quantity   = min($item->quantity, $product->stock);
-					$order->original_bill  += $order_item->quantity * $product->price;
-					$order_items[]          = $order_item;
+					$order_product             = new OrderProduct;
+					$order_product->product_id = $product->id;
+					$order_product->name       = $product->name;
+					$order_product->price      = $product->price;
+					$order_product->stock_unit = $product->stock_unit;
+					$order_product->quantity   = min($item->quantity, $product->stock);
+					$order_product->created_by = $this->_current_user->id;
+					$order->original_bill     += $order_product->quantity * $product->price;
+					$order_products[]          = $order_product;
 				}
-				$service_area     = ServiceArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village->id]]);
-				$minimum_purchase = $service_area && $service_area->minimum_purchase ? $service_area->minimum_purchase : ($merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value);
-				if ($order->original_bill < $minimum_purchase) {
+				if ($order->original_bill < $merchant->minimum_purchase) {
 					throw new Exception('Order Anda tidak valid!');
 				}
 				$order->final_bill    = $order->original_bill;
 				$order->discount      = 0;
 				$order->shipping_cost = $merchant->shipping_cost ?? 0;
 				$order->final_bill   += $order->shipping_cost;
-				$order->items         = $order_items;
+				$order->orderProducts = $order_products;
 				if (!$order->validation()) {
 					throw new Exception('Order Anda tidak valid!');
 				}

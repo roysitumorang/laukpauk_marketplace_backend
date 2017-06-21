@@ -173,9 +173,10 @@ class Order extends ModelBase {
 	}
 
 	function afterCreate() {
+		$session = $this->getDI()->getSession();
 		$this->buyer->setName($this->name);
 		$this->buyer->setAddress($this->address);
-		$this->buyer->update();
+		$this->buyer->update(['updated_by' => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by]);
 		$recipients    = [];
 		$device_tokens = [];
 		$admins        = User::find([

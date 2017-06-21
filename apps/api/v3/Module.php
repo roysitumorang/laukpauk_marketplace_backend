@@ -94,5 +94,9 @@ class Module implements ModuleDefinitionInterface {
 			$cache = new Apc(new FrontData(['lifetime' => 172800]));
 			return $cache;
 		});
+
+		$di->set('session', function() {
+			return null;
+		});
 	}
 }

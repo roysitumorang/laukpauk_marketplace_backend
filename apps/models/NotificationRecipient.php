@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Application\Models\ModelBase;
+use Phalcon\Mvc\Model;
 
-class NotificationRecipient extends ModelBase {
+class NotificationRecipient extends Model {
 	public $notification_id;
 	public $user_id;
 	public $read_at;
@@ -14,7 +14,6 @@ class NotificationRecipient extends ModelBase {
 	}
 
 	function initialize() {
-		parent::initialize();
 		$this->belongsTo('notification_id', 'Application\Models\Notification', 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
