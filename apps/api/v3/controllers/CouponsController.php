@@ -24,7 +24,7 @@ class CouponsController extends ControllerBase {
 					COUNT(1) AS usage
 				FROM
 					coupons a
-					LEFT JOIN orders b ON a.id = b.coupon_id AND b.status = '1' AND b.buyer_id = ?
+					LEFT JOIN orders b ON a.id = b.coupon_id AND b.status = 1 AND b.buyer_id = ?
 				WHERE
 					a.status = '1' AND
 					a.effective_date <= ? AND
