@@ -13,20 +13,19 @@ class CategoriesController extends ControllerBase {
 		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($category = $result->fetch()) {
-			$category->products = [];
-			$query              = <<<QUERY
+			$products = [];
+			$query    = <<<QUERY
 				SELECT
-					COUNT(1)
+					COUNT(DISTINCT c.id)
 				FROM
 					users a
-					JOIN service_areas b ON a.id = b.user_id
-					JOIN villages c ON b.village_id = c.id
-					JOIN products d ON a.id = d.user_id
-					JOIN order_items e ON d.id = e.product_id
-					JOIN orders f ON e.order_id = f.id AND f.status = 1
+					JOIN coverage_area b ON a.id = b.user_id
+					JOIN user_product c ON a.id = c.user_id
+					JOIN products d ON c.product_id = d.id
 				WHERE
 					a.status = 1 AND
-					c.subdistrict_id = {$this->_current_user->village->subdistrict->id} AND
+					b.village_id = {$this->_current_user->village->id} AND
+					c.published = 1 AND
 					d.published = 1 AND
 					a.premium_merchant
 QUERY;
@@ -36,14 +35,11 @@ QUERY;
 				$query .= ' IS NULL';
 			}
 			$query .= " AND d.product_category_id = {$category->id}";
-			if ($this->db->fetchColumn($query)) {
-				$query  = strtr($query, ['COUNT(1)' => 'd.id, d.user_id, d.product_category_id, d.name, d.price, d.stock, d.stock_unit, d.picture, COALESCE(SUM(e.quantity), 0) AS total_sale']);
-				$query .= ' GROUP BY d.id ORDER BY total_sale DESC LIMIT 2 OFFSET 0';
-			} else {
-				$query  = strtr($query, ['COUNT(1)' => 'd.id, d.user_id, d.product_category_id, d.name, d.price, d.stock, d.stock_unit, d.picture', 'JOIN order_items e ON d.id = e.product_id' => '', 'JOIN orders f ON e.order_id = f.id AND f.status = 1' => '']);
-				$query .= ' GROUP BY d.id LIMIT 2 OFFSET FLOOR(RANDOM() * ' . $this->db->fetchColumn('SELECT COUNT(1) FROM products') . ')';
+			$total_products = $this->db->fetchColumn($query);
+			if (!$total_products) {
+				continue;
 			}
-			$sub_result = $this->db->query($query);
+			$sub_result = $this->db->query(strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) d.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ' LIMIT 2 OFFSET 0');
 			$sub_result->setFetchMode(Db::FETCH_OBJ);
 			while ($product = $sub_result->fetch()) {
 				in_array($product->user_id, $merchant_ids) || $merchant_ids[] = $product->user_id;
@@ -53,12 +49,10 @@ QUERY;
 				} else {
 					unset($product->picture);
 				}
-				unset($product->total_sale);
-				$category->products[] = $product;
+				$products[] = $product;
 			}
-			if ($category->products) {
-				$categories[] = $category;
-			}
+			$category->products = $products;
+			$categories[]       = $category;
 		}
 		if ($merchant_ids) {
 			$query = <<<QUERY
@@ -83,10 +77,11 @@ QUERY;
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
+					JOIN coverage_area c ON a.id = c.user_id
 					JOIN settings d ON d.name = 'minimum_purchase'
-					JOIN products e ON a.id = e.user_id
-					JOIN product_categories f ON e.product_category_id = f.id
+					JOIN user_product e ON a.id = e.user_id
+					JOIN products f ON e.product_id = f.id
+					JOIN product_categories g ON f.product_category_id = g.id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -111,7 +106,8 @@ QUERY;
 					$item->open_on_sunday    ? 'Minggu' : ',',
 				];
 				$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
-				if ($hours = explode(',', $item->delivery_hours)) {
+				$hours          = explode(',', $item->delivery_hours);
+				if ($hours) {
 					foreach ($business_hours as &$hour) {
 						if (!in_array($hour, $hours)) {
 							$hour = ',';
