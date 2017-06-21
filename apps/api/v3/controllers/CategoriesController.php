@@ -40,7 +40,7 @@ QUERY;
 			if (!$total_products) {
 				continue;
 			}
-			$sub_result = $this->db->query(strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) d.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ' LIMIT 2 OFFSET 0');
+			$sub_result = $this->db->query(strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ' LIMIT 2 OFFSET 0');
 			$sub_result->setFetchMode(Db::FETCH_OBJ);
 			while ($product = $sub_result->fetch()) {
 				in_array($product->user_id, $merchant_ids) || $merchant_ids[] = $product->user_id;
