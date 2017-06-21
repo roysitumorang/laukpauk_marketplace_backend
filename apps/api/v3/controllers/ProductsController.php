@@ -21,17 +21,19 @@ class ProductsController extends ControllerBase {
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
-				JOIN service_areas c ON a.id = c.user_id
-				JOIN products d ON a.id = d.user_id
-				JOIN product_categories e ON d.product_category_id = e.id
-				LEFT JOIN product_group_member f ON d.id = f.product_id
-				LEFT JOIN product_groups g ON f.product_group_id = g.id
+				JOIN coverage_area c ON a.id = c.user_id
+				JOIN user_product d ON a.id = d.user_id
+				JOIN products e ON d.product_id = e.id
+				JOIN product_categories f ON e.product_category_id = f.id
+				LEFT JOIN product_group_member g ON e.id = g.product_id
+				LEFT JOIN product_groups h ON g.product_group_id = h.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
 				d.published = 1 AND
 				e.published = 1 AND
+				f.published = 1 AND
 				a.premium_merchant
 QUERY;
 		if ($this->_premium_merchant) {
@@ -43,20 +45,20 @@ QUERY;
 			}
 			if ($search_query) {
 				if ($this->db->fetchColumn('SELECT COUNT(1) FROM product_groups WHERE published = 1 AND name = ?', [$search_query])) {
-					$query   .= ' AND g.published = 1 AND g.name = ?';
+					$query   .= ' AND h.published = 1 AND h.name = ?';
 					$params[] = $search_query;
 				} else {
 					$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
 					$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
 					$filtered_keywords     = array_diff($keywords, $stop_words);
 					$filtered_search_query = implode(' ', $filtered_keywords);
-					$query                .= ' AND (a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
+					$query                .= ' AND (a.company ILIKE ? OR e.name ILIKE ? OR f.name ILIKE ?';
 					foreach (range(1, 3) as $i) {
 						$params[] = "%{$filtered_search_query}%";
 					}
 					if (count($filtered_keywords) > 1) {
 						foreach ($filtered_keywords as $keyword) {
-							$query .= ' OR a.company ILIKE ? OR d.name ILIKE ? OR e.name ILIKE ?';
+							$query .= ' OR a.company ILIKE ? OR e.name ILIKE ? OR f.name ILIKE ?';
 							foreach (range(1, 3) as $i) {
 								$params[] = "%{$keyword}%";
 							}
@@ -67,13 +69,13 @@ QUERY;
 			}
 		}
 		if ($category_id) {
-			$query .= " AND e.id = {$category_id}";
+			$query .= " AND f.id = {$category_id}";
 		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(str_replace('COUNT(DISTINCT d.id)', 'd.id, d.user_id, d.name, d.price, d.stock, d.stock_unit, d.picture', $query) . " GROUP BY d.id ORDER BY d.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, d.user_id, e.name, d.price, d.stock, e.stock_unit, e.picture']) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -109,10 +111,11 @@ QUERY;
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
+					JOIN coverage_area c ON a.id = c.user_id
 					JOIN settings d ON d.name = 'minimum_purchase'
-					JOIN products e ON a.id = e.user_id
-					JOIN product_categories f ON e.product_category_id = f.id
+					JOIN user_product e ON a.id = e.user_id
+					JOIN products f ON e.product_id = f.id
+					JOIN product_categories g ON f.product_category_id = g.id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -137,7 +140,8 @@ QUERY;
 					$item->open_on_sunday    ? 'Minggu' : ',',
 				];
 				$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
-				if ($hours = explode(',', $item->delivery_hours)) {
+				$hours          = explode(',', $item->delivery_hours);
+				if ($hours) {
 					foreach ($business_hours as &$hour) {
 						if (!in_array($hour, $hours)) {
 							$hour = ',';
