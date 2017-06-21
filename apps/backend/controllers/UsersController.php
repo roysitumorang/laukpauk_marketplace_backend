@@ -342,6 +342,9 @@ QUERY
 		if ($village_id) {
 			$user->village = Village::findFirst($village_id);
 		}
+		if ($user->role->name == 'Merchant') {
+			$user->setDeposit($this->request->getPost('deposit'));
+		}
 		$user->setPremiumMerchant($this->request->getPost('premium_merchant'));
 		$user->setDomain($this->request->getPost('domain'));
 		$user->setMinimumPurchase($this->request->getPost('minimum_purchase'));

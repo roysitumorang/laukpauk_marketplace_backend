@@ -97,6 +97,14 @@
 							<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
 						</td>
 					</tr>
+					{% if user.role.name == 'Merchant' %}
+					<tr>
+						<td>
+							Deposit (untuk merchant) :<br>
+							<input type="text" name="deposit" value="{{ user.deposit }}" size="20" placeholder="Deposit">
+						</td>
+					</tr>
+					{% endif %}
 					<tr>
 						<td>
 							Jenis Kelamin :<br>
