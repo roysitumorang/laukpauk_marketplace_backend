@@ -48,7 +48,6 @@ QUERY
 					SELECT
 						a.id,
 						a.company,
-						COALESCE(a.shipping_cost, 1) AS shipping_cost,
 						COALESCE(b.minimum_purchase, a.minimum_purchase, c.value::int) AS minimum_purchase
 					FROM
 						users a
@@ -72,7 +71,7 @@ QUERY
 					if (!$product) {
 						throw new Exception("Produk {$merchant->company} tidak valid! Silahkan cek pesanan Anda kembali atau hapus pesanan dari penjual tersebut untuk melanjutkan pemesanan!");
 					}
-					$total += $product->price * min($item->quantity, $product->stock);
+					$total += $product->price * min(max($item->quantity, 0), $product->stock);
 				}
 			}
 			if ($coupon->minimum_purchase && $total < $coupon->minimum_purchase) {

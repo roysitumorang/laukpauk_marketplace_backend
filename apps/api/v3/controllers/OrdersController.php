@@ -134,7 +134,7 @@ QUERY
 				$params = [<<<QUERY
 					SELECT
 						a.id,
-						COALESCE(a.shipping_cost, 1) AS shipping_cost,
+						COALESCE(a.shipping_cost, 0) AS shipping_cost,
 						COALESCE(b.minimum_purchase, a.minimum_purchase, c.value::int) AS minimum_purchase
 					FROM
 						users a
@@ -175,7 +175,7 @@ QUERY
 					$order_product->name       = $product->name;
 					$order_product->price      = $product->price;
 					$order_product->stock_unit = $product->stock_unit;
-					$order_product->quantity   = min($item->quantity, $product->stock);
+					$order_product->quantity   = min(max($item->quantity, 0), $product->stock);
 					$order_product->created_by = $this->_current_user->id;
 					$order->original_bill     += $order_product->quantity * $product->price;
 					$order_products[]          = $order_product;
@@ -281,9 +281,9 @@ QUERY
 
 	function showAction($id) {
 		if ($this->_current_user->role->name == 'Buyer') {
-			$collection = 'buyer_orders';
+			$collection = 'buyerOrders';
 		} else if ($this->_current_user->role->name == 'Merchant') {
-			$collection = 'merchant_orders';
+			$collection = 'merchantOrders';
 		}
 		$order = $this->_current_user->getRelated($collection, ['Application\Models\Order.id = ?0', 'bind' => [$id]])->getFirst();
 		if (!$order) {
