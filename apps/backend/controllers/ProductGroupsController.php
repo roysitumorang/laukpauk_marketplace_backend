@@ -9,7 +9,7 @@ use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class ProductGroupsController extends ControllerBase {
 	function onConstruct() {
-		$this->view->menu = $this->_menu('Options');
+		$this->view->menu = $this->_menu('Products');
 	}
 
 	function indexAction() {

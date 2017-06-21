@@ -37,7 +37,7 @@ class ProductGroupMembersController extends ControllerBase {
 		while ($item = $result->fetch()) {
 			$product_categories[] = $item;
 		}
-		$this->view->menu               = $this->_menu('Options');
+		$this->view->menu               = $this->_menu('Products');
 		$this->view->product_group      = $this->_product_group;
 		$this->view->product_groups     = $product_groups;
 		$this->view->product_categories = $product_categories;

@@ -12,7 +12,7 @@ class CouponsController extends ControllerBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->view->menu      = $this->_menu('Options');
+		$this->view->menu      = $this->_menu('Products');
 		$this->_date_formatter = new IntlDateFormatter(
 			'id_ID',
 			IntlDateFormatter::FULL,
