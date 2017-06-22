@@ -186,12 +186,12 @@ QUERY
 				$order->final_bill    = $order->original_bill;
 				$order->discount      = 0;
 				$order->shipping_cost = $merchant->shipping_cost ?? 0;
-				$order->final_bill   += $order->shipping_cost;
 				$order->orderProducts = $order_products;
 				if (!$order->validation()) {
 					throw new Exception('Order Anda tidak valid!');
 				}
 				if (!$coupon) {
+					$order->final_bill += $order->shipping_cost;
 					$order->create();
 					continue;
 				}
@@ -210,6 +210,7 @@ QUERY
 						$order->final_bill -= $order->discount;
 						$discount           = max($discount - $order->discount, 0);
 					}
+					$order->final_bill += $order->shipping_cost;
 					$order->create();
 				}
 			}
