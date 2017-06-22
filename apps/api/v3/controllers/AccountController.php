@@ -159,7 +159,7 @@ class AccountController extends ControllerBase {
 					JOIN cities b ON a.id = b.province_id
 					JOIN subdistricts c ON b.id = c.city_id
 					JOIN villages d ON c.id = d.subdistrict_id
-					JOIN service_areas e ON d.id = e.village_id
+					JOIN coverage_area e ON d.id = e.village_id
 					JOIN users f ON e.user_id = f.id
 				WHERE
 QUERY
@@ -177,7 +177,7 @@ QUERY
 					cities b
 					JOIN subdistricts c ON b.id = c.city_id
 					JOIN villages d ON c.id = d.subdistrict_id
-					JOIN service_areas e ON d.id = e.village_id
+					JOIN coverage_area e ON d.id = e.village_id
 					JOIN users f ON e.user_id = f.id
 				WHERE
 QUERY
@@ -194,7 +194,7 @@ QUERY
 				FROM
 					subdistricts c
 					JOIN villages d ON c.id = d.subdistrict_id
-					JOIN service_areas e ON d.id = e.village_id
+					JOIN coverage_area e ON d.id = e.village_id
 					JOIN users f ON e.user_id = f.id
 				WHERE
 QUERY
@@ -211,7 +211,7 @@ QUERY
 				FROM
 					subdistricts c
 					JOIN villages d ON c.id = d.subdistrict_id
-					JOIN service_areas e ON d.id = e.village_id
+					JOIN coverage_area e ON d.id = e.village_id
 					JOIN users f ON e.user_id = f.id
 				WHERE
 QUERY
@@ -448,7 +448,7 @@ QUERY
 				JOIN cities b ON a.id = b.province_id
 				JOIN subdistricts c ON b.id = c.city_id
 				JOIN villages d ON c.id = d.subdistrict_id
-				JOIN service_areas e ON d.id = e.village_id
+				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
 			WHERE
 QUERY
@@ -475,7 +475,7 @@ QUERY
 				JOIN cities b ON a.id = b.province_id
 				JOIN subdistricts c ON b.id = c.city_id
 				JOIN villages d ON c.id = d.subdistrict_id
-				JOIN service_areas e ON d.id = e.village_id
+				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
 			WHERE
 				a.id = {$id} AND
@@ -502,7 +502,7 @@ QUERY
 				cities b
 				JOIN subdistricts c ON b.id = c.city_id
 				JOIN villages d ON c.id = d.subdistrict_id
-				JOIN service_areas e ON d.id = e.village_id
+				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
 			WHERE
 				b.id = {$id} AND
@@ -528,7 +528,7 @@ QUERY
 			FROM
 				subdistricts c
 				JOIN villages d ON c.id = d.subdistrict_id
-				JOIN service_areas e ON d.id = e.village_id
+				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
 			WHERE
 				c.id = {$id} AND
