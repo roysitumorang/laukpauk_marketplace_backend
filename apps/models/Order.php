@@ -226,6 +226,7 @@ class Order extends ModelBase {
 		if (!$this->validation() || !$this->update()) {
 			return false;
 		}
+		$session       = $this->getDI()->getSession();
 		$recipients    = [];
 		$device_tokens = [];
 		$admins        = User::find([
@@ -245,7 +246,7 @@ class Order extends ModelBase {
 			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
 			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
 			$notification->target_url = strtr($template->target_url, ['{order_id}' => $this->id]);
-			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
 			$notification->recipients = $recipients;
 			$notification->create();
 		}
@@ -257,7 +258,7 @@ class Order extends ModelBase {
 			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
 			$notification->link       = strtr($template->link, ['{order_id}' => $this->id]);
 			$notification->target_url = $template->target_url;
-			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->create();
 			$notification->push($device_tokens, [
@@ -271,6 +272,7 @@ class Order extends ModelBase {
 	}
 
 	function complete() {
+		$session       = $this->getDI()->getSession();
 		$recipients    = [];
 		$device_tokens = [];
 		foreach ($this->items as $item) {
@@ -299,7 +301,7 @@ class Order extends ModelBase {
 			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
 			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
 			$notification->target_url = strtr($template->target_url, ['{order_id}' => $this->id]);
-			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
 			$notification->recipients = $recipients;
 			$notification->create();
 		}
@@ -311,7 +313,7 @@ class Order extends ModelBase {
 			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
 			$notification->link       = strtr($template->link, ['{order_id}' => $this->id]);
 			$notification->target_url = $template->target_url;
-			$notification->created_by = $this->getDI()->getCurrentUser()->id ?: $this->merchant->id;
+			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
 			$notification->recipients = [$this->buyer];
 			$notification->push($device_tokens, [
 				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),

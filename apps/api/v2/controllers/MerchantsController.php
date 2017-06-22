@@ -7,9 +7,9 @@ use Application\Models\ProductCategory;
 use Application\Models\User;
 use Application\Models\Role;
 use DateTime;
-use Exception;
 use IntlDateFormatter;
 use Phalcon\Db;
+use Phalcon\Exception;
 
 class MerchantsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -30,9 +30,10 @@ class MerchantsController extends ControllerBase {
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
-				JOIN service_areas c ON a.id = c.user_id
+				JOIN coverage_area c ON a.id = c.user_id
 				JOIN settings d ON d.name = 'minimum_purchase'
-				JOIN products f ON a.id = f.user_id
+				JOIN user_product e ON a.id = e.user_id
+				JOIN products f ON e.product_id = f.id
 				JOIN product_categories g ON f.product_category_id = g.id
 			WHERE
 				a.status = 1 AND
@@ -145,7 +146,7 @@ QUERY;
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
+					JOIN coverage_area c ON a.id = c.user_id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -221,11 +222,13 @@ QUERY;
 				c.id,
 				c.name
 			FROM
-				products b
+				user_product a
+				JOIN products b ON a.product_id = b.id
 				JOIN product_categories c ON b.product_category_id = c.id
 			WHERE
-				b.user_id = {$merchant->id} AND
-				b.price > 0 AND
+				a.user_id = {$merchant->id} AND
+				a.price > 0 AND
+				a.published = 1 AND
 				b.published = 1 AND
 				c.published = 1
 			GROUP BY c.id

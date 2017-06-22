@@ -2,8 +2,8 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Exception;
 use Phalcon\Db;
+use Phalcon\Exception;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -21,7 +21,7 @@ class ProductsController extends ControllerBase {
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
+					JOIN coverage_area c ON a.id = c.user_id
 					JOIN settings d ON d.name = 'minimum_purchase'
 				WHERE
 					a.status = 1 AND
@@ -55,18 +55,20 @@ QUERY;
 		$products    = [];
 		$query       = <<<QUERY
 			SELECT
-				COUNT(1)
+				COUNT(DISTINCT a.id)
 			FROM
-				products b
+				user_product a
+				JOIN products b ON a.product_id = b.id
 				JOIN product_categories c ON b.product_category_id = c.id
 			WHERE
+				a.published = 1 AND
 				b.published = 1 AND
 				c.published = 1 AND
 QUERY;
 		if ($this->_premium_merchant) {
-			$query .= " b.user_id = {$this->_premium_merchant->id}";
+			$query .= " a.user_id = {$this->_premium_merchant->id}";
 		} else {
-			$query .= " b.user_id = {$merchant->id}";
+			$query .= " a.user_id = {$merchant->id}";
 		}
 		if ($category_id && $category = $this->db->fetchOne("SELECT id FROM product_categories WHERE id = {$category_id}", Db::FETCH_OBJ)) {
 			$query .= " AND c.id = {$category->id}";
@@ -78,7 +80,7 @@ QUERY;
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 && $page <= $total_pages ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(str_replace('COUNT(1)', 'b.id, b.product_category_id, b.name, b.price, b.stock, b.stock_unit, b.picture', $query) . " GROUP BY b.id ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
+		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => 'DISTINCT a.id, b.product_category_id, b.name, a.price, a.stock, b.stock_unit, b.picture']) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}");
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
