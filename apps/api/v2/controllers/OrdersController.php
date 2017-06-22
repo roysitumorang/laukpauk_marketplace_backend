@@ -179,7 +179,7 @@ QUERY
 			}
 			$order->updated_by = $this->_current_user->id;
 			$order->complete();
-			$this->_response['status']  = 1;
+			$this->_response['status'] = 1;
 			throw new Exception('Order #' . $order->code . ' telah selesai, terima kasih');
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
@@ -206,7 +206,7 @@ QUERY
 			}
 			$order->updated_by = $this->_current_user->id;
 			$order->cancel($this->_input->cancellation_reason);
-			$this->_response['status']  = 1;
+			$this->_response['status'] = 1;
 			throw new Exception('Order #' . $order->code . ' telah dicancel!');
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();

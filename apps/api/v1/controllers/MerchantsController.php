@@ -4,9 +4,9 @@ namespace Application\Api\V1\Controllers;
 
 use Application\Models\ProductCategory;
 use DateTime;
-use Exception;
 use IntlDateFormatter;
 use Phalcon\Db;
+use Phalcon\Exception;
 
 class MerchantsController extends ControllerBase {
 	function indexAction() {
@@ -29,7 +29,7 @@ class MerchantsController extends ControllerBase {
 			FROM
 				users a
 				JOIN roles b ON a.role_id = b.id
-				JOIN service_areas c ON a.id = c.user_id
+				JOIN coverage_area c ON a.id = c.user_id
 			WHERE
 				a.status = 1 AND
 				a.premium_merchant IS NULL AND
@@ -113,7 +113,7 @@ QUERY
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
-					JOIN service_areas c ON a.id = c.user_id
+					JOIN coverage_area c ON a.id = c.user_id
 				WHERE
 					a.status = 1 AND
 					a.premium_merchant IS NULL AND
