@@ -36,7 +36,22 @@
 						<tr>
 							<td>
 								<b>Kepada :</b><br>
-								<select name="user_id">
+								Supplier
+								<select name="merchant_id" id="merchant_id">
+									<option value="">Laukpauk.id</option>
+									{% for merchant in merchants %}
+										<option value="{{ merchant.id }}"{% if merchant.id == merchant_id %} selected{% endif %}>{{ merchant.company }}</option>
+									{% endfor %}
+								</select>
+								Role
+								<select name="role_id" id="role_id">
+									<option value="">Merchant + Buyer</option>
+									{% for role in roles %}
+										<option value="{{ role.id }}"{% if role.id == role_id %} selected{% endif %}>{{ role.name }} aja</option>
+									{% endfor %}
+								</select>
+								Member
+								<select name="user_id" id="user_id">
 									<option value="">Semua Member</option>
 									{% for user in users %}
 										<option value="{{ user.id }}"{% if user.id == user_id %} selected{% endif %}>{{ user.mobile_phone }} / {{ user.name }}</option>
@@ -65,3 +80,18 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	let merchant_id = document.getElementById('merchant_id'), role_id = document.getElementById('role_id'), user_id = document.getElementById('user_id'), fetchRecipients = () => {
+		let new_options = '<option value="">Semua Member</option>'
+		fetch('/admin/sms/recipients' + (merchant_id.value ? '/merchant_id:' + merchant_id.value : '') + (role_id.value ? '/role_id:' + role_id.value : ''), { credentials: 'include' }).then(response => {
+			return response.text()
+		}).then(payload => {
+			let result = JSON.parse(payload), new_options = '<option value="">Semua Member</option>'
+			result.forEach(item => {
+				new_options += '<option value="' + item.id + '">' + item.mobile_phone + ' / ' + item.name + '</option>'
+			})
+			user_id.innerHTML = new_options
+		})
+	}
+	merchant_id.onchange = fetchRecipients, role_id.onchange = fetchRecipients
+</script>

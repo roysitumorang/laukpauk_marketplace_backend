@@ -2,6 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
+use Application\Models\Role;
 use Application\Models\Sms;
 use Application\Models\User;
 use Phalcon\Paginator\Adapter\Model;
@@ -9,8 +10,7 @@ use Phalcon\Paginator\Adapter\Model;
 class SmsController extends ControllerBase {
 	function initialize() {
 		parent::initialize();
-		$this->view->menu  = $this->_menu('Mailbox');
-		$this->view->users = User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'order' => 'name ASC']);
+		$this->view->menu = $this->_menu('Mailbox');
 	}
 
 	function indexAction() {
@@ -37,20 +37,37 @@ class SmsController extends ControllerBase {
 	}
 
 	function createAction() {
-		$sms     = new Sms;
-		$user_id = '';
+		$sms       = new Sms;
+		$user_id   = '';
+		$merchants = [];
+		$roles     = [];
+		foreach (User::find(['status = 1 AND premium_merchant = 1', 'column' => 'id, name, mobile_phone', 'order' => 'company']) as $item) {
+			$merchants[] = $item;
+		}
+		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'name DESC']) as $item) {
+			$roles[] = $item;
+		}
 		if ($this->request->isPost()) {
-			$recipients = [];
-			$user_id    = $this->request->getPost('user_id');
+			$condition   = 'status = 1';
+			$recipients  = [];
+			$merchant_id = $this->request->getPost('merchant_id', 'int');
+			$role_id     = $this->request->getPost('role_id', 'int');
+			$user_id     = $this->request->getPost('user_id');
+			if ($merchant_id && $merchant = User::findFirst("status = 1 AND premium_merchant = 1 AND id = {$merchant_id}")) {
+				$condition .= " AND (id = {$merchant->id} OR merchant_id = {$merchant->id})";
+			}
+			if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
+				$condition .= " AND role_id = {$role->id}";
+			}
+			if ($user_id && $user = User::findFirst("status = 1 AND id = {$user_id}")) {
+				$condition .= " AND id = {$user->id}";
+			}
+			$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
+			foreach ($result as $item) {
+				$recipients[] = $item;
+			}
 			$sms->setBody($this->request->getPost('body'));
 			$sms->user_id = $this->currentUser->id;
-			if ($user_id && $recipient = User::findFirst(['id = ?0 AND premium_merchant IS NULL AND merchant_id IS NULL', 'bind' => [$user_id]])) {
-				$recipients[] = $recipient;
-			} else {
-				foreach ($this->view->users as $user) {
-					$recipients[] = $user;
-				}
-			}
 			if ($sms->validation() && $sms->send($recipients)) {
 				$this->flashSession->success('SMS berhasil dikirim.');
 				return $this->response->redirect('/admin/sms');
@@ -59,8 +76,37 @@ class SmsController extends ControllerBase {
 			foreach ($sms->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
+			$this->view->merchant_id = $merchant_id;
+			$this->view->role_id     = $role_id;
+			$this->view->user_id     = $user_id;
+			$this->view->users       = $recipients;
+		} else {
+			$this->view->users = User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
 		}
-		$this->view->sms     = $sms;
-		$this->view->user_id = $user_id;
+		$this->view->sms       = $sms;
+		$this->view->user_id   = $user_id;
+		$this->view->merchants = $merchants;
+		$this->view->roles     = $roles;
+	}
+
+	function recipientsAction() {
+		$condition   = 'status = 1';
+		$recipients  = [];
+		$merchant_id = $this->dispatcher->getParam('merchant_id', 'int');
+		$role_id     = $this->dispatcher->getParam('role_id', 'int');
+		if ($merchant_id && $merchant = User::findFirst("status = 1 AND premium_merchant = 1 AND id = {$merchant_id}")) {
+			$condition .= " AND (id = {$merchant->id} OR merchant_id = {$merchant->id})";
+		}
+		if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
+			$condition .= " AND role_id = {$role->id}";
+		}
+		$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
+		foreach ($result as $item) {
+			$recipients[] = $item;
+		}
+		$this->response->setContentType('application/json', 'UTF-8');
+		$this->response->setContent(json_encode($recipients));
+		$this->response->send();
+		exit;
 	}
 }
