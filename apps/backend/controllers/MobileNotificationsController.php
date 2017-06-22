@@ -19,7 +19,7 @@ class MobileNotificationsController extends ControllerBase {
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
 		$paginator    = new Model([
-			'data'  => $this->currentUser->getRelated('own_notifications', ["type = 'mobile'", 'order' => 'id DESC']),
+			'data'  => $this->currentUser->getRelated('ownNotifications', ["type = 'mobile'", 'order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);

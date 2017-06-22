@@ -18,7 +18,7 @@ class SmsController extends ControllerBase {
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
 		$paginator    = new Model([
-			'data'  => $this->currentUser->getRelated('own_sms', ['order' => 'id DESC']),
+			'data'  => $this->currentUser->getRelated('ownSms', ['order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
