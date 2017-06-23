@@ -3,15 +3,14 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Notification;
+use Application\Models\Role;
 use Application\Models\User;
-use Phalcon\Db;
 use Phalcon\Paginator\Adapter\Model;
 
 class MobileNotificationsController extends ControllerBase {
 	function initialize() {
 		parent::initialize();
-		$this->view->menu  = $this->_menu('Mailbox');
-		$this->view->users = User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'order' => 'name ASC']);
+		$this->view->menu = $this->_menu('Mailbox');
 	}
 
 	function indexAction() {
@@ -39,44 +38,96 @@ class MobileNotificationsController extends ControllerBase {
 
 	function createAction() {
 		$notification = new Notification;
+		$merchants    = [];
+		$roles        = [];
+		$recipients   = [];
+		$merchant_id  = '';
+		$role_id      = '';
 		$user_id      = '';
+		$condition    = 'status = 1 AND EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id)';
+		foreach (User::find(['status = 1 AND premium_merchant = 1', 'column' => 'id, name, mobile_phone', 'order' => 'company']) as $item) {
+			$merchants[] = $item;
+		}
+		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'name DESC']) as $item) {
+			$roles[] = $item;
+		}
 		if ($this->request->isPost()) {
 			$device_tokens = [];
-			$recipients    = [];
 			$content       = [
 				'title'   => $this->request->getPost('title'),
 				'message' => $this->request->getPost('message'),
 			];
-			$notification->user_id = $this->currentUser->id;
-			$notification->setType('mobile');
-			$notification->setTitle($this->request->getPost('title'));
-			$notification->setMessage($this->request->getPost('message'));
-			$user_id = $this->request->getPost('user_id');
-			$db      = $this->getDI()->getDb();
-			if ($user_id && $recipient = User::findFirst(['id = ?0 AND premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'bind' => [$user_id]])) {
-				$recipients[] = $recipient;
-				$result       = $db->query("SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1 AND b.id = {$recipient->id}");
-			} else {
-				foreach ($this->view->users as $user) {
-					$recipients[] = $user;
-				}
-				$result = $db->query('SELECT a.token FROM devices a JOIN users b ON a.user_id = b.id WHERE b.premium_merchant IS NULL AND b.merchant_id IS NULL AND b.status = 1');
+			$result      = User::query()->where('status = 1')->join('Application\Models\Device', 'Application\Models\User.id = b.user_id', 'b')->columns(['token']);
+			$merchant_id = $this->request->getPost('merchant_id', 'int');
+			$role_id     = $this->request->getPost('role_id', 'int');
+			$user_id     = $this->request->getPost('user_id');
+			if ($merchant_id && $merchant = User::findFirst("status = 1 AND premium_merchant = 1 AND id = {$merchant_id}")) {
+				$condition .= " AND (id = {$merchant->id} OR merchant_id = {$merchant->id})";
+				$result->andWhere("Application\Models\User.id = {$merchant->id} OR merchant_id = {$merchant->id}");
 			}
-			$notification->recipients = $recipients;
-			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($row = $result->fetch()) {
+			if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
+				$condition .= " AND role_id = {$role->id}";
+				$result->andWhere("role_id = {$role->id}");
+			}
+			if ($user_id && $user = User::findFirst("status = 1 AND id = {$user_id}")) {
+				$condition .= " AND id = {$user->id}";
+				$result->andWhere("Application\Models\User.id = {$user->id}");
+			}
+			foreach ($result->execute() as $row) {
 				$device_tokens[] = $row->token;
 			}
-			if ($notification->push($device_tokens, $content)) {
-				$this->flashSession->success('Notifikasi berhasil dikirim.');
-				return $this->response->redirect('/admin/mobile_notifications');
+			if (!$device_tokens) {
+				$this->flashSession->error('Penerima notifikasi belum ada.');
+			} else {
+				foreach (User::find($condition) as $user) {
+					$recipients[] = $user;
+				}
+				$notification->setType('mobile');
+				$notification->setTitle($this->request->getPost('title'));
+				$notification->setMessage($this->request->getPost('message'));
+				$notification->user_id    = $this->currentUser->id;
+				$notification->recipients = $recipients;
+				if ($notification->push($device_tokens, $content)) {
+					$this->flashSession->success('Notifikasi berhasil dikirim.');
+					return $this->response->redirect('/admin/mobile_notifications');
+				}
+				$this->flashSession->error('Notifikasi tidak terkirim, silahkan cek form dan coba lagi.');
+				foreach ($notification->getMessages() as $error) {
+					$this->flashSession->error($error);
+				}
 			}
-			$this->flashSession->error('Notifikasi tidak terkirim, silahkan cek form dan coba lagi.');
-			foreach ($notification->getMessages() as $error) {
-				$this->flashSession->error($error);
+		} else {
+			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']) as $user) {
+				$recipients[] = $user;
 			}
 		}
 		$this->view->notification = $notification;
+		$this->view->merchants    = $merchants;
+		$this->view->roles        = $roles;
+		$this->view->users        = $recipients;
+		$this->view->merchant_id  = $merchant_id;
+		$this->view->role_id      = $role_id;
 		$this->view->user_id      = $user_id;
+	}
+
+	function recipientsAction() {
+		$condition   = 'status = 1 AND EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id)';
+		$recipients  = [];
+		$merchant_id = $this->dispatcher->getParam('merchant_id', 'int');
+		$role_id     = $this->dispatcher->getParam('role_id', 'int');
+		if ($merchant_id && $merchant = User::findFirst("status = 1 AND premium_merchant = 1 AND id = {$merchant_id}")) {
+			$condition .= " AND (id = {$merchant->id} OR merchant_id = {$merchant->id})";
+		}
+		if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
+			$condition .= " AND role_id = {$role->id}";
+		}
+		$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
+		foreach ($result as $item) {
+			$recipients[] = $item;
+		}
+		$this->response->setContentType('application/json', 'UTF-8');
+		$this->response->setContent(json_encode($recipients));
+		$this->response->send();
+		exit;
 	}
 }

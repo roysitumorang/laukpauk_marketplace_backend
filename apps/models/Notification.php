@@ -90,6 +90,9 @@ class Notification extends ModelBase {
 	}
 
 	function push(array $tokens, array $content, array $payload = []) {
+		if (!$tokens) {
+			return false;
+		}
 		if (!isset($payload['target_url'])) {
 			$payload['target_url'] = 'tab.notification';
 		}
