@@ -626,8 +626,7 @@ class User extends ModelBase {
 			'body'       => 'Token password Anda: ' . $password_reset_token,
 			'created_by' => $this->id,
 		]);
-		$sms->recipients = [$this];
-		return $sms->send([$this->mobile_phone]);
+		return $sms->send([$this]);
 	}
 
 	function resetPassword($new_password) {
