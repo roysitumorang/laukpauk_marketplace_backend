@@ -143,7 +143,7 @@ QUERY
 				'province_id'      => 'a.id',
 				'province_name'    => 'a.name',
 				'city_id'          => 'b.id',
-				'city_name'        => "CONCAT(' ', b.type, b.name)",
+				'city_name'        => "CONCAT_WS(' ', b.type, b.name)",
 				'subdistrict_id'   => 'c.id',
 				'subdistrict_name' => 'c.name',
 				'village_id'       => 'd.id',
