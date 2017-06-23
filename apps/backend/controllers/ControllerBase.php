@@ -30,7 +30,6 @@ class ControllerBase extends Controller {
 			return;
 		}
 		$unread_notifications = [];
-		$unread_messages      = [];
 		$datetime_formatter   = new IntlDateFormatter(
 			'id_ID',
 			IntlDateFormatter::FULL,
@@ -48,18 +47,13 @@ class ControllerBase extends Controller {
 			$item->writeAttribute('created_at', $datetime_formatter->format(new DateTime($item->created_at, $this->currentDatetime->getTimezone())));
 			$unread_notifications[] = $item;
 		}
-		$result = $this->currentUser->getRelated('messages', [
+		$this->view->current_user         = $this->currentUser;
+		$this->view->unread_notifications = $unread_notifications;
+		$this->view->unread_messages      = $this->currentUser->getRelated('messages', [
 			'conditions' => 'Application\Models\MessageRecipient.read_at IS NULL',
 			'columns'    => 'Application\Models\Message.id, Application\Models\Message.subject, Application\Models\Message.body',
 			'order'      => 'Application\Models\Message.id DESC',
 		]);
-		foreach ($result as $item) {
-			$item->writeAttribute('created_at', $datetime_formatter->format(new DateTime($item->created_at, $this->currentDatetime->getTimezone())));
-			$unread_messages[] = $item;
-		}
-		$this->view->unread_notifications = $unread_notifications;
-		$this->view->unread_messages      = $unread_messages;
-		$this->view->current_user         = $this->currentUser;
 		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 	}
 
