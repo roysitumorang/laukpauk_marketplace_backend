@@ -64,7 +64,7 @@ class SmsController extends ControllerBase {
 			if ($user_id && $user = User::findFirst("status = 1 AND id = {$user_id}")) {
 				$condition .= " AND id = {$user->id}";
 			}
-			foreach (User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']) as $item) {
+			foreach (User::find([$condition, 'order' => 'name']) as $item) {
 				$recipients[] = $item;
 			}
 			if (!$recipients) {
@@ -82,7 +82,7 @@ class SmsController extends ControllerBase {
 				}
 			}
 		} else {
-			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']) as $user) {
+			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'order' => 'name']) as $item) {
 				$recipients[] = $item;
 			}
 		}
