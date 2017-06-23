@@ -2,7 +2,9 @@
 
 namespace Application\Backend\Controllers;
 
+use DateTime;
 use Ds\Vector;
+use IntlDateFormatter;
 use Phalcon\Mvc\Controller;
 use Phalcon\Text;
 
@@ -27,18 +29,38 @@ class ControllerBase extends Controller {
 			}
 			return;
 		}
-		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
-		$this->view->current_user         = $this->currentUser;
-		$this->view->unread_notifications = $this->currentUser->getRelated('notifications', [
+		$unread_notifications = [];
+		$unread_messages      = [];
+		$datetime_formatter   = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'd MMM yyyy HH.mm'
+		);
+		$result = $this->currentUser->getRelated('notifications', [
 			'conditions' => 'Application\Models\NotificationRecipient.read_at IS NULL',
 			'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.title, Application\Models\Notification.target_url, Application\Models\Notification.created_at',
 			'order'      => 'Application\Models\Notification.id DESC',
 		]);
-		$this->view->unread_messages      = $this->currentUser->getRelated('messages', [
+		foreach ($result as $item) {
+			$item->writeAttribute('created_at', $datetime_formatter->format(new DateTime($item->created_at, $this->currentDatetime->getTimezone())));
+			$unread_notifications[] = $item;
+		}
+		$result = $this->currentUser->getRelated('messages', [
 			'conditions' => 'Application\Models\MessageRecipient.read_at IS NULL',
 			'columns'    => 'Application\Models\Message.id, Application\Models\Message.subject, Application\Models\Message.body',
 			'order'      => 'Application\Models\Message.id DESC',
 		]);
+		foreach ($result as $item) {
+			$item->writeAttribute('created_at', $datetime_formatter->format(new DateTime($item->created_at, $this->currentDatetime->getTimezone())));
+			$unread_messages[] = $item;
+		}
+		$this->view->unread_notifications = $unread_notifications;
+		$this->view->unread_messages      = $unread_messages;
+		$this->view->current_user         = $this->currentUser;
+		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
 	}
 
 	protected function _menu(string $expanded = null) : array {

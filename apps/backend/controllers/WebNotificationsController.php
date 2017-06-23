@@ -3,10 +3,20 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\NotificationRecipient;
+use DateTime;
+use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
 class WebNotificationsController extends ControllerBase {
 	function indexAction() {
+		$datetime_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'd MMM yyyy HH.mm'
+		);
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -24,6 +34,7 @@ class WebNotificationsController extends ControllerBase {
 		$notifications = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
+			$item->writeAttribute('created_at', $datetime_formatter->format(new DateTime($item->created_at, $this->currentDatetime->getTimezone())));
 			$notifications[] = $item;
 		}
 		$this->view->menu          = $this->_menu('Options');

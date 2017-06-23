@@ -54,7 +54,7 @@
 					<li>
 						<a href="javascript:void(0)" data-id="{{ notification.id }}" data-target-url="{{ notification.target_url }}" class="clearfix notification">
 							<span class="title">{{ notification.created_at }}</span>
-							<span class="message">{{ notification.subject }}</span>
+							<span class="message">{{ notification.title }}</span>
 						</a>
 					</li>
 				{% elsefor %}
