@@ -37,10 +37,14 @@ class SmsController extends ControllerBase {
 	}
 
 	function createAction() {
-		$sms       = new Sms;
-		$user_id   = '';
-		$merchants = [];
-		$roles     = [];
+		$sms         = new Sms;
+		$merchants   = [];
+		$roles       = [];
+		$recipients  = [];
+		$merchant_id = '';
+		$role_id     = '';
+		$user_id     = '';
+		$condition   = 'status = 1';
 		foreach (User::find(['status = 1 AND premium_merchant = 1', 'column' => 'id, name, mobile_phone', 'order' => 'company']) as $item) {
 			$merchants[] = $item;
 		}
@@ -48,8 +52,6 @@ class SmsController extends ControllerBase {
 			$roles[] = $item;
 		}
 		if ($this->request->isPost()) {
-			$condition   = 'status = 1';
-			$recipients  = [];
 			$merchant_id = $this->request->getPost('merchant_id', 'int');
 			$role_id     = $this->request->getPost('role_id', 'int');
 			$user_id     = $this->request->getPost('user_id');
@@ -62,31 +64,35 @@ class SmsController extends ControllerBase {
 			if ($user_id && $user = User::findFirst("status = 1 AND id = {$user_id}")) {
 				$condition .= " AND id = {$user->id}";
 			}
-			$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
-			foreach ($result as $item) {
+			foreach (User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']) as $item) {
 				$recipients[] = $item;
 			}
-			$sms->setBody($this->request->getPost('body'));
-			$sms->user_id = $this->currentUser->id;
-			if ($sms->validation() && $sms->send($recipients)) {
-				$this->flashSession->success('SMS berhasil dikirim.');
-				return $this->response->redirect('/admin/sms');
+			if (!$recipients) {
+				$this->flashSession->error('Penerima notifikasi belum ada.');
+			} else {
+				$sms->setBody($this->request->getPost('body'));
+				$sms->user_id = $this->currentUser->id;
+				if ($sms->validation() && $sms->send($recipients)) {
+					$this->flashSession->success('SMS berhasil dikirim.');
+					return $this->response->redirect('/admin/sms');
+				}
+				$this->flashSession->error('SMS tidak terkirim, silahkan cek form dan coba lagi.');
+				foreach ($sms->getMessages() as $error) {
+					$this->flashSession->error($error);
+				}
 			}
-			$this->flashSession->error('SMS tidak terkirim, silahkan cek form dan coba lagi.');
-			foreach ($sms->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
-			$this->view->merchant_id = $merchant_id;
-			$this->view->role_id     = $role_id;
-			$this->view->user_id     = $user_id;
-			$this->view->users       = $recipients;
 		} else {
-			$this->view->users = User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
+			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']) as $user) {
+				$recipients[] = $item;
+			}
 		}
-		$this->view->sms       = $sms;
-		$this->view->user_id   = $user_id;
-		$this->view->merchants = $merchants;
-		$this->view->roles     = $roles;
+		$this->view->sms         = $sms;
+		$this->view->merchants   = $merchants;
+		$this->view->roles       = $roles;
+		$this->view->users       = $recipients;
+		$this->view->merchant_id = $merchant_id;
+		$this->view->role_id     = $role_id;
+		$this->view->user_id     = $user_id;
 	}
 
 	function recipientsAction() {
