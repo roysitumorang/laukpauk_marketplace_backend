@@ -304,8 +304,8 @@ QUERY
 			$current_user['open_on_thursday']      = $this->_current_user->open_on_thursday;
 			$current_user['open_on_friday']        = $this->_current_user->open_on_friday;
 			$current_user['open_on_saturday']      = $this->_current_user->open_on_saturday;
-			$current_user['business_opening_hour'] = $this->_current_user->business_opening_hour;
-			$current_user['business_closing_hour'] = $this->_current_user->business_closing_hour;
+			$current_user['business_opening_hour'] = strval($this->_current_user->business_opening_hour);
+			$current_user['business_closing_hour'] = strval($this->_current_user->business_closing_hour);
 			$current_user['minimum_purchase']      = $this->_current_user->minimum_purchase;
 			$current_user['delivery_hours']        = $this->_current_user->delivery_hours;
 			$current_user['delivery_hours']        = array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1);
@@ -415,8 +415,8 @@ QUERY
 			$current_user['open_on_thursday']      = $user->open_on_thursday;
 			$current_user['open_on_friday']        = $user->open_on_friday;
 			$current_user['open_on_saturday']      = $user->open_on_saturday;
-			$current_user['business_opening_hour'] = $user->business_opening_hour;
-			$current_user['business_closing_hour'] = $user->business_closing_hour;
+			$current_user['business_opening_hour'] = strval($user->business_opening_hour);
+			$current_user['business_closing_hour'] = strval($user->business_closing_hour);
 			$current_user['minimum_purchase']      = $user->minimum_purchase;
 			$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
 		}
