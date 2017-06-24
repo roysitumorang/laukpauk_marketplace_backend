@@ -245,6 +245,7 @@ QUERY
 			$this->_current_user->setOpenOnSaturday($this->_post->open_on_saturday);
 			$this->_current_user->setMinimumPurchase($this->_post->minimum_purchase);
 			$this->_current_user->setDeliveryHours($this->_post->delivery_hours);
+			$this->_current_user->setMerchantNote($this->_post->merchant_note);
 		}
 		if (!$this->_current_user->validation() || !$this->_current_user->update()) {
 			$errors = [];
@@ -306,6 +307,7 @@ QUERY
 			$current_user['open_on_saturday']      = $this->_current_user->open_on_saturday;
 			$current_user['business_opening_hour'] = strval($this->_current_user->business_opening_hour);
 			$current_user['business_closing_hour'] = strval($this->_current_user->business_closing_hour);
+			$current_user['merchant_note']         = $this->_current_user->merchant_note;
 			$current_user['minimum_purchase']      = $this->_current_user->minimum_purchase;
 			$current_user['delivery_hours']        = $this->_current_user->delivery_hours;
 			$current_user['delivery_hours']        = array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1);
@@ -417,6 +419,7 @@ QUERY
 			$current_user['open_on_saturday']      = $user->open_on_saturday;
 			$current_user['business_opening_hour'] = strval($user->business_opening_hour);
 			$current_user['business_closing_hour'] = strval($user->business_closing_hour);
+			$current_user['merchant_note']         = $user->merchant_note;
 			$current_user['minimum_purchase']      = $user->minimum_purchase;
 			$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
 		}
