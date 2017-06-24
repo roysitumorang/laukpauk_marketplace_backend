@@ -336,16 +336,18 @@ QUERY
 						}
 						return 'Sedang Diproses';
 					}),
-					'day'    => $date_formatter->format($scheduled_delivery),
-					'hour'   => $scheduled_delivery->format('G'),
+					'day'  => $date_formatter->format($scheduled_delivery),
+					'hour' => $scheduled_delivery->format('G'),
 				],
-				'note'          => $order->note,
-				'merchant'      => [
+				'note'  => $order->note,
+				'items' => $items,
+			];
+			if ($this->_current_user->role->name == 'Buyer') {
+				$payload['merchant'] = [
 					'company' => $merchant->company,
 					'address' => $merchant->address,
-				],
-				'items'         => $items,
-			];
+				];
+			}
 			if ($order->status == -1) {
 				$payload['cancellation_reason'] = $order->cancellation_reason;
 			}
