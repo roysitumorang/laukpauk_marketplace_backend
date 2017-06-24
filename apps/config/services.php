@@ -35,24 +35,25 @@ $di->set('assets', function() {
 /**
  * The URL component is used to generate all kind of urls in the application
  */
-$di->set('url', function() use($config) {
+$di->set('url', function() {
 	$url = new Url;
-	$url->setBaseUri($config->application->baseUri);
+	$url->setBaseUri($this->getConfig()->application->baseUri);
 	return $url;
 }, true);
 
 /**
  * Database connection is created based in the parameters defined in the configuration file
  */
-$di->set('db', function() use($config) {
-	$params = [
-		'host'       => $config->database->host,
-		'dbname'     => $config->database->dbname,
-		'username'   => $config->database->username,
-		'password'   => $config->database->password,
-		'persistent' => $config->database->persistent,
+$di->set('db', function() {
+	$database = $this->getConfig()->database;
+	$params   = [
+		'host'       => $database->host,
+		'dbname'     => $database->dbname,
+		'username'   => $database->username,
+		'password'   => $database->password,
+		'persistent' => $database->persistent,
 	];
-	if ($config->database->adapter == 'Mysql') {
+	if ($database->adapter == 'Mysql') {
 		return new Mysql($params);
 	}
 	return new Postgresql($params);
@@ -94,7 +95,7 @@ $di->set('request', function() {
 	return new Request;
 });
 
-$di->set('currentDatetime', function() use($di) {
+$di->set('currentDatetime', function() {
 	$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
-	return $current_datetime->setTimezone(new DateTimeZone($di->getConfig()->timezone));
+	return $current_datetime->setTimezone(new DateTimeZone($this->getConfig()->timezone));
 });

@@ -39,9 +39,9 @@ class Module implements ModuleDefinitionInterface {
 		/**
 		 * Start the session the first time some component request the session service
 		 */
-		$di->setShared('session', function() use($di) {
+		$di->setShared('session', function() {
 			$session = new \Phalcon\Session\Adapter\Database([
-				'db'    => $di->getDb(),
+				'db'    => $this->getDb(),
 				'table' => 'sessions',
 			]);
 			$session->start();
@@ -103,16 +103,14 @@ class Module implements ModuleDefinitionInterface {
 						->addFunction('strip_tags', 'strip_tags')
 						->addFunction('substr', 'substr')
 						->addFunction('strftime', 'strftime');
-
 					return $volt;
 				},
 			]);
-
 			return $view;
 		});
 
-		$di->set('currentUser', function() use($di) {
-			return User::findFirstById($di->getSession()->get('user_id'));
+		$di->set('currentUser', function() {
+			return User::findFirstById($this->getSession()->get('user_id'));
 		});
 	}
 }
