@@ -13,6 +13,7 @@ class UserProductsController extends ControllerBase {
 	private $_user;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($user_id = $this->dispatcher->getParam('user_id', 'int')) ||
 			!($this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [$user_id, Role::MERCHANT]]))) {
 			$this->flashSession->error('Member tidak ditemukan!');

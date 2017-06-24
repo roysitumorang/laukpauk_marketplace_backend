@@ -9,7 +9,7 @@ use Phalcon\Mvc\Controller;
 use Phalcon\Text;
 
 class ControllerBase extends Controller {
-	function initialize() {
+	function beforeExecuteRoute() {
 		register_shutdown_function(function() {
 			$this->db->insertAsDict('api_calls', [
 				'user_id'        => $this->currentUser->id,
@@ -26,6 +26,7 @@ class ControllerBase extends Controller {
 			$url = $this->request->getQuery('_url');
 			if (!Text::startsWith($url, '/admin/sessions/create')) {
 				$this->response->redirect('/admin/sessions/create' . ($url != '/admin' ? "?next={$url}" : ''));
+				$this->response->send();
 			}
 			return;
 		}

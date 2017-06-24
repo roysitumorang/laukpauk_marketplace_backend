@@ -8,7 +8,8 @@ use Error;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class ProductGroupsController extends ControllerBase {
-	function onConstruct() {
+	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		$this->view->menu = $this->_menu('Products');
 	}
 

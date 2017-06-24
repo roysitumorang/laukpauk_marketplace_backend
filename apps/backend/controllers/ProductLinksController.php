@@ -11,15 +11,12 @@ class ProductLinksController extends ControllerBase {
 	private $_product, $_limit, $current_page, $_offset;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($product_id = $this->dispatcher->getParam('product_id', 'int')) || !($this->_product = Product::findFirstById($product_id))) {
 			$this->flashSession->error('Produk tidak ditemukan!');
 			$this->response->redirect('/admin/products');
 			$this->response->sendHeaders();
 		}
-	}
-
-	function initialize() {
-		parent::initialize();
 		$this->_limit           = $this->config->per_page;
 		$this->_current_page    = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$this->_offset          = ($this->_current_page - 1) * $this->_limit;

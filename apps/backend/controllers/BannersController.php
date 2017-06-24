@@ -11,6 +11,7 @@ class BannersController extends ControllerBase {
 	private $_banner_category;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($banner_category_id = $this->dispatcher->getParam('banner_category_id', 'int')) || !($this->_banner_category = BannerCategory::findFirst($banner_category_id))) {
 			$this->flashSession->error('Data tidak ditemukan');
 			$this->response->redirect('/admin/banner_categories');

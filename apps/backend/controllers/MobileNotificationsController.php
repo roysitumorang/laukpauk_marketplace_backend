@@ -8,8 +8,8 @@ use Application\Models\User;
 use Phalcon\Paginator\Adapter\Model;
 
 class MobileNotificationsController extends ControllerBase {
-	function initialize() {
-		parent::initialize();
+	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		$this->view->menu = $this->_menu('Mailbox');
 	}
 

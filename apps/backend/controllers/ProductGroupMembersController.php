@@ -11,7 +11,8 @@ use Phalcon\Paginator\Adapter\QueryBuilder;
 class ProductGroupMembersController extends ControllerBase {
 	private $_product_group;
 
-	function onConstruct() {
+	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		$product_categories = [];
 		$product_groups     = [];
 		if ($this->request->isGet()) {

@@ -10,6 +10,7 @@ class VillagesController extends ControllerBase {
 	private $_subdistrict;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($subdistrict_id = $this->dispatcher->getParam('subdistrict_id', 'int')) || !($this->_subdistrict = Subdistrict::findFirstById($subdistrict_id))) {
 			$this->flashSession->error('Kecamatan tidak ditemukan!');
 			$this->response->redirect('/admin/provinces');

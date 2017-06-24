@@ -10,6 +10,7 @@ class SubdistrictsController extends ControllerBase {
 	private $_city;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($city_id = $this->dispatcher->getParam('city_id', 'int')) || !($this->_city = City::findFirstById($city_id))) {
 			$this->flashSession->error('Kabupaten / kota tidak ditemukan!');
 			$this->response->redirect('/admin/provinces');

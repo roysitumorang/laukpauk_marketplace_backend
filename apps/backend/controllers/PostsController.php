@@ -11,6 +11,7 @@ class PostsController extends ControllerBase {
 	private $_post_category;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($post_category_id = $this->dispatcher->getParam('post_category_id', 'int')) || !($this->_post_category = PostCategory::findFirst($post_category_id))) {
 			$this->flashSession->error('Data tidak ditemukan');
 			$this->response->redirect('/admin/post_categories');

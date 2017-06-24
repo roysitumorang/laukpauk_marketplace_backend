@@ -12,7 +12,8 @@ use Phalcon\Paginator\Adapter\QueryBuilder;
 class CoverageAreasController extends ControllerBase {
 	private $_user;
 
-	function onConstruct() {
+	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!$this->_user = User::findFirst(['id = ?0 AND role_id = ?1', 'bind' => [
 			$this->dispatcher->getParam('user_id', 'int'),
 			Role::MERCHANT,

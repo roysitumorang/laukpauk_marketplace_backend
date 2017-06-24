@@ -10,6 +10,7 @@ class CitiesController extends ControllerBase {
 	private $_province;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		if (!($province_id = $this->dispatcher->getParam('province_id', 'int')) || !($this->_province = Province::findFirstById($province_id))) {
 			$this->flashSession->error('Propinsi tidak ditemukan!');
 			$this->response->redirect('/admin/provinces');

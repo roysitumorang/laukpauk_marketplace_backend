@@ -10,8 +10,8 @@ use Phalcon\Paginator\Adapter\Model;
 class CouponsController extends ControllerBase {
 	private $_date_formatter;
 
-	function initialize() {
-		parent::initialize();
+	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		$this->view->menu      = $this->_menu('Products');
 		$this->_date_formatter = new IntlDateFormatter(
 			'id_ID',

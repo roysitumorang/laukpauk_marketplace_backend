@@ -12,6 +12,7 @@ class PagesController extends ControllerBase {
 	private $_parent;
 
 	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
 		$page_category_id = $this->dispatcher->getParam('page_category_id', 'int');
 		$parent_id        = $this->dispatcher->getParam('parent_id', 'int');
 		try {
