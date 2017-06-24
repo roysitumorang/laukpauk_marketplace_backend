@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Controllers;
 
+use Ds\Set;
 use Phalcon\Db;
 
 class ProductsController extends ControllerBase {
@@ -13,9 +14,11 @@ class ProductsController extends ControllerBase {
 		$limit        = 10;
 		$params       = [];
 		$products     = [];
-		$merchant_ids = [];
-		$merchants    = [];
-		$query        = <<<QUERY
+		if ($this->_current_user->role->name === 'Buyer') {
+			$merchant_ids = new Set;
+			$merchants    = [];
+		}
+		$query = <<<QUERY
 			SELECT
 				COUNT(DISTINCT d.id)
 			FROM
@@ -71,15 +74,20 @@ QUERY;
 		if ($category_id) {
 			$query .= " AND f.id = {$category_id}";
 		}
+		if ($this->_current_user->role->name === 'Merchant') {
+			$query .= " AND d.user_id = {$this->_current_user->id}";
+		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, d.user_id, e.name, d.price, d.stock, e.stock_unit, e.picture']) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, e.name, d.price, d.stock, e.stock_unit, e.picture' . ($this->_current_user->role->name === 'Buyer' ? ', d.user_id' : '')]) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			in_array($row->user_id, $merchant_ids) || $merchant_ids[] = $row->user_id;
+			if ($this->_current_user->role->name === 'Buyer' && !$merchant_ids->contains($row->user_id)) {
+				$merchant_ids->add($row->user_id);
+			}
 			if ($row->picture) {
 				$row->thumbnail = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
 				$row->picture   = $picture_root_url . strtr($row->picture, ['.jpg' => '300.jpg']);
@@ -88,7 +96,7 @@ QUERY;
 			}
 			$products[] = $row;
 		}
-		if ($merchant_ids) {
+		if ($this->_current_user->role->name === 'Buyer' && $merchant_ids) {
 			$query = <<<QUERY
 				SELECT
 					DISTINCT
@@ -124,7 +132,7 @@ QUERY;
 			if ($this->_premium_merchant) {
 				$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
 			} else {
-				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
+				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . $merchant_ids->join(',') . ')';
 			}
 			$query .= ' ORDER BY a.company';
 			$result = $this->db->query($query);
@@ -173,11 +181,11 @@ QUERY;
 		} else {
 			$this->_response['status'] = 1;
 		}
-		$this->_response['data'] = [
-			'products'     => $products,
-			'merchants'    => $merchants,
-			'current_hour' => $this->currentDatetime->format('G'),
-		];
+		$this->_response['data']['products'] = $products;
+		if ($this->_current_user->role->name === 'Buyer') {
+			$this->_response['data']['current_hour'] = $this->currentDatetime->format('G');
+			$this->_response['data']['merchants']    = $merchants;
+		}
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
