@@ -45,10 +45,10 @@ class SmsController extends ControllerBase {
 		$role_id     = '';
 		$user_id     = '';
 		$condition   = 'status = 1';
-		foreach (User::find(['status = 1 AND premium_merchant = 1', 'column' => 'id, name, mobile_phone', 'order' => 'company']) as $item) {
+		foreach (User::find(['status = 1 AND premium_merchant = 1', 'column' => 'id, name, mobile_phone', 'order' => 'LOWER(company)']) as $item) {
 			$merchants[] = $item;
 		}
-		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'name DESC']) as $item) {
+		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'LOWER(name) DESC']) as $item) {
 			$roles[] = $item;
 		}
 		if ($this->request->isPost()) {
@@ -64,7 +64,7 @@ class SmsController extends ControllerBase {
 			if ($user_id && $user = User::findFirst("status = 1 AND id = {$user_id}")) {
 				$condition .= " AND id = {$user->id}";
 			}
-			foreach (User::find([$condition, 'order' => 'name']) as $item) {
+			foreach (User::find([$condition, 'order' => 'LOWER(name)']) as $item) {
 				$recipients[] = $item;
 			}
 			if (!$recipients) {
@@ -82,7 +82,7 @@ class SmsController extends ControllerBase {
 				}
 			}
 		} else {
-			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'order' => 'name']) as $item) {
+			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'order' => 'LOWER(name)']) as $item) {
 				$recipients[] = $item;
 			}
 		}
@@ -106,7 +106,7 @@ class SmsController extends ControllerBase {
 		if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
 			$condition .= " AND role_id = {$role->id}";
 		}
-		$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'name']);
+		$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'LOWER(name)']);
 		foreach ($result as $item) {
 			$recipients[] = $item;
 		}
