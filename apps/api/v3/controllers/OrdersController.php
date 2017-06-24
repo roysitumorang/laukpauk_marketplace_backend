@@ -34,28 +34,32 @@ class OrdersController extends ControllerBase {
 		$page         = $this->dispatcher->getParam('page', 'int');
 		$current_page = $page > 0 ? $page : 1;
 		$offset       = ($current_page - 1) * $limit;
-		$result       = $this->db->query(<<<QUERY
+		$result       = $this->db->query(sprintf(<<<QUERY
 			SELECT
 				a.id,
 				a.code,
 				a.status,
 				a.final_bill,
-				a.scheduled_delivery,
-				b.company,
-				b.address
+				a.scheduled_delivery
+				%s
 			FROM
 				orders a
 				JOIN users b ON a.merchant_id = b.id
-			WHERE {$field} = {$this->_current_user->id}
+			WHERE %s = %d
 			ORDER BY a.id DESC
-			LIMIT {$limit} OFFSET {$offset}
+			LIMIT %d OFFSET %d
 QUERY
-		);
+			,
+			$this->_current_user->role->name === 'Buyer' ? ', b.company, b.address' : '',
+			$field,
+			$this->_current_user->id,
+			$limit,
+			$offset
+		));
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($order = $result->fetch()) {
 			$schedule        = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$order->delivery = new stdClass;
-			$order->merchant = new stdClass;
 			if ($order->status == 1) {
 				$order->delivery->status = 'Selesai';
 			} else if ($order->status == -1) {
@@ -63,10 +67,13 @@ QUERY
 			} else {
 				$order->delivery->status = 'Sedang Diproses';
 			}
-			$order->delivery->day     = $date_formatter->format($schedule);
-			$order->delivery->hour    = $schedule->format('G');
-			$order->merchant->company = $order->company;
-			$order->merchant->address = $order->address;
+			$order->delivery->day  = $date_formatter->format($schedule);
+			$order->delivery->hour = $schedule->format('G');
+			if ($this->_current_user->role->name === 'Buyer') {
+				$order->merchant          = new stdClass;
+				$order->merchant->company = $order->company;
+				$order->merchant->address = $order->address;
+			}
 			unset($order->status, $order->company, $order->address);
 			$orders[] = $order;
 		}
