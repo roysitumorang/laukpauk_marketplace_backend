@@ -289,7 +289,7 @@ QUERY
 		} else if ($this->_current_user->role->name == 'Merchant') {
 			$collection = 'merchantOrders';
 		}
-		$order = $this->_current_user->getRelated($collection, ['Application\Models\Order.id = ?0', 'bind' => [$id]])->getFirst();
+		$order = $this->_current_user->getRelated($collection, ['Application\Models\Order.id = ?0 OR Application\Models\Order.code = ?1', 'bind' => [$id, $id]])->getFirst();
 		if (!$order) {
 			$this->_response['message'] = 'Pesanan tidak ditemukan!';
 		} else {
