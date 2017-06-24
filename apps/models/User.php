@@ -635,4 +635,8 @@ class User extends ModelBase {
 		$this->setPasswordResetToken(null);
 		return $this->update();
 	}
+
+	function totalNewNotifications() {
+		return $this->countNotifications("Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL");
+	}
 }

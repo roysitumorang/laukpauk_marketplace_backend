@@ -133,8 +133,9 @@ QUERY;
 		}
 		$this->_response['status'] = 1;
 		$this->_response['data']   = [
-			'categories' => $categories,
-			'merchants'  => $merchants,
+			'categories'              => $categories,
+			'merchants'               => $merchants,
+			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;

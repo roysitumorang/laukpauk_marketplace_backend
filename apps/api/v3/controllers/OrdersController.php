@@ -71,7 +71,10 @@ QUERY
 			$orders[] = $order;
 		}
 		$this->_response['status'] = 1;
-		$this->_response['data']   = ['orders' => $orders];
+		$this->_response['data']   = [
+			'orders'                  => $orders,
+			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
+		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -346,8 +349,11 @@ QUERY
 			if ($order->status == -1) {
 				$payload['cancellation_reason'] = $order->cancellation_reason;
 			}
-			$this->_response['status']        = 1;
-			$this->_response['data']['order'] = $payload;
+			$this->_response['status'] = 1;
+			$this->_response['data']   = [
+				'order'                   => $payload,
+				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
+			];
 		}
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
