@@ -5,8 +5,8 @@ namespace Application\Api\V3\Merchant;
 use Application\Models\Role;
 use Application\Models\Setting;
 use Application\Models\User;
-use Error;
 use Phalcon\Crypt;
+use Phalcon\Exception;
 use Phalcon\Mvc\Controller;
 
 abstract class ControllerBase extends Controller {
@@ -16,7 +16,6 @@ abstract class ControllerBase extends Controller {
 		'data'   => [],
 	];
 	protected $_current_user;
-	protected $_premium_merchant;
 	protected $_post;
 	protected $_server;
 
@@ -46,24 +45,18 @@ abstract class ControllerBase extends Controller {
 
 	function beforeExecuteRoute() {
 		try {
-			$access_token   = str_replace('Bearer ', '', filter_input(INPUT_SERVER, 'Authorization'));
-			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
+			$access_token = str_replace('Bearer ', '', filter_input(INPUT_SERVER, 'Authorization'));
 			if (!$access_token) {
-				throw new Error(static::INVALID_API_KEY_MESSAGE);
+				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
-			if ($merchant_token && !($this->_premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]))) {
-				throw new Error(static::INVALID_API_KEY_MESSAGE);
+			$encrypted_data      = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
+			$crypt               = new Crypt;
+			$payload             = json_decode($crypt->decryptBase64($encrypted_data, $this->config->encryption_key));
+			$this->_current_user = User::findFirst(['status = 1 AND role_id = ?0 AND api_key = ?1', 'bind' => [Role::MERCHANT, $payload->api_key]]);
+			if (!$this->_current_user) {
+				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
-			$encrypted_data = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
-			$crypt          = new Crypt;
-			$payload        = json_decode($crypt->decryptBase64($encrypted_data, $this->config->encryption_key));
-			$params         = $this->_premium_merchant
-					? ['status = 1 AND api_key = ?0 AND ((role_id = ?1 AND id = ?2) OR (role_id = ?3 AND merchant_id = ?4))', 'bind' => [$payload->api_key, Role::MERCHANT, $this->_premium_merchant->id, Role::BUYER, $this->_premium_merchant->id]]
-					: ['status = 1 AND merchant_token IS NULL AND merchant_id IS NULL AND role_id > 2 AND api_key = ?0', 'bind' => [$payload->api_key]];
-			if (($merchant_token && $payload->merchant_token != $merchant_token) || !($this->_current_user = User::findFirst($params))) {
-				throw new Error(static::INVALID_API_KEY_MESSAGE);
-			}
-		} catch (Throwable $e) {
+		} catch (Exception $e) {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();
 			$this->response->setJsonContent($this->_response);
