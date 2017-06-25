@@ -81,7 +81,7 @@ QUERY;
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, e.name, d.price, d.stock, e.stock_unit, e.picture' . ($this->_current_user->role->name === 'Buyer' ? ', d.user_id' : '')]) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, e.name, d.price, d.stock, e.stock_unit, e.picture' . ($this->_current_user->role->name === 'Buyer' ? ', d.user_id' : ', d.published')]) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
