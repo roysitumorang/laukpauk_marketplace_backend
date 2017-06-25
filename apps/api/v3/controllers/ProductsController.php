@@ -2,8 +2,10 @@
 
 namespace Application\Api\V3\Controllers;
 
+use Application\Models\UserProduct;
 use Ds\Set;
 use Phalcon\Db;
+use Phalcon\Exception;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -34,7 +36,6 @@ class ProductsController extends ControllerBase {
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
-				d.published = 1 AND
 				e.published = 1 AND
 				f.published = 1 AND
 				a.premium_merchant
@@ -76,6 +77,8 @@ QUERY;
 		}
 		if ($this->_current_user->role->name === 'Merchant') {
 			$query .= " AND d.user_id = {$this->_current_user->id}";
+		} else {
+			$query .= ' AND d.published = 1';
 		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
@@ -188,5 +191,34 @@ QUERY;
 		}
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
+	}
+
+	function updateAction($id) {
+		try {
+			if (!$this->request->isPost() || $this->_current_user->role->name != 'Merchant') {
+				throw new Exception('Request tidak valid!');
+			}
+			$user_product = UserProduct::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_current_user->id, $id]]);
+			if (!$user_product) {
+				throw new Exception('Produk tidak ditemukan!');
+			}
+			$user_product->setPrice($this->_post->price);
+			$user_product->setStock($this->_post->stock);
+			$user_product->setPublished($this->_post->published);
+			if ($user_product->validation() && $user_product->update()) {
+				$this->_response['status']  = 1;
+				throw new Exception('Update produk berhasil!');
+			}
+			$errors = new Set;
+			foreach ($user_product->getMessages() as $error) {
+				$errors->add($error->getMessage());
+			}
+			throw new Exception($errors->join('<br>'));
+		} catch (Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response);
+			return $this->response;
+		}
 	}
 }

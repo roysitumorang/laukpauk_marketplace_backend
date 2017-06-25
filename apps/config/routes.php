@@ -137,18 +137,33 @@ $di->set('router', function() {
 		return $new_action;
 	});
 
+	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller/:int/:action', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 5,
+		'params'         => 4,
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', strtolower($old_action));
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return $new_action;
+	});
+
+	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller/:int', [
+		'module'         => 'v3',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 'show',
+		'params'         => 4,
+	]);
+
 	$router->add('/api/v3(/([a-z0-9]{32}))?/posts/:params', [
 		'module'         => 'v3',
 		'merchant_token' => 2,
 		'controller'     => 'posts',
-		'action'         => 'show',
-		'params'         => 3,
-	]);
-
-	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/:int', [
-		'module'         => 'v3',
-		'merchant_token' => 2,
-		'controller'     => 'merchants',
 		'action'         => 'show',
 		'params'         => 3,
 	]);
@@ -158,30 +173,6 @@ $di->set('router', function() {
 		'merchant_token' => 2,
 		'controller'     => 'merchants',
 		'action'         => 'termsConditions',
-	]);
-
-	$router->add('/api/v3(/([a-z0-9]{32}))?/notifications/:int', [
-		'module'         => 'v3',
-		'merchant_token' => 2,
-		'controller'     => 'notifications',
-		'action'         => 'show',
-		'params'         => 3,
-	]);
-
-	$router->add('/api/v3(/([a-z0-9]{32}))?/orders/:int/:action', [
-		'module'         => 'v3',
-		'merchant_token' => 2,
-		'controller'     => 'orders',
-		'action'         => 4,
-		'params'         => 3,
-	]);
-
-	$router->add('/api/v3(/([a-z0-9]{32}))?/orders/:int', [
-		'module'         => 'v3',
-		'merchant_token' => 2,
-		'controller'     => 'orders',
-		'action'         => 'show',
-		'params'         => 3,
 	]);
 
 	$router->add('/api/v3(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
