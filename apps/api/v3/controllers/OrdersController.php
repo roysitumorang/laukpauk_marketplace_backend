@@ -80,6 +80,7 @@ QUERY
 		$this->_response['status'] = 1;
 		$this->_response['data']   = [
 			'orders'                  => $orders,
+			'total_new_orders'        => $this->_current_user->totalNewOrders(),
 			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
@@ -249,45 +250,60 @@ QUERY
 	}
 
 	function completeAction($id) {
-		if (!$this->request->isPost()) {
-			$this->_response['message'] = 'Request tidak valid!';
+		try {
+			if ($this->_current_user->role->name != 'Merchant' || !$this->request->isPost()) {
+				throw new Exception('Request tidak valid!');
+			}
+			$order = $this->_current_user->getRelated('merchantOrders', [
+				'status = 0 AND (id = ?0 OR code = ?1)',
+				'bind' => [$id, $id],
+			])->getFirst();
+			if (!$order) {
+				throw new Exception('Pesanan tidak ditemukan!');
+			}
+			$order->complete();
+			$this->_response['status'] = 1;
+			throw new Exception("Pesanan #{$order->code} telah selesai, terima kasih.");
+		} catch (Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->_response['data'] = [
+				'total_new_orders'        => $this->_current_user->totalNewOrders(),
+				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
+			];
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$order = $this->_current_user->getRelated('merchant_orders', [
-			'status = 0 AND id = ?0',
-			'bind' => [$id]
-		])->getFirst();
-		if ($order) {
-			$order->complete();
-			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Order #' . $order->code . ' telah selesai, terima kasih';
-		} else {
-			$this->_response['message'] = 'Order tidak ditemukan';
-		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 
 	function cancelAction($id) {
-		if (!$this->request->isPost()) {
-			$this->_response['message'] = 'Request tidak valid!';
+		try {
+			if ($this->_current_user->role->name != 'Merchant' || !$this->request->isPost()) {
+				throw new Exception('Request tidak valid!');
+			}
+			if (!$this->_post->cancellation_reason) {
+				throw new Exception('Alasan pembatalan harus diisi.');
+			}
+			$order = $this->_current_user->getRelated('merchantOrders', [
+				'status = 0 AND (id = ?0 OR code = ?1)',
+				'bind' => [$id, $id],
+			])->getFirst();
+			if (!$order) {
+				throw new Exception('Pesanan tidak ditemukan!');
+			}
+			$order->cancel($this->_post->cancellation_reason);
+			$this->_response['status'] = 1;
+			throw new Exception("Pesanan #{$order->code} berhasil dibatalkan!");
+		} catch (Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->_response['data'] = [
+				'total_new_orders'        => $this->_current_user->totalNewOrders(),
+				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
+			];
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
-		$order = $this->_current_user->getRelated('merchant_orders', [
-			'status = 0 AND id = ?0',
-			'bind' => [$id]
-		])->getFirst();
-		if ($order) {
-			$order->cancel($this->_post->cancellation_reason);
-			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Order #' . $order->code . ' telah dicancel!';
-		} else {
-			$this->_response['message'] = 'Order tidak ditemukan';
-		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 
 	function showAction($id) {
@@ -361,6 +377,7 @@ QUERY
 			$this->_response['status'] = 1;
 			$this->_response['data']   = [
 				'order'                   => $payload,
+				'total_new_orders'        => $this->_current_user->totalNewOrders(),
 				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
 			];
 		}
