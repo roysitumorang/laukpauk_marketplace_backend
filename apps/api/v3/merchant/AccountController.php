@@ -99,7 +99,7 @@ QUERY
 					e.user_id = {$this->_current_user->id} AND
 					c.id = {$this->_current_user->village->subdistrict->id}
 				GROUP BY d.id
-				ORDER BY d.name"
+				ORDER BY d.name
 QUERY
 			);
 			$result->setFetchMode(Db::FETCH_OBJ);
