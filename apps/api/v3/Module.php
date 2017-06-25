@@ -22,10 +22,11 @@ class Module implements ModuleDefinitionInterface {
 		$application = $di->getConfig()->application;
 		$loader      = new Loader;
 		$loader->registerNamespaces([
-			'Application\Api\V3\Controllers' => APP_PATH . 'apps/api/v3/controllers/',
-			'Application\Models'             => $application->modelsDir,
-			'Application\Plugins'            => $application->pluginsDir,
-			'Phalcon'                        => $application->libraryDir,
+			'Application\Api\V3\Buyer'    => APP_PATH . 'apps/api/v3/buyer/',
+			'Application\Api\V3\Merchant' => APP_PATH . 'apps/api/v3/merchant/',
+			'Application\Models'          => $application->modelsDir,
+			'Application\Plugins'         => $application->pluginsDir,
+			'Phalcon'                     => $application->libraryDir,
 		]);
 		$loader->register();
 	}

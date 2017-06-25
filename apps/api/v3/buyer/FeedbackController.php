@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Api\V3\Controllers;
+namespace Application\Api\V3\Buyer;
 
 use Application\Models\Feedback;
 

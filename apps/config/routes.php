@@ -122,8 +122,9 @@ $di->set('router', function() {
 		'action'         => 'index',
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller/:action/:params', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller/:action/:params', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 3,
 		'action'         => 4,
@@ -137,8 +138,9 @@ $di->set('router', function() {
 		return $new_action;
 	});
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller/:int/:action', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller/:int/:action', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 3,
 		'action'         => 5,
@@ -152,31 +154,35 @@ $di->set('router', function() {
 		return $new_action;
 	});
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller/:int', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller/:int', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 3,
 		'action'         => 'show',
 		'params'         => 4,
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/posts/:params', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/posts/:params', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 'posts',
 		'action'         => 'show',
 		'params'         => 3,
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/merchants/terms-conditions', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/merchants/terms-conditions', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 'merchants',
 		'action'         => 'termsConditions',
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 'products',
 		'action'         => 'index',
@@ -185,15 +191,102 @@ $di->set('router', function() {
 		'params'         => 7,
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?/:controller', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
 		'merchant_token' => 2,
 		'controller'     => 3,
 		'action'         => 'index',
 	]);
 
-	$router->add('/api/v3(/([a-z0-9]{32}))?', [
+	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?', [
 		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Buyer',
+		'merchant_token' => 2,
+		'controller'     => 'home',
+		'action'         => 'index',
+	]);
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller/:action/:params', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 4,
+		'params'         => 5,
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', strtolower($old_action));
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return $new_action;
+	});
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller/:int/:action', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 5,
+		'params'         => 4,
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', strtolower($old_action));
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return $new_action;
+	});
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller/:int', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 'show',
+		'params'         => 4,
+	]);
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/posts/:params', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 'posts',
+		'action'         => 'show',
+		'params'         => 3,
+	]);
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/merchants/terms-conditions', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 'merchants',
+		'action'         => 'termsConditions',
+	]);
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 'products',
+		'action'         => 'index',
+		'merchant_id'    => 4,
+		'category_id'    => 6,
+		'params'         => 7,
+	]);
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
+		'merchant_token' => 2,
+		'controller'     => 3,
+		'action'         => 'index',
+	]);
+
+	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?', [
+		'module'         => 'v3',
+		'namespace'      => 'Application\\Api\\V3\\Merchant',
 		'merchant_token' => 2,
 		'controller'     => 'home',
 		'action'         => 'index',

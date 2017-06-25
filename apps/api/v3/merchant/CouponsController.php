@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\Api\V3\Controllers;
+namespace Application\Api\V3\Merchant;
 
 use Application\Models\Role;
 use Phalcon\Db;
