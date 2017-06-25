@@ -14,7 +14,7 @@ use stdClass;
 
 class AccountController extends ControllerBase {
 	function beforeExecuteRoute() {
-		if ($this->dispatcher->getActionName() === 'update') {
+		if ($this->dispatcher->getActionName() != 'authorize') {
 			parent::beforeExecuteRoute();
 		}
 	}
@@ -110,7 +110,6 @@ QUERY
 				'status' => 1,
 				'data'   => [
 					'business_hours' => $business_hours,
-					'deposit'        => $this->_current_user->deposit,
 					'provinces'      => $provinces,
 					'cities'         => $cities,
 					'subdistricts'   => $subdistricts,
@@ -411,6 +410,48 @@ QUERY
 			$villages[] = $row;
 		}
 		$this->_response = ['status' => 1, 'data' => ['villages' => $villages]];
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function summaryAction() {
+		$business_days = [
+			$this->_current_user->open_on_monday    ? 'Senin'  : ',',
+			$this->_current_user->open_on_tuesday   ? 'Selasa' : ',',
+			$this->_current_user->open_on_wednesday ? 'Rabu'   : ',',
+			$this->_current_user->open_on_thursday  ? 'Kamis'  : ',',
+			$this->_current_user->open_on_friday    ? 'Jumat'  : ',',
+			$this->_current_user->open_on_saturday  ? 'Sabtu'  : ',',
+			$this->_current_user->open_on_sunday    ? 'Minggu' : ',',
+		];
+		$business_hours = range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour);
+		if ($hours = $this->_current_user->delivery_hours) {
+			foreach ($business_hours as &$hour) {
+				if (!in_array($hour, $hours)) {
+					$hour = ',';
+				} else {
+					$hour .= '.00';
+				}
+			}
+		}
+		$delivery_hours  = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+		$this->_response = [
+			'status' => 1,
+			'data'   => [
+				'company'                 => $this->_current_user->company,
+				'address'                 => $this->_current_user->address,
+				'business_days'           => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
+				'business_hours'          => $this->_current_user->business_opening_hour . '.00 - ' . $this->_current_user->business_closing_hour . '.00 WIB',
+				'delivery_hours'          => $delivery_hours ? $delivery_hours . ' WIB' : '-',
+				'minimum_purchase'        => $this->_current_user->minimum_purchase,
+				'shipping_cost'           => $this->_current_user->shipping_cost ?? 0,
+				'merchant_note'           => $this->_current_user->merchant_note,
+				'deposit'                 => $this->_current_user->deposit,
+				'total_products'          => $this->_current_user->countProducts(),
+				'total_new_orders'        => $this->_current_user->totalNewOrders(),
+				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
+			],
+		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
