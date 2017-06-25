@@ -96,7 +96,7 @@ QUERY;
 			}
 			$products[] = $row;
 		}
-		if ($this->_current_user->role->name === 'Buyer' && $merchant_ids) {
+		if ($this->_current_user->role->name === 'Buyer' && !$merchant_ids->isEmpty()) {
 			$query = <<<QUERY
 				SELECT
 					DISTINCT
