@@ -172,14 +172,6 @@ $di->set('router', function() {
 		'params'         => 3,
 	]);
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/merchants/terms-conditions', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 'merchants',
-		'action'         => 'termsConditions',
-	]);
-
 	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
 		'module'         => 'v3',
 		'namespace'      => 'Application\\Api\\V3\\Buyer',
@@ -255,14 +247,6 @@ $di->set('router', function() {
 		'controller'     => 'posts',
 		'action'         => 'show',
 		'params'         => 3,
-	]);
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/merchants/terms-conditions', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 'merchants',
-		'action'         => 'termsConditions',
 	]);
 
 	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
