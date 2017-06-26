@@ -11,13 +11,11 @@ use Phalcon\Exception;
 use stdClass;
 
 class DeliverySchedulesController extends ControllerBase {
-	function indexAction() {
-		$merchant_ids   = $this->_server->merchant_ids;
-		$delivery_dates = [];
-		$current_hour   = $this->currentDatetime->format('G');
-		$minimum_hour   = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
-		$days_of_week   = [];
-		$day_formatter  = new IntlDateFormatter(
+	private $_day_formatter;
+
+	function initialize() {
+		parent::initialize();
+		$this->_day_formatter = new IntlDateFormatter(
 			'id_ID',
 			IntlDateFormatter::FULL,
 			IntlDateFormatter::NONE,
@@ -25,14 +23,14 @@ class DeliverySchedulesController extends ControllerBase {
 			IntlDateFormatter::GREGORIAN,
 			'EEEE'
 		);
-		$date_formatter = new IntlDateFormatter(
-			'id_ID',
-			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE,
-			$this->currentDatetime->getTimezone(),
-			IntlDateFormatter::GREGORIAN,
-			'd MMM yyyy'
-		);
+	}
+
+	function indexAction() {
+		$merchant_ids   = $this->_server->merchant_ids;
+		$delivery_dates = [];
+		$current_hour   = $this->currentDatetime->format('G');
+		$minimum_hour   = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
+		$days_of_week   = [];
 		foreach (new DatePeriod($this->currentDatetime, new DateInterval('P1D'), 1) as $i => $date) {
 			if (!$i) {
 				$day = 'Hari Ini';
@@ -41,9 +39,9 @@ class DeliverySchedulesController extends ControllerBase {
 			} else if ($i === 2) {
 				$day = 'Lusa';
 			} else {
-				$day = $day_formatter->format($date) . ' Depan';
+				$day = $this->_day_formatter->format($date) . ' Depan';
 			}
-			$day               .= ' / ' . $date_formatter->format($date);
+			$day               .= ' / ' . $this->_date_formatter->format($date);
 			$days_of_week[$day] = $date;
 		}
 		$query = <<<QUERY
@@ -125,22 +123,6 @@ QUERY;
 		$current_hour  = $this->currentDatetime->format('G');
 		$minimum_hour  = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
 		$days_of_week  = [];
-		$day_formatter = new IntlDateFormatter(
-			'id_ID',
-			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE,
-			$this->currentDatetime->getTimezone(),
-			IntlDateFormatter::GREGORIAN,
-			'EEEE'
-		);
-		$date_formatter = new IntlDateFormatter(
-			'id_ID',
-			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE,
-			$this->currentDatetime->getTimezone(),
-			IntlDateFormatter::GREGORIAN,
-			'd MMM yyyy'
-		);
 		try {
 			$valid_date = false;
 			foreach (new DatePeriod($this->currentDatetime, new DateInterval('P1D'), 1) as $i => $date) {
@@ -151,9 +133,9 @@ QUERY;
 				} else if ($i === 2) {
 					$day = 'Lusa';
 				} else {
-					$day = $day_formatter->format($date) . ' Depan';
+					$day = $this->_day_formatter->format($date) . ' Depan';
 				}
-				$day               .= ' / ' . $date_formatter->format($date);
+				$day               .= ' / ' . $this->_date_formatter->format($date);
 				$days_of_week[$day] = $date;
 				if ($date->format('Y-m-d') === $delivery_date) {
 					$valid_date = true;
@@ -221,8 +203,9 @@ QUERY;
 			$this->_response['status'] = 1;
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
 		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 }

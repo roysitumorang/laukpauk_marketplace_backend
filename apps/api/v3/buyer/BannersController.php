@@ -17,7 +17,7 @@ class BannersController extends ControllerBase {
 		}
 		$this->_response['status']          = 1;
 		$this->_response['data']['banners'] = $banners;
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		$this->response->setJsonContent($this->_response);
 		return $this->response;
 	}
 }

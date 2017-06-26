@@ -12,7 +12,7 @@ class CouponsController extends ControllerBase {
 		$total = 0;
 		$today = $this->currentDatetime->format('Y-m-d');
 		try {
-			if (!$this->request->isOptions() || $this->_current_user->role->name != 'Buyer' || !$code) {
+			if (!$this->request->isOptions() || !$code) {
 				throw new Exception('Request tidak valid!');
 			}
 			$params = [<<<QUERY
@@ -81,8 +81,9 @@ QUERY
 			$this->_response['data']['discount'] = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100.0);
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
 		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 }

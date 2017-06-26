@@ -2,10 +2,8 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\UserProduct;
 use Ds\Set;
 use Phalcon\Db;
-use Phalcon\Exception;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -16,11 +14,10 @@ class ProductsController extends ControllerBase {
 		$limit        = 10;
 		$params       = [];
 		$products     = [];
-		if ($this->_current_user->role->name === 'Buyer') {
-			$merchant_ids = new Set;
-			$merchants    = [];
-		}
-		$query = <<<QUERY
+		$merchant_ids = new Set;
+		$merchants    = [];
+		$stop_words   = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
+		$query        = <<<QUERY
 			SELECT
 				COUNT(DISTINCT d.id)
 			FROM
@@ -36,12 +33,31 @@ class ProductsController extends ControllerBase {
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
+				d.published = 1 AND
 				e.published = 1 AND
 				f.published = 1 AND
 				a.premium_merchant
 QUERY;
 		if ($this->_premium_merchant) {
 			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
+			if ($search_query) {
+				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
+				$filtered_keywords     = array_diff($keywords, $stop_words);
+				$filtered_search_query = implode(' ', $filtered_keywords);
+				$query                .= ' AND (e.name ILIKE ? OR f.name ILIKE ?';
+				foreach (range(1, 2) as $i) {
+					$params[] = "%{$filtered_search_query}%";
+				}
+				if (count($filtered_keywords) > 1) {
+					foreach ($filtered_keywords as $keyword) {
+						$query .= ' OR e.name ILIKE ? OR f.name ILIKE ?';
+						foreach (range(1, 2) as $i) {
+							$params[] = "%{$keyword}%";
+						}
+					}
+				}
+				$query .= ')';
+			}
 		} else {
 			$query .= ' IS NULL';
 			if ($merchant_id) {
@@ -52,7 +68,6 @@ QUERY;
 					$query   .= ' AND h.published = 1 AND h.name = ?';
 					$params[] = $search_query;
 				} else {
-					$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
 					$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
 					$filtered_keywords     = array_diff($keywords, $stop_words);
 					$filtered_search_query = implode(' ', $filtered_keywords);
@@ -75,20 +90,15 @@ QUERY;
 		if ($category_id) {
 			$query .= " AND f.id = {$category_id}";
 		}
-		if ($this->_current_user->role->name === 'Merchant') {
-			$query .= " AND d.user_id = {$this->_current_user->id}";
-		} else {
-			$query .= ' AND d.published = 1';
-		}
 		$total_products   = $this->db->fetchColumn($query, $params);
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, e.name, d.price, d.stock, e.stock_unit, e.picture' . ($this->_current_user->role->name === 'Buyer' ? ', d.user_id' : ', d.published')]) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, e.name, d.price, d.stock, e.stock_unit, e.picture, d.user_id']) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			if ($this->_current_user->role->name === 'Buyer' && !$merchant_ids->contains($row->user_id)) {
+			if (!$merchant_ids->contains($row->user_id)) {
 				$merchant_ids->add($row->user_id);
 			}
 			if ($row->picture) {
@@ -99,7 +109,7 @@ QUERY;
 			}
 			$products[] = $row;
 		}
-		if ($this->_current_user->role->name === 'Buyer' && !$merchant_ids->isEmpty()) {
+		if (!$merchant_ids->isEmpty()) {
 			$query = <<<QUERY
 				SELECT
 					DISTINCT
@@ -184,41 +194,10 @@ QUERY;
 		} else {
 			$this->_response['status'] = 1;
 		}
-		$this->_response['data']['products'] = $products;
-		if ($this->_current_user->role->name === 'Buyer') {
-			$this->_response['data']['current_hour'] = $this->currentDatetime->format('G');
-			$this->_response['data']['merchants']    = $merchants;
-		}
+		$this->_response['data']['products']     = $products;
+		$this->_response['data']['current_hour'] = $this->currentDatetime->format('G');
+		$this->_response['data']['merchants']    = $merchants;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
-	}
-
-	function updateAction($id) {
-		try {
-			if (!$this->request->isPost() || $this->_current_user->role->name != 'Merchant') {
-				throw new Exception('Request tidak valid!');
-			}
-			$user_product = UserProduct::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_current_user->id, $id]]);
-			if (!$user_product) {
-				throw new Exception('Produk tidak ditemukan!');
-			}
-			$user_product->setPrice($this->_post->price);
-			$user_product->setStock($this->_post->stock);
-			$user_product->setPublished($this->_post->published);
-			if ($user_product->validation() && $user_product->update()) {
-				$this->_response['status']  = 1;
-				throw new Exception('Update produk berhasil!');
-			}
-			$errors = new Set;
-			foreach ($user_product->getMessages() as $error) {
-				$errors->add($error->getMessage());
-			}
-			throw new Exception($errors->join('<br>'));
-		} catch (Exception $e) {
-			$this->_response['message'] = $e->getMessage();
-		} finally {
-			$this->response->setJsonContent($this->_response);
-			return $this->response;
-		}
 	}
 }

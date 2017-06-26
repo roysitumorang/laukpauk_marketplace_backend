@@ -20,6 +20,7 @@ class MerchantsController extends ControllerBase {
 		$limit        = 10;
 		$merchants    = [];
 		$params       = [];
+		$stop_words   = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
 		$query        = <<<QUERY
 			SELECT
 				COUNT(DISTINCT a.id)
@@ -38,10 +39,27 @@ class MerchantsController extends ControllerBase {
 QUERY;
 		if ($this->_premium_merchant) {
 			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
+			if ($search_query) {
+				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
+				$filtered_keywords     = array_diff($keywords, $stop_words);
+				$filtered_search_query = implode(' ', $filtered_keywords);
+				$query                .= ' AND (f.name ILIKE ? OR g.name ILIKE ?';
+				foreach (range(1, 2) as $i) {
+					$params[] = "%{$filtered_search_query}%";
+				}
+				if (count($filtered_keywords) > 1) {
+					foreach ($filtered_keywords as $keyword) {
+						$query .= ' OR f.name ILIKE ? OR g.name ILIKE ?';
+						foreach (range(1, 2) as $i) {
+							$params[] = "%{$keyword}%";
+						}
+					}
+				}
+				$query .= ')';
+			}
 		} else {
 			$query .= ' a.premium_merchant IS NULL';
 			if ($search_query) {
-				$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
 				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
 				$filtered_keywords     = array_diff($keywords, $stop_words);
 				$filtered_search_query = implode(' ', $filtered_keywords);

@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\PostCategory;
-use Exception;
+use Phalcon\Exception;
 
 class PostsController extends ControllerBase {
 	function beforeExecuteRoute() {}
@@ -25,8 +25,9 @@ class PostsController extends ControllerBase {
 			];
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
 		}
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 }

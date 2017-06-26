@@ -3,9 +3,10 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\Device;
+use Application\Models\Role;
 use Application\Models\User;
-use Error;
 use Phalcon\Crypt;
+use Phalcon\Exception;
 
 class PasswordController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -17,13 +18,13 @@ class PasswordController extends ControllerBase {
 	function saveAction() {
 		try {
 			if (!$this->_post->old_password) {
-				throw new Error('Password Lama harus diisi.');
+				throw new Exception('Password Lama harus diisi.');
 			}
 			if (!$this->security->checkHash($this->_post->old_password, $this->_current_user->password)) {
-				throw new Error('Password Lama salah.');
+				throw new Exception('Password Lama salah.');
 			}
 			if (!$this->_post->new_password) {
-				throw new Error('Password Baru harus diisi.');
+				throw new Exception('Password Baru harus diisi.');
 			}
 			$this->_current_user->setNewPassword($this->_post->new_password);
 			$this->_current_user->setNewPasswordConfirmation($this->_post->new_password);
@@ -43,10 +44,10 @@ class PasswordController extends ControllerBase {
 					}
 				}
 				$this->_response['status'] = 1;
-				throw new Error('Ganti password berhasil!');
+				throw new Exception('Ganti password berhasil!');
 			}
-			throw new Error('Ganti password tidak berhasil!');
-		} catch (Error $e) {
+			throw new Exception('Ganti password tidak berhasil!');
+		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -56,16 +57,16 @@ class PasswordController extends ControllerBase {
 
 	function sendResetTokenAction() {
 		try {
-			if (!$this->_post->mobile_phone || !($user = User::findFirst(['mobile_phone = ?0 AND ' . ($this->_premium_merchant ? "(merchant_id = {$this->_premium_merchant->id} OR id = {$this->_premium_merchant->id})" : 'merchant_id IS NULL'), 'bind' => [$this->_post->mobile_phone]]))) {
-				throw new Error('No HP tidak terdaftar!');
+			if (!$this->_post->mobile_phone || !($user = User::findFirst(['role_id = ?0 AND mobile_phone = ?1 AND merchant_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL'), 'bind' => [Role::BUYER, $this->_post->mobile_phone]]))) {
+				throw new Exception('No HP tidak terdaftar!');
 			}
 			if ($user->status == -1) {
-				throw new Error('Akun Anda telah dinonaktifkan!');
+				throw new Exception('Akun Anda telah dinonaktifkan!');
 			}
 			$user->sendPasswordResetToken();
 			$this->_response['status'] = 1;
-			throw new Error('Token password telah dikirim via sms!');
-		} catch (Error $e) {
+			throw new Exception('Token password telah dikirim via sms!');
+		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -75,11 +76,11 @@ class PasswordController extends ControllerBase {
 
 	function resetAction() {
 		try {
-			if (!$this->_post->password_reset_token || !($user = User::findFirst(['password_reset_token = ?0 AND status = 1', 'bind' => [$this->_post->password_reset_token]]))) {
-				throw new Error('Token reset password tidak valid!.');
+			if (!$this->_post->password_reset_token || !($user = User::findFirst(['status = 1 AND role_id = ?0 AND password_reset_token = ?1', 'bind' => [Role::BUYER, $this->_post->password_reset_token]]))) {
+				throw new Exception('Token reset password tidak valid!.');
 			}
 			if (!$this->_post->new_password) {
-				throw new Error('Password baru harus diisi.');
+				throw new Exception('Password baru harus diisi.');
 			}
 			if ($user->resetPassword($this->_post->new_password)) {
 				if ($this->_post->device_token) {
@@ -124,36 +125,21 @@ class PasswordController extends ControllerBase {
 						'name' => $user->village->subdistrict->city->province->name,
 					],
 				];
-				if ($user->role->name === 'Merchant') {
-					$current_user['open_on_sunday']        = $user->open_on_sunday;
-					$current_user['open_on_monday']        = $user->open_on_monday;
-					$current_user['open_on_tuesday']       = $user->open_on_tuesday;
-					$current_user['open_on_wednesday']     = $user->open_on_wednesday;
-					$current_user['open_on_thursday']      = $user->open_on_thursday;
-					$current_user['open_on_friday']        = $user->open_on_friday;
-					$current_user['open_on_saturday']      = $user->open_on_saturday;
-					$current_user['business_opening_hour'] = $user->business_opening_hour;
-					$current_user['business_closing_hour'] = $user->business_closing_hour;
-					$current_user['minimum_purchase']      = $user->minimum_purchase;
-					$current_user['delivery_hours']        = array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1);
-				}
 				$payload = ['api_key' => $user->api_key];
 				if ($merchant_token) {
 					$payload['merchant_token'] = $merchant_token;
 				}
-				$this->_response['status'] = 1;
-				$this->_response['data']   = [
-					'access_token' => strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
-						'+' => '-',
-						'/' => '_',
-						'=' => ',',
-					]),
-					'current_user' => $current_user,
-				];
-				throw new Error('Reset password berhasil!');
+				$this->_response['status']               = 1;
+				$this->_response['data']['access_token'] = strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
+					'+' => '-',
+					'/' => '_',
+					'=' => ',',
+				]);
+				$this->_response['data']['current_user'] = $current_user;
+				throw new Exception('Reset password berhasil!');
 			}
-			throw new Error('Reset password tidak berhasil!');
-		} catch (Error $e) {
+			throw new Exception('Reset password tidak berhasil!');
+		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);

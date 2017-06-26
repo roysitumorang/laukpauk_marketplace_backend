@@ -9,80 +9,58 @@ use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
-use IntlDateFormatter;
 use Phalcon\Db;
 use Phalcon\Exception;
-use stdClass;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
-		$orders = [];
-		$limit  = 10;
-		if ($this->_current_user->role->name == 'Buyer') {
-			$field = 'a.buyer_id';
-		} else if ($this->_current_user->role->name == 'Merchant') {
-			$field = 'a.merchant_id';
-		}
-		$date_formatter = new IntlDateFormatter(
-			'id_ID',
-			IntlDateFormatter::FULL,
-			IntlDateFormatter::NONE,
-			$this->currentDatetime->getTimezone(),
-			IntlDateFormatter::GREGORIAN,
-			'd MMM yyyy'
-		);
+		$orders       = [];
+		$limit        = 10;
 		$page         = $this->dispatcher->getParam('page', 'int');
 		$current_page = $page > 0 ? $page : 1;
 		$offset       = ($current_page - 1) * $limit;
-		$result       = $this->db->query(sprintf(<<<QUERY
+		$result       = $this->db->query(<<<QUERY
 			SELECT
 				a.id,
 				a.code,
 				a.status,
 				a.final_bill,
-				a.scheduled_delivery
-				%s
+				a.scheduled_delivery,
+				b.company,
+				b.address
 			FROM
 				orders a
 				JOIN users b ON a.merchant_id = b.id
-			WHERE %s = %d
+			WHERE a.buyer_id = {$this->_current_user->id}
 			ORDER BY a.id DESC
-			LIMIT %d OFFSET %d
+			LIMIT {$limit} OFFSET {$offset}
 QUERY
-			,
-			$this->_current_user->role->name === 'Buyer' ? ', b.company, b.address' : '',
-			$field,
-			$this->_current_user->id,
-			$limit,
-			$offset
-		));
+		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($order = $result->fetch()) {
 			$schedule        = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
-			$order->delivery = new stdClass;
-			if ($order->status == 1) {
-				$order->delivery->status = 'Selesai';
-			} else if ($order->status == -1) {
-				$order->delivery->status = 'Dibatalkan';
-			} else {
-				$order->delivery->status = 'Sedang Diproses';
-			}
-			$order->delivery->day  = $date_formatter->format($schedule);
-			$order->delivery->hour = $schedule->format('G');
-			if ($this->_current_user->role->name === 'Buyer') {
-				$order->merchant          = new stdClass;
-				$order->merchant->company = $order->company;
-				$order->merchant->address = $order->address;
-			}
+			$order->delivery = [
+				'day'    => $this->_date_formatter->format($schedule),
+				'hour'   => $schedule->format('G'),
+				'status' => call_user_func(function() use($order) {
+					if ($order->status == 1) {
+						return 'Selesai';
+					} else if ($order->status == -1) {
+						return 'Dibatalkan';
+					}
+					return 'Sedang Diproses';
+				}),
+			];
+			$order->merchant = [
+				'company' => $order->company,
+				'address' => $order->address,
+			];
 			unset($order->status, $order->company, $order->address);
 			$orders[] = $order;
 		}
-		$this->_response['status'] = 1;
-		$this->_response['data']   = [
-			'orders'                  => $orders,
-			'total_new_orders'        => $this->_current_user->totalNewOrders(),
-			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-		];
+		$this->_response['status']                          = 1;
+		$this->_response['data']['orders']                  = $orders;
+		$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -91,9 +69,6 @@ QUERY
 		try {
 			if (!$this->request->isPost()) {
 				throw new Exception('Request tidak valid!');
-			}
-			if ($this->_current_user->role->name != 'Buyer') {
-				throw new Exception('Hanya pembeli yang bisa melakukan pemesanan!');
 			}
 			if (!$this->_post->orders) {
 				throw new Exception('Order item kosong!');
@@ -240,82 +215,21 @@ QUERY
 				}
 			}
 			$this->_response['status']  = 1;
-			$this->_response['message'] = 'Terima kasih, order Anda segera kami proses.';
+			throw new Exception('Terima kasih, order Anda segera kami proses.');
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-			return $this->response;
-		}
-	}
-
-	function completeAction($id) {
-		try {
-			if ($this->_current_user->role->name != 'Merchant' || !$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
-			}
-			$order = $this->_current_user->getRelated('merchantOrders', [
-				'status = 0 AND (id = ?0 OR code = ?1)',
-				'bind' => [$id, $id],
-			])->getFirst();
-			if (!$order) {
-				throw new Exception('Pesanan tidak ditemukan!');
-			}
-			$order->complete();
-			$this->_response['status'] = 1;
-			throw new Exception("Pesanan #{$order->code} telah selesai, terima kasih.");
-		} catch (Exception $e) {
-			$this->_response['message'] = $e->getMessage();
-		} finally {
-			$this->_response['data'] = [
-				'total_new_orders'        => $this->_current_user->totalNewOrders(),
-				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-			];
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-			return $this->response;
-		}
-	}
-
-	function cancelAction($id) {
-		try {
-			if ($this->_current_user->role->name != 'Merchant' || !$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
-			}
-			if (!$this->_post->cancellation_reason) {
-				throw new Exception('Alasan pembatalan harus diisi.');
-			}
-			$order = $this->_current_user->getRelated('merchantOrders', [
-				'status = 0 AND (id = ?0 OR code = ?1)',
-				'bind' => [$id, $id],
-			])->getFirst();
-			if (!$order) {
-				throw new Exception('Pesanan tidak ditemukan!');
-			}
-			$order->cancel($this->_post->cancellation_reason);
-			$this->_response['status'] = 1;
-			throw new Exception("Pesanan #{$order->code} berhasil dibatalkan!");
-		} catch (Exception $e) {
-			$this->_response['message'] = $e->getMessage();
-		} finally {
-			$this->_response['data'] = [
-				'total_new_orders'        => $this->_current_user->totalNewOrders(),
-				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-			];
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
 	}
 
 	function showAction($id) {
-		if ($this->_current_user->role->name == 'Buyer') {
-			$collection = 'buyerOrders';
-		} else if ($this->_current_user->role->name == 'Merchant') {
-			$collection = 'merchantOrders';
-		}
-		$order = $this->_current_user->getRelated($collection, ['Application\Models\Order.id = ?0 OR Application\Models\Order.code = ?1', 'bind' => [$id, $id]])->getFirst();
-		if (!$order) {
-			$this->_response['message'] = 'Pesanan tidak ditemukan!';
-		} else {
+		try {
+			$order = $this->_current_user->getRelated('buyerOrders', ['Application\Models\Order.id = ?0 OR Application\Models\Order.code = ?1', 'bind' => [$id, $id]])->getFirst();
+			if (!$order) {
+				throw new Exception('Pesanan tidak ditemukan!');
+			}
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
 			$merchant = $this->_premium_merchant ?: User::findFirst($order->merchant_id);
@@ -327,14 +241,6 @@ QUERY
 					'quantity'   => $item->quantity,
 				];
 			}
-			$date_formatter = new IntlDateFormatter(
-				'id_ID',
-				IntlDateFormatter::FULL,
-				IntlDateFormatter::NONE,
-				$this->currentDatetime->getTimezone(),
-				IntlDateFormatter::GREGORIAN,
-				'd MMM yyyy'
-			);
 			$scheduled_delivery = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$payload            = [
 				'code'          => $order->code,
@@ -359,29 +265,27 @@ QUERY
 						}
 						return 'Sedang Diproses';
 					}),
-					'day'  => $date_formatter->format($scheduled_delivery),
+					'day'  => $this->_date_formatter->format($scheduled_delivery),
 					'hour' => $scheduled_delivery->format('G'),
 				],
-				'note'  => $order->note,
-				'items' => $items,
-			];
-			if ($this->_current_user->role->name == 'Buyer') {
-				$payload['merchant'] = [
+				'note'     => $order->note,
+				'items'    => $items,
+				'merchant' => [
 					'company' => $merchant->company,
 					'address' => $merchant->address,
-				];
-			}
+				],
+			];
 			if ($order->status == -1) {
 				$payload['cancellation_reason'] = $order->cancellation_reason;
 			}
-			$this->_response['status'] = 1;
-			$this->_response['data']   = [
-				'order'                   => $payload,
-				'total_new_orders'        => $this->_current_user->totalNewOrders(),
-				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-			];
+			$this->_response['status']                          = 1;
+			$this->_response['data']['order']                   = $payload;
+			$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
+		} catch (Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+			return $this->response;
 		}
-		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 }

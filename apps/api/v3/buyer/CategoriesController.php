@@ -2,12 +2,13 @@
 
 namespace Application\Api\V3\Buyer;
 
+use Ds\Set;
 use Phalcon\Db;
 
 class CategoriesController extends ControllerBase {
 	function indexAction() {
 		$categories       = [];
-		$merchant_ids     = [];
+		$merchant_ids     = new Set;
 		$merchants        = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
@@ -43,7 +44,7 @@ QUERY;
 			$sub_result = $this->db->query(strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ' LIMIT 2 OFFSET 0');
 			$sub_result->setFetchMode(Db::FETCH_OBJ);
 			while ($product = $sub_result->fetch()) {
-				in_array($product->user_id, $merchant_ids) || $merchant_ids[] = $product->user_id;
+				$merchant_ids->contains($product->user_id) || $merchant_ids->add($product->user_id);
 				if ($product->picture) {
 					$product->thumbnail = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
 					$product->picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
@@ -55,7 +56,7 @@ QUERY;
 			$category->products = $products;
 			$categories[]       = $category;
 		}
-		if ($merchant_ids) {
+		if (!$merchant_ids->isEmpty()) {
 			$query = <<<QUERY
 				SELECT
 					DISTINCT
@@ -91,7 +92,7 @@ QUERY;
 			if ($this->_premium_merchant) {
 				$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
 			} else {
-				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
+				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . $merchant_ids->join(',') . ')';
 			}
 			$query .= ' ORDER BY a.company';
 			$result = $this->db->query($query);
@@ -131,12 +132,10 @@ QUERY;
 				];
 			}
 		}
-		$this->_response['status'] = 1;
-		$this->_response['data']   = [
-			'categories'              => $categories,
-			'merchants'               => $merchants,
-			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-		];
+		$this->_response['status']                          = 1;
+		$this->_response['data']['categories']              = $categories;
+		$this->_response['data']['merchants']               = $merchants;
+		$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
