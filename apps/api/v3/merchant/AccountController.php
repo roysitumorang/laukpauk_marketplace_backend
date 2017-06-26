@@ -106,15 +106,13 @@ QUERY
 			while ($row = $result->fetch()) {
 				$villages[] = $row;
 			}
-			$this->_response = [
-				'status' => 1,
-				'data'   => [
-					'business_hours' => $business_hours,
-					'provinces'      => $provinces,
-					'cities'         => $cities,
-					'subdistricts'   => $subdistricts,
-					'villages'       => $villages,
-				],
+			$this->_response['status'] = 1;
+			$this->_response['data']   = [
+				'business_hours' => $business_hours,
+				'provinces'      => $provinces,
+				'cities'         => $cities,
+				'subdistricts'   => $subdistricts,
+				'villages'       => $villages,
 			];
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 			return $this->response;
@@ -158,50 +156,48 @@ QUERY
 				$device->update();
 			}
 		}
-		$this->_response = [
-			'status'  => 1,
-			'message' => 'Update profil berhasil!',
-			'data'    => [
-				'current_user' => [
-					'id'           => $this->_current_user->id,
-					'name'         => $this->_current_user->name,
-					'role'         => $this->_current_user->role->name,
-					'mobile_phone' => $this->_current_user->mobile_phone,
-					'address'      => $this->_current_user->address,
-					'subdistrict'  => [
-						'id'   => $this->_current_user->village->subdistrict->id,
-						'name' => $this->_current_user->village->subdistrict->name,
-					],
-					'village'      => [
-						'id'   => $this->_current_user->village->id,
-						'name' => $this->_current_user->village->name,
-					],
-					'subdistrict'  => [
-						'id'   => $this->_current_user->village->subdistrict->id,
-						'name' => $this->_current_user->village->subdistrict->name,
-					],
-					'city'         => [
-						'id'   => $this->_current_user->village->subdistrict->city->id,
-						'name' => $this->_current_user->village->subdistrict->city->name,
-					],
-					'province'     => [
-						'id'   => $this->_current_user->village->subdistrict->city->province->id,
-						'name' => $this->_current_user->village->subdistrict->city->province->name,
-					],
-					'open_on_sunday'        => $this->_current_user->open_on_sunday,
-					'open_on_monday'        => $this->_current_user->open_on_monday,
-					'open_on_tuesday'       => $this->_current_user->open_on_tuesday,
-					'open_on_wednesday'     => $this->_current_user->open_on_wednesday,
-					'open_on_thursday'      => $this->_current_user->open_on_thursday,
-					'open_on_friday'        => $this->_current_user->open_on_friday,
-					'open_on_saturday'      => $this->_current_user->open_on_saturday,
-					'business_opening_hour' => strval($this->_current_user->business_opening_hour),
-					'business_closing_hour' => strval($this->_current_user->business_closing_hour),
-					'merchant_note'         => $this->_current_user->merchant_note,
-					'minimum_purchase'      => $this->_current_user->minimum_purchase,
-					'delivery_hours'        => $this->_current_user->delivery_hours,
-					'delivery_hours'        => array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1),
+		$this->_response['status']  = 1;
+		$this->_response['message'] = 'Update profil berhasil!';
+		$this->_response['data']    = [
+			'current_user' => [
+				'id'           => $this->_current_user->id,
+				'name'         => $this->_current_user->name,
+				'role'         => $this->_current_user->role->name,
+				'mobile_phone' => $this->_current_user->mobile_phone,
+				'address'      => $this->_current_user->address,
+				'subdistrict'  => [
+					'id'   => $this->_current_user->village->subdistrict->id,
+					'name' => $this->_current_user->village->subdistrict->name,
 				],
+				'village'      => [
+					'id'   => $this->_current_user->village->id,
+					'name' => $this->_current_user->village->name,
+				],
+				'subdistrict'  => [
+					'id'   => $this->_current_user->village->subdistrict->id,
+					'name' => $this->_current_user->village->subdistrict->name,
+				],
+				'city'         => [
+					'id'   => $this->_current_user->village->subdistrict->city->id,
+					'name' => $this->_current_user->village->subdistrict->city->name,
+				],
+				'province'     => [
+					'id'   => $this->_current_user->village->subdistrict->city->province->id,
+					'name' => $this->_current_user->village->subdistrict->city->province->name,
+				],
+				'open_on_sunday'        => $this->_current_user->open_on_sunday,
+				'open_on_monday'        => $this->_current_user->open_on_monday,
+				'open_on_tuesday'       => $this->_current_user->open_on_tuesday,
+				'open_on_wednesday'     => $this->_current_user->open_on_wednesday,
+				'open_on_thursday'      => $this->_current_user->open_on_thursday,
+				'open_on_friday'        => $this->_current_user->open_on_friday,
+				'open_on_saturday'      => $this->_current_user->open_on_saturday,
+				'business_opening_hour' => strval($this->_current_user->business_opening_hour),
+				'business_closing_hour' => strval($this->_current_user->business_closing_hour),
+				'merchant_note'         => $this->_current_user->merchant_note,
+				'minimum_purchase'      => $this->_current_user->minimum_purchase,
+				'delivery_hours'        => $this->_current_user->delivery_hours,
+				'delivery_hours'        => array_fill_keys($this->_current_user->delivery_hours ?: range($this->_current_user->business_opening_hour, $this->_current_user->business_closing_hour), 1),
 			],
 		];
 		$this->response->setJsonContent($this->_response);
@@ -250,53 +246,51 @@ QUERY
 		$login_history          = new LoginHistory;
 		$login_history->user_id = $user->id;
 		$login_history->create();
-		$this->_response = [
-			'status' => 1,
-			'data'   => [
-				'access_token' => strtr($crypt->encryptBase64(json_encode(['api_key' => $user->api_key]), $this->config->encryption_key), [
-					'+' => '-',
-					'/' => '_',
-					'=' => ',',
-				]),
-				'current_user' => [
-					'id'           => $user->id,
-					'name'         => $user->name,
-					'role'         => $user->role->name,
-					'mobile_phone' => $user->mobile_phone,
-					'address'      => $user->address,
-					'subdistrict'  => [
-						'id'   => $user->village->subdistrict->id,
-						'name' => $user->village->subdistrict->name,
-					],
-					'village'      => [
-						'id'   => $user->village->id,
-						'name' => $user->village->name,
-					],
-					'subdistrict'  => [
-						'id'   => $user->village->subdistrict->id,
-						'name' => $user->village->subdistrict->name,
-					],
-					'city'         => [
-						'id'   => $user->village->subdistrict->city->id,
-						'name' => $user->village->subdistrict->city->name,
-					],
-					'province'     => [
-						'id'   => $user->village->subdistrict->city->province->id,
-						'name' => $user->village->subdistrict->city->province->name,
-					],
-					'open_on_sunday'        => $user->open_on_sunday,
-					'open_on_monday'        => $user->open_on_monday,
-					'open_on_tuesday'       => $user->open_on_tuesday,
-					'open_on_wednesday'     => $user->open_on_wednesday,
-					'open_on_thursday'      => $user->open_on_thursday,
-					'open_on_friday'        => $user->open_on_friday,
-					'open_on_saturday'      => $user->open_on_saturday,
-					'business_opening_hour' => strval($user->business_opening_hour),
-					'business_closing_hour' => strval($user->business_closing_hour),
-					'merchant_note'         => $user->merchant_note,
-					'minimum_purchase'      => $user->minimum_purchase,
-					'delivery_hours'        => array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1),
+		$this->_response['status'] = 1;
+		$this->_response['data']   = [
+			'access_token' => strtr($crypt->encryptBase64(json_encode(['api_key' => $user->api_key]), $this->config->encryption_key), [
+				'+' => '-',
+				'/' => '_',
+				'=' => ',',
+			]),
+			'current_user' => [
+				'id'           => $user->id,
+				'name'         => $user->name,
+				'role'         => $user->role->name,
+				'mobile_phone' => $user->mobile_phone,
+				'address'      => $user->address,
+				'subdistrict'  => [
+					'id'   => $user->village->subdistrict->id,
+					'name' => $user->village->subdistrict->name,
 				],
+				'village'      => [
+					'id'   => $user->village->id,
+					'name' => $user->village->name,
+				],
+				'subdistrict'  => [
+					'id'   => $user->village->subdistrict->id,
+					'name' => $user->village->subdistrict->name,
+				],
+				'city'         => [
+					'id'   => $user->village->subdistrict->city->id,
+					'name' => $user->village->subdistrict->city->name,
+				],
+				'province'     => [
+					'id'   => $user->village->subdistrict->city->province->id,
+					'name' => $user->village->subdistrict->city->province->name,
+				],
+				'open_on_sunday'        => $user->open_on_sunday,
+				'open_on_monday'        => $user->open_on_monday,
+				'open_on_tuesday'       => $user->open_on_tuesday,
+				'open_on_wednesday'     => $user->open_on_wednesday,
+				'open_on_thursday'      => $user->open_on_thursday,
+				'open_on_friday'        => $user->open_on_friday,
+				'open_on_saturday'      => $user->open_on_saturday,
+				'business_opening_hour' => strval($user->business_opening_hour),
+				'business_closing_hour' => strval($user->business_closing_hour),
+				'merchant_note'         => $user->merchant_note,
+				'minimum_purchase'      => $user->minimum_purchase,
+				'delivery_hours'        => array_fill_keys($user->delivery_hours ?: range($user->business_opening_hour, $user->business_closing_hour), 1),
 			],
 		];
 		$this->response->setJsonContent($this->_response);
@@ -325,7 +319,8 @@ QUERY
 		while ($row = $result->fetch()) {
 			$provinces[] = $row;
 		}
-		$this->_response = ['status' => 1, 'data' => ['provinces' => $provinces]];
+		$this->_response['status'] = 1;
+		$this->_response['data']   = ['provinces' => $provinces];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -354,7 +349,8 @@ QUERY
 		while ($row = $result->fetch()) {
 			$cities[] = $row;
 		}
-		$this->_response = ['status' => 1, 'data' => ['cities' => $cities]];
+		$this->_response['status'] = 1;
+		$this->_response['data']   = ['cities' => $cities];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -382,7 +378,8 @@ QUERY
 		while ($row = $result->fetch()) {
 			$subdistricts[] = $row;
 		}
-		$this->_response = ['status' => 1, 'data' => ['subdistricts' => $subdistricts]];
+		$this->_response['status'] = 1;
+		$this->_response['data']   = ['subdistricts' => $subdistricts];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -409,7 +406,8 @@ QUERY
 		while ($row = $result->fetch()) {
 			$villages[] = $row;
 		}
-		$this->_response = ['status' => 1, 'data' => ['villages' => $villages]];
+		$this->_response['status'] = 1;
+		$this->_response['data']   = ['villages' => $villages];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -434,23 +432,21 @@ QUERY
 				}
 			}
 		}
-		$delivery_hours  = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
-		$this->_response = [
-			'status' => 1,
-			'data'   => [
-				'company'                 => $this->_current_user->company,
-				'address'                 => $this->_current_user->address,
-				'business_days'           => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
-				'business_hours'          => $this->_current_user->business_opening_hour . '.00 - ' . $this->_current_user->business_closing_hour . '.00 WIB',
-				'delivery_hours'          => $delivery_hours ? $delivery_hours . ' WIB' : '-',
-				'minimum_purchase'        => $this->_current_user->minimum_purchase,
-				'shipping_cost'           => $this->_current_user->shipping_cost ?? 0,
-				'merchant_note'           => $this->_current_user->merchant_note,
-				'deposit'                 => $this->_current_user->deposit,
-				'total_products'          => $this->_current_user->countProducts(),
-				'total_new_orders'        => $this->_current_user->totalNewOrders(),
-				'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-			],
+		$delivery_hours            = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+		$this->_response['status'] = 1;
+		$this->_response['data']   = [
+			'company'                 => $this->_current_user->company,
+			'address'                 => $this->_current_user->address,
+			'business_days'           => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
+			'business_hours'          => $this->_current_user->business_opening_hour . '.00 - ' . $this->_current_user->business_closing_hour . '.00 WIB',
+			'delivery_hours'          => $delivery_hours ? $delivery_hours . ' WIB' : '-',
+			'minimum_purchase'        => $this->_current_user->minimum_purchase,
+			'shipping_cost'           => $this->_current_user->shipping_cost ?? 0,
+			'merchant_note'           => $this->_current_user->merchant_note,
+			'deposit'                 => $this->_current_user->deposit,
+			'total_products'          => $this->_current_user->countProducts(),
+			'total_new_orders'        => $this->_current_user->totalNewOrders(),
+			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;

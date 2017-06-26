@@ -18,11 +18,9 @@ class PostsController extends ControllerBase {
 			if (!$post) {
 				throw new Exception('Konten tidak ditemukan!');
 			}
-			$this->_response = [
-				'status' => 1,
-				'data'   => [
-					'post' => ['subject' => $post->subject, 'body' => strtr($post->body, ["\r\n" => ''])],
-				],
+			$this->_response['status'] = 1;
+			$this->_response['data']   = [
+				'post' => ['subject' => $post->subject, 'body' => strtr($post->body, ["\r\n" => ''])],
 			];
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
