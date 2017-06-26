@@ -61,7 +61,7 @@ QUERY
 					JOIN users f ON e.user_id = f.id
 				WHERE e.user_id = {$this->_current_user->id}
 				GROUP BY b.id
-				ORDER BY CONCAT_WS(' ', b.type, b.name)
+				ORDER BY name
 QUERY
 			);
 			$result->setFetchMode(Db::FETCH_OBJ);
@@ -342,7 +342,7 @@ QUERY
 				a.id = {$id} AND
 				e.user_id = {$this->_current_user->id}
 			GROUP BY b.id
-			ORDER BY CONCAT_WS(' ', b.type, b.name)
+			ORDER BY name
 QUERY
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);

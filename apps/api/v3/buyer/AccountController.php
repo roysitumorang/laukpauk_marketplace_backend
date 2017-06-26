@@ -175,7 +175,7 @@ QUERY
 						JOIN users f ON e.user_id = f.id
 					WHERE
 QUERY
-					. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY CONCAT_WS(' ', b.type, b.name)"
+					. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY name"
 				);
 				$result->setFetchMode(Db::FETCH_OBJ);
 				while ($row = $result->fetch()) {
@@ -415,7 +415,7 @@ QUERY
 			WHERE
 				a.id = {$id} AND
 QUERY
-			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY CONCAT_WS(' ', b.type, b.name)"
+			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY name"
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
