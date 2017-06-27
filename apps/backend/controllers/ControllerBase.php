@@ -122,6 +122,7 @@ class ControllerBase extends Controller {
 				'expanded'  => $expanded == 'Options',
 				'sub_items' => [
 					['label' => 'Settings',        'link' => 'settings'],
+					['label' => 'Rekening Bank',   'link' => 'bank_accounts'],
 					['label' => 'Daftar Propinsi', 'link' => 'provinces'],
 				],
 			], [
