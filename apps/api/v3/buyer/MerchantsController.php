@@ -20,6 +20,8 @@ class MerchantsController extends ControllerBase {
 		$limit        = 10;
 		$merchants    = [];
 		$params       = [];
+		$today        = $this->currentDatetime->format('N');
+		$tomorrow     = $this->currentDatetime->modify('+1 day')->format('N');
 		$stop_words   = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
 		$query        = <<<QUERY
 			SELECT
@@ -104,6 +106,30 @@ QUERY
 			, $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
+			$availability = 'Hari ini ';
+			if (($today === 1 && $item->open_on_monday) ||
+				($today === 2 && $item->open_on_tuesday) ||
+				($today === 3 && $item->open_on_wednesday) ||
+				($today === 4 && $item->open_on_thursday) ||
+				($today === 5 && $item->open_on_friday) ||
+				($today === 6 && $item->open_on_saturday) ||
+				($today === 7 && $item->open_on_sunday)) {
+				$availability .= 'buka';
+			} else {
+				$availability .= 'tutup';
+			}
+			$availability .= ', besok ';
+			if (($tomorrow === 1 && $item->open_on_monday) ||
+				($tomorrow === 2 && $item->open_on_tuesday) ||
+				($tomorrow === 3 && $item->open_on_wednesday) ||
+				($tomorrow === 4 && $item->open_on_thursday) ||
+				($tomorrow === 5 && $item->open_on_friday) ||
+				($tomorrow === 6 && $item->open_on_saturday) ||
+				($tomorrow === 7 && $item->open_on_sunday)) {
+				$availability .= 'buka';
+			} else {
+				$availability .= 'tutup';
+			}
 			$business_days = [
 				$item->open_on_monday    ? 'Senin'  : ',',
 				$item->open_on_tuesday   ? 'Selasa' : ',',
@@ -125,10 +151,11 @@ QUERY
 				}
 			}
 			$delivery_hours = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
-			$merchants[] = [
+			$merchants[]    = [
 				'id'               => $item->id,
 				'company'          => $item->company,
 				'address'          => $item->address,
+				'availability'     => $availability,
 				'business_days'    => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
 				'business_hours'   => $item->business_opening_hour . '.00 - ' . $item->business_closing_hour . '.00 WIB',
 				'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
