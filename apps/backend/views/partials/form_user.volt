@@ -172,8 +172,8 @@
 				Hari Operasional (* untuk merchant) :<br>
 				<input type="checkbox" name="open_on_sunday" value="1"{% if user.open_on_sunday %} checked{% endif %}> Minggu&nbsp;&nbsp;
 				<input type="checkbox" name="open_on_monday" value="1"{% if user.open_on_monday %} checked{% endif %}> Senin&nbsp;&nbsp;
-				<input type="checkbox" name="open_on_wednesday" value="1"{% if user.open_on_wednesday %} checked{% endif %}> Selasa&nbsp;&nbsp;
-				<input type="checkbox" name="open_on_tuesday" value="1"{% if user.open_on_tuesday %} checked{% endif %}> Rabu&nbsp;&nbsp;
+				<input type="checkbox" name="open_on_tuesday" value="1"{% if user.open_on_tuesday %} checked{% endif %}> Selasa&nbsp;&nbsp;
+				<input type="checkbox" name="open_on_wednesday" value="1"{% if user.open_on_wednesday %} checked{% endif %}> Rabu&nbsp;&nbsp;
 				<input type="checkbox" name="open_on_thursday" value="1"{% if user.open_on_thursday %} checked{% endif %}> Kamis&nbsp;&nbsp;
 				<input type="checkbox" name="open_on_friday" value="1"{% if user.open_on_friday %} checked{% endif %}> Jumat&nbsp;&nbsp;
 				<input type="checkbox" name="open_on_saturday" value="1"{% if user.open_on_saturday %} checked{% endif %}> Sabtu&nbsp;&nbsp;
