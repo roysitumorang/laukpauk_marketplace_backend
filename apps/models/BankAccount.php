@@ -20,6 +20,11 @@ class BankAccount extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
+	function initialize() {
+		parent::initialize();
+		$this->hasMany('id', 'Application\Models\Payment', 'bank_account_id', ['alias' => 'payments']);
+	}
+
 	function getSource() {
 		return 'bank_accounts';
 	}

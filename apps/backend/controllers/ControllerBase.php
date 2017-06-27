@@ -106,6 +106,7 @@ class ControllerBase extends Controller {
 					['label' => 'Produk List',   'link' => 'products'],
 					['label' => 'Group Produk',  'link' => 'product_groups'],
 					['label' => 'Kupon Member',  'link' => 'coupons'],
+					['label' => 'Pembayaran Deposit',  'link' => 'payments'],
 				],
 			], [
 				'label'     => 'Order',
