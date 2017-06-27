@@ -10,7 +10,7 @@ use Phalcon\Paginator\Adapter\Model;
 class PaymentsController extends ControllerBase {
 	function beforeExecuteRoute() {
 		parent::beforeExecuteRoute();
-		$this->view->menu = $this->_menu('Options');
+		$this->view->menu = $this->_menu('Products');
 	}
 
 	function indexAction() {
