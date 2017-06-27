@@ -165,10 +165,6 @@ QUERY
 				'role'         => $this->_current_user->role->name,
 				'mobile_phone' => $this->_current_user->mobile_phone,
 				'address'      => $this->_current_user->address,
-				'subdistrict'  => [
-					'id'   => $this->_current_user->village->subdistrict->id,
-					'name' => $this->_current_user->village->subdistrict->name,
-				],
 				'village'      => [
 					'id'   => $this->_current_user->village->id,
 					'name' => $this->_current_user->village->name,
@@ -259,10 +255,6 @@ QUERY
 				'role'         => $user->role->name,
 				'mobile_phone' => $user->mobile_phone,
 				'address'      => $user->address,
-				'subdistrict'  => [
-					'id'   => $user->village->subdistrict->id,
-					'name' => $user->village->subdistrict->name,
-				],
 				'village'      => [
 					'id'   => $user->village->id,
 					'name' => $user->village->name,
