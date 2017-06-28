@@ -154,25 +154,25 @@ QUERY;
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$availability = 'Hari ini ';
-				if (($today === 1 && $item->open_on_monday) ||
-					($today === 2 && $item->open_on_tuesday) ||
-					($today === 3 && $item->open_on_wednesday) ||
-					($today === 4 && $item->open_on_thursday) ||
-					($today === 5 && $item->open_on_friday) ||
-					($today === 6 && $item->open_on_saturday) ||
-					($today === 7 && $item->open_on_sunday)) {
+				if (($today == 1 && $item->open_on_monday) ||
+					($today == 2 && $item->open_on_tuesday) ||
+					($today == 3 && $item->open_on_wednesday) ||
+					($today == 4 && $item->open_on_thursday) ||
+					($today == 5 && $item->open_on_friday) ||
+					($today == 6 && $item->open_on_saturday) ||
+					($today == 7 && $item->open_on_sunday)) {
 					$availability .= 'buka';
 				} else {
 					$availability .= 'tutup';
 				}
 				$availability .= ', besok ';
-				if (($tomorrow === 1 && $item->open_on_monday) ||
-					($tomorrow === 2 && $item->open_on_tuesday) ||
-					($tomorrow === 3 && $item->open_on_wednesday) ||
-					($tomorrow === 4 && $item->open_on_thursday) ||
-					($tomorrow === 5 && $item->open_on_friday) ||
-					($tomorrow === 6 && $item->open_on_saturday) ||
-					($tomorrow === 7 && $item->open_on_sunday)) {
+				if (($tomorrow == 1 && $item->open_on_monday) ||
+					($tomorrow == 2 && $item->open_on_tuesday) ||
+					($tomorrow == 3 && $item->open_on_wednesday) ||
+					($tomorrow == 4 && $item->open_on_thursday) ||
+					($tomorrow == 5 && $item->open_on_friday) ||
+					($tomorrow == 6 && $item->open_on_saturday) ||
+					($tomorrow == 7 && $item->open_on_sunday)) {
 					$availability .= 'buka';
 				} else {
 					$availability .= 'tutup';
