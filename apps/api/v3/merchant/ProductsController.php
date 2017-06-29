@@ -3,7 +3,6 @@
 namespace Application\Api\V3\Merchant;
 
 use Application\Models\UserProduct;
-use Ds\Set;
 use Phalcon\Db;
 use Phalcon\Exception;
 
@@ -53,16 +52,10 @@ QUERY;
 		$total_pages      = ceil($total_products / $limit);
 		$current_page     = $page > 0 ? $page : 1;
 		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(strtr($query, ['COUNT(1)' => 'a.id, b.name, a.price, a.stock, b.stock_unit, b.picture, a.published']) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$result           = $this->db->query(strtr($query, ['COUNT(1)' => 'a.id, b.name, a.price, a.stock, b.stock_unit, a.published']) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			if ($row->picture) {
-				$row->thumbnail = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
-				$row->picture   = $picture_root_url . strtr($row->picture, ['.jpg' => '300.jpg']);
-			} else {
-				unset($row->picture);
-			}
 			$products[] = $row;
 		}
 		if (!$total_products) {
@@ -79,27 +72,22 @@ QUERY;
 		return $this->response;
 	}
 
-	function updateAction($id) {
+	function saveAction() {
 		try {
-			if (!$this->request->isPost() || $this->_current_user->role->name != 'Merchant') {
+			if (!$this->request->isPost()) {
 				throw new Exception('Request tidak valid!');
 			}
-			$user_product = UserProduct::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_current_user->id, $id]]);
-			if (!$user_product) {
-				throw new Exception('Produk tidak ditemukan!');
+			foreach ($this->_post as $item) {
+				$user_product = UserProduct::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_current_user->id, $item->id]]);
+				if (!$user_product) {
+					continue;
+				}
+				$user_product->setPrice($item->price);
+				$user_product->setStock($item->stock);
+				$user_product->setPublished($item->published);
+				$user_product->update();
 			}
-			$user_product->setPrice($this->_post->price);
-			$user_product->setStock($this->_post->stock);
-			$user_product->setPublished($this->_post->published);
-			if ($user_product->validation() && $user_product->update()) {
-				$this->_response['status']  = 1;
-				throw new Exception('Update produk berhasil!');
-			}
-			$errors = new Set;
-			foreach ($user_product->getMessages() as $error) {
-				$errors->add($error->getMessage());
-			}
-			throw new Exception($errors->join('<br>'));
+			throw new Exception('Update produk berhasil!');
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
