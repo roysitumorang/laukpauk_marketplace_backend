@@ -89,6 +89,10 @@ class Payment extends ModelBase {
 		$validator->add('code', new Uniqueness([
 			'message' => 'kode pembayaran sudah ada',
 		]));
+		$validator->add('payer_bank', new InclusionIn([
+			'domain'  => BankAccount::BANKS,
+			'message' => 'bank asal transfer tidak valid',
+		]));
 		return $this->validate($validator);
 	}
 

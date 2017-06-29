@@ -10,6 +10,8 @@ use Phalcon\Validation\Validator\StringLength;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class BankAccount extends ModelBase {
+	const BANKS = ['BCA', 'BNI', 'BRI', 'Mandiri', 'Bank Sumut'];
+
 	public $id;
 	public $bank;
 	public $number;
@@ -65,6 +67,10 @@ class BankAccount extends ModelBase {
 		]));
 		$validator->add(['bank', 'number'], new Uniqueness([
 			'message' => 'nomor rekening sudah ada',
+		]));
+		$validator->add('bank', new InclusionIn([
+			'domain'  => static::BANKS,
+			'message' => 'bank tidak valid',
 		]));
 		$validator->add('published', new InclusionIn([
 			'domain'  => [0, 1],
