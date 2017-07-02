@@ -7,6 +7,8 @@ use Application\Models\ModelBase;
 class SmsRecipient extends ModelBase {
 	public $sms_id;
 	public $user_id;
+	public $mobile_phone;
+	public $status;
 
 	function getSource() {
 		return 'sms_recipient';
