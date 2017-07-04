@@ -20,42 +20,40 @@ class ProductsController extends ControllerBase {
 			FROM
 				user_product a
 				JOIN products b ON a.product_id = b.id
-				JOIN product_categories c ON b.product_category_id = c.id
 			WHERE
 				a.user_id = {$this->_current_user->id} AND
-				b.published = 1 AND
-				c.published = 1
+				b.published = 1
 QUERY;
 		if ($search_query) {
-			$stop_words            = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
-			$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
-			$filtered_keywords     = array_diff($keywords, $stop_words);
-			$filtered_search_query = implode(' ', $filtered_keywords);
-			$query                .= ' AND (b.name ILIKE ? OR c.name ILIKE ?';
-			foreach (range(1, 2) as $i) {
-				$params[] = "%{$filtered_search_query}%";
+			$stop_words = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
+			$keywords   = '';
+			$words      = array_values(array_diff(preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY), $stop_words));
+			foreach ($words as $i => $word) {
+				$keywords .= ($i > 0 ? ' & ' : '') . $word . ':*';
 			}
-			if (count($filtered_keywords) > 1) {
-				foreach ($filtered_keywords as $keyword) {
-					$query .= ' OR b.name ILIKE ? OR c.name ILIKE ?';
-					foreach (range(1, 2) as $i) {
-						$params[] = "%{$keyword}%";
-					}
-				}
-			}
-			$query .= ')';
+			$keywords && $query .= " AND b.keywords @@ TO_TSQUERY('{$keywords}')";
 		}
 		if ($category_id) {
-			$query .= " AND c.id = {$category_id}";
+			$query .= " AND b.product_category_id = {$category_id}";
 		}
-		$total_products   = $this->db->fetchColumn($query, $params);
-		$total_pages      = ceil($total_products / $limit);
-		$current_page     = $page > 0 ? $page : 1;
-		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(strtr($query, ['COUNT(1)' => 'a.id, b.name, a.price, a.stock, b.stock_unit, a.published']) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$total_products = $this->db->fetchColumn($query, $params);
+		$total_pages    = ceil($total_products / $limit);
+		$current_page   = $page > 0 ? $page : 1;
+		$offset         = ($current_page - 1) * $limit;
+		$result         = $this->db->query(strtr($query, ['COUNT(1)' => <<<QUERY
+			a.id,
+			b.name,
+			a.price,
+			a.stock,
+			b.stock_unit,
+			a.published,
+			TS_RANK(b.keywords, TO_TSQUERY('{$keywords}')) AS relevancy
+QUERY
+		]) . " ORDER BY relevancy DESC, b.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
+			unset($row->relevancy);
 			$products[] = $row;
 		}
 		if (!$total_products) {

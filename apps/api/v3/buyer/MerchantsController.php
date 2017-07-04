@@ -23,7 +23,14 @@ class MerchantsController extends ControllerBase {
 		$today        = $this->currentDatetime->format('N');
 		$tomorrow     = $this->currentDatetime->modify('+1 day')->format('N');
 		$stop_words   = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
-		$query        = <<<QUERY
+		$keywords     = '';
+		if ($search_query) {
+			$words = array_values(array_diff(preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY), $stop_words));
+			foreach ($words as $i => $word) {
+				$keywords .= ($i > 0 ? ' & ' : '') . $word . ':*';
+			}
+		}
+		$query = <<<QUERY
 			SELECT
 				COUNT(DISTINCT a.id)
 			FROM
@@ -33,49 +40,23 @@ class MerchantsController extends ControllerBase {
 				JOIN settings d ON d.name = 'minimum_purchase'
 				JOIN user_product e ON a.id = e.user_id
 				JOIN products f ON e.product_id = f.id
-				JOIN product_categories g ON f.product_category_id = g.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
+				a.premium_merchant
 QUERY;
 		if ($this->_premium_merchant) {
-			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
-			if ($search_query) {
-				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
-				$filtered_keywords     = array_diff($keywords, $stop_words);
-				$filtered_search_query = implode(' ', $filtered_keywords);
-				$query                .= ' AND (f.name ILIKE ? OR g.name ILIKE ?';
-				foreach (range(1, 2) as $i) {
-					$params[] = "%{$filtered_search_query}%";
-				}
-				if (count($filtered_keywords) > 1) {
-					foreach ($filtered_keywords as $keyword) {
-						$query .= ' OR f.name ILIKE ? OR g.name ILIKE ?';
-						foreach (range(1, 2) as $i) {
-							$params[] = "%{$keyword}%";
-						}
-					}
-				}
-				$query .= ')';
+			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
+			if ($search_query && $keywords) {
+				$query .= " AND f.keywords @@ TO_TSQUERY('{$keywords}')";
 			}
 		} else {
-			$query .= ' a.premium_merchant IS NULL';
-			if ($search_query) {
-				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
-				$filtered_keywords     = array_diff($keywords, $stop_words);
-				$filtered_search_query = implode(' ', $filtered_keywords);
-				$query                .= ' AND (a.company ILIKE ? OR f.name ILIKE ? OR g.name ILIKE ?';
-				foreach (range(1, 3) as $i) {
-					$params[] = "%{$filtered_search_query}%";
-				}
-				if (count($filtered_keywords) > 1) {
-					foreach ($filtered_keywords as $keyword) {
-						$query .= ' OR a.company ILIKE ? OR f.name ILIKE ? OR g.name ILIKE ?';
-						foreach (range(1, 3) as $i) {
-							$params[] = "%{$keyword}%";
-						}
-					}
+			$query .= ' IS NULL';
+			if ($search_query && $keywords) {
+				$query .= ' AND (';
+				foreach (['f.keywords', 'a.keywords'] as $i => $field) {
+					$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
 				}
 				$query .= ')';
 			}
@@ -84,7 +65,7 @@ QUERY;
 		$total_pages     = ceil($total_merchants / $limit);
 		$current_page    = $page > 0 ? $page : 1;
 		$offset          = ($current_page - 1) * $limit;
-		$result          = $this->db->query(str_replace('COUNT(DISTINCT a.id)', <<<QUERY
+		$result          = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => <<<QUERY
 			DISTINCT
 			a.id,
 			a.company,
@@ -101,11 +82,13 @@ QUERY;
 			a.delivery_hours,
 			COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
 			a.shipping_cost,
-			a.merchant_note
+			a.merchant_note,
+			TS_RANK(f.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy
 QUERY
-			, $query) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
+			]) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
+			unset($row->relevancy);
 			$availability = 'Hari ini ';
 			if (($today == 1 && $item->open_on_monday) ||
 				($today == 2 && $item->open_on_tuesday) ||

@@ -17,7 +17,14 @@ class ProductsController extends ControllerBase {
 		$merchant_ids = new Set;
 		$merchants    = [];
 		$stop_words   = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
-		$query        = <<<QUERY
+		$keywords     = '';
+		if ($search_query) {
+			$words = array_values(array_diff(preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY), $stop_words));
+			foreach ($words as $i => $word) {
+				$keywords .= ($i > 0 ? ' & ' : '') . $word . ':*';
+			}
+		}
+		$query = <<<QUERY
 			SELECT
 				COUNT(DISTINCT d.id)
 			FROM
@@ -26,7 +33,6 @@ class ProductsController extends ControllerBase {
 				JOIN coverage_area c ON a.id = c.user_id
 				JOIN user_product d ON a.id = d.user_id
 				JOIN products e ON d.product_id = e.id
-				JOIN product_categories f ON e.product_category_id = f.id
 				LEFT JOIN product_group_member g ON e.id = g.product_id
 				LEFT JOIN product_groups h ON g.product_group_id = h.id
 			WHERE
@@ -35,28 +41,12 @@ class ProductsController extends ControllerBase {
 				c.village_id = {$this->_current_user->village->id} AND
 				d.published = 1 AND
 				e.published = 1 AND
-				f.published = 1 AND
 				a.premium_merchant
 QUERY;
 		if ($this->_premium_merchant) {
 			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
-			if ($search_query) {
-				$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
-				$filtered_keywords     = array_diff($keywords, $stop_words);
-				$filtered_search_query = implode(' ', $filtered_keywords);
-				$query                .= ' AND (e.name ILIKE ? OR f.name ILIKE ?';
-				foreach (range(1, 2) as $i) {
-					$params[] = "%{$filtered_search_query}%";
-				}
-				if (count($filtered_keywords) > 1) {
-					foreach ($filtered_keywords as $keyword) {
-						$query .= ' OR e.name ILIKE ? OR f.name ILIKE ?';
-						foreach (range(1, 2) as $i) {
-							$params[] = "%{$keyword}%";
-						}
-					}
-				}
-				$query .= ')';
+			if ($search_query && $keywords) {
+				$query .= " AND e.keywords @@ TO_TSQUERY('{$keywords}')";
 			}
 		} else {
 			$query .= ' IS NULL';
@@ -67,37 +57,38 @@ QUERY;
 				if ($this->db->fetchColumn('SELECT COUNT(1) FROM product_groups WHERE published = 1 AND name = ?', [$search_query])) {
 					$query   .= ' AND h.published = 1 AND h.name = ?';
 					$params[] = $search_query;
-				} else {
-					$keywords              = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
-					$filtered_keywords     = array_diff($keywords, $stop_words);
-					$filtered_search_query = implode(' ', $filtered_keywords);
-					$query                .= ' AND (a.company ILIKE ? OR e.name ILIKE ? OR f.name ILIKE ?';
-					foreach (range(1, 3) as $i) {
-						$params[] = "%{$filtered_search_query}%";
-					}
-					if (count($filtered_keywords) > 1) {
-						foreach ($filtered_keywords as $keyword) {
-							$query .= ' OR a.company ILIKE ? OR e.name ILIKE ? OR f.name ILIKE ?';
-							foreach (range(1, 3) as $i) {
-								$params[] = "%{$keyword}%";
-							}
-						}
+				} else if ($keywords) {
+					$query .= ' AND (';
+					foreach (['e.keywords', 'a.keywords'] as $i => $field) {
+						$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
 					}
 					$query .= ')';
 				}
 			}
 		}
 		if ($category_id) {
-			$query .= " AND f.id = {$category_id}";
+			$query .= " AND e.product_category_id = {$category_id}";
 		}
-		$total_products   = $this->db->fetchColumn($query, $params);
-		$total_pages      = ceil($total_products / $limit);
-		$current_page     = $page > 0 ? $page : 1;
-		$offset           = ($current_page - 1) * $limit;
-		$result           = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => 'DISTINCT d.id, e.name, d.price, d.stock, e.stock_unit, e.picture, d.user_id']) . " ORDER BY e.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$total_products = $this->db->fetchColumn($query, $params);
+		$total_pages    = ceil($total_products / $limit);
+		$current_page   = $page > 0 ? $page : 1;
+		$offset         = ($current_page - 1) * $limit;
+		$result         = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => <<<QUERY
+			DISTINCT
+			d.id,
+			e.name,
+			d.price,
+			d.stock,
+			e.stock_unit,
+			e.picture,
+			d.user_id,
+			TS_RANK(e.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy
+QUERY
+		]) . " ORDER BY relevancy DESC, e.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
+			unset($row->relevancy);
 			if (!$merchant_ids->contains($row->user_id)) {
 				$merchant_ids->add($row->user_id);
 			}
