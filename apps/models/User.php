@@ -522,7 +522,7 @@ class User extends ModelBase {
 			$this->delivery_hours = explode(',', $this->delivery_hours);
 		}
 		if ($this->role->id == Role::MERCHANT) {
-			$this->getDI()->getDb()->exec("UPDATE users SET keywords = to_tsvector(company) WHERE id = {$this->id}");
+			$this->getDI()->getDb()->exec("UPDATE users SET keywords = TO_TSVECTOR('simple', company) WHERE id = {$this->id}");
 		}
 	}
 

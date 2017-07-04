@@ -169,7 +169,7 @@ class Product extends ModelBase {
 	}
 
 	function afterSave() {
-		$this->getDI()->getDb()->exec("UPDATE products a SET keywords = to_tsvector(b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND a.id = {$this->id}");
+		$this->getDI()->getDb()->exec("UPDATE products a SET keywords = TO_TSVECTOR('simple', b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND a.id = {$this->id}");
 	}
 
 	function deletePicture() {
