@@ -6,7 +6,6 @@
 		<li{% if expand == 'update_user' %} class="active"{% endif %}><a href="/admin/users/{{ user.id }}/update">Edit Profil</a></li>
 		{% if user.role.name == 'Merchant' %}
 			<li{% if expand == 'areas' %} class="active"{% endif %}><a href="/admin/users/{{ user.id }}/coverage_areas">Area Operasional</a></li>
-			<li{% if expand == 'product_categories' %} class="active"{% endif %}><a href="/admin/users/{{ user.id }}/product_categories">Kategori Produk</a></li>
 			<li{% if expand == 'products' %} class="active"{% endif %}><a href="/admin/users/{{ user.id }}/products">Daftar Produk</a></li>
 		{% endif %}
 	{% endif %}

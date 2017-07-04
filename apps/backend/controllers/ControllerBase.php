@@ -102,11 +102,12 @@ class ControllerBase extends Controller {
 				'icon'      => 'coffee',
 				'expanded'  => $expanded == 'Products',
 				'sub_items' => [
-					['label' => 'Tambah Produk', 'link' => 'products/create'],
-					['label' => 'Produk List',   'link' => 'products'],
-					['label' => 'Group Produk',  'link' => 'product_groups'],
-					['label' => 'Kupon Member',  'link' => 'coupons'],
-					['label' => 'Pembayaran Deposit',  'link' => 'payments'],
+					['label' => 'Daftar Kategori Produk', 'link' => 'product_categories'],
+					['label' => 'Tambah Produk',          'link' => 'products/create'],
+					['label' => 'Daftar Produk',          'link' => 'products'],
+					['label' => 'Group Produk',           'link' => 'product_groups'],
+					['label' => 'Kupon Member',           'link' => 'coupons'],
+					['label' => 'Pembayaran Deposit',     'link' => 'payments'],
 				],
 			], [
 				'label'     => 'Order',
