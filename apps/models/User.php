@@ -2,7 +2,7 @@
 
 namespace Application\Models;
 
-use Phalcon\Image\Adapter\Gd;
+use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Digit;
@@ -512,10 +512,10 @@ class User extends ModelBase {
 	function afterSave() {
 		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
 		if ($this->new_avatar) {
-			$avatar = $this->_upload_config->path . $this->avatar;
-			$gd     = new Gd($this->new_avatar['tmp_name']);
-			imageinterlace($gd->getImage(), 1);
-			$gd->save($avatar, 100);
+			$avatar  = $this->_upload_config->path . $this->avatar;
+			$imagick = new Imagick($this->new_avatar['tmp_name']);
+			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$imagick->writeImage($avatar);
 			unlink($this->new_avatar['tmp_name']);
 		}
 		if ($this->delivery_hours) {
@@ -550,9 +550,10 @@ class User extends ModelBase {
 		}
 		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $avatar);
 		if (!in_array($thumbnail, $this->thumbnails)) {
-			$gd = new Gd($this->_upload_config->path . $avatar);
-			$gd->resize($width, $height);
-			$gd->save($this->_upload_config->path . $thumbnail, 100);
+			$imagick = new Imagick($this->_upload_config->path . $avatar);
+			$imagick->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1);
+			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$imagick->writeImage($this->_upload_config->path . $thumbnail);
 			if ($this->avatar) {
 				$this->thumbnails[] = $thumbnail;
 				$this->setThumbnails($this->thumbnails);
