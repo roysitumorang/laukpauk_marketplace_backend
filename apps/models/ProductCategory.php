@@ -180,14 +180,8 @@ class ProductCategory extends ModelBase {
 		$this->thumbnails = explode(',', $this->thumbnails);
 	}
 
-	function afterSave() {
-		$this->getDI()->getDb()->exec("UPDATE product_categories SET keywords = TO_TSVECTOR('simple', name) WHERE id = {$this->id}");
-	}
-
 	function afterUpdate() {
-		if ($this->hasChanged('name')) {
-			$this->getDI()->getDb()->exec("UPDATE products a SET keywords = TO_TSVECTOR('simple', b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND b.id = {$this->id}");
-		}
+		$this->getDI()->getDb()->execute("UPDATE products a SET keywords = TO_TSVECTOR('simple', b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND b.id = {$this->id}");
 	}
 
 	function deletePicture() {
