@@ -39,8 +39,9 @@ class ProductCategory extends ModelBase {
 	}
 
 	function onConstruct() {
-		$this->_upload_config = $this->getDI()->getConfig()->upload;
-		$this->_filter        = $this->getDI()->getFilter();
+		$di                   = $this->getDI();
+		$this->_upload_config = $di->getConfig()->upload;
+		$this->_filter        = $di->getFilter();
 	}
 
 	function initialize() {
@@ -177,6 +178,16 @@ class ProductCategory extends ModelBase {
 
 	function afterFetch() {
 		$this->thumbnails = explode(',', $this->thumbnails);
+	}
+
+	function afterSave() {
+		$this->getDI()->getDb()->exec("UPDATE product_categories SET keywords = to_tsvector(name) WHERE id = {$this->id}");
+	}
+
+	function afterUpdate() {
+		if ($this->hasChanged('name')) {
+			$this->getDI()->getDb()->exec("UPDATE products a SET keywords = to_tsvector(b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND b.id = {$this->id}");
+		}
 	}
 
 	function deletePicture() {

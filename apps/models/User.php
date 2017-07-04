@@ -521,6 +521,9 @@ class User extends ModelBase {
 		if ($this->delivery_hours) {
 			$this->delivery_hours = explode(',', $this->delivery_hours);
 		}
+		if ($this->role->id == Role::MERCHANT) {
+			$this->getDI()->getDb()->exec("UPDATE users SET keywords = to_tsvector(company) WHERE id = {$this->id}");
+		}
 	}
 
 	function beforeDelete() {

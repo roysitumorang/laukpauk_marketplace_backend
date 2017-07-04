@@ -168,6 +168,10 @@ class Product extends ModelBase {
 		$this->thumbnails = explode(',', $this->thumbnails);
 	}
 
+	function afterSave() {
+		$this->getDI()->getDb()->exec("UPDATE products a SET keywords = to_tsvector(b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND a.id = {$this->id}");
+	}
+
 	function deletePicture() {
 		if (!$this->picture) {
 			return;
