@@ -11,50 +11,52 @@ class CategoriesController extends ControllerBase {
 		$merchant_ids     = new Set;
 		$merchants        = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
-		$result           = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' AND published = 1 ORDER BY name');
-		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($category = $result->fetch()) {
-			$products = [];
-			$query    = <<<QUERY
-				SELECT
-					COUNT(DISTINCT c.id)
-				FROM
-					users a
-					JOIN coverage_area b ON a.id = b.user_id
-					JOIN user_product c ON a.id = c.user_id
-					JOIN products d ON c.product_id = d.id
-				WHERE
-					a.status = 1 AND
-					b.village_id = {$this->_current_user->village->id} AND
-					c.published = 1 AND
-					c.stock > 0 AND
-					d.published = 1 AND
-					a.premium_merchant
+		foreach (["!= 'Lain-Lain'", "= 'Lain-Lain'"] as $condition) {
+			$result = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . " AND published = 1 AND name {$condition} ORDER BY name");
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($category = $result->fetch()) {
+				$products = [];
+				$query    = <<<QUERY
+					SELECT
+						COUNT(DISTINCT c.id)
+					FROM
+						users a
+						JOIN coverage_area b ON a.id = b.user_id
+						JOIN user_product c ON a.id = c.user_id
+						JOIN products d ON c.product_id = d.id
+					WHERE
+						a.status = 1 AND
+						b.village_id = {$this->_current_user->village->id} AND
+						c.published = 1 AND
+						c.stock > 0 AND
+						d.published = 1 AND
+						a.premium_merchant
 QUERY;
-			if ($this->_premium_merchant) {
-				$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
-			} else {
-				$query .= ' IS NULL';
-			}
-			$query .= " AND d.product_category_id = {$category->id}";
-			$total_products = $this->db->fetchColumn($query);
-			if (!$total_products) {
-				continue;
-			}
-			$sub_result = $this->db->query(strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ' LIMIT 2 OFFSET 0');
-			$sub_result->setFetchMode(Db::FETCH_OBJ);
-			while ($product = $sub_result->fetch()) {
-				$merchant_ids->contains($product->user_id) || $merchant_ids->add($product->user_id);
-				if ($product->picture) {
-					$product->thumbnail = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
-					$product->picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
+				if ($this->_premium_merchant) {
+					$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
 				} else {
-					unset($product->picture);
+					$query .= ' IS NULL';
 				}
-				$products[] = $product;
+				$query .= " AND d.product_category_id = {$category->id}";
+				$total_products = $this->db->fetchColumn($query);
+				if (!$total_products) {
+					continue;
+				}
+				$sub_result = $this->db->query(strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ' LIMIT 2 OFFSET 0');
+				$sub_result->setFetchMode(Db::FETCH_OBJ);
+				while ($product = $sub_result->fetch()) {
+					$merchant_ids->contains($product->user_id) || $merchant_ids->add($product->user_id);
+					if ($product->picture) {
+						$product->thumbnail = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
+						$product->picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
+					} else {
+						unset($product->picture);
+					}
+					$products[] = $product;
+				}
+				$category->products = $products;
+				$categories[]       = $category;
 			}
-			$category->products = $products;
-			$categories[]       = $category;
 		}
 		if (!$merchant_ids->isEmpty()) {
 			$today    = $this->currentDatetime->format('N');
