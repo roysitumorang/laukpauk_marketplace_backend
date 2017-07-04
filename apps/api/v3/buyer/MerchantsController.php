@@ -66,7 +66,6 @@ QUERY;
 		$current_page    = $page > 0 ? $page : 1;
 		$offset          = ($current_page - 1) * $limit;
 		$result          = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => <<<QUERY
-			DISTINCT
 			a.id,
 			a.company,
 			a.address,
@@ -80,12 +79,12 @@ QUERY;
 			a.business_opening_hour,
 			a.business_closing_hour,
 			a.delivery_hours,
-			COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
+			AVG(COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT)) AS minimum_purchase,
 			a.shipping_cost,
 			a.merchant_note,
-			TS_RANK(f.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy
+			SUM(TS_RANK(f.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(a.keywords, TO_TSQUERY('{$keywords}'))) AS relevancy
 QUERY
-			]) . " ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
+			]) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			unset($row->relevancy);
