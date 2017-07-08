@@ -174,154 +174,58 @@ class Order extends ModelBase {
 
 	function afterCreate() {
 		$session = $this->getDI()->getSession();
-		$this->buyer->setName($this->name);
-		$this->buyer->setAddress($this->address);
-		$this->buyer->update(['updated_by' => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by]);
-		$recipients    = [];
-		$device_tokens = [];
-		$admins        = User::find([
-			'role_id IN ({role_ids:array}) AND status = 1',
-			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
+		$this->buyer->update([
+			'name'       => $this->name,
+			'address'    => $this->address,
+			'updated_by' => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
 		]);
-		foreach ($admins as $admin) {
-			$recipients[] = $admin;
-		}
-		foreach ($this->merchant->devices as $device) {
-			$device_tokens[] = $device->token;
-		}
-		if ($recipients) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'new order'");
-			$notification             = new Notification;
-			$notification->type       = $template->notification_type;
-			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->target_url = strtr($template->target_url, ['{order_id}' => $this->id]);
-			$notification->created_by = $this->created_by;
-			$notification->recipients = $recipients;
-			$notification->create();
-		}
-		if ($device_tokens) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'new order'");
-			$notification             = new Notification;
-			$notification->type       = $template->notification_type;
-			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->link       = strtr($template->link, ['{order_id}' => $this->id]);
-			$notification->target_url = $template->target_url;
-			$notification->created_by = $this->created_by;
-			$notification->recipients = [$this->merchant];
-			$notification->push($device_tokens, [
-				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
-				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
-			], [
-				'target_url'        => $template->target_url,
-				'target_parameters' => ['orderId' => $this->id],
-			]);
-		}
+		$this->_push_notification('new order', [$this->merchant]);
 	}
 
 	function cancel($cancellation_reason) {
-		$this->status              = array_search('CANCELLED', static::STATUS);
-		$this->cancellation_reason = $cancellation_reason ?: null;
-		if (!$this->validation() || !$this->update()) {
-			return false;
-		}
-		$session       = $this->getDI()->getSession();
-		$recipients    = [];
-		$device_tokens = [];
-		$admins        = User::find([
-			'role_id IN ({role_ids:array}) AND status = 1',
-			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
+		$session = $this->getDI()->getSession();
+		$this->update([
+			'status'              => array_search('CANCELLED', static::STATUS),
+			'cancellation_reason' => $cancellation_reason ?: null,
+			'updated_by'          => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
 		]);
-		foreach ($admins as $admin) {
-			$recipients[] = $admin;
-		}
-		foreach ($this->buyer->devices as $device) {
-			$device_tokens[] = $device->token;
-		}
-		if ($recipients) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'cancelled order'");
-			$notification             = new Notification;
-			$notification->type       = $template->notification_type;
-			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->target_url = strtr($template->target_url, ['{order_id}' => $this->id]);
-			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
-			$notification->recipients = $recipients;
-			$notification->create();
-		}
-		if ($device_tokens) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'cancelled order'");
-			$notification             = new Notification;
-			$notification->type       = $template->notification_type;
-			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->link       = strtr($template->link, ['{order_id}' => $this->id]);
-			$notification->target_url = $template->target_url;
-			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
-			$notification->recipients = [$this->buyer];
-			$notification->create();
-			$notification->push($device_tokens, [
-				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
-				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
-			], [
-				'target_url'        => $template->target_url,
-				'target_parameters' => ['orderId' => $this->id],
-			]);
-		}
+		$this->_push_notification('cancelled order', [$this->buyer]);
 	}
 
 	function complete() {
-		$session       = $this->getDI()->getSession();
-		$recipients    = [];
-		$device_tokens = [];
-		foreach ($this->items as $item) {
-			$product = Product::findFirst($item->product_id);
-			$product->update(['stock' => max(0, $product->stock - $item->quantity)]);
+		$session = $this->getDI()->getSession();
+		foreach ($this->orderProducts as $item) {
+			$user_product = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->merchant_id, $item->product_id]]);
+			$user_product->update(['stock' => max(0, $user_product->stock - $item->quantity)]);
 		}
 		$this->update([
 			'status'          => array_search('COMPLETED', static::STATUS),
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
+			'updated_by'      => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
 		]);
-		$this->merchant->update(['deposit' => $this->merchant->deposit - $this->admin_fee]);
-		$admins = User::find([
+		$this->merchant->update([
+			'deposit'    => $this->merchant->deposit - $this->admin_fee,
+			'updated_by' => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
+		]);
+		$this->_push_notification('delivered order', [$this->buyer]);
+	}
+
+	private function _push_notification($template_name, $recipients) {
+		$template     = NotificationTemplate::findFirstByName($template_name);
+		$notification = new Notification;
+		$admins       = User::find([
 			'role_id IN ({role_ids:array}) AND status = 1',
 			'bind' => ['role_ids' => [Role::SUPER_ADMIN, Role::ADMIN]],
 		]);
 		foreach ($admins as $admin) {
 			$recipients[] = $admin;
 		}
-		foreach ($this->buyer->devices as $device) {
-			$device_tokens[] = $device->token;
+		foreach (['title', 'admin_target_url', 'merchant_target_url', 'old_mobile_target_url', 'new_mobile_target_url'] as $attribute) {
+			$notification->$attribute = strtr($template->$attribute, ['{order_id}' => $this->code]);
 		}
-		if ($recipients) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'web' AND name = 'delivered order'");
-			$notification             = new Notification;
-			$notification->type       = $template->notification_type;
-			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->target_url = strtr($template->target_url, ['{order_id}' => $this->id]);
-			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
-			$notification->recipients = $recipients;
-			$notification->create();
-		}
-		if ($device_tokens) {
-			$template                 = NotificationTemplate::findFirst("notification_type = 'mobile' AND name = 'delivered order'");
-			$notification             = new Notification;
-			$notification->type       = $template->notification_type;
-			$notification->title      = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->message    = strtr($template->subject, ['{order_id}' => $this->code]);
-			$notification->link       = strtr($template->link, ['{order_id}' => $this->id]);
-			$notification->target_url = $template->target_url;
-			$notification->created_by = $session && $session->has('user_id') ? $session->get('user_id') : $this->merchant->id;
-			$notification->recipients = [$this->buyer];
-			$notification->push($device_tokens, [
-				'title'   => strtr($template->subject, ['{order_id}' => $this->code]),
-				'message' => strtr($template->subject, ['{order_id}' => $this->code]),
-			], [
-				'target_url'        => $template->target_url,
-				'target_parameters' => ['orderId' => $this->id],
-			]);
-		}
+		$notification->message                      = $notification->title;
+		$notification->new_mobile_target_parameters = json_encode(['orderId' => $this->id]);
+		$notification->created_by                   = $this->created_by;
+		$notification->push($recipients);
 	}
 }

@@ -4,17 +4,17 @@ namespace Application\Models;
 
 use Application\Models\ModelBase;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class NotificationTemplate extends ModelBase {
 	public $id;
-	public $notification_type;
 	public $name;
-	public $subject;
-	public $link;
-	public $target_url;
+	public $title;
+	public $admin_target_url;
+	public $merchant_target_url;
+	public $old_mobile_target_url;
+	public $new_mobile_target_url;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -28,39 +28,42 @@ class NotificationTemplate extends ModelBase {
 		$this->_filter = $this->getDI()->getFilter();
 	}
 
-	function setNotificationType($notification_type) {
-		$this->notification_type = $notification_type;
-	}
-
 	function setName($name) {
 		$this->name = $this->_filter->sanitize($name, ['string', 'trim']);
 	}
 
-	function setSubject($subject) {
-		$this->subject = $this->_filter->sanitize($subject, ['string', 'trim']);
+	function setTitle($title) {
+		$this->title = $this->_filter->sanitize($title, ['string', 'trim']);
 	}
 
-	function setLink($link) {
-		$this->link = $this->_filter->sanitize($link, ['string', 'trim']);
+	function setAdminTargetUrl($admin_target_url) {
+		$this->admin_target_url = $this->_filter->sanitize($admin_target_url, ['string', 'trim']);
 	}
 
-	function setTargetUrl($target_url) {
-		$this->target_url = $this->_filter->sanitize($target_url, ['string', 'trim']);
+	function setMerchantTargetUrl($merchant_target_url) {
+		$this->merchant_target_url = $this->_filter->sanitize($merchant_target_url, ['string', 'trim']);
+	}
+
+	function setOldMobileTargetUrl($old_mobile_target_url) {
+		$this->old_mobile_target_url = $this->_filter->sanitize($old_mobile_target_url, ['string', 'trim']);
+	}
+
+	function setNewMobileTargetUrl($new_mobile_target_url) {
+		$this->new_mobile_target_url = $this->_filter->sanitize($new_mobile_target_url, ['string', 'trim']);
 	}
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['notification_type', 'name', 'subject', 'target_url'], new PresenceOf([
+		$validator->add(['notification_type', 'name', 'title', 'target_url'], new PresenceOf([
 			'message' => [
-				'notification_type' => 'tipe harus diisi',
-				'name'              => 'nama harus diisi',
-				'subject'           => 'judul harus diisi',
-				'target_url'        => 'url harus diisi',
+				'notification_type'     => 'tipe harus diisi',
+				'name'                  => 'nama harus diisi',
+				'title'                 => 'judul harus diisi',
+				'admin_target_url'      => 'link target admin harus diisi',
+				'merchant_target_url'   => 'link target merchant harus diisi',
+				'old_mobile_target_url' => 'link target mobile lama harus diisi',
+				'new_mobile_target_url' => 'link target mobile baru harus diisi',
 			],
-		]));
-		$validator->add('notification_type', new InclusionIn([
-			'domain'  => Notification::TYPES,
-			'message' => 'tipe salah satu dari mobile atau web',
 		]));
 		$validator->add('name', new Uniqueness([
 			'message' => 'nama sudah ada',

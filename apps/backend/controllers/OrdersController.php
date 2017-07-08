@@ -108,7 +108,7 @@ class OrdersController extends ControllerBase {
 	}
 
 	function showAction($id) {
-		if (!$order = Order::findFirstById($id)) {
+		if (!$order = Order::findFirst(['code = ?0 OR id = ?1', 'bind' => [$id, $id]])) {
 			$this->flashSession->error('Order tidak ditemukan.');
 			return $this->dispatcher->forward('orders');
 		}
@@ -119,7 +119,7 @@ class OrdersController extends ControllerBase {
 	}
 
 	function completeAction($id) {
-		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND id = ?0', 'bind' => [$id]]))) {
+		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND (code = ?0 OR id = ?1)', 'bind' => [$id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
 			return $this->dispatcher->forward('orders');
 		}
@@ -129,7 +129,7 @@ class OrdersController extends ControllerBase {
 	}
 
 	function cancelAction($id) {
-		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND id = ?0', 'bind' => [$id]]))) {
+		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND (code = ?0 OR id = ?1)', 'bind' => [$id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
 			return $this->dispatcher->forward('orders');
 		}
@@ -143,7 +143,7 @@ class OrdersController extends ControllerBase {
 	}
 
 	function printAction($id) {
-		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 1 AND id = ?0', 'bind' => [$id]]))) {
+		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 1 AND (code = ?0 OR id = ?1)', 'bind' => [$id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
 			return $this->dispatcher->forward('orders');
 		}

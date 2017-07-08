@@ -76,6 +76,7 @@ QUERY
 			$orders = [];
 			$total  = 0;
 			$today  = $this->currentDatetime->format('Y-m-d');
+			$coupon = null;
 			try {
 				$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
 			} catch (Exception $ex) {
@@ -84,8 +85,22 @@ QUERY
 			if (!filter_var($this->_post->delivery->hour, FILTER_VALIDATE_INT)) {
 				throw new Exception('Order Anda tidak valid!');
 			}
+			if ($this->_post->device_token) {
+				$device = Device::findFirstByToken($this->_post->device_token);
+				if (!$device) {
+					$device             = new Device;
+					$device->token      = $this->_post->device_token;
+					$device->user_id    = $this->_current_user->id;
+					$device->created_by = $this->_current_user->id;
+					$device->create();
+				} else if ($device->user_id != $this->_current_user->id) {
+					$device->user_id    = $this->_current_user->id;
+					$device->updated_by = $this->_current_user->id;
+					$device->update();
+				}
+			}
 			$delivery_date->setTime($this->_post->delivery->hour, 0, 0);
-			if ($this->_post->coupon_code) {
+			if (property_exists($this->_post, 'coupon_code') && $this->_post->coupon_code) {
 				$params = [<<<QUERY
 					SELECT
 						a.id,
@@ -134,7 +149,7 @@ QUERY
 						a.premium_merchant
 QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
-				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL');
+				$params[0] .= $this->_premium_merchant ? ' = 1' : ' IS NULL';
 				$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new Exception('Order Anda tidak valid!');
@@ -148,9 +163,10 @@ QUERY
 				$order->village_id         = $this->_current_user->village_id;
 				$order->original_bill      = 0;
 				$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
-				$order->note               = $cart->note;
+				$order->note               = property_exists($cart, 'note') ? $cart->note : null;
 				$order->buyer_id           = $this->_current_user->id;
 				$order->created_by         = $this->_current_user->id;
+				$order->setTransaction($this->transactionManager->get());
 				foreach ($cart->products as $item) {
 					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
@@ -200,21 +216,7 @@ QUERY
 					$order->create();
 				}
 			}
-			if ($this->_post->device_token) {
-				$device = Device::findFirstByToken($this->_post->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->token      = $this->_post->device_token;
-					$device->user_id    = $this->_current_user->id;
-					$device->created_by = $this->_current_user->id;
-					$device->create();
-				} else if ($device->user_id != $this->_current_user->id) {
-					$device->user_id    = $this->_current_user->id;
-					$device->updated_by = $this->_current_user->id;
-					$device->update();
-				}
-			}
-			$this->_response['status']  = 1;
+			$this->_response['status'] = 1;
 			throw new Exception('Terima kasih, order Anda segera kami proses.');
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();

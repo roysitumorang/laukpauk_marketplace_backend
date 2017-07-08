@@ -642,7 +642,7 @@ class User extends ModelBase {
 	}
 
 	function totalNewNotifications() {
-		return $this->countNotifications("Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL");
+		return $this->countNotifications('Application\Models\NotificationRecipient.read_at IS NULL');
 	}
 
 	function totalNewOrders() {

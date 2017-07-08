@@ -41,7 +41,7 @@ class ControllerBase extends Controller {
 		);
 		$result = $this->currentUser->getRelated('notifications', [
 			'conditions' => 'Application\Models\NotificationRecipient.read_at IS NULL',
-			'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.title, Application\Models\Notification.target_url, Application\Models\Notification.created_at',
+			'columns'    => 'Application\Models\Notification.id, Application\Models\Notification.title, Application\Models\Notification.admin_target_url, Application\Models\Notification.created_at',
 			'order'      => 'Application\Models\Notification.id DESC',
 		]);
 		foreach ($result as $item) {

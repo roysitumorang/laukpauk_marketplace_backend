@@ -35,9 +35,9 @@
 					</thead>
 					<tbody>
 					{% for notification in notifications %}
-						<tr class="notification"{% if !notification.read_at %} data-id="{{ notification.id }}"{% endif %} data-target-url="{{ notification.target_url }}">
+						<tr class="notification"{% if !notification.read_at %} data-id="{{ notification.id }}"{% endif %} data-target-url="{{ notification.admin_target_url }}">
 							<td>{{ notification.rank }}</td>
-							<td>{{ notification.title }}<br><strong>Link:</strong>&nbsp;{{ notification.target_url }}</td>
+							<td>{{ notification.title }}<br><strong>Link:</strong>&nbsp;{{ notification.admin_target_url }}</td>
 							<td>{{ notification.created_at }}</td>
 							<td>{% if notification.read_at %}Read{% else %}<i><font color="#FF0000">Unread</font></i>{% endif %}</td>
 						</tr>
