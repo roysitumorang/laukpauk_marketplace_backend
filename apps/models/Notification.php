@@ -61,7 +61,7 @@ class Notification extends ModelBase {
 	}
 
 	function setNewMobileTargetParameters($new_mobile_target_parameters) {
-		$this->new_mobile_target_parameters = $this->_filter->sanitize($new_mobile_target_parameters, ['string', 'trim']);
+		$this->new_mobile_target_parameters = $new_mobile_target_parameters;
 	}
 
 	function beforeValidationOnCreate() {
@@ -115,8 +115,7 @@ class Notification extends ModelBase {
 			return false;
 		}
 		if (!$this->new_mobile_target_parameters) {
-			$this->setNewMobileTargetParameters(json_encode(['notificationId' => $this->id]));
-			$this->update();
+			$this->update(['new_mobile_target_parameters' => sprintf('{"notificationId":%d}', $this->id)]);
 		}
 		$device_tokens = [];
 		foreach ($recipients as $recipient) {
@@ -158,5 +157,6 @@ class Notification extends ModelBase {
 			curl_exec($ch);
 			curl_close($ch);
 		}
+		return true;
 	}
 }

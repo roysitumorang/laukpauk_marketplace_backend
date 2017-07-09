@@ -41,7 +41,7 @@
 							<td>
 								<p><strong>Judul :</strong><br>{% if notification.title %}{{ notification.title }}{% else %}{% endif %}</p>
 								<p><strong>Pesan :</strong><br>{{ notification.message }}</p>
-								<strong>Link:</strong>&nbsp;{{ notification.target_url }}
+								<strong>Link:</strong>&nbsp;{{ notification.admin_target_url }}
 							</td>
 							<td>{{ notification.recipients }}</td>
 							<td>{{ notification.created_at }}</td>

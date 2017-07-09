@@ -5,6 +5,8 @@ namespace Application\Backend\Controllers;
 use Application\Models\Notification;
 use Application\Models\Role;
 use Application\Models\User;
+use DateTime;
+use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model;
 
 class MobileNotificationsController extends ControllerBase {
@@ -14,6 +16,14 @@ class MobileNotificationsController extends ControllerBase {
 	}
 
 	function indexAction() {
+		$datetime_formatter = new IntlDateFormatter(
+			'id_ID',
+			IntlDateFormatter::FULL,
+			IntlDateFormatter::NONE,
+			$this->currentDatetime->getTimezone(),
+			IntlDateFormatter::GREGORIAN,
+			'd MMM yyyy HH.mm'
+		);
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -28,6 +38,7 @@ class MobileNotificationsController extends ControllerBase {
 		foreach ($page->items as $item) {
 			$recipients = $item->countRecipients() > 1 ? 'Semua Member' : $item->getRelated('recipients')->getFirst()->name;
 			$item->writeAttribute('rank', ++$offset);
+			$item->writeAttribute('created_at', $datetime_formatter->format(new DateTime($item->created_at, $this->currentDatetime->getTimezone())));
 			$item->writeAttribute('recipients', $recipients);
 			$notifications[] = $item;
 		}
@@ -52,8 +63,7 @@ class MobileNotificationsController extends ControllerBase {
 			$roles[] = $item;
 		}
 		if ($this->request->isPost()) {
-			$device_tokens = [];
-			$content       = [
+			$content = [
 				'title'   => $this->request->getPost('title'),
 				'message' => $this->request->getPost('message'),
 			];
@@ -73,21 +83,24 @@ class MobileNotificationsController extends ControllerBase {
 				$condition .= " AND id = {$user->id}";
 				$result->andWhere("Application\Models\User.id = {$user->id}");
 			}
-			foreach ($result->execute() as $row) {
-				$device_tokens[] = $row->token;
+			foreach (User::find($condition) as $user) {
+				$recipients[] = $user;
 			}
-			if (!$device_tokens) {
+			if (!$recipients) {
 				$this->flashSession->error('Penerima notifikasi belum ada.');
 			} else {
-				foreach (User::find($condition) as $user) {
-					$recipients[] = $user;
-				}
-				$notification->setType('mobile');
 				$notification->setTitle($this->request->getPost('title'));
 				$notification->setMessage($this->request->getPost('message'));
-				$notification->user_id    = $this->currentUser->id;
-				$notification->recipients = $recipients;
-				if ($notification->push($device_tokens, $content)) {
+				$notification->setAdminTargetUrl('/admin/notifications/');
+				$notification->setMerchantTargetUrl('/notifications/');
+				$notification->setOldMobileTargetUrl('#/tabs/notification/');
+				$notification->setNewMobileTargetUrl('tab.notification');
+				$notification->user_id = $this->currentUser->id;
+				if ($notification->push($recipients)) {
+					$notification->setAdminTargetUrl($notification->admin_target_url . $notification->id);
+					$notification->setMerchantTargetUrl($notification->merchant_target_url . $notification->id);
+					$notification->setOldMobileTargetUrl($notification->old_mobile_target_url . $notification->id);
+					$notification->update();
 					$this->flashSession->success('Notifikasi berhasil dikirim.');
 					return $this->response->redirect('/admin/mobile_notifications');
 				}
