@@ -8,7 +8,7 @@ class NotificationsController extends ControllerBase {
 	function indexAction() {
 		$notifications = [];
 		$result        = $this->_current_user->getRelated('notifications', [
-			"Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL",
+			'Application\Models\NotificationRecipient.read_at IS NULL',
 			'order' => 'Application\Models\Notification.id DESC',
 		]);
 		foreach ($result as $notification) {
@@ -23,7 +23,7 @@ class NotificationsController extends ControllerBase {
 
 	function showAction($id) {
 		$notification = $this->_current_user->getRelated('notifications', [
-			"Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0",
+			'Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0',
 			'bind' => [$id]
 		])->getFirst();
 		if ($notification) {

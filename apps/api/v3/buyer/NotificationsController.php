@@ -9,11 +9,11 @@ class NotificationsController extends ControllerBase {
 	function indexAction() {
 		$notifications = [];
 		$result        = $this->_current_user->getRelated('notifications', [
-			"Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL",
+			'Application\Models\NotificationRecipient.read_at IS NULL',
 			'order' => 'Application\Models\Notification.id DESC',
 		]);
 		foreach ($result as $notification) {
-			$notifications[] = ['id' => $notification->id, 'title' => $notification->title, 'target_url' => $notification->target_url, 'target_parameters' => $notification->target_parameters];
+			$notifications[] = ['id' => $notification->id, 'title' => $notification->title, 'target_url' => $notification->new_mobile_target_url, 'target_parameters' => $notification->new_mobile_target_parameters];
 		}
 		$this->_response['status']                          = 1;
 		$this->_response['data']['notifications']           = $notifications;
@@ -25,7 +25,7 @@ class NotificationsController extends ControllerBase {
 	function showAction($id) {
 		try {
 			$notification = $this->_current_user->getRelated('notifications', [
-				"Application\Models\Notification.type = 'mobile' AND Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0",
+				'Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0',
 				'bind' => [$id]
 			])->getFirst();
 			if (!$notification) {
@@ -41,10 +41,11 @@ class NotificationsController extends ControllerBase {
 			$notification_recipient->read();
 			$this->_response['status']               = 1;
 			$this->_response['data']['notification'] = [
-				'id'         => $notification->id,
-				'title'      => $notification->title,
-				'message'    => $notification->message,
-				'target_url' => $notification->target_url,
+				'id'                => $notification->id,
+				'title'             => $notification->title,
+				'message'           => $notification->message,
+				'target_url'        => $notification->new_mobile_target_url,
+				'target_parameters' => $notification->new_mobile_target_parameters,
 			];
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();

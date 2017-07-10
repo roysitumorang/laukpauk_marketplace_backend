@@ -38,7 +38,7 @@ class NotificationsController extends ControllerBase {
 			$this->_response['data']['notification'] = [
 				'id'      => $notification->id,
 				'subject' => $notification->subject,
-				'link'    => $notification->link,
+				'link'    => $notification->old_mobile_target_url,
 			];
 		} else {
 			$this->_response['message'] = 'Notifikasi tidak ditemukan!';
