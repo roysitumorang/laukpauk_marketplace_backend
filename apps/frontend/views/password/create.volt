@@ -8,10 +8,10 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/password/create"><h2>My Account</h2></a>
+				<a href="/password/create"><h2>My Account</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
-						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
+						<li><a href="/"><i class="fa fa-home"></i></a></li>
 						<li><span>My Account</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="POST" action="/admin/password/create">
+				<form method="POST" action="/password/create">
 					<div class="form-group">
 						<label class="col-md-3 control-label" for="name">Nama</label>
 						<div class="col-md-6">

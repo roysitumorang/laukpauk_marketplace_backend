@@ -3,6 +3,8 @@
 namespace Application\Frontend;
 
 use Application\Models\User;
+use DateTimeImmutable;
+use DateTimeZone;
 use Phalcon\DiInterface;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
@@ -12,6 +14,7 @@ use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt;
+use Phalcon\Session\Adapter\Database;
 
 class Module implements ModuleDefinitionInterface {
 	/**
@@ -37,9 +40,9 @@ class Module implements ModuleDefinitionInterface {
 		/**
 		 * Start the session the first time some component request the session service
 		 */
-		$di->setShared('session', function() use($di) {
-			$session = new \Phalcon\Session\Adapter\Database([
-				'db'    => $di->getDb(),
+		$di->setShared('session', function() {
+			$session = new Database([
+				'db'    => $this->getDb(),
 				'table' => 'sessions',
 			]);
 			$session->start();
@@ -55,18 +58,13 @@ class Module implements ModuleDefinitionInterface {
 				if ($exception instanceof DispatchException && in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
 						'controller' => 'home',
-						'action'     => 'notFound',
+						'action'     => 'route404',
 					]);
-				} else {
-					$dispatcher->forward([
-						'controller' => 'home',
-						'action'     => 'uncaughtException',
-					]);
+					return false;
 				}
-				return false;
+				return true;
 			});
 			$dispatcher->setEventsManager($eventsManager);
-
 			return $dispatcher;
 		});
 
@@ -87,21 +85,19 @@ class Module implements ModuleDefinitionInterface {
 						->addFunction('number_format', 'number_format')
 						->addFunction('date', 'date')
 						->addFunction('strtotime', 'strtotime');
-
 					return $volt;
 				},
 			]);
-
 			return $view;
 		});
 
-		$di->set('currentUser', function() use($di) {
-			return User::findFirst($di->getSession()->get('user_id'));
+		$di->set('currentUser', function() {
+			return User::findFirstById($this->getSession()->get('user_id'));
 		});
 
-		$di->set('currentDatetime', function() use($di) {
+		$di->set('currentDatetime', function() {
 			$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
-			return $current_datetime->setTimezone(new DateTimeZone($di->getConfig()->timezone));
+			return $current_datetime->setTimezone(new DateTimeZone($this->getConfig()->timezone));
 		});
 	}
 }
