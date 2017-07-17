@@ -54,6 +54,19 @@ class Module implements ModuleDefinitionInterface {
 			$dispatcher    = new Dispatcher;
 			$eventsManager = new EventsManager;
 			$dispatcher->setDefaultNamespace('Application\Frontend\Controllers');
+			$eventsManager->attach('dispatch:beforeDispatchLoop', function(Event $event, $dispatcher) {
+				$old_params = $dispatcher->getParams();
+				$new_params = [];
+				foreach ($old_params as $key => $value) {
+					if (!strstr($value, ':')) {
+						$new_params[$key] = $value;
+						continue;
+					}
+					list($new_key, $new_value) = explode(':', $value);
+					$new_params[$new_key]      = $new_value;
+				}
+				$dispatcher->setParams($new_params);
+			});
 			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, $exception) {
 				if ($exception instanceof DispatchException && in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
@@ -81,10 +94,15 @@ class Module implements ModuleDefinitionInterface {
 					]);
 					$volt->getCompiler()
 						->addFunction('is_a', 'is_a')
+						->addFunction('is_int', 'is_int')
 						->addFunction('count', 'count')
 						->addFunction('number_format', 'number_format')
 						->addFunction('date', 'date')
-						->addFunction('strtotime', 'strtotime');
+						->addFunction('strtotime', 'strtotime')
+						->addFunction('in_array', 'in_array')
+						->addFunction('strip_tags', 'strip_tags')
+						->addFunction('substr', 'substr')
+						->addFunction('strftime', 'strftime');
 					return $volt;
 				},
 			]);

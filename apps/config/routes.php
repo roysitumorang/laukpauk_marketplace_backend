@@ -24,6 +24,27 @@ $di->set('router', function() {
 		'params'     => 3
 	]);
 
+	$router->add('/:controller/:int/:action', [
+		'module'     => 'frontend',
+		'controller' => 1,
+		'action'     => 3,
+		'params'     => 2,
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', strtolower($old_action));
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return $new_action;
+	});
+
+	$router->add('/:controller/:int', [
+		'module'     => 'frontend',
+		'controller' => 1,
+		'action'     => 'show',
+		'params'     => 2,
+	]);
+
 	$router->add('/api/v1', [
 		'module'     => 'v1',
 		'controller' => 'home',
