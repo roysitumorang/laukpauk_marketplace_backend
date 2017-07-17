@@ -9,7 +9,7 @@
 <body style="padding:15px">
 	<center>
 		<br>
-		<a href="/" title="laukpauk.id"><img src="/backend/images/logo.png" border="0" alt="coffindo.id"></a>
+		<a href="/" title="laukpauk.id"><img src="/backend/images/logo.png" border="0" alt="laukpauk.id"></a>
 		<div class="page-header">
 			<h1>404 Not Found - Halaman tidak di temukan</h1>
 		</div>
