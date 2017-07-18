@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products/create"><h2>Tambah Produk</h2></a>
+				<a href="/products/create"><h2>Tambah Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
-						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/products">Daftar Produk</a></span></li>
+						<li><a href="/"><i class="fa fa-home"></i></a></li>
+						<li><span><a href="/products">Daftar Produk</a></span></li>
 						<li><span>Tambah Produk</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -24,7 +24,7 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ partial('partials/form_product', ['action': '/admin/products/create']) }}
+				{{ partial('partials/form_product', ['action': '/products/create']) }}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->

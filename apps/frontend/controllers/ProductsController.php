@@ -4,6 +4,7 @@ namespace Application\Frontend\Controllers;
 
 use Application\Models\Product;
 use Application\Models\ProductCategory;
+use Application\Models\UserProduct;
 use Phalcon\Db;
 use Phalcon\Exception;
 use Phalcon\Paginator\Adapter\Model;
@@ -17,34 +18,29 @@ class ProductsController extends ControllerBase {
 		$published    = filter_var($this->dispatcher->getParam('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
 		$keyword      = $this->dispatcher->getParam('keyword', 'string');
 		$next         = '/products/index';
-		$parameter    = [];
-		$conditions   = [['user_id = :user_id:'], 'user_id' => $this->currentUser->id];
+		$conditions   = ['user_id = :user_id:', 'bind' => ['user_id' => $this->currentUser->id]];
 		$this->_prepare_datas();
 		if ($category_id) {
-			$conditions[0][]           = 'product_category_id = :category_id:';
-			$conditions['category_id'] = $category_id;
-			$next                     .= "/category_id:{$category_id}";
+			$conditions[0]                    .= ' AND product_category_id = :category_id:';
+			$conditions['bind']['category_id'] = $category_id;
+			$next                             .= "/category_id:{$category_id}";
 		}
 		if (is_int($published)) {
-			$conditions[0][]         = 'published = :published:';
-			$conditions['published'] = $published;
-			$next                   .= "/published:{$published}";
+			$conditions[0]                  .= ' AND published = :published:';
+			$conditions['bind']['published'] = $published;
+			$next                           .= "/published:{$published}";
 		}
 		if (filter_var($keyword, FILTER_VALIDATE_INT)) {
-			$conditions[0][]  = 'id = :id:';
-			$conditions['id'] = $keyword;
-			$next            .= "/keyword:{$keyword}";
+			$conditions[0]           .= ' AND id = :id:';
+			$conditions['bind']['id'] = $keyword;
+			$next                    .= "/keyword:{$keyword}";
 		} else if ($keyword) {
-			$conditions[0][]    = 'name LIKE :name:';
-			$conditions['name'] = '%' . $keyword . '%';
-			$next              .= "/keyword:{$keyword}";
-		}
-		if ($conditions[0]) {
-			$parameter['conditions'] = implode(' AND ', array_shift($conditions));
-			$parameter['bind']       = $conditions;
+			$conditions[0]             .= ' AND name ILIKE :name:';
+			$conditions['bind']['name'] = '%' . $keyword . '%';
+			$next                      .= "/keyword:{$keyword}";
 		}
 		$paginator = new Model([
-			'data'  => Product::find($parameter),
+			'data'  => Product::find($conditions),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
@@ -66,11 +62,15 @@ class ProductsController extends ControllerBase {
 	}
 
 	function createAction() {
-		$product = new Product;
+		$product               = new Product;
+		$user_product          = new UserProduct;
+		$user_product->user_id = $this->currentUser->id;
 		if ($this->request->isPost()) {
 			$product->user_id = $this->currentUser->id;
-			$this->_set_model_attributes($product);
+			$this->_set_model_attributes($product, $user_product);
 			if ($product->validation() && $product->create()) {
+				$user_product->product_id = $product->id;
+				$user_product->create();
 				$this->flashSession->success('Penambahan produk berhasil.');
 				return $this->response->redirect('/products');
 			}
@@ -80,9 +80,9 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_datas();
-		$this->view->menu     = $this->_menu('Products');
-		$this->view->product  = $product;
-		$this->view->pictures = [];
+		$this->view->menu         = $this->_menu('Products');
+		$this->view->product      = $product;
+		$this->view->user_product = $user_product;
 	}
 
 	function updateAction($id) {
@@ -90,10 +90,12 @@ class ProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan.');
 			return $this->dispatcher->forward('products');
 		}
-		$next = $this->request->get('next');
+		$user_product = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->currentUser->id, $id]]);
+		$next         = $this->request->get('next');
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($product);
+			$this->_set_model_attributes($product, $user_product);
 			if ($product->validation() && $product->update()) {
+				$user_product->update();
 				$this->flashSession->success('Update produk berhasil.');
 				return $this->response->redirect($next);
 			}
@@ -103,10 +105,10 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_datas();
-		$this->view->menu       = $this->_menu('Products');
-		$this->view->product    = $product;
-		$this->view->active_tab = 'product';
-		$this->view->next       = $next;
+		$this->view->menu         = $this->_menu('Products');
+		$this->view->product      = $product;
+		$this->view->user_product = $user_product;
+		$this->view->next         = $next;
 	}
 
 	function publishAction($id) {
@@ -175,7 +177,7 @@ class ProductsController extends ControllerBase {
 		$this->view->lifetimes  = range(1, 30);
 	}
 
-	private function _set_model_attributes(&$product) {
+	private function _set_model_attributes(&$product, &$user_product) {
 		$product->category = ProductCategory::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $this->request->getPost('product_category_id')]]);
 		$product->setName($this->request->getPost('name'));
 		$product->setStockUnit($this->request->getPost('stock_unit'));
@@ -183,5 +185,8 @@ class ProductsController extends ControllerBase {
 		$product->setLifetime($this->request->getPost('lifetime'));
 		$product->setNewPicture($_FILES['picture']);
 		$product->setPublished($this->request->getPost('published'));
+		$user_product->setPrice($this->request->getPost('price'));
+		$user_product->setStock($this->request->getPost('stock'));
+		$user_product->setPublished($this->request->getPost('published'));
 	}
 }

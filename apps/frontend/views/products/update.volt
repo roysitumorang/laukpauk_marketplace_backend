@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products/{{ product.id }}/update?next={{ next }}"><h2>Update Produk #{{ product.id }}</h2></a>
+				<a href="/products/{{ product.id }}/update?next={{ next }}"><h2>Update Produk #{{ product.id }}</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
-						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/products">Daftar Produk</a></span></li>
+						<li><a href="/"><i class="fa fa-home"></i></a></li>
+						<li><span><a href="/products">Daftar Produk</a></span></li>
 						<li><span>Update Produk #{{ product.id}}</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -24,14 +24,7 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				<div class="tabs">
-					{{ partial('partials/tabs_product', ['active_tab': active_tab, 'product': product]) }}
-					<div class="tab-content">
-						<div id="product" class="tab-pane active">
-							{{ partial('partials/form_product', ['action': '/admin/products/' ~ product.id ~ '/update?next=' ~ next]) }}
-						</div>
-					</div>
-				</div>
+				{{ partial('partials/form_product', ['action': '/products/' ~ product.id ~ '/update?next=' ~ next]) }}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->

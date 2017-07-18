@@ -8,10 +8,10 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products"><h2>Daftar Produk</h2></a>
+				<a href="/products"><h2>Daftar Produk</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
-						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
+						<li><a href="/"><i class="fa fa-home"></i></a></li>
 						<li><span>Daftar Produk</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form action="/admin/products" method="GET" id="search">
+				<form action="/products" method="GET" id="search">
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -48,7 +48,7 @@
 						</tr>
 					</table>
 				</form>
-				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/products/create" title="Tambah Produk">Tambah Produk</a>
+				<i class="fa fa-plus-square"></i>&nbsp;<a href="/products/create" title="Tambah Produk">Tambah Produk</a>
 				{% if page.total_items %}
 				<span style="float:right"><strong>{{ page.total_items }} Product{% if page.total_items > 1 %}s{% endif %}</strong></span>
 				{% endif %}
@@ -82,7 +82,7 @@
 								<strong>Kategori :</strong>&nbsp;{{ product.category.name }}
 							</td>
 							<td{{ background }} class="text-center">
-								<a href="/admin/products/{{ product.id}}/update?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+								<a href="/products/{{ product.id}}/update?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}" data-published="{{ product.published }}">
 									{% if product.published %}
 									<i class="fa fa-eye fa-2x"></i>
@@ -108,7 +108,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/products/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if is_int(published) %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+							<a href="/products/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if is_int(published) %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -122,7 +122,7 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
+	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), url = '/products/index', replacement = {' ': '+', ':': '', '\/': ''};
 	search.addEventListener('submit', event => {
 		event.preventDefault();
 		if (search.category_id.value) {
@@ -147,8 +147,8 @@
 			let form = document.createElement('form');
 			form.method = 'POST',
 			form.action = 'delete' === item.className
-			? '/admin/products/' + item.dataset.id + '/delete'
-			: '/admin/products/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			? '/products/' + item.dataset.id + '/delete'
+			: '/products/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}

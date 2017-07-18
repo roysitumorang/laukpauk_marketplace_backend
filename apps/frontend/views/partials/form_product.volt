@@ -35,14 +35,16 @@
 		</tr>
 		<tr>
 			<td>
-				<b><font color="#000099">Masa Pakai</font> <font color="red">*</font></b>
+				<b><font color="#000099">Harga</font> <font color="red">*</font></b>
 				<br>
-				<select name="lifetime">
-					<option value="">-</option>
-					{% for lifetime in lifetimes %}
-					<option value="{{ lifetime }}"{% if lifetime == product.lifetime  %} selected{% endif %}>{{ lifetime }} hari</options>
-					{% endfor %}
-				</select>
+				<input type="text" name="price" value="{{ user_product.price }}" placeholder="Harga" size="30" placeholder="Harga">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b><font color="#000099">Stok</font> <font color="red">*</font></b>
+				<br>
+				<input type="text" name="stock" value="{{ user_product.stock }}" placeholder="Stok" size="30" placeholder="Stok">
 			</td>
 		</tr>
 		<tr>
