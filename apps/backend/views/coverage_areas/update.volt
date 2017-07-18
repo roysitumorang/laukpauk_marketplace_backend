@@ -88,7 +88,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/users/{{ user.id }}/coverage_areas{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/{{ user.id }}/coverage_areas/update{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
