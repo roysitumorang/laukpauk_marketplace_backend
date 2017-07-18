@@ -72,18 +72,3 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
-<script>
-	let merchant_id = document.getElementById('merchant_id'), role_id = document.getElementById('role_id'), user_id = document.getElementById('user_id'), fetchRecipients = () => {
-		let new_options = '<option value="">Semua Member</option>'
-		fetch('/mobile_notifications/recipients' + (merchant_id.value ? '/merchant_id:' + merchant_id.value : '') + (role_id.value ? '/role_id:' + role_id.value : ''), { credentials: 'include' }).then(response => {
-			return response.text()
-		}).then(payload => {
-			let result = JSON.parse(payload), new_options = '<option value="">Semua Member</option>'
-			result.forEach(item => {
-				new_options += '<option value="' + item.id + '">' + item.mobile_phone + ' / ' + item.name + '</option>'
-			})
-			user_id.innerHTML = new_options
-		})
-	}
-	merchant_id.onchange = fetchRecipients, role_id.onchange = fetchRecipients
-</script>
