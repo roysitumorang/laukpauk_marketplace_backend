@@ -132,7 +132,7 @@
 				Propinsi (*) :<br>
 				<select name="province_id" id="province_id">
 				{% for id, name in provinces %}
-					<option value="{{ id }}"{% if user.subdistrict.village.city.province.id == id %} selected{% endif %}>{{ name }}</option>
+					<option value="{{ id }}"{% if user.village.subdistrict.city.province.id == id %} selected{% endif %}>{{ name }}</option>
 				{% endfor %}
 				</select>
 			</td>
