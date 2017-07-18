@@ -113,6 +113,14 @@ class ControllerBase extends Controller {
 					['label' => 'Order List', 'link' => 'orders'],
 				],
 			], [
+				'label'     => 'Options',
+				'link'      => null,
+				'icon'      => 'wrench',
+				'expanded'  => $expanded == 'Options',
+				'sub_items' => [
+					['label' => 'Area Operasional', 'link' => 'coverage_areas'],
+				],
+			], [
 				'label'     => 'Manage User',
 				'link'      => 'users',
 				'icon'      => 'user-plus',
