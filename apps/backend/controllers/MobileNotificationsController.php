@@ -63,10 +63,6 @@ class MobileNotificationsController extends ControllerBase {
 			$roles[] = $item;
 		}
 		if ($this->request->isPost()) {
-			$content = [
-				'title'   => $this->request->getPost('title'),
-				'message' => $this->request->getPost('message'),
-			];
 			$result      = User::query()->where('status = 1')->join('Application\Models\Device', 'Application\Models\User.id = b.user_id', 'b')->columns(['token']);
 			$merchant_id = $this->request->getPost('merchant_id', 'int');
 			$role_id     = $this->request->getPost('role_id', 'int');
