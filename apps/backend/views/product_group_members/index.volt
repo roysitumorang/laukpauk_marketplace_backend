@@ -59,7 +59,7 @@
 							{% if count(products) %}
 								<div class="panel panel-default">
 									<div class="panel-body">
-										<form method="POST" action="/admin/product_group_members/truncate/product_group_id:{{ group.id }}" onsubmit="return confirm('Hapus semua produk dari group ?')">
+										<form method="POST" action="/admin/product_group_members/truncate/product_group_id:{{ product_group.id }}" onsubmit="return confirm('Hapus semua produk dari group ?')">
 											<strong>Total Produk : {{ number_format(page.total_items) }}</strong>
 											<button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> Hapus semua produk</button>
 										</form>
