@@ -117,21 +117,6 @@
 					</tr>
 					<tr>
 						<td>
-							<b><font color="#000099">Penjual :</font></b>
-						</td>
-						<td>
-							<b><font color="#000099">Nama</font></b>
-							<br>
-							{{ order.merchant.name }}
-						</td>
-						<td colspan="2">
-							<b><font color="#000099">Nama Toko</font></b>
-							<br>
-							{{ order.merchant.company }}
-						</td>
-					</tr>
-					<tr>
-						<td>
 							<b><font color="#000099">Tgl. Order</font></b>
 							<br>
 							{{ date('Y-m-d H:i', strtotime(order.created_at)) }}
@@ -153,7 +138,14 @@
 					</tr>
 					<tr>
 						<td colspan="4">
-							<b><font color="#000099">Order Items</font></b>
+							<b><font color="#000099">Ongkos Kirim</font></b>
+							<br>
+							{% if order.shipping_cost %}Rp. {{ number_format(order.shipping_cost) }}{% else %}-{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4">
+							<b><font color="#000099">Items</font></b>
 						</td>
 					</tr>
 					{% for item in order.orderProducts %}
