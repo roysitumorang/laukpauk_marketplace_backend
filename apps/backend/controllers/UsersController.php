@@ -370,7 +370,6 @@ QUERY
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
 		$user->setTermsConditions($this->request->getPost('terms_conditions'));
-		$user->setShippingCost($this->request->getPost('shipping_cost'));
 		$user->setMerchantNote($this->request->getPost('merchant_note'));
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {

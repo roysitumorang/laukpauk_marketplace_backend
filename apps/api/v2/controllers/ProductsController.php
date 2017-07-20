@@ -16,13 +16,12 @@ class ProductsController extends ControllerBase {
 				SELECT
 					a.id,
 					a.merchant_note,
-					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
-					a.shipping_cost
+					a.minimum_purchase,
+					c.shipping_cost
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
 					JOIN coverage_area c ON a.id = c.user_id
-					JOIN settings d ON d.name = 'minimum_purchase'
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -106,7 +105,7 @@ QUERY;
 			'current_page'     => $current_page,
 			'current_hour'     => $this->currentDatetime->format('G'),
 			'minimum_purchase' => $merchant->minimum_purchase,
-			'shipping_cost'    => $merchant->shipping_cost ?? 0,
+			'shipping_cost'    => $merchant->shipping_cost,
 			'pages'            => $this->_setPaginationRange($total_pages, $current_page),
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);

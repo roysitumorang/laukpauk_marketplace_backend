@@ -119,17 +119,16 @@ QUERY
 					a.business_opening_hour,
 					a.business_closing_hour,
 					a.delivery_hours,
-					COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT) AS minimum_purchase,
-					a.shipping_cost,
+					a.minimum_purchase,
+					c.shipping_cost,
 					a.merchant_note
 				FROM
 					users a
 					JOIN roles b ON a.role_id = b.id
 					JOIN coverage_area c ON a.id = c.user_id
-					JOIN settings d ON d.name = 'minimum_purchase'
-					JOIN user_product e ON a.id = e.user_id
-					JOIN products f ON e.product_id = f.id
-					JOIN product_categories g ON f.product_category_id = g.id
+					JOIN user_product d ON a.id = d.user_id
+					JOIN products e ON d.product_id = e.id
+					JOIN product_categories f ON e.product_category_id = f.id
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
@@ -198,7 +197,7 @@ QUERY;
 					'business_hours'   => $item->business_opening_hour . '.00 - ' . $item->business_closing_hour . '.00 WIB',
 					'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 					'minimum_purchase' => $item->minimum_purchase,
-					'shipping_cost'    => $item->shipping_cost ?? 0,
+					'shipping_cost'    => $item->shipping_cost,
 					'merchant_note'    => $item->merchant_note,
 				];
 			}

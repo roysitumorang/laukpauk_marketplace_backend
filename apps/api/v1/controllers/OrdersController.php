@@ -5,7 +5,6 @@ namespace Application\Api\V1\Controllers;
 use Application\Models\Order;
 use Application\Models\OrderProduct;
 use Application\Models\Role;
-use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
@@ -53,12 +52,11 @@ class OrdersController extends ControllerBase {
 			$params = [<<<QUERY
 				SELECT
 					a.id,
-					COALESCE(a.shipping_cost, 0) AS shipping_cost,
-					COALESCE(b.minimum_purchase, a.minimum_purchase, c.value::int) AS minimum_purchase
+					b.shipping_cost,
+					a.minimum_purchase
 				FROM
 					users a
 					JOIN coverage_area b ON a.id = b.user_id
-					JOIN settings c ON c.name = 'minimum_purchase'
 				WHERE
 					a.status = 1 AND
 					a.role_id = ? AND

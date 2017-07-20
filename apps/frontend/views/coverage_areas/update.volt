@@ -35,7 +35,7 @@
 								<th><b>Kabupaten / Kota</b></th>
 								<th><b>Kecamatan</b></th>
 								<th><b>Kelurahan</b></th>
-								<th><b>Minimum Order</b></th>
+								<th><b>Ongkos Kirim</b></th>
 								<th><b>#</b></th>
 							</tr>
 						</thead>
@@ -51,7 +51,7 @@
 								<td>{{ coverage_area.subdistrict_name }}</td>
 								<td>{{ coverage_area.village_name }}</td>
 								<td>
-									<input type="text" name="minimum_purchase[]" value="{{ coverage_area.minimum_purchase }}">
+									<input type="text" name="shipping_cost[]" value="{{ coverage_area.shipping_cost }}" placeholder="Ongkos Kirim">
 								</td>
 								<td>
 									<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ coverage_area.village_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>

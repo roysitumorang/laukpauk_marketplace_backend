@@ -83,13 +83,7 @@
 		</tr>
 		<tr>
 			<td>
-				Ongkos Kirim (untuk premium merchant) :<br>
-				<input type="text" name="shipping_cost" value="{{ user.shipping_cost }}" size="20" placeholder="Ongkos kirim">
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Catan Penjual (untuk merchant) :<br>
+				Catatan Penjual (untuk merchant) :<br>
 				<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
 			</td>
 		</tr>

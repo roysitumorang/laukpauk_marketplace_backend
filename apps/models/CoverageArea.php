@@ -3,7 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Digit;
+use Phalcon\Validation\Validator\Callback;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -11,7 +11,7 @@ class CoverageArea extends ModelBase {
 	public $id;
 	public $user_id;
 	public $village_id;
-	public $minimum_purchase;
+	public $shipping_cost;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -33,14 +33,8 @@ class CoverageArea extends ModelBase {
 		]);
 	}
 
-	function setMinimumPurchase($minimum_purchase) {
-		$this->minimum_purchase = $this->getDI()->getFilter()->sanitize($minimum_purchase, 'int');
-	}
-
-	function beforeSave() {
-		if (!$this->minimum_purchase) {
-			$this->minimum_purchase = null;
-		}
+	function setShippingCost($shipping_cost) {
+		$this->shipping_cost = $this->getDI()->getFilter()->sanitize($shipping_cost, 'int');
 	}
 
 	function validation() {
@@ -54,11 +48,12 @@ class CoverageArea extends ModelBase {
 		$validator->add(['user_id', 'village_id'], new Uniqueness([
 			'message' => 'kelurahan sudah ada',
 		]));
-		if ($this->minimum_purchase) {
-			$validator->add('minimum_purchase', new Digit([
-				'message' => 'minimal order harus dalam bentuk angka',
-			]));
-		}
+		$validator->add('shipping_cost', new Callback([
+			'callback' => function($data) {
+				return ctype_digit($data) && $data >= 0;
+			},
+			'message'  => 'ongkos kirim harus diisi angka, minimal 0',
+		]));
 		return $this->validate($validator);
 	}
 }

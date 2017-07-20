@@ -450,7 +450,6 @@ QUERY
 		$this->_response['data']['business_hours']          = $this->_current_user->business_opening_hour . '.00 - ' . $this->_current_user->business_closing_hour . '.00 WIB';
 		$this->_response['data']['delivery_hours']          = $delivery_hours ? $delivery_hours . ' WIB' : '-';
 		$this->_response['data']['minimum_purchase']        = $this->_current_user->minimum_purchase;
-		$this->_response['data']['shipping_cost']           = $this->_current_user->shipping_cost ?? 0;
 		$this->_response['data']['merchant_note']           = $this->_current_user->merchant_note;
 		$this->_response['data']['deposit']                 = $this->_current_user->deposit;
 		$this->_response['data']['total_products']          = $this->_current_user->countProducts();

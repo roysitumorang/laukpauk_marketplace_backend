@@ -52,12 +52,11 @@ class OrdersController extends ControllerBase {
 			$params = [<<<QUERY
 				SELECT
 					a.id,
-					COALESCE(a.shipping_cost, 0) AS shipping_cost,
-					COALESCE(b.minimum_purchase, a.minimum_purchase, c.value::int) AS minimum_purchase
+					b.shipping_cost,
+					a.minimum_purchase
 				FROM
 					users a
 					JOIN coverage_area b ON a.id = b.user_id
-					JOIN settings c ON c.name = 'minimum_purchase'
 				WHERE
 					a.status = 1 AND
 					a.role_id = ? AND
@@ -142,7 +141,7 @@ QUERY
 				$order->discount   = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $order->original_bill / 100.0);
 				$order->final_bill = $order->original_bill - $order->discount;
 			}
-			$order->shipping_cost = $merchant->shipping_cost ?? 0;
+			$order->shipping_cost = $merchant->shipping_cost;
 			$order->final_bill   += $order->shipping_cost;
 			$order->orderProducts = $order_products;
 			if ($order->validation() && $order->create()) {

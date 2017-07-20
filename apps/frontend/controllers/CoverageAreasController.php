@@ -17,7 +17,7 @@ class CoverageAreasController extends ControllerBase {
 		if ($this->request->isPost()) {
 			$coverage_area->user_id    = $this->currentUser->id;
 			$coverage_area->village_id = Village::findFirstById($this->request->getPost('village_id', 'int'))->id;
-			$coverage_area->setMinimumPurchase($this->request->getPost('minimum_purchase'));
+			$coverage_area->setShippingCost($this->request->getPost('shipping_cost'));
 			if ($coverage_area->validation() && $coverage_area->create()) {
 				$this->flashSession->success('Penambahan area operasional berhasil!');
 				return $this->response->redirect('/coverage_areas');
@@ -34,13 +34,13 @@ class CoverageAreasController extends ControllerBase {
 		$page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		if ($this->request->isPost()) {
 			$input = filter_input_array(INPUT_POST, [
-				'id'               => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
-				'minimum_purchase' => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+				'id'            => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
+				'shipping_cost' => ['filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_ARRAY],
 			]);
 			foreach ($input['id'] as $k => $id) {
 				$coverage_area = CoverageArea::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $id]]);
 				if ($coverage_area) {
-					$coverage_area->setMinimumPurchase($input['minimum_purchase'][$k]);
+					$coverage_area->setShippingCost($input['shipping_cost'][$k]);
 					$coverage_area->update();
 				}
 			}
@@ -132,7 +132,7 @@ QUERY
 				'subdistrict_name' => 'c.name',
 				'village_id'       => 'd.id',
 				'village_name'     => 'd.name',
-				'e.minimum_purchase',
+				'e.shipping_cost',
 			])
 			->from(['a' => 'Application\Models\Province'])
 			->join('Application\Models\City', 'a.id = b.province_id', 'b')

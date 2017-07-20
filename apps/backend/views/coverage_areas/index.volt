@@ -84,8 +84,8 @@
 											{% endif %}
 										</td>
 										<td>
-											<b>Minimum Order :</b><br>
-											<input type="text" name="minimum_purchase" value="{{ coverage_area.minimum_purchase }}">
+											<b>Ongkos Kirim :</b><br>
+											<input type="text" name="shipping_cost" value="{{ coverage_area.shipping_cost }}" placeholder="Ongkos Kirim">
 										</td>
 										<td class="text-right">
 											<br>
@@ -96,7 +96,7 @@
 							</form>
 							{% if coverage_areas %}
 							<p style="margin-left:5px" class="text-right">
-								<a type="button" href="/admin/users/{{ user.id }}/coverage_areas/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-pencil"></i> Update Minimum Order</a>
+								<a type="button" href="/admin/users/{{ user.id }}/coverage_areas/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-pencil"></i> Update Ongkos Kirim</a>
 							</p>
 							{% endif %}
 							<table class="table table-striped">
@@ -107,7 +107,7 @@
 										<th><b>Kabupaten / Kota</b></th>
 										<th><b>Kecamatan</b></th>
 										<th><b>Kelurahan</b></th>
-										<th><b>Minimum Order</b></th>
+										<th><b>Ongkos Kirim</b></th>
 										<th><b>#</b></th>
 									</tr>
 								</thead>
@@ -119,7 +119,7 @@
 										<td>{{ coverage_area.city_name }}</td>
 										<td>{{ coverage_area.subdistrict_name }}</td>
 										<td>{{ coverage_area.village_name }}</td>
-										<td>{% if coverage_area.minimum_purchase %}Rp. {{ number_format(coverage_area.minimum_purchase, 0, ',', '.') }}{% else %}-{% endif %}</td>
+										<td>{% if coverage_area.shipping_cost %}Rp. {{ number_format(coverage_area.shipping_cost, 0, ',', '.') }}{% else %}-{% endif %}</td>
 										<td>
 											<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ coverage_area.village_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 										</td>

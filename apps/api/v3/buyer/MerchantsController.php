@@ -37,9 +37,8 @@ class MerchantsController extends ControllerBase {
 				users a
 				JOIN roles b ON a.role_id = b.id
 				JOIN coverage_area c ON a.id = c.user_id
-				JOIN settings d ON d.name = 'minimum_purchase'
-				JOIN user_product e ON a.id = e.user_id
-				JOIN products f ON e.product_id = f.id
+				JOIN user_product d ON a.id = d.user_id
+				JOIN products e ON d.product_id = e.id
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
@@ -49,13 +48,13 @@ QUERY;
 		if ($this->_premium_merchant) {
 			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
 			if ($search_query && $keywords) {
-				$query .= " AND f.keywords @@ TO_TSQUERY('{$keywords}')";
+				$query .= " AND e.keywords @@ TO_TSQUERY('{$keywords}')";
 			}
 		} else {
 			$query .= ' IS NULL';
 			if ($search_query && $keywords) {
 				$query .= ' AND (';
-				foreach (['f.keywords', 'a.keywords'] as $i => $field) {
+				foreach (['e.keywords', 'a.keywords'] as $i => $field) {
 					$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
 				}
 				$query .= ')';
@@ -79,10 +78,10 @@ QUERY;
 			a.business_opening_hour,
 			a.business_closing_hour,
 			a.delivery_hours,
-			AVG(COALESCE(c.minimum_purchase, a.minimum_purchase, d.value::INT)) AS minimum_purchase,
-			a.shipping_cost,
+			a.minimum_purchase,
+			c.shipping_cost,
 			a.merchant_note,
-			SUM(TS_RANK(f.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(a.keywords, TO_TSQUERY('{$keywords}'))) AS relevancy
+			SUM(TS_RANK(e.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(e.keywords, TO_TSQUERY('{$keywords}'))) AS relevancy
 QUERY
 			]) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
@@ -142,7 +141,7 @@ QUERY
 				'business_hours'   => $item->business_opening_hour . '.00 - ' . $item->business_closing_hour . '.00 WIB',
 				'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 				'minimum_purchase' => $item->minimum_purchase,
-				'shipping_cost'    => $item->shipping_cost ?? 0,
+				'shipping_cost'    => $item->shipping_cost,
 				'merchant_note'    => $item->merchant_note,
 			];
 		}

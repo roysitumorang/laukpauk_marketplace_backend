@@ -5,7 +5,7 @@ namespace Application\Models;
 use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Digit;
+use Phalcon\Validation\Validator\Callback;
 use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\Confirmation;
 use Phalcon\Validation\Validator\Date;
@@ -27,9 +27,6 @@ class User extends ModelBase {
 		'opening' => 6,
 		'closing' => 22,
 	];
-	const MAX_MINIMUM_PURCHASE = 900000;
-	const MAX_ADMIN_FEE        = 90000;
-	const MAX_SHIPPING_COST    = 90000;
 
 	public $id;
 	public $role_id;
@@ -40,7 +37,6 @@ class User extends ModelBase {
 	public $merchant_note;
 	public $domain;
 	public $minimum_purchase;
-	public $shipping_cost;
 	public $admin_fee;
 	public $name;
 	public $email;
@@ -146,15 +142,11 @@ class User extends ModelBase {
 	}
 
 	function setMinimumPurchase($minimum_purchase) {
-		$this->minimum_purchase = filter_var($minimum_purchase, FILTER_VALIDATE_INT) ?: null;
-	}
-
-	function setShippingCost($shipping_cost) {
-		$this->shipping_cost = filter_var($shipping_cost, FILTER_VALIDATE_INT) ?: null;
+		$this->minimum_purchase = filter_var($minimum_purchase, FILTER_VALIDATE_INT) ?: 0;
 	}
 
 	function setAdminFee($admin_fee) {
-		$this->admin_fee = filter_var($admin_fee, FILTER_VALIDATE_INT) ?: null;
+		$this->admin_fee = filter_var($admin_fee, FILTER_VALIDATE_INT) ?: 0;
 	}
 
 	function setName($name) {
@@ -336,14 +328,13 @@ class User extends ModelBase {
 		}
 		if ($this->role->id != Role::MERCHANT) {
 			$this->premium_merchant = null;
-			$this->minimal_purchase = null;
-			$this->admin_fee        = null;
+			$this->minimum_purchase = 0;
+			$this->admin_fee        = 0;
 			$this->merchant_note    = null;
 			if (!$this->premium_merchant) {
 				$this->domain           = null;
 				$this->company_profile  = null;
 				$this->terms_conditions = null;
-				$this->shipping_cost    = null;
 			}
 		}
 	}
@@ -388,26 +379,18 @@ class User extends ModelBase {
 					'business_closing_hour' => 'jam mulai operasional antara ' . static::BUSINESS_HOURS['opening'] . ' dan ' . static::BUSINESS_HOURS['closing'],
 				],
 			]));
-			if ($this->minimum_purchase) {
-				$validator->add('minimum_purchase', new Digit([
-					'message' => 'minimal order harus dalam bentuk angka',
-				]));
-				$validator->add('minimum_purchase', new Between([
-					'minimum' => 0,
-					'maximum' => static::MAX_MINIMUM_PURCHASE,
-					'message' => 'minimal order paling sedikit 0, maksimal ' . number_format(static::MAX_MINIMUM_PURCHASE, 0, ',', '.'),
-				]));
-			}
-			if ($this->admin_fee) {
-				$validator->add('admin_fee', new Digit([
-					'message' => 'biaya administrasi harus dalam bentuk angka',
-				]));
-				$validator->add('admin_fee', new Between([
-					'minimum' => 0,
-					'maximum' => static::MAX_ADMIN_FEE,
-					'message' => 'biaya administrasi minimal 0, maksimal ' . number_format(static::MAX_ADMIN_FEE, 0, ',', '.'),
-				]));
-			}
+			$validator->add('minimum_purchase', new Callback([
+				'callback' => function($data) {
+					return ctype_digit($data) && $data >= 0;
+				},
+				'message'  => 'minimal order harus diisi angka, minimal 0',
+			]));
+			$validator->add('admin_fee', new Callback([
+				'callback' => function($data) {
+					return ctype_digit($data) && $data >= 0;
+				},
+				'message'  => 'biaya administrasi harus diisi angka, minimal 0',
+			]));
 			if ($this->domain) {
 				$validator->add('domain', new Uniqueness([
 					'convert' => function(array $values) : array {
@@ -415,13 +398,6 @@ class User extends ModelBase {
 						return $values;
 					},
 					'message' => 'domain sudah ada',
-				]));
-			}
-			if ($this->premium_merchant && $this->shipping_cost) {
-				$validator->add('shipping_cost', new Between([
-					'minimum' => 0,
-					'maximum' => static::MAX_SHIPPING_COST,
-					'message' => 'ongkos kirim minimal 0, maksimal ' . number_format(static::MAX_SHIPPING_COST, 0, ',', '.'),
 				]));
 			}
 		}
