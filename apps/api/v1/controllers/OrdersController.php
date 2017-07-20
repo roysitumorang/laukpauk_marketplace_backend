@@ -141,6 +141,7 @@ QUERY
 							: ((100 - $coupon->price_discount) * $order->original_bill / 100));
 			}
 			$order->orderProducts = $order_products;
+			$order->setTransaction($this->transactionManager->get());
 			if ($order->validation() && $order->create()) {
 				if (!$this->_current_user->address) {
 					$this->_current_user->update(['address' => $this->_input->address, 'updated_by' => $this->_current_user->id]);

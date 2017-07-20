@@ -79,7 +79,7 @@ QUERY;
 			a.business_closing_hour,
 			a.delivery_hours,
 			a.minimum_purchase,
-			c.shipping_cost,
+			AVG(c.shipping_cost) AS shipping_cost,
 			a.merchant_note,
 			SUM(TS_RANK(e.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(e.keywords, TO_TSQUERY('{$keywords}'))) AS relevancy
 QUERY
