@@ -381,13 +381,13 @@ class User extends ModelBase {
 			]));
 			$validator->add('minimum_purchase', new Callback([
 				'callback' => function($data) {
-					return ctype_digit($data) && $data >= 0;
+					return filter_var($data->minimum_purchase, FILTER_VALIDATE_INT) !== false && $data->minimum_purchase >= 0;
 				},
 				'message'  => 'minimal order harus diisi angka, minimal 0',
 			]));
 			$validator->add('admin_fee', new Callback([
 				'callback' => function($data) {
-					return ctype_digit($data) && $data >= 0;
+					return filter_var($data->admin_fee, FILTER_VALIDATE_INT) !== false && $data->admin_fee >= 0;
 				},
 				'message'  => 'biaya administrasi harus diisi angka, minimal 0',
 			]));

@@ -50,7 +50,7 @@ class CoverageArea extends ModelBase {
 		]));
 		$validator->add('shipping_cost', new Callback([
 			'callback' => function($data) {
-				return ctype_digit($data) && $data >= 0;
+				return filter_var($data->shipping_cost, FILTER_VALIDATE_INT) !== false && $data->shipping_cost >= 0;
 			},
 			'message'  => 'ongkos kirim harus diisi angka, minimal 0',
 		]));
