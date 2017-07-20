@@ -83,7 +83,7 @@ class UsersController extends ControllerBase {
 		}
 		if ($keyword) {
 			$keyword_placeholder = "%{$keyword}%";
-			$builder->andWhere('a.name LIKE ?0 OR a.email LIKE ?1 OR a.mobile_phone LIKE ?2', [
+			$builder->andWhere('a.name ILIKE ?0 OR a.company ILIKE ?1 OR a.mobile_phone ILIKE ?2', [
 				$keyword_placeholder,
 				$keyword_placeholder,
 				$keyword_placeholder,

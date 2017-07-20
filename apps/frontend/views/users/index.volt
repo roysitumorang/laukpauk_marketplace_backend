@@ -50,7 +50,7 @@
 											<option value="{{ value }}"{% if current_status == value %} selected{% endif %}>{{ label }}</option>
 											{% endfor %}
 										</select>&nbsp;&nbsp;
-										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Name / Phone">&nbsp;
+										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Nomor HP">&nbsp;
 										<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
 									</form>
 								</td>

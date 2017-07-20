@@ -59,7 +59,7 @@ class UsersController extends ControllerBase {
 			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory h WHERE g.user_id = h.user_id AND h.id > g.id)');
 		if ($keyword) {
 			$keyword_placeholder = "%{$keyword}%";
-			$builder->andWhere('a.name LIKE ?0 OR a.mobile_phone LIKE ?1', [
+			$builder->andWhere('a.name ILIKE ?0 OR a.mobile_phone ILIKE ?1', [
 				$keyword_placeholder,
 				$keyword_placeholder,
 			]);

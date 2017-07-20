@@ -56,7 +56,7 @@
 											<option value="{{ role.id }}"{% if current_role == role.id %} selected{% endif %}>{{ role.name }}</option>
 											{% endfor %}
 										</select>&nbsp;&nbsp;
-										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Name / Email / Phone">&nbsp;
+										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Toko / Nomor HP">&nbsp;
 										<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
 										<a type="button" href="/admin/users/excel" target="_blank" class="btn btn-success"><i class="fa fa-file-excel-o"></i> Excel</a>
 									</form>
