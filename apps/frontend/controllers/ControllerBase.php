@@ -2,6 +2,7 @@
 
 namespace Application\Frontend\Controllers;
 
+use Application\Models\Role;
 use DateTime;
 use Ds\Vector;
 use IntlDateFormatter;
@@ -29,6 +30,10 @@ class ControllerBase extends Controller {
 				$this->response->send();
 			}
 			return;
+		}
+		if (in_array($this->currentUser->role_id, [Role::SUPER_ADMIN, Role::ADMIN])) {
+			$this->response->redirect('/admin/home/route404');
+			return false;
 		}
 		$unread_notifications = [];
 		$datetime_formatter   = new IntlDateFormatter(
