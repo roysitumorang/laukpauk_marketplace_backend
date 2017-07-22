@@ -105,6 +105,7 @@ class UserProductsController extends ControllerBase {
 		$user_products = [];
 		$categories    = [];
 		$products      = [];
+		$search_query  = $this->dispatcher->getParam('keyword', 'string') ?: null;
 		$builder       = $this->modelsManager->createBuilder()
 			->columns([
 				'b.id',
@@ -123,6 +124,12 @@ class UserProductsController extends ControllerBase {
 			->join('Application\Models\ProductCategory', 'c.product_category_id = d.id', 'd')
 			->orderBy('d.name, c.name')
 			->where('a.id = ' . $this->_user->id);
+		if ($search_query) {
+			$keywords = preg_split('/ /', $search_query, -1, PREG_SPLIT_NO_EMPTY);
+			foreach ($keywords as $keyword) {
+				$builder->andWhere("c.name ILIKE '%{$keyword}%'");
+			}
+		}
 		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
@@ -152,6 +159,7 @@ class UserProductsController extends ControllerBase {
 		$this->view->categories       = $categories;
 		$this->view->products         = $products;
 		$this->view->current_products = $products[$categories[0]->id];
+		$this->view->keyword          = $search_query;
 		if ($user_product) {
 			$this->view->user_product = $user_product;
 		}

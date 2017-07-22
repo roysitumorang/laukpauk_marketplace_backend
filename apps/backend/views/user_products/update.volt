@@ -30,6 +30,16 @@
 					<div class="tab-content">
 						<div id="user_products" class="tab-pane active">
 							{{ flashSession.output() }}
+							<form method="GET" action="/admin/users/{{ user.id }}/products/update" id="search">
+								<table class="table table-striped">
+									<tr>
+										<td>
+											<input type="text" name="keyword" value="{{ keyword }}" placeholder="Cari">
+											<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
+										</td>
+									</tr>
+								</table>
+							</form>
 							{% if user_products %}
 							<form method="POST" action="/admin/users/{{ user.id }}/products/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
 							{% endif %}
@@ -80,7 +90,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/users/{{ user.id }}/products{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/{{ user.id }}/products/update{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -94,3 +104,15 @@
 		</section>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
+	search.addEventListener('submit', event => {
+		event.preventDefault();
+		if (search.keyword.value) {
+			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+				return replacement[match];
+			});
+		}
+		location.href = url;
+	}, false)
+</script>
