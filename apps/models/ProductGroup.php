@@ -11,6 +11,7 @@ class ProductGroup extends ModelBase {
 	public $id;
 	public $user_id;
 	public $name;
+	public $keywords;
 	public $published;
 	public $created_by;
 	public $created_at;
@@ -52,5 +53,9 @@ class ProductGroup extends ModelBase {
 			'message' => 'tampilkan harus antara 0 and 1',
 		]));
 		return $this->validate($validator);
+	}
+
+	function beforeSave() {
+		$this->keywords = $this->getDI()->getDb()->fetchColumn("SELECT TO_TSVECTOR('simple', '{$this->name}')");
 	}
 }
