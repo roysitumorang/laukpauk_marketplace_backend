@@ -7,6 +7,7 @@ use Application\Models\ProductCategory;
 use Phalcon\Db;
 use Phalcon\Exception;
 use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -161,6 +162,41 @@ class ProductsController extends ControllerBase {
 			}
 		}
 		return $this->response->redirect('/admin/products');
+	}
+
+	function merchantsAction($id) {
+		$limit        = $this->config->per_page;
+		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$offset       = ($current_page - 1) * $limit;
+		$keyword      = $this->dispatcher->getParam('keyword', 'string');
+		$product      = Product::findFirst($id);
+		$builder      = $this->modelsManager->createBuilder()
+			->columns(['c.company'])
+			->from(['a' => 'Application\Models\Product'])
+			->join('Application\Models\UserProduct', 'a.id = b.product_id', 'b')
+			->join('Application\Models\User', 'b.user_id = c.id', 'c')
+			->where('a.id = ' . $product->id)
+			->andWhere('c.status = 1')
+			->orderBy('c.company');
+		$paginator = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
+		]);
+		$page  = $paginator->getPaginate();
+		$pages = $this->_setPaginationRange($page);
+		$users = [];
+		foreach ($page->items as $item) {
+			$item->writeAttribute('rank', ++$offset);
+			$users[] = $item;
+		}
+		$this->view->menu       = $this->_menu('Products');
+		$this->view->page       = $page;
+		$this->view->pages      = $pages;
+		$this->view->product    = $product;
+		$this->view->users      = $users;
+		$this->view->keyword    = $keyword;
+		$this->view->active_tab = 'merchants';
 	}
 
 	private function _prepare_datas() {
