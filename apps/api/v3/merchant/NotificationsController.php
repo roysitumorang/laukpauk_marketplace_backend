@@ -12,7 +12,12 @@ class NotificationsController extends ControllerBase {
 			'order' => 'Application\Models\Notification.id DESC',
 		]);
 		foreach ($result as $notification) {
-			$notifications[] = ['id' => $notification->id, 'title' => $notification->title];
+			$notifications[] = [
+				'id'                => $notification->id,
+				'title'             => $notification->title,
+				'target_url'        => $notification->new_mobile_target_url,
+				'target_parameters' => $notification->new_mobile_target_parameters,
+			];
 		}
 		$this->_response['status']                          = 1;
 		$this->_response['data']['notifications']           = $notifications;
