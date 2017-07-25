@@ -44,12 +44,6 @@ class Post extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->hasMany('id', 'Application\Models\PostComment', 'post_id', [
-			'alias'      => 'comments',
-			'foreignKey' => [
-				'message' => 'content tidak dapat dihapus karena memiliki comment',
-			],
-		]);
 		$this->belongsTo('post_category_id', 'Application\Models\Post', 'id', [
 			'alias'    => 'category',
 			'reusable' => true,

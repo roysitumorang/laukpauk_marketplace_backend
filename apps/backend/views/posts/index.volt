@@ -82,7 +82,6 @@
 								<b>ID: </b>{{ post.id }}<br>
 								<b>Category ID: </b>{{ post_category.id }}<br>
 								<strong>Tgl Publikasi:</strong>&nbsp;{{ strftime('%A, %e %B %Y', strtotime(post.created_at)) }}<br>
-								<strong>Komentar:</strong>&nbsp;{{ post.comments.count() }} komentar
 							</td>
 							<td{{ background }}>
 								<a href="/admin/posts/show/{{ post.id }}/post_category_id:{{ post_category.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>

@@ -33,7 +33,6 @@ class PostsController extends ControllerBase {
 		$posts        = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$item->writeAttribute('removable', !$item->comments->count());
 			if ($item->picture) {
 				$item->writeAttribute('thumbnail', $item->getThumbnail(500, 300));
 			}
