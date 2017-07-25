@@ -89,7 +89,7 @@ class ControllerBase extends Controller {
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
 					['label' => 'Content', 'link' => 'post_categories'],
-					['label' => 'Banner',  'link' => 'banner_categories'],
+					['label' => 'Banner',  'link' => 'banners'],
 				],
 			], [
 				'label'     => 'Members',

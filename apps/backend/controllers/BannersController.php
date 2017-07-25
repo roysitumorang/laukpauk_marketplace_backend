@@ -3,28 +3,18 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Banner;
-use Application\Models\BannerCategory;
+use Application\Models\User;
 use Exception;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Phalcon\Paginator\Adapter\Model;
 
 class BannersController extends ControllerBase {
-	private $_banner_category;
-
-	function beforeExecuteRoute() {
-		parent::beforeExecuteRoute();
-		if (!($banner_category_id = $this->dispatcher->getParam('banner_category_id', 'int')) || !($this->_banner_category = BannerCategory::findFirst($banner_category_id))) {
-			$this->flashSession->error('Data tidak ditemukan');
-			$this->response->redirect('/admin/banner_categories');
-			$this->response->sendHeaders();
-		}
-	}
-
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new PaginatorModel([
-			'data'  => $this->_banner_category->getRelated('banners', ['order' => 'id DESC']),
+		$user_id      = $this->dispatcher->getParam('user_id', 'int');
+		$paginator    = new Model([
+			'data'  => Banner::find(['user_id ' . ($user_id ? "= {$user_id}" : 'IS NULL'), 'order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
@@ -33,73 +23,83 @@ class BannersController extends ControllerBase {
 		$banners      = [];
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			if ($item->file_name) {
-				$item->writeAttribute('thumbnail', $item->getThumbnail(800, 400));
-			}
 			$banners[] = $item;
 		}
-		$this->view->menu            = $this->_menu('Content');
-		$this->view->banner_category = $this->_banner_category;
-		$this->view->page            = $page;
-		$this->view->pages           = $pages;
-		$this->view->banners         = $banners;
+		$this->view->menu      = $this->_menu('Content');
+		$this->view->page      = $page;
+		$this->view->pages     = $pages;
+		$this->view->banners   = $banners;
+		$this->view->user_id   = $user_id;
+		$this->view->merchants = User::find([
+			'premium_merchant = 1 AND status = 1',
+			'columns' => 'id, company',
+			'order'   => 'company'
+		]);
 	}
 
 	function createAction() {
-		$banner           = new Banner;
-		$banner->category = $this->_banner_category;
+		$banner = new Banner;
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($banner);
 			if ($banner->validation() && $banner->create()) {
 				$this->flashSession->success('Penambahan data berhasil.');
-				return $this->response->redirect("/admin/banners/index/banner_category_id:{$this->_banner_category->id}");
+				return $this->response->redirect('/admin/banners' . ($banner->user_id ? "/index/user_id:{$banner->user_id}" : ''));
 			}
 			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($banner->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->banner_category = $this->_banner_category;
-		$this->view->banner          = $banner;
-		$this->view->banner_types    = Banner::TYPES;
-		$this->view->menu            = $this->_menu('Content');
+		$this->view->menu      = $this->_menu('Content');
+		$this->view->banner    = $banner;
+		$this->view->merchants = User::find([
+			'premium_merchant = 1 AND status = 1',
+			'columns' => 'id, company',
+			'order'   => 'company'
+		]);
 	}
 
 	function updateAction($id) {
-		if (!filter_var($id, FILTER_VALIDATE_INT) || !($banner = $this->_banner_category->getRelated('banners', ['conditions' => "id = {$id}"])->getFirst())) {
+		if (!$banner = Banner::findFirst($id)) {
 			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward("/admin/banners/index/banner_category_id:{$this->_banner_category->id}");
-		}
-		if ($banner->file_name) {
-			$banner->thumbnail = $banner->getThumbnail(150, 100);
+			return $this->dispatcher->forward('/admin/banners');
 		}
 		if ($this->request->isPost()) {
-			if ($this->dispatcher->hasParam('published')) {
-				$banner->update(['published' => $banner->published ? 0 : 1]);
-				return $this->response->redirect("/admin/banners/index/banner_category_id:{$this->_banner_category->id}");
-			} else if ($this->dispatcher->hasParam('delete_picture')) {
-				$banner->deletePicture();
-				return $this->response->redirect("/admin/banners/update/{$banner->id}/banner_category_id:{$this->_banner_category->id}");
-			}
 			$this->_set_model_attributes($banner);
 			if ($banner->validation() && $banner->update()) {
 				$this->flashSession->success('Update data berhasil.');
-				return $this->response->redirect("/admin/banners/index/banner_category_id:{$this->_banner_category->id}");
+				return $this->response->redirect('/admin/banners' . ($banner->user_id ? "/index/user_id:{$banner->user_id}" : ''));
 			}
 			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($banner->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->banner_category = $this->_banner_category;
-		$this->view->banner          = $banner;
-		$this->view->banner_types    = Banner::TYPES;
-		$this->view->menu            = $this->_menu('Content');
+		$this->view->banner = $banner;
+		$this->view->menu   = $this->_menu('Content');
+	}
+
+	function publishAction($id) {
+		if (!$banner = Banner::findFirst(['id = ?0 AND published = 0', 'bind' => [$id]])) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->dispatcher->forward('/admin/banners');
+		}
+		$banner->update(['published' => 1]);
+		return $this->response->redirect('/admin/banners' . ($banner->user_id ? "/index/user_id:{$banner->user_id}" : ''));
+	}
+
+	function unpublishAction($id) {
+		if (!$banner = Banner::findFirst(['id = ?0 AND published = 1', 'bind' => [$id]])) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->dispatcher->forward('/admin/banners');
+		}
+		$banner->update(['published' => 0]);
+		return $this->response->redirect('/admin/banners' . ($banner->user_id ? "/index/user_id:{$banner->user_id}" : ''));
 	}
 
 	function deleteAction($id) {
 		try {
-			if (!filter_var($id, FILTER_VALIDATE_INT) || !($banner = $this->_banner_category->getRelated('banners', ['conditions' => "id = {$id}"])->getFirst())) {
+			if (!$banner = Banner::findFirst($id)) {
 				throw new Exception('Data tidak ditemukan.');
 			}
 			$banner->delete();
@@ -107,16 +107,16 @@ class BannersController extends ControllerBase {
 		} catch (Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
-			return $this->response->redirect("/admin/banners/index/banner_category_id:{$this->_banner_category->id}");
+			return $this->response->redirect('/admin/banners' . ($banner && $banner->user_id ? "/index/user_id:{$banner->user_id}" : ''));
 		}
 	}
 
 	private function _set_model_attributes(Banner &$banner) {
-		$banner->setName($this->request->getPost('name'));
-		$banner->setLink($this->request->getPost('link'));
-		$banner->setType($this->request->getPost('type'));
+		$user_id = $this->request->getPost('user_id', 'int');
+		if (!$banner->id && $user_id && User::findFirst(['premium_merchant = 1 AND status = 1 AND id = ?0', 'bind' => $user_id])) {
+			$banner->user_id = $user_id;
+		}
 		$banner->setPublished($this->request->getPost('published'));
-		$banner->setFileUrl($this->request->getPost('file_url'));
 		$banner->setNewFile($_FILES['new_file']);
 	}
 }

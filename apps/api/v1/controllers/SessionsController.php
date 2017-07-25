@@ -2,7 +2,7 @@
 
 namespace Application\Api\V1\Controllers;
 
-use Application\Models\BannerCategory;
+use Application\Models\Banner;
 use Application\Models\Device;
 use Application\Models\LoginHistory;
 use Application\Models\Role;
@@ -14,12 +14,9 @@ class SessionsController extends ControllerBase {
 
 	function createAction() {
 		if (!$this->request->isPost()) {
-			$banners  = [];
-			$category = BannerCategory::findFirstByName('Login');
-			foreach ($category->banners as $banner) {
-				if ($banner->published) {
-					$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file_name;
-				}
+			$banners = [];
+			foreach (Banner::find(['published = 1 AND user_id IS NULL', 'columns' => 'file', 'order' => 'id DESC']) as $banner) {
+				$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file;
 			}
 			$this->_response = [
 				'status' => 1,

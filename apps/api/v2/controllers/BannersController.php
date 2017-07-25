@@ -2,18 +2,15 @@
 
 namespace Application\Api\V2\Controllers;
 
-use Application\Models\BannerCategory;
+use Application\Models\Banner;
 
 class BannersController extends ControllerBase {
 	function beforeExecuteRoute() {}
 
 	function indexAction() {
-		$banners  = [];
-		$category = BannerCategory::findFirstByName('Login');
-		foreach ($category->banners as $banner) {
-			if ($banner->published) {
-				$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file_name;
-			}
+		$banners = [];
+		foreach (Banner::find(['published = 1 AND user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL'), 'columns' => 'file', 'order' => 'id DESC']) as $banner) {
+			$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file;
 		}
 		$this->_response['status']          = 1;
 		$this->_response['data']['banners'] = $banners;

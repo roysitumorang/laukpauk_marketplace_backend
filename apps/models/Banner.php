@@ -5,20 +5,13 @@ namespace Application\Models;
 Use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\File as FileValidator;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Url;
+use Phalcon\Validation\Validator\Callback;
 
 class Banner extends ModelBase {
 	public $id;
-	public $banner_category_id;
-	public $name;
-	public $link;
-	public $type;
+	public $user_id;
 	public $published;
-	public $file_url;
-	public $file_name;
+	public $file;
 	public $new_file;
 	public $thumbnails;
 	public $created_by;
@@ -29,52 +22,27 @@ class Banner extends ModelBase {
 	private $_filter;
 	private $_upload_config;
 
-	const TYPES = ['Image'];
-
 	function getSource() {
 		return 'banners';
 	}
 
 	function onConstruct() {
-		$this->_filter        = $this->getDI()->getFilter();
-		$this->_upload_config = $this->getDI()->getConfig()->upload;
+		$di                   = $this->getDI();
+		$this->_filter        = $di->getFilter();
+		$this->_upload_config = $di->getConfig()->upload;
 	}
 
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('banner_category_id', 'Application\Models\BannerCategory', 'id', [
-			'alias'      => 'category',
-			'reusable'   => true,
-			'foreignKey' => [
-				'allowNulls' => false,
-				'message'    => 'id kategori harus diisi',
-			],
+		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+			'alias'    => 'user',
+			'reusable' => true,
 		]);
-	}
-
-	function setName(string $name) {
-		$this->name = $this->_filter->sanitize($name, ['string', 'trim']);
-	}
-
-	function setLink(string $link) {
-		if ($link) {
-			$this->link = $link;
-		}
-	}
-
-	function setType($type) {
-		$this->type = $this->_filter->sanitize($type, 'int');
 	}
 
 	function setPublished($published) {
 		$this->published = $published;
-	}
-
-	function setFileUrl($file_url) {
-		if ($file_url) {
-			$this->file_url = $file_url;
-		}
 	}
 
 	function setNewFile(array $new_file) {
@@ -89,45 +57,35 @@ class Banner extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add('name', new PresenceOf([
-			'message' => 'nama harus diisi',
-		]));
-		if ($this->link) {
-			$validator->add('link', new Url([
-				'message' => 'link tidak valid',
+		$max_size  = $this->_upload_config->max_size;
+		if (!$this->id || $this->new_file) {
+			$validator->add('new_file', new Callback([
+				'callback' => function($data) {
+					return $data->new_file['tmp_name'] && is_uploaded_file($data->new_file['tmp_name']);
+				},
+				'message' => 'gambar harus diisi',
 			]));
-		}
-		if ($this->type) {
-			$validator->add('type', new InclusionIn([
-				'message' => 'link tidak valid',
-				'domain'  =>  array_keys(static::TYPES),
+			$validator->add('new_file', new Callback([
+				'callback' => function($data) use($max_size) {
+					return filesize($data->new_file['tmp_name']) <= intval($max_size) * pow(1024, 2);
+				},
+				'message' => 'ukuran gambar maksimal ' . $max_size,
 			]));
-		}
-		if ($this->file_url) {
-			$validator->add('file_url', new Url([
-				'message' => 'file URL tidak valid',
-			]));
-		}
-		if ($this->new_file) {
-			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_file', new FileValidator([
-				'maxSize'      => $max_size,
-				'messageSize'  => 'ukuran file maksimal ' . $max_size,
-				'allowedTypes' => ['image/jpeg', 'image/png'],
-				'messageType'  => 'format gambar harus JPG atau PNG',
+			$validator->add('new_file', new Callback([
+				'callback' => function($data) {
+					return in_array(mime_content_type($data->new_file['tmp_name']), ['image/jpeg', 'image/png']);
+				},
+				'message' => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		return $this->validate($validator);
 	}
 
-	function beforeSave() {
-		if (!$this->new_file || $this->file_name) {
-			return true;
-		}
+	function beforeCreate() {
 		$random = new Random;
 		do {
-			$this->file_name = $random->hex(16) . '.jpg';
-			if (!static::findFirst(['conditions' => "file_name = '{$this->file_name}'"])) {
+			$this->file = $random->hex(16) . '.jpg';
+			if (!static::findFirstByFile($this->file)) {
 				break;
 			}
 		} while (1);
@@ -135,6 +93,7 @@ class Banner extends ModelBase {
 
 	function beforeUpdate() {
 		if ($this->new_file) {
+			$this->thumbnails[] = $this->file;
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
@@ -147,48 +106,35 @@ class Banner extends ModelBase {
 		if (!$this->new_file) {
 			return true;
 		}
-		$file_name = $this->_upload_config->path . $this->file_name;
-		$image     = new Imagick($this->new_file['tmp_name']);
+		$file  = $this->_upload_config->path . $this->file;
+		$image = new Imagick($this->new_file['tmp_name']);
 		$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
-		$image->writeImage($file_name);
+		$image->writeImage($file);
 		unlink($this->new_file['tmp_name']);
 	}
 
 	function beforeDelete() {
-		$this->thumbnails[] = $this->file_name;
+		$this->thumbnails[] = $this->file;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
 		}
 	}
 
 	function afterFetch() {
-		$this->thumbnails = json_decode(trim(stripslashes($this->thumbnails), '"'));
+		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
 	}
 
-	function getThumbnail(int $width, int $height, string $default_picture = null) {
-		$picture = $this->file_name ?? $default_picture;
-		if (!$picture) {
-			return null;
-		}
-		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $picture);
+	function getThumbnail(int $width, int $height) {
+		$thumbnail = strtr($this->file, ['.jpg' => $width . $height . '.jpg']);
 		if (!in_array($thumbnail, $this->thumbnails)) {
-			$image = new Imagick($this->_upload_config->path . $picture);
+			$image = new Imagick($this->_upload_config->path . $this->file);
 			$image->thumbnailImage($width, $height);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 			$image->writeImage($this->_upload_config->path . $thumbnail);
-			if ($this->file_name) {
-				$this->thumbnails[] = $thumbnail;
-				$this->skipAttributes(['updated_by', 'updated_at']);
-				$this->update(['thumbnails' => $this->thumbnails]);
-			}
+			$this->thumbnails[] = $thumbnail;
+			$this->skipAttributes(['updated_by', 'updated_at']);
+			$this->update(['thumbnails' => $this->thumbnails]);
 		}
 		return $thumbnail;
-	}
-
-	function deletePicture() {
-		$this->beforeDelete();
-		$this->file_name = null;
-		$this->setThumbnails([]);
-		$this->save();
 	}
 }
