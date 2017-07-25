@@ -4,9 +4,25 @@
 	<table class="table table-striped">
 		<tr>
 			<td>
+				<b><font color="#000099">Merchant</font></b>
+				<br>
+				{% if product.id %}
+					{{ product.user ? product.user.company : '-' }}
+				{% else %}
+					<select name="user_id" id="user_id">
+						<option value=""></option>
+						{% for merchant in merchants %}
+							<option value="{{ merchant.id }}"{% if merchant.id == product.user_id %} selected{% endif %}>{{ merchant.company }}</option>
+						{% endfor %}
+					</select>
+				{% endif %}
+			</td>
+		</tr>
+		<tr>
+			<td>
 				<b><font color="#000099">Kategori</font> <font color="red">*</font></b>
 				<br>
-				<select name="product_category_id">
+				<select name="product_category_id" id="category_id">
 				{% for category in categories %}
 					<option value="{{ category.id }}"{% if category.id == product.category.id %} selected{% endif %}>{% if category.parent_id %}--{% endif %}{{ category.name }} ({{ category.total_products }})</option>
 				{% endfor %}
@@ -82,9 +98,25 @@
 		</tr>
 		<tr>
 			<td>
-				<input type="submit" value="SIMPAN" class="btn btn-info">&nbsp;
-				<input type="button" value="BATAL" class="btn btn-warning" onclick="location.href='/admin/products'">
+				<button type="submit" class="btn btn-primary">SIMPAN</button>&nbsp;
+				<a type="button" href="/admin/products" class="btn btn-warning">BATAL</a>
 			</td>
 		</tr>
 	</table>
 </form>
+{% if !product.id %}
+<script>
+	let user_id = document.getElementById('user_id'), category_id = document.getElementById('category_id');
+	user_id.onchange = () => {
+		fetch('/admin/products/categories' + (user_id.value ? '/user_id:' + user_id.value : ''), { credentials: 'include' }).then(response => {
+			return response.text()
+		}).then(payload => {
+			let result = JSON.parse(payload), new_options = '';
+			result.forEach(item => {
+				new_options += '<option value="' + item.id + '">' + item.name + ' (' + item.total_products +')</option>'
+			}),
+			category_id.innerHTML = new_options
+		})
+	}
+</script>
+{% endif %}

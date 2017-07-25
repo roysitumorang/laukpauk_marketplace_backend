@@ -28,22 +28,48 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
+								Merchant :
+							</td>
+							<td>
+								<select name="user_id" id="user_id">
+									<option value=""></option>
+									{% for merchant in merchants %}
+										<option value="{{ merchant.id }}"{% if merchant.id == user_id %} selected{% endif %}>{{ merchant.company }}</option>
+									{% endfor %}
+								</select>
+							</td>
+							<td>
 								Kategori :
-								<select name="category_id">
+							</td>
+							<td>
+								<select name="category_id" id="category_id">
 									<option value="">Semua</option>
 									{% for category in categories %}
 									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{% if category.parent_id %}{{ category.parent.name }} &raquo; {% endif %}{{ category.name }} ({{ category.total_products }})</option>
 									{% endfor %}
 								</select>
+							</td>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<td>
 								Status :
+							</td>
+							<td>
 								<select name="published">
 									<option value="">Semua</option>
 									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
 									<option value="0"{% if published === 0 %} selected{% endif %}>Tersembunyi</option>
 								</select>
-								Nama :
+							</td>
+							<td>
+								ID / Nama :
+							</td>
+							<td>
 								<input type="text" name="keyword" value="{{ keyword }}" placeholder="ID / Nama">&nbsp;
-								<input type="submit" value="CARI" class="btn btn-info">
+							</td>
+							<td>
+								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
 							</td>
 						</tr>
 					</table>
@@ -122,9 +148,12 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
+	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), user_id = document.getElementById('user_id'), category_id = document.getElementById('category_id'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
 	search.addEventListener('submit', event => {
 		event.preventDefault();
+		if (search.user_id.value) {
+			url += '/user_id:' + search.user_id.value;
+		}
 		if (search.category_id.value) {
 			url += '/category_id:' + search.category_id.value;
 		}
@@ -153,4 +182,15 @@
 			form.submit()
 		}
 	}
+	user_id.onchange = () => {
+		fetch('/admin/products/categories' + (user_id.value ? '/user_id:' + user_id.value : ''), { credentials: 'include' }).then(response => {
+			return response.text()
+		}).then(payload => {
+			let result = JSON.parse(payload), new_options = '<option value="">Semua</option>';
+			result.forEach(item => {
+				new_options += '<option value="' + item.id + '">' + item.name + ' (' + item.total_products +')</option>'
+			}),
+			category_id.innerHTML = new_options
+		})
+	};
 </script>
