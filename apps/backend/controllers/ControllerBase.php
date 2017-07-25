@@ -88,7 +88,6 @@ class ControllerBase extends Controller {
 				'icon'      => 'copy',
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
-					['label' => 'Page',    'link' => 'page_categories'],
 					['label' => 'Content', 'link' => 'post_categories'],
 					['label' => 'Banner',  'link' => 'banner_categories'],
 				],
