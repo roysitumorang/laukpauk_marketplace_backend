@@ -119,7 +119,7 @@ class UserProductsController extends ControllerBase {
 			->join('Application\Models\UserProduct', 'a.id = b.user_id', 'b')
 			->join('Application\Models\Product', 'b.product_id = c.id', 'c')
 			->join('Application\Models\ProductCategory', 'c.product_category_id = d.id', 'd')
-			->orderBy('d.name, c.name')
+			->orderBy('d.name, c.name, c.stock_unit')
 			->where('a.id = ' . $this->_user->id);
 		if ($search_query) {
 			$keywords = preg_split('/ /', $search_query, -1, PREG_SPLIT_NO_EMPTY);
