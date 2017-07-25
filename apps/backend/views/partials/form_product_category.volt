@@ -2,7 +2,19 @@
 <form method="POST" action="{{ action }}" enctype="multipart/form-data">
 	<table class="table table-striped">
 		<tr>
-			<td colspan="2" bgcolor="#999999"><b><font color="#FFFFFF">Input Kategori</font></b></td>
+			<td><b>Merchant</b></td>
+			<td>
+				{% if category.id %}
+					{{ category.user.company }}
+				{% else %}
+					<select name="user_id">
+						<option value=""></option>
+						{% for merchant in merchants %}
+							<option value="{{ merchant.id }}"{% if merchant.id == category.user_id %} selected{% endif %}>{{ merchant.company }}</option>
+						{% endfor %}
+					</select>
+				{% endif %}
+			</td>
 		</tr>
 		<tr>
 			<td width="30%"><b>Nama</b></td>
@@ -27,7 +39,7 @@
 					<img src="{{ category.thumbnail }}" border="0">
 				</a>
 				<br>
-				<a href="javascript:void(0)" class="delete" data-user-id="{{ user.id }}" data-id="{{ category.id }}">
+				<a href="javascript:void(0)" class="delete" data-id="{{ category.id }}">
 					<i class="fa fa-trash-o fa-2x"></i>
 				</a>
 				<script>
@@ -36,7 +48,7 @@
 						if (confirm('Anda yakin menghapus gambar ini ?')) {
 							let form = document.createElement('form');
 							form.method = 'POST',
-							form.action = '/admin/users/' + removal_link.dataset.userId + '/product_categories/' + removal_link.dataset.id + '/deletePicture',
+							form.action = '/admin/product_categories/' + removal_link.dataset.id + '/delete_picture',
 							document.body.appendChild(form),
 							form.submit()
 						}

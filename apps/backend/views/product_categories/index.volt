@@ -28,7 +28,13 @@
 					<tr>
 						<td>
 							<form method="GET" action="/admin/product_categories" id="search">
-								<input type="text" name="keyword" value="{{ keyword }}" size="40" placeholder="Nama">&nbsp;
+								Merchant <select name="user_id">
+									<option value=""></option>
+									{% for merchant in merchants %}
+										<option value="{{ merchant.id }}"{% if merchant.id == user_id %} selected{% endif %}>{{ merchant.company }}</option>
+									{% endfor %}
+								</select>
+								<input type="text" name="keyword" value="{{ keyword }}" placeholder="Nama">&nbsp;
 								<button type="submit" class="btn btn-info">CARI</button>
 							</form>
 						</td>
@@ -118,6 +124,9 @@
 	search.addEventListener('submit', event => {
 		event.preventDefault();
 		url += 'index';
+		if (search.user_id.value) {
+			url += '/user_id:' + search.user_id.value;
+		}
 		if (search.keyword.value) {
 			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
 				return replacement[match];

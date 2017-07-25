@@ -3,6 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\ProductCategory;
+use Application\Models\User;
 use Phalcon\Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
@@ -16,6 +17,7 @@ class ProductCategoriesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
+		$user_id      = $this->dispatcher->getParam('user_id', 'int');
 		$keyword      = $this->dispatcher->getParam('keyword');
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
@@ -37,10 +39,11 @@ class ProductCategoriesController extends ControllerBase {
 			])
 			->from(['a' => 'Application\Models\ProductCategory'])
 			->leftJoin('Application\Models\Product', 'a.id = b.product_category_id', 'b')
+			->where('a.user_id ' . ($user_id ? "= {$user_id}" : 'IS NULL'))
 			->groupBy('a.id')
 			->orderBy('a.name ASC');
 		if ($keyword) {
-			$builder->where('a.name ILIKE ?0', ["%{$keyword}%"]);
+			$builder->andWhere('a.name ILIKE ?0', ["%{$keyword}%"]);
 		}
 		$paginator  = new QueryBuilder([
 			'builder' => $builder,
@@ -56,6 +59,7 @@ class ProductCategoriesController extends ControllerBase {
 			$item->writeAttribute('thumbnail', $category->thumbnail(120));
 			$categories[] = $item;
 		}
+		$this->view->user_id    = $user_id;
 		$this->view->keyword    = $keyword;
 		$this->view->categories = $categories;
 		$this->view->page       = $paginator->getPaginate();
@@ -153,10 +157,19 @@ class ProductCategoriesController extends ControllerBase {
 	}
 
 	private function _prepare_datas(ProductCategory $category = null) {
-		$this->view->category = $category;
+		$this->view->category  = $category;
+		$this->view->merchants = User::find([
+			'premium_merchant = 1 AND status = 1',
+			'columns' => 'id, company',
+			'order'   => 'company'
+		]);
 	}
 
 	private function _set_model_attributes(&$category) {
+		$user_id = $this->request->getPost('user_id', 'int');
+		if (!$category->id && $user_id && User::findFirst(['premium_merchant = 1 AND status = 1 AND id = ?0', 'bind' => [$user_id]])) {
+			$category->user_id = $user_id;
+		}
 		$category->setName($this->request->getPost('name'));
 		$category->setNewPermalink($this->request->getPost('new_permalink'));
 		$category->setPublished($this->request->getPost('published'));
