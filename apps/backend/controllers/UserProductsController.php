@@ -74,9 +74,8 @@ class UserProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/products");
 		}
-		$page = $this->request->get('page', 'int') ?: 1;
 		$user_product->update(['published' => 1]);
-		return $this->response->redirect("/admin/users/{$this->_user->id}/products" . ($page > 1 ? '/index/page:' . $page : ''));
+		return $this->response->redirect($this->request->get('next'));
 	}
 
 	function unpublishAction($id) {
@@ -85,18 +84,16 @@ class UserProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/products");
 		}
-		$page = $this->request->get('page', 'int') ?: 1;
 		$user_product->update(['published' => 0]);
-		return $this->response->redirect("/admin/users/{$this->_user->id}/products" . ($page > 1 ? '/index/page:' . $page : ''));
+		return $this->response->redirect($this->request->get('next'));
 	}
 
 	function deleteAction($id) {
-		$page = $this->request->get('page', 'int') ?: 1;
 		if ($this->request->isPost() &&
 			($user_product = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->_user->id, $id]]))) {
 			$user_product->delete();
 		}
-		return $this->response->redirect("/admin/users/{$this->_user->id}/products" . ($page > 1 ? '/index/page:' . $page : ''));
+		return $this->response->redirect($this->request->get('next'));
 	}
 
 	private function _render(UserProduct $user_product = null, $current_page = 1) {
@@ -143,7 +140,7 @@ class UserProductsController extends ControllerBase {
 		}
 		foreach (ProductCategory::find(['published = 1', 'order' => 'name']) as $category) {
 			$category_products = [];
-			foreach ($category->getProducts(['published = 1 AND NOT EXISTS(SELECT 1 FROM Application\Models\UserProduct WHERE Application\Models\UserProduct.product_id = Application\Models\Product.id AND Application\Models\UserProduct.user_id = ?0)', 'bind' => [$this->_user->id], 'columns' => 'id, name, stock_unit', 'order' => 'name']) as $product) {
+			foreach ($category->getProducts(['published = 1 AND NOT EXISTS(SELECT 1 FROM Application\Models\UserProduct WHERE Application\Models\UserProduct.product_id = Application\Models\Product.id AND Application\Models\UserProduct.user_id = ?0)', 'bind' => [$this->_user->id], 'columns' => 'id, name, stock_unit', 'order' => 'name, stock_unit']) as $product) {
 				$category_products[] = $product;
 			}
 			if ($category_products) {
@@ -160,6 +157,7 @@ class UserProductsController extends ControllerBase {
 		$this->view->products         = $products;
 		$this->view->current_products = $products[$categories[0]->id];
 		$this->view->keyword          = $search_query;
+		$this->view->next             = $this->request->getServer('REQUEST_URI');
 		if ($user_product) {
 			$this->view->user_product = $user_product;
 		}

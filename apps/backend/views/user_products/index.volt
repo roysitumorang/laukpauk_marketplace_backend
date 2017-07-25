@@ -76,16 +76,24 @@
 											<input type="text" name="stock" value="{{ user_product.stock }}" placeholder="Stok">
 										</td>
 										<td class="text-right">
-											<button type="submit" class="btn btn-info"><i class="fa fa-plus-square"></i> Tambah</button>
+											<button type="submit" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah</button>
 										</td>
 									</tr>
 								</table>
 							</form>
-							{% if user_products %}
-							<p style="margin-left:5px" class="text-right">
-								<a type="button" href="/admin/users/{{ user.id }}/products/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-info"><i class="fa fa-pencil"></i> Update Harga &amp; Stok</a>
-							</p>
-							{% endif %}
+							<form method="GET" action="/admin/users/{{ user.id }}/products/index" id="search">
+								<table class="table table-striped">
+									<tr>
+										<td>
+											<input type="text" name="keyword" value="{{ keyword }}" placeholder="Cari">
+											<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
+											{% if user_products %}
+												<a type="button" href="/admin/users/{{ user.id }}/products/update{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="btn btn-primary"><i class="fa fa-pencil"></i> Update Harga &amp; Stok</a>
+											{% endif %}
+										</td>
+									</tr>
+								</table>
+							</form>
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -131,7 +139,7 @@
 										{% if i == page.current %}
 										<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/users/{{ user.id }}/products{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/{{ user.id }}/products{% if i > 1 %}/index{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -148,14 +156,14 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-        let products = {{ products | json_encode }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), stock_unit = document.getElementById('stock_unit');
+        let products = {{ products | json_encode }}, category = document.getElementById('category_id'), product = document.getElementById('product_id'), stock_unit = document.getElementById('stock_unit'), search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
 	for (let items = document.querySelectorAll('.delete'), i = items.length; i--; ) {
 		let item = items[i];
 		item.onclick = () => {
 			if (confirm('Anda yakin menghapus data ini ?')) {
 				let form = document.createElement('form');
 				form.method = 'POST',
-				form.action = '/admin/users/' + item.dataset.userId + '/products/' + item.dataset.id + '/delete{% if page.current > 1%}?page={{ page.current }}{% endif %}',
+				form.action = '/admin/users/' + item.dataset.userId + '/products/' + item.dataset.id + '/delete?next={{ next }}',
 				document.body.appendChild(form),
 				form.submit()
 			}
@@ -166,7 +174,7 @@
 		items[i].onclick = () => {
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/users/' + item.dataset.userId + '/products/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '{% if page.current > 1%}?page={{ page.current }}{% endif %}',
+			form.action = '/admin/users/' + item.dataset.userId + '/products/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next={{ next }}',
 			document.body.appendChild(form),
 			form.submit()
 		}
@@ -187,4 +195,13 @@
                         }
                 }
         }
+	search.addEventListener('submit', event => {
+		event.preventDefault();
+		if (search.keyword.value) {
+			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+				return replacement[match];
+			});
+		}
+		location.href = url;
+	}, false)
 </script>
