@@ -56,6 +56,7 @@ class ProductGroup extends ModelBase {
 	}
 
 	function beforeSave() {
+		$this->name     = implode(' ', preg_split('/\s/', $this->name, -1, PREG_SPLIT_NO_EMPTY));
 		$this->keywords = $this->getDI()->getDb()->fetchColumn("SELECT TO_TSVECTOR('simple', '{$this->name}')");
 	}
 }
