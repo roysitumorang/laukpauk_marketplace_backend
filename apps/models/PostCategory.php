@@ -9,6 +9,7 @@ use Phalcon\Validation\Validator\Uniqueness;
 class PostCategory extends ModelBase {
 	public $id;
 	public $name;
+	public $permalink;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -33,10 +34,17 @@ class PostCategory extends ModelBase {
 		$this->name = implode(' ', preg_split('/\s/', $name, -1, PREG_SPLIT_NO_EMPTY));
 	}
 
+	function beforeValidation() {
+		$this->permalink = implode('-', preg_split('/\s/', preg_replace('/[^a-z\d\s]+/', '', strtolower($this->name)), -1, PREG_SPLIT_NO_EMPTY));
+	}
+
 	function validation() {
 		$validator = new Validation;
-		$validator->add('name', new PresenceOf([
-			'message' => 'nama harus diisi',
+		$validator->add(['name', 'permalink'], new PresenceOf([
+			'message' => [
+				'name'      => 'nama harus diisi',
+				'permalink' => 'permalink harus diisi',
+			],
 		]));
 		$validator->add('name', new Uniqueness([
 			'convert' => function(array $values) : array {
