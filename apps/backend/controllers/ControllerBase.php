@@ -83,12 +83,12 @@ class ControllerBase extends Controller {
 					['label' => 'SMS',               'link' => 'sms'],
 				],
 			], [
-				'label'     => 'Content',
+				'label'     => 'Konten',
 				'link'      => null,
 				'icon'      => 'copy',
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
-					['label' => 'Content', 'link' => 'post_categories'],
+					['label' => 'Content', 'link' => 'posts'],
 					['label' => 'Banner',  'link' => 'banners'],
 				],
 			], [

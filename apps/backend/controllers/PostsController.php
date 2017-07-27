@@ -4,121 +4,72 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Post;
 use Application\Models\PostCategory;
-use Exception;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Application\Models\Role;
+use Application\Models\User;
+use Phalcon\Db;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class PostsController extends ControllerBase {
-	private $_post_category;
-
-	function beforeExecuteRoute() {
-		parent::beforeExecuteRoute();
-		if (!($post_category_id = $this->dispatcher->getParam('post_category_id', 'int')) || !($this->_post_category = PostCategory::findFirst($post_category_id))) {
-			$this->flashSession->error('Data tidak ditemukan');
-			$this->response->redirect('/admin/post_categories');
-			$this->response->sendHeaders();
-		}
-	}
-
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new PaginatorModel([
-			'data'  => $this->_post_category->getRelated('posts', ['order' => 'id DESC']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$user_id      = $this->request->getPost('user_id', 'int') ?: $this->dispatcher->getParam('user_id', 'int');
+		if ($user_id && !User::findFirst(['status = 1 AND role_id = ?0 AND premium_merchant = 1 AND id = ?1', 'bind' => [Role::MERCHANT, $user_id]])) {
+			$user_id = null;
+		}
+		$builder = $this->modelsManager->createBuilder()
+			->columns(['post_category_id' => 'a.id', 'a.name', 'b.body'])
+			->from(['a' => 'Application\Models\PostCategory'])
+			->leftJoin('Application\Models\Post', 'a.id = b.post_category_id AND b.user_id ' . ($user_id ? "= {$user_id}" : 'IS NULL'), 'b')
+			->orderBy('a.id');
+		$paginator = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
-		$page         = $paginator->getPaginate();
-		$pages        = $this->_setPaginationRange($page);
-		$posts        = [];
+		$page      = $paginator->getPaginate();
+		$pages     = $this->_setPaginationRange($page);
+		$posts     = [];
+		$merchants = [];
+		$result    = $this->db->query('SELECT id, company FROM users WHERE status = 1 AND role_id = ? AND premium_merchant = 1 ORDER BY company', [Role::MERCHANT]);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			if ($item->picture) {
-				$item->writeAttribute('thumbnail', $item->getThumbnail(500, 300));
-			}
 			$posts[] = $item;
 		}
-		$this->view->menu          = $this->_menu('Content');
-		$this->view->post_category = $this->_post_category;
-		$this->view->page          = $page;
-		$this->view->pages         = $pages;
-		$this->view->posts         = $posts;
-		$this->view->fqdn          = 'http' . ($this->request->getServer('SERVER_PORT') == 443 ? 's' : '') . '://' . $this->request->getServer('HTTP_HOST');
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$merchants[] = $row;
+		}
+		$this->view->menu      = $this->_menu('Content');
+		$this->view->page      = $page;
+		$this->view->pages     = $pages;
+		$this->view->posts     = $posts;
+		$this->view->merchants = $merchants;
+		$this->view->user_id   = $user_id;
 	}
 
-	function createAction() {
-		$post           = new Post;
-		$post->category = $this->_post_category;
+	function saveAction() {
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($post);
-			if ($post->validation() && $post->create()) {
-				$this->flashSession->success('Penambahan data berhasil.');
-				return $this->response->redirect("/admin/posts/index/post_category_id:{$this->_post_category->id}");
+			$user_id = filter_var($this->request->getPost('user_id'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+			$posts   = $this->request->getPost('posts');
+			if ($user_id && !User::findFirst(['status = 1 AND role_id = ?0 AND premium_merchant = 1 AND id = ?1', 'bind' => [Role::MERCHANT, $user_id]])) {
+				return $this->response->redirect('/admin/posts');
 			}
-			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
-			foreach ($post->getMessages() as $error) {
-				$this->flashSession->error($error);
+			foreach ($posts as $post_category_id => $body) {
+				if (!filter_var($post_category_id, FILTER_VALIDATE_INT) || !PostCategory::findFirst($post_category_id) || !$body) {
+					continue;
+				}
+				$post = Post::findFirst(['user_id ' . ($user_id ? "= {$user_id}" : 'IS NULL') . ' AND post_category_id = ?0', 'bind' => [$post_category_id]]);
+				if (!$post) {
+					$post                   = new Post;
+					$post->post_category_id = $post_category_id;
+					$post->user_id          = $user_id;
+				}
+				$post->save(['body' => $body]);
 			}
+			$this->flashSession->success('Update konten berhasil.');
 		}
-		$this->view->post_category = $this->_post_category;
-		$this->view->post          = $post;
-		$this->view->menu          = $this->_menu('Content');
-	}
-
-	function updateAction($id) {
-		if (!filter_var($id, FILTER_VALIDATE_INT) || !($post = $this->_post_category->getRelated('posts', ['conditions' => "id = {$id}"])->getFirst())) {
-			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward("/admin/posts/index/post_category_id:{$this->_post_category->id}");
-		}
-		if ($post->picture) {
-			$post->thumbnail = $post->getThumbnail(150, 100);
-		}
-		if ($this->request->isPost()) {
-			if ($this->dispatcher->hasParam('published')) {
-				$post->update(['published' => $post->published ? 0 : 1]);
-				return $this->response->redirect("/admin/posts/index/post_category_id:{$this->_post_category->id}");
-			} else if ($this->dispatcher->hasParam('delete_picture')) {
-				$post->deletePicture();
-				return $this->response->redirect("/admin/posts/update/{$post->id}/post_category_id:{$this->_post_category->id}");
-			}
-			$this->_set_model_attributes($post);
-			if ($post->validation() && $post->update()) {
-				$this->flashSession->success('Update data berhasil.');
-				return $this->response->redirect("/admin/posts/index/post_category_id:{$this->_post_category->id}");
-			}
-			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
-			foreach ($post->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
-		}
-		$this->view->post_category = $this->_post_category;
-		$this->view->post          = $post;
-		$this->view->menu          = $this->_menu('Content');
-	}
-
-	function deleteAction($id) {
-		try {
-			if (!filter_var($id, FILTER_VALIDATE_INT) || !($post = $this->_post_category->getRelated('posts', ['conditions' => "id = {$id}"])->getFirst()) || $post->comments->count()) {
-				throw new Exception('Data tidak ditemukan.');
-			}
-			$post->delete();
-			$this->flashSession->success('Data berhasil dihapus');
-		} catch (Exception $e) {
-			$this->flashSession->error($e->getMessage());
-		} finally {
-			return $this->response->redirect("/admin/posts/index/post_category_id:{$this->_post_category->id}");
-		}
-	}
-
-	private function _set_model_attributes(Post &$post) {
-		$post->setSubject($this->request->getPost('subject'));
-		$post->setNewPermalink($this->request->getPost('new_permalink'));
-		$post->setCustomLink($this->request->getPost('custom_link'));
-		$post->setBody($this->request->getPost('body'));
-		$post->setMetaTitle($this->request->getPost('meta_title'));
-		$post->setMetaKeyword($this->request->getPost('meta_keyword'));
-		$post->setMetaDesc($this->request->getPost('meta_desc'));
-		$post->setPublished($this->request->getPost('published'));
-		$post->setNewPicture($_FILES['picture']);
+		$this->dispatcher->forward(['action' => 'index']);
 	}
 }
