@@ -113,6 +113,7 @@ class ControllerBase extends Controller {
 					['label' => 'Kupon Member',           'link' => 'coupons'],
 					['label' => 'Pembayaran Deposit',     'link' => 'payments'],
 					['label' => 'Daftar Harga',           'link' => 'prices'],
+					['label' => 'Hari Jam Operasional',   'link' => 'operations'],
 				],
 			], [
 				'label'     => 'Order',
