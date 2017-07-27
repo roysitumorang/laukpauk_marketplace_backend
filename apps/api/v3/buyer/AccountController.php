@@ -16,6 +16,8 @@ class AccountController extends ControllerBase {
 	function beforeExecuteRoute() {
 		if ($this->dispatcher->getActionName() === 'update') {
 			parent::beforeExecuteRoute();
+		} else if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
+			$this->_premium_merchant = User::findFirst(['status = 1 AND role_id = ?0 AND premium_merchant = 1 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
 		}
 	}
 
