@@ -88,8 +88,8 @@ class ControllerBase extends Controller {
 				'icon'      => 'copy',
 				'expanded'  => $expanded == 'Content',
 				'sub_items' => [
-					['label' => 'Content', 'link' => 'posts'],
-					['label' => 'Banner',  'link' => 'banners'],
+					['label' => 'Konten', 'link' => 'posts'],
+					['label' => 'Banner', 'link' => 'banners'],
 				],
 			], [
 				'label'     => 'Members',
