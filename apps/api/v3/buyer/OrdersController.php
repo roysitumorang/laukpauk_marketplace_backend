@@ -6,6 +6,7 @@ use Application\Models\Device;
 use Application\Models\Order;
 use Application\Models\OrderProduct;
 use Application\Models\Role;
+use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
@@ -73,10 +74,12 @@ QUERY
 			if (!$this->_post->orders) {
 				throw new Exception('Order item kosong!');
 			}
-			$orders = [];
-			$total  = 0;
-			$today  = $this->currentDatetime->format('Y-m-d');
-			$coupon = null;
+			$orders           = [];
+			$total            = 0;
+			$today            = $this->currentDatetime->format('Y-m-d');
+			$coupon           = null;
+			$discount         = 0;
+			$minimum_purchase = Setting::findFirstByName('minimum_purchase')->value;
 			try {
 				$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
 			} catch (Exception $ex) {
@@ -191,29 +194,26 @@ QUERY
 				if (!$order->validation()) {
 					throw new Exception('Order Anda tidak valid!');
 				}
-				if (!$coupon) {
-					$order->final_bill += $order->shipping_cost;
-					$order->create();
-					continue;
-				}
 				$total   += $order->final_bill;
 				$orders[] = $order;
+			}
+			if ($total < $minimum_purchase) {
+				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			if ($coupon) {
 				if ($total < $coupon->minimum_purchase) {
 					throw new Exception('Order Anda tidak valid!');
 				}
 				$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100);
-				foreach ($orders as $order) {
-					if ($discount) {
-						$order->coupon_id   = $coupon->id;
-						$order->discount    = min($order->final_bill, $discount);
-						$order->final_bill -= $order->discount;
-						$discount           = max($discount - $order->discount, 0);
-					}
-					$order->final_bill += $order->shipping_cost;
-					$order->create();
+			}
+			foreach ($orders as $order) {
+				if ($discount) {
+					$order->coupon_id = $coupon->id;
 				}
+				$order->discount   = min($order->final_bill, $discount);
+				$order->final_bill = $order->final_bill - $order->discount + $order->shipping_cost;
+				$discount          = max($discount - $order->discount, 0);
+				$order->create();
 			}
 			$this->_response['status'] = 1;
 			throw new Exception('Terima kasih, order Anda segera kami proses.');
