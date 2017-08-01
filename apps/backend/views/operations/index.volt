@@ -84,6 +84,10 @@
 									{% for hour, label in business_hours %}
 									<input type="checkbox" name="merchants[{{ merchant.id }}][delivery_hours][]" value="{{ hour }}"{% if in_array(hour, merchant.delivery_hours) %} checked{% endif %}> {{ label }}&nbsp;&nbsp;
 									{% endfor %}
+									<br>
+									Minimal Order :
+									<br>
+									<input type="text" name="merchants[{{ merchant.id }}][minimum_purchase][]" value="{{ merchant.minimum_purchase }}">
 								</td>
 							</tr>
 						{% elsefor %}
