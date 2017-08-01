@@ -84,9 +84,15 @@ class Order extends ModelBase {
 
 	function beforeValidationOnCreate() {
 		parent::beforeValidationOnCreate();
-		$this->status     = array_search('HOLD', static::STATUS);
-		$this->ip_address = $this->getDI()->getRequest()->getClientAddress();
-		$this->admin_fee  = $this->merchant->admin_fee ?: Setting::findFirstByName('admin_fee')->value;
+		$default_admin_fee = Setting::findFirstByName('admin_fee')->value;
+		$this->status      = array_search('HOLD', static::STATUS);
+		$this->ip_address  = $this->getDI()->getRequest()->getClientAddress();
+		$this->admin_fee   = 0;
+		if ($this->merchant->premium_merchant) {
+			$this->admin_fee = $this->merchant->admin_fee ?: $default_admin_fee;
+		} else if ($this->final_bill >= Setting::findFirstByName('minimum_purchase')->value) {
+			$this->admin_fee = $default_admin_fee;
+		}
 		do {
 			$this->code = random_int(111111, 999999);
 			if (!static::findFirstByCode($this->code)) {
