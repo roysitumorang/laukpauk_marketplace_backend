@@ -66,6 +66,63 @@ QUERY
 		return $this->response;
 	}
 
+	function checkAction() {
+		try {
+			if (!$this->request->isPost()) {
+				throw new Exception('Request tidak valid!');
+			}
+			if (!$this->_post->orders) {
+				throw new Exception('Order item kosong!');
+			}
+			$total            = 0;
+			$minimum_purchase = Setting::findFirstByName('minimum_purchase')->value;
+			foreach ($this->_post->orders as $cart) {
+				$params = [<<<QUERY
+					SELECT
+						a.id,
+						b.shipping_cost,
+						a.minimum_purchase
+					FROM
+						users a
+						JOIN coverage_area b ON a.id = b.user_id
+					WHERE
+						a.status = 1 AND
+						a.role_id = ? AND
+						a.id = ? AND
+						b.village_id = ? AND
+						a.premium_merchant
+QUERY
+					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
+				$params[0] .= $this->_premium_merchant ? ' = 1' : ' IS NULL';
+				$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				if (!$merchant) {
+					throw new Exception('Order Anda tidak valid!');
+				}
+				$purchase = 0;
+				foreach ($cart->products as $item) {
+					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					if (!$product) {
+						throw new Exception('Order Anda tidak valid');
+					}
+					$purchase += min(max($item->quantity, 0), $product->stock) * $product->price;
+				}
+				if ($purchase < $merchant->minimum_purchase) {
+					throw new Exception('Order Anda tidak valid!');
+				}
+				$total += $purchase;
+			}
+			if (!$this->_premium_merchant && $total < $minimum_purchase) {
+				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
+			}
+			$this->_response['status'] = 1;
+		} catch (Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			return $this->response;
+		}
+	}
+
 	function createAction() {
 		try {
 			if (!$this->request->isPost()) {
@@ -197,7 +254,7 @@ QUERY
 				$total   += $order->final_bill;
 				$orders[] = $order;
 			}
-			if ($total < $minimum_purchase) {
+			if (!$this->_premium_merchant && $total < $minimum_purchase) {
 				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			if ($coupon) {
