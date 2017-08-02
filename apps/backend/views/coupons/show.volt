@@ -40,9 +40,9 @@
 							<td>
 								<font size="6">
 								{% if coupon.discount_type == 1 %}
-									Rp. {{ number_format(coupon.discount_amount) }}
+									Rp. {{ number_format(coupon.price_discount) }}
 								{% else %}
-									{{ coupon.discount_amount }} %
+									{{ coupon.price_discount }} %
 								{% endif %}
 								</font>
 							</td>
@@ -82,6 +82,18 @@
 					<tbody>
 						<tr>
 							<td>{{ coupon.usage_type }}</td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th><b>Pemakaian Maksimal</b></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>{{ coupon.maximum_usage }} order</td>
 						</tr>
 					</tbody>
 				</table>

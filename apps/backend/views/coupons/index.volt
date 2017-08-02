@@ -61,7 +61,9 @@
 								<font size="4" color="#006bb3"><strong><a href="/admin/coupons/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>&nbsp;
 								<img src="/assets/image/bullet-{% if coupon.status == 1 %}green{% else %}red{% endif %}.png" border="0"><br>
 								{{ coupon.multiple_use }}
-								<br><br>
+								<br>
+								Pemakaian maksimal {{ number_format(coupon.maximum_usage) }} order
+								<br>
 								Min. Pembelian: Rp. {{ number_format(coupon.minimum_purchase) }}
 							</td>
 							<td>

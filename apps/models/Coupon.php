@@ -63,7 +63,7 @@ class Coupon extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['code', 'effective_date', 'expiry_date', 'price_discount', 'discount_type', 'status', 'multiple_use', 'minimum_purchase'], new PresenceOf([
+		$validator->add(['code', 'effective_date', 'expiry_date', 'price_discount', 'discount_type', 'status', 'multiple_use', 'minimum_purchase', 'maximum_usage'], new PresenceOf([
 			'message' => [
 				'code'             => 'kode kupon harus diisi',
 				'effective_date'   => 'tanggal berlaku harus diisi',

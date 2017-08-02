@@ -59,13 +59,30 @@
 		</tr>
 		<tr>
 			<td>
+				<b>Pemakaian maksimal :</b><br>
+				<input type="text" name="maximum_usage" value="{{ coupon.maximum_usage }}" size="15" maxlength="15" class="form form-control form-30" placeholder="Pemakaian maksimal">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Berlaku untuk versi minimal :</b><br>
+				<select name="release_id" class="form form-control form-30">
+					<option value="">Semua versi</option>
+					{% for release in releases %}
+						<option value="{{ release.id }}"{% if coupon.release_id == release.id %} selected{% endif %}>{{ release.version }}</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
 				<b>Deskripsi :</b><br>
 				<textarea name="description" placeholder="Deskripsi Kupon" cols="50" rows="5" class="form form-control form-50">{{ coupon.description }}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td>
-				<button type="submit" class="btn btn-info">SIMPAN</button>
+				<button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> SIMPAN</button>
 			</td>
 		</tr>
 	</table>
