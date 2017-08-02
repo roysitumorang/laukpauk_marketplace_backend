@@ -197,7 +197,7 @@ QUERY
 					throw new Exception('Order Anda tidak valid!');
 				} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
 					throw new Exception('Pemakaian voucher udah melebihi batas maksimal!');
-				} else if ($coupon->minimum_version && (!$this->_post->app_version || !Release::findFirstByVersion($this->_post->app_version) || $this->_post->app_version < $coupon->minimum_version)) {
+				} else if ($coupon->minimum_version && (!$this->_post->app_version || !Release::findFirst(['type = ?0 AND version = ?1', 'bind' => ['buyer', $this->_post->app_version]]) || $this->_post->app_version < $coupon->minimum_version)) {
 					throw new Exception('Voucher berlaku untuk versi minimal ' . $coupon->minimum_version . '! Silahkan upgrade aplikasi Anda.');
 				} else if (!$coupon->multiple_use && $coupon->personal_usage > 1) {
 					throw new Exception('Voucher cuma berlaku untuk sekali pemakaian!');
