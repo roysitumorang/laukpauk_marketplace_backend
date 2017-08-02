@@ -12,7 +12,7 @@ use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
 use Phalcon\Db;
-use Phalcon\Exception;
+use Exception;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
@@ -171,7 +171,7 @@ QUERY
 						a.minimum_purchase,
 						d.version AS minimum_version,
 						a.maximum_usage,
-						COUNT(DISTINCT b.id) AS personal_usage
+						COUNT(DISTINCT b.id) AS personal_usage,
 						COUNT(DISTINCT c.id) AS total_usage
 					FROM
 						coupons a
@@ -191,7 +191,7 @@ QUERY
 					$today,
 					$this->_post->coupon_code,
 				];
-				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
+				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id, d.version';
 				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$coupon) {
 					throw new Exception('Order Anda tidak valid!');
