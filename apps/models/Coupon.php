@@ -26,6 +26,8 @@ class Coupon extends ModelBase {
 	public $status;
 	public $multiple_use;
 	public $minimum_purchase;
+	public $release_id;
+	public $maximum_usage;
 	public $description;
 	public $created_by;
 	public $created_at;
@@ -41,6 +43,10 @@ class Coupon extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Order', 'coupon_id', ['alias' => 'orders']);
 		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
 			'alias'    => 'user',
+			'reusable' => true,
+		]);
+		$this->belongsTo('release_id', 'Application\Models\Release', 'id', [
+			'alias'    => 'release',
 			'reusable' => true,
 		]);
 	}
@@ -67,6 +73,7 @@ class Coupon extends ModelBase {
 				'status'           => 'status harus diisi',
 				'multiple_use'     => 'penggunaan harus diisi',
 				'minimum_purchase' => 'belanja minimal harus diisi',
+				'maximum_usage'    => 'pemakaian maksimal harus diisi',
 			],
 		]));
 		$validator->add(['effective_date', 'expiry_date'], new Date([
@@ -79,10 +86,11 @@ class Coupon extends ModelBase {
 				'expiry_date'    => 'tanggal expired tidak valid',
 			],
 		]));
-		$validator->add(['price_discount', 'minimum_purchase'], new Digit([
+		$validator->add(['price_discount', 'minimum_purchase', 'maximum_usage'], new Digit([
 			'message' => [
 				'price_discount'   => 'diskon tidak valid',
 				'minimum_purchase' => 'belanja minimal tidak valid',
+				'maximum_usage'    => 'pemakaian maksimal tidak valid',
 			],
 		]));
 		$validator->add(['discount_type', 'multiple_use', 'status'], new InclusionIn([

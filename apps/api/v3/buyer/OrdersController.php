@@ -5,6 +5,7 @@ namespace Application\Api\V3\Buyer;
 use Application\Models\Device;
 use Application\Models\Order;
 use Application\Models\OrderProduct;
+use Application\Models\Release;
 use Application\Models\Role;
 use Application\Models\Setting;
 use Application\Models\User;
@@ -168,10 +169,15 @@ QUERY
 						a.discount_type,
 						a.multiple_use,
 						a.minimum_purchase,
-						COUNT(1) AS usage
+						d.version AS minimum_version,
+						a.maximum_usage,
+						COUNT(DISTINCT b.id) AS personal_usage
+						COUNT(DISTINCT c.id) AS total_usage
 					FROM
 						coupons a
-						LEFT JOIN orders b ON a.id = b.coupon_id AND b.status = '1' AND b.buyer_id = ?
+						LEFT JOIN orders b ON a.id = b.coupon_id AND b.status != '-1' AND b.buyer_id = ?
+						LEFT JOIN orders c ON a.id = c.coupon_id AND c.status != '-1'
+						LEFT JOIN releases d ON a.release_id = d.id
 					WHERE
 						a.status = '1' AND
 						a.effective_date <= ? AND
@@ -187,8 +193,14 @@ QUERY
 				];
 				$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id';
 				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
-				if (!$coupon || ($coupon->multiple_use && $coupon->usage > 1)) {
+				if (!$coupon) {
 					throw new Exception('Order Anda tidak valid!');
+				} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
+					throw new Exception('Pemakaian voucher udah melebihi batas maksimal!');
+				} else if ($coupon->minimum_version && (!$this->_post->app_version || !Release::findFirstByVersion($this->_post->app_version) || $this->_post->app_version < $coupon->minimum_version)) {
+					throw new Exception('Voucher berlaku untuk versi minimal ' . $coupon->minimum_version . '! Silahkan upgrade aplikasi Anda.');
+				} else if (!$coupon->multiple_use && $coupon->personal_usage > 1) {
+					throw new Exception('Voucher cuma berlaku untuk sekali pemakaian!');
 				}
 			}
 			foreach ($this->_post->orders as $cart) {
