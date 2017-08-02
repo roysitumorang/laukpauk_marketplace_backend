@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
+use Application\Models\Release;
 use Application\Models\Role;
 use Phalcon\Db;
 use Exception;
