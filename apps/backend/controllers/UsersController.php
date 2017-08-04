@@ -19,9 +19,12 @@ class UsersController extends ControllerBase {
 		if ($current_status === null || !array_key_exists($current_status, $status)) {
 			$current_status = array_search('ACTIVE', $status);
 		}
-		$current_role = $this->dispatcher->getParam('role_id', 'int');
-		$keyword      = str_replace([':', '/'], '', $this->dispatcher->getParam('keyword', 'string'));
-		$builder      = $this->modelsManager->createBuilder()
+		$current_role             = $this->dispatcher->getParam('role_id', 'int');
+		$current_premium_merchant = $this->dispatcher->getParam('merchant_id', 'int');
+		$keyword                  = str_replace([':', '/'], '', $this->dispatcher->getParam('keyword', 'string'));
+		$users                    = [];
+		$premium_merchants        = [];
+		$builder                  = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
 				'a.api_key',
@@ -89,32 +92,37 @@ class UsersController extends ControllerBase {
 				$keyword_placeholder,
 			]);
 		}
+		$builder->andWhere('a.merchant_id ' . ($current_premium_merchant ? "= {$current_premium_merchant}" : 'IS NULL'));
 		$paginator = new PaginatorQueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
-		$pages     = $this->_setPaginationRange($page);
-		$users     = [];
+		$page  = $paginator->getPaginate();
+		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('status', $status[$item->status]);
 			$users[] = $item;
 		}
-		$this->view->menu                  = $this->_menu('Members');
-		$this->view->users                 = $users;
-		$this->view->pages                 = $pages;
-		$this->view->page                  = $paginator->getPaginate();
-		$this->view->status                = $status;
-		$this->view->current_status        = $current_status;
-		$this->view->roles                 = Role::find(['id > 1', 'order' => 'name']);
-		$this->view->current_role          = $current_role;
-		$this->view->keyword               = $keyword;
-		$this->view->total_users           = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
-		$this->view->total_pending_users   = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 0');
-		$this->view->total_active_users    = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 1');
-		$this->view->total_suspended_users = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = -1');
+		foreach (User::find(['role_id = ?0 AND premium_merchant = 1 AND status = 1', 'bind' => [Role::MERCHANT], 'columns' => 'id, company', 'order' => 'company']) as $merchant) {
+			$premium_merchants[] = $merchant;
+		}
+		$this->view->menu                     = $this->_menu('Members');
+		$this->view->users                    = $users;
+		$this->view->premium_merchants        = $premium_merchants;
+		$this->view->pages                    = $pages;
+		$this->view->page                     = $paginator->getPaginate();
+		$this->view->status                   = $status;
+		$this->view->current_status           = $current_status;
+		$this->view->roles                    = Role::find(['id > 1', 'order' => 'name']);
+		$this->view->current_role             = $current_role;
+		$this->view->current_premium_merchant = $current_premium_merchant;
+		$this->view->keyword                  = $keyword;
+		$this->view->total_users              = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
+		$this->view->total_pending_users      = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 0');
+		$this->view->total_active_users       = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 1');
+		$this->view->total_suspended_users    = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = -1');
 	}
 
 	function createAction() {

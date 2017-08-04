@@ -39,30 +39,51 @@
 								<strong>Suspended:</strong>&nbsp;{{ total_suspended_users }}
 							</font>
 						</div>
-						<table class="table table-striped">
-							<tr>
-								<td>
-									<!-- Main Content //-->
-									<form action="/admin/users" method="GET" id="search">
-										<b>Cari berdasarkan:</b>
+						<form action="/admin/users" method="GET" id="search">
+							<table class="table table-striped">
+								<tr>
+									<td colspan="6"><b>Cari berdasarkan :</b></td>
+								</tr>
+								<tr>
+									<td>Status</td>
+									<td>
 										<select name="status">
 											{% for value, label in status %}
 											<option value="{{ value }}"{% if current_status == value %} selected{% endif %}>{{ label }}</option>
 											{% endfor %}
-										</select>&nbsp;&nbsp;
+										</select>
+									</td>
+									<td>Role</td>
+									<td>
 										<select name="role_id">
 											<option value="">Any Roles</option>
 											{% for role in roles %}
 											<option value="{{ role.id }}"{% if current_role == role.id %} selected{% endif %}>{{ role.name }}</option>
 											{% endfor %}
-										</select>&nbsp;&nbsp;
-										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Toko / Nomor HP">&nbsp;
+										</select>
+									</td>
+									<td>Premium Merchant</td>
+									<td>
+										<select name="merchant_id">
+											<option value=""></option>
+											{% for merchant in premium_merchants %}
+											<option value="{{ merchant.id }}"{% if current_premium_merchant == merchant.id %} selected{% endif %}>{{ merchant.company }}</option>
+											{% endfor %}
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td>Nama / Toko / Nomor HP</td>
+									<td>
+										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Toko / Nomor HP">
+									</td>
+									<td colspan="4">
 										<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
 										<a type="button" href="/admin/users/excel" target="_blank" class="btn btn-success"><i class="fa fa-file-excel-o"></i> Excel</a>
-									</form>
-								</td>
-							</tr>
-						</table>
+									</td>
+								</tr>
+							</table>
+						</form>
 						<table class="table table-striped">
 							<thead>
 								<tr>
@@ -166,6 +187,9 @@
 		}
 		if (search.role_id.value) {
 			url += '/role_id:' + search.role_id.value;
+		}
+		if (search.merchant_id.value) {
+			url += '/merchant_id:' + search.merchant_id.value;
 		}
 		if (search.keyword.value) {
 			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
