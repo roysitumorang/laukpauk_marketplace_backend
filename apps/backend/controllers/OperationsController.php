@@ -64,6 +64,7 @@ class OperationsController extends ControllerBase {
 					$user->setBusinessClosingHour($operation['business_closing_hour']);
 					$user->setDeliveryHours($operation['delivery_hours']);
 					$user->setMinimumPurchase($operation['minimum_purchase']);
+					$user->setAddress($operation['address']);
 					$user->update();
 				}
 			}

@@ -87,7 +87,11 @@
 									<br>
 									Minimal Order :
 									<br>
-									<input type="text" name="merchants[{{ merchant.id }}][minimum_purchase][]" value="{{ merchant.minimum_purchase }}">
+									<input type="text" name="merchants[{{ merchant.id }}][minimum_purchase]" value="{{ merchant.minimum_purchase }}">
+									<br>
+									Alamat :
+									<br>
+									<input type="text" name="merchants[{{ merchant.id }}][address]" value="{{ merchant.address }}">
 								</td>
 							</tr>
 						{% elsefor %}
