@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/provinces/create{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"><h2>Tambah Rekening Bank</h2></a>
+				<a href="/admin/bank_accounts/create"><h2>Tambah Rekening Bank</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/provinces{% if page.current > 1 %}/index/page:{{ page.current }}{% endif %}">Daftar Rekening Bank</a></span></li>
+						<li><span><a href="/admin/bank_accounts">Daftar Rekening Bank</a></span></li>
 						<li><span>Tambah Rekening Bank</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -20,7 +20,7 @@
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Tambah Propinsi</h2>
+				<h2 class="panel-title">Tambah Rekening Bank</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
