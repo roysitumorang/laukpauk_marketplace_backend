@@ -32,7 +32,6 @@ abstract class ControllerBase extends Controller {
 				'created_at'     => $this->currentDatetime->format('Y-m-d H:i:s'),
 			]);
 		});
-		$this->_response['version'] = $this->db->fetchColumn("SELECT MAX(version) FROM releases WHERE type = 'merchant'");
 		if (Setting::findFirstByName('maintenance_mode')->value) {
 			$this->_response['offline'] = 1;
 			$this->response->setJsonContent($this->_response);
@@ -56,6 +55,7 @@ abstract class ControllerBase extends Controller {
 			if (!$this->_current_user) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
+			$this->_response['version'] = $this->db->fetchColumn("SELECT MAX(version) FROM releases WHERE user_type = 'merchant' AND application_type = '" . ($this->_current_user->premium_merchant ? 'premium' : 'free') . "'");
 		} catch (Exception $e) {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();

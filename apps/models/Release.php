@@ -8,10 +8,12 @@ use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class Release extends ModelBase {
-	const TYPES = ['buyer', 'merchant'];
+	const APPLICATION_TYPES = ['free', 'premium'];
+	const USER_TYPES        = ['buyer', 'merchant'];
 
 	public $id;
-	public $type;
+	public $application_type;
+	public $user_type;
 	public $version;
 	public $features;
 	public $created_by;
@@ -29,6 +31,10 @@ class Release extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Coupon', 'release_id', ['alias' => 'releases']);
 	}
 
+	function setPremium(string $premium) {
+		$this->premium = $premium;
+	}
+
 	function setType(string $type) {
 		$this->type = $type;
 	}
@@ -43,23 +49,30 @@ class Release extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['type', 'version', 'features'], new PresenceOf([
+		$validator->add(['application_type', 'user_type', 'version', 'features'], new PresenceOf([
 			'message' => [
-				'type'     => 'tipe harus diisi',
-				'version'  => 'versi harus diisi',
-				'features' => 'fitur harus diisi',
+				'application_type' => 'tipe aplikasi harus diisi',
+				'user_type'        => 'tipe user harus diisi',
+				'version'          => 'versi harus diisi',
+				'features'         => 'fitur harus diisi',
 			],
 		]));
-		$validator->add('version', new Uniqueness([
+		$validator->add(['application_type', 'user_type', 'version'], new Uniqueness([
 			'convert' => function(array $values) : array {
 				$values['version'] = strtolower($values['version']);
 				return $values;
 			},
-			'message' => 'versi sudah ada',
+			'message' => 'tipe aplikasi, tipe user dan versi sudah ada',
 		]));
-		$validator->add('type', new InclusionIn([
-			'domain'  => static::TYPES,
-			'message' => 'tipe antara buyer atau merchant',
+		$validator->add(['application_type', 'user_type'], new InclusionIn([
+			'domain' => [
+				'application_type' => static::APPLICATION_TYPES,
+				'user_type'        => static::USER_TYPES,
+			],
+			'message' => [
+				'application_type' => 'tipe aplikasi antara free dan premium',
+				'user_type'        => 'tipe user antara buyer dan merchant',
+			],
 		]));
 		return $this->validate($validator);
 	}
