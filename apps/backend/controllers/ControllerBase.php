@@ -132,6 +132,7 @@ class ControllerBase extends Controller {
 					['label' => 'Settings',        'link' => 'settings'],
 					['label' => 'Rekening Bank',   'link' => 'bank_accounts'],
 					['label' => 'Daftar Propinsi', 'link' => 'provinces'],
+					['label' => 'Release APK',     'link' => 'releases'],
 				],
 			], [
 				'label'     => 'Manage User',

@@ -31,19 +31,19 @@ class Release extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Coupon', 'release_id', ['alias' => 'releases']);
 	}
 
-	function setPremium(string $premium) {
-		$this->premium = $premium;
+	function setApplicationType($application_type) {
+		$this->application_type = $application_type;
 	}
 
-	function setType(string $type) {
-		$this->type = $type;
+	function setUserType($user_type) {
+		$this->user_type = $user_type;
 	}
 
-	function setVersion(string $version) {
+	function setVersion($version) {
 		$this->version = $version;
 	}
 
-	function setFeatures(string $features) {
+	function setFeatures($features) {
 		$this->features = $features;
 	}
 
