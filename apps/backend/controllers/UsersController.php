@@ -354,9 +354,12 @@ QUERY
 			$user->setDeposit($this->request->getPost('deposit'));
 		}
 		$user->setPremiumMerchant($this->request->getPost('premium_merchant'));
+		$user->setOnesignalAppId($this->request->getPost('onesignal_app_id'));
+		$user->setOnesignalApiKey($this->request->getPost('onesignal_api_key'));
 		$user->setDomain($this->request->getPost('domain'));
 		$user->setMinimumPurchase($this->request->getPost('minimum_purchase'));
 		$user->setAdminFee($this->request->getPost('admin_fee'));
+		$user->setAccumulationDivisor($this->request->getPost('accumulation_divisor'));
 		$user->setName($this->request->getPost('name'));
 		$user->setEmail($this->request->getPost('email'));
 		$user->setNewPassword($this->request->getPost('new_password'));

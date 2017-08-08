@@ -32,12 +32,15 @@ class User extends ModelBase {
 	public $role_id;
 	public $api_key;
 	public $premium_merchant;
+	public $onesignal_app_id;
+	public $onesignal_api_key;
 	public $merchant_id;
 	public $merchant_token;
 	public $merchant_note;
 	public $domain;
 	public $minimum_purchase;
 	public $admin_fee;
+	public $accumulation_divisor;
 	public $name;
 	public $email;
 	public $password;
@@ -131,6 +134,14 @@ class User extends ModelBase {
 		$this->premium_merchant = $this->_filter->sanitize($premium_merchant, 'int') ?: null;
 	}
 
+	function setOnesignalAppId($onesignal_app_id) {
+		$this->onesignal_app_id = $onesignal_app_id ?: null;
+	}
+
+	function setOnesignalApiKey($onesignal_api_key) {
+		$this->onesignal_api_key = $onesignal_api_key ?: null;
+	}
+
 	function setMerchantId($merchant_id) {
 		$this->merchant_id = $this->_filter->sanitize($merchant_id, 'int') ?: null;
 	}
@@ -149,6 +160,10 @@ class User extends ModelBase {
 
 	function setAdminFee($admin_fee) {
 		$this->admin_fee = filter_var($admin_fee, FILTER_VALIDATE_INT) ?: 0;
+	}
+
+	function setAccumulationDivisor($accumulation_divisor) {
+		$this->accumulation_divisor = filter_var($accumulation_divisor, FILTER_VALIDATE_INT) ?: 0;
 	}
 
 	function setName($name) {
@@ -402,6 +417,11 @@ class User extends ModelBase {
 					'message' => 'domain sudah ada',
 				]));
 			}
+			if ($this->premium_merchant) {
+				$validator->add('onesignal_app_id', new Uniqueness([
+					'message' => 'application id onesignal sudah ada',
+				]));
+			}
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
 			$validator->add(['mobile_phone', 'merchant_id'], new Uniqueness([
@@ -474,6 +494,10 @@ class User extends ModelBase {
 					}
 				} while (1);
 			}
+		} else {
+			$this->onesignal_app_id     = null;
+			$this->onesignal_api_key    = null;
+			$this->accumulation_divisor = 0;
 		}
 	}
 

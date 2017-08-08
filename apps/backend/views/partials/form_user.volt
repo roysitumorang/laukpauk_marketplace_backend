@@ -53,13 +53,25 @@
 		</tr>
 		<tr>
 			<td>
+				Application ID Onesignal (untuk premium merchant) :<br>
+				<input type="text" name="onesignal_app_id" value="{{ user.onesignal_app_id }}" size="50" placeholder="Application ID Onesignal">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				API Key Onesignal (untuk premium merchant) :<br>
+				<input type="text" name="onesignal_api_key" value="{{ user.onesignal_api_key }}" size="50" placeholder="API Key Onesignal">
+			</td>
+		</tr>
+		<tr>
+			<td>
 				Domain (untuk premium merchant) :<br>
 				<input type="text" name="domain" value="{{ user.domain }}" size="50" placeholder="Domain">
 			</td>
 		</tr>
 		<tr>
 			<td>
-				Profil Toko (* untuk premium merchant) :<br>
+				Tentang Kami (* untuk premium merchant) :<br>
 				<textarea name="company_profile" cols="50" rows="5" placeholder="Profil toko">{{ user.company_profile }}</textarea>
 			</td>
 		</tr>
@@ -67,6 +79,12 @@
 			<td>
 				Syarat dan Ketentuan (* untuk premium merchant) :<br>
 				<textarea name="terms_conditions" cols="50" rows="5" placeholder="Syarat dan ketentuan">{{ user.terms_conditions }}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Catatan Penjual (untuk merchant) :<br>
+				<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
 			</td>
 		</tr>
 		<tr>
@@ -83,8 +101,8 @@
 		</tr>
 		<tr>
 			<td>
-				Catatan Penjual (untuk merchant) :<br>
-				<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
+				Jumlah Akumulasi Dikenai Biaya Administrasi (untuk merchant) :<br>
+				<input type="text" name="accumulation_divisor" value="{{ user.accumulation_divisor }}" size="20" placeholder="Jumlah Akumulasi Dikenai Biaya Administrasi">
 			</td>
 		</tr>
 		{% if user.role.name == 'Merchant' %}
@@ -99,7 +117,7 @@
 			<td>
 				Jenis Kelamin :<br>
 				{% for gender in genders %}
-				<input type="radio" name="gender" value={{ gender }}{% if user.gender == gender %} checked{% endif %}> {{ gender }}&nbsp;&nbsp;
+				<input type="radio" name="gender" value="{{ gender }}"{% if user.gender == gender %} checked{% endif %}> {{ gender }}&nbsp;&nbsp;
 				{% endfor %}
 			</td>
 		</tr>
