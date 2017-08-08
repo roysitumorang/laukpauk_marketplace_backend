@@ -72,7 +72,7 @@
 		<tr>
 			<td>
 				Tentang Kami (* untuk premium merchant) :<br>
-				<textarea name="company_profile" cols="50" rows="5" placeholder="Profil toko">{{ user.company_profile }}</textarea>
+				<textarea name="company_profile" cols="50" rows="5" placeholder="Tentang kami">{{ user.company_profile }}</textarea>
 			</td>
 		</tr>
 		<tr>
