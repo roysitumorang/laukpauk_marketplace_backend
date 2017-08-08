@@ -5,6 +5,7 @@ namespace Application\Api\V1\Controllers;
 use Application\Models\Order;
 use Application\Models\OrderProduct;
 use Application\Models\Role;
+use Application\Models\Setting;
 use Application\Models\User;
 use Application\Models\Village;
 use DateTime;
@@ -69,6 +70,7 @@ QUERY
 			if (!$merchant) {
 				throw new Exception('Order Anda tidak valid!');
 			}
+			$minimum_purchase = $merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value;
 			if ($this->_input->coupon_code) {
 				$today = $this->currentDatetime->format('Y-m-d');
 				$params = [<<<QUERY
@@ -127,8 +129,8 @@ QUERY
 				$order->original_bill     += $order_product->quantity * $order_product->price;
 				$order_products[]          = $order_product;
 			}
-			if ($order->original_bill < $merchant->minimum_purchase) {
-				throw new Exception('Belanja minimal Rp. ' . number_format($coupon->minimum_purchase) . ' untuk dapat diproses!');
+			if ($order->original_bill < $minimum_purchase) {
+				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			$order->final_bill = $order->original_bill;
 			if ($coupon) {
