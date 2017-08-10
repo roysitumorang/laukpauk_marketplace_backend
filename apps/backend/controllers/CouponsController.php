@@ -120,7 +120,7 @@ class CouponsController extends ControllerBase {
 		$this->view->discount_types = Coupon::DISCOUNT_TYPES;
 		$this->view->status         = Coupon::STATUS;
 		$this->view->usage_types    = Coupon::USAGE_TYPES;
-		$this->view->releases       = Release::find(["type = 'buyer'", 'columns' => 'id, version', 'order' => 'version DESC']);
+		$this->view->releases       = Release::find(["user_type = 'buyer'", 'columns' => 'id, version', 'order' => 'version DESC']);
 	}
 
 	private function _set_model_attributes(Coupon &$coupon) {
@@ -136,7 +136,7 @@ class CouponsController extends ControllerBase {
 			'minimum_purchase' => $this->request->getPost('minimum_purchase'),
 			'status'           => $this->request->getPost('status'),
 			'multiple_use'     => $this->request->getPost('multiple_use'),
-			'release_id'       => $release_id ? Release::findFirst(['type = ?0 AND id = ?1', 'bind' => ['buyer', $release_id]])->id : null,
+			'release_id'       => $release_id ? Release::findFirst(['user_type = ?0 AND id = ?1', 'bind' => ['buyer', $release_id]])->id : null,
 			'maximum_usage'    => $this->request->getPost('maximum_usage'),
 			'description'      => $this->request->getPost('description'),
 		]);
