@@ -162,7 +162,7 @@
 					</tr>
 					<tr>
 						<td colspan="4">
-							<b><font color="#000099">Items</font></b>
+							<b><font color="#000099">Produk</font></b>
 						</td>
 					</tr>
 					{% for item in order.orderProducts %}
