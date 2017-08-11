@@ -28,19 +28,19 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								Dari Tanggal :<br>
+								<i class="fa fa-calendar"></i> Dari Tanggal :<br>
 								<input type="text" name="from" value="{{ from }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Dari Tanggal">
 							</td>
 							<td>
-								Sampai Tanggal :<br>
+								<i class="fa fa-calendar"></i> Sampai Tanggal :<br>
 								<input type="text" name="to" value="{{ to }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Sampai Tanggal">
 							</td>
 							<td>
-								Nomor Order :<br>
+								<i class="fa fa-id-badge"></i> Nomor Order :<br>
 								<input type="text" name="code" value="{{ code }}" class="form form-control text-center" size="6" placeholder="Nomor Order">
 							</td>
 							<td>
-								Status Order :<br>
+								<i class="fa fa-tag"></i> Status :<br>
 								<select name="status" class="form form-control">
 									<option value="">Any Status</option>
 									{% for value, label in status %}
@@ -49,12 +49,12 @@
 								</select>
 							</td>
 							<td>
-								HP Merchant :<br>
+								<i class="fa fa-mobile"></i> HP Merchant :<br>
 								<input type="text" name="mobile_phone" value="{{ mobile_phone }}" class="form form-control text-center" size="6" placeholder="HP Merchant">
 							</td>
 							<td>
 								<br>
-								<button type="submit" class="btn btn-info">CARI</button>
+								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
 							</td>
 						</tr>
 					</table>
@@ -74,7 +74,7 @@
 							<th class="text-center">Status / Pengantaran</th>
 							<th class="text-center">Pembeli</th>
 							<th class="text-center">Penjual</th>
-							<th class="text-center">Tagihan / Biaya Admin</th>
+							<th class="text-center">Total / Biaya Admin</th>
 							<th class="text-center">#</th>
 						</tr>
 					</thead>
@@ -85,7 +85,7 @@
 							<td class="text-nowrap" style="background:#{% if order.status == 0 %}FFCCCC{% elseif order.status == 1 %}CCFFCC{% elseif order.status == -1 %}FF0000;color:#FFFFFF{% endif %}">
 								<strong>
 									#{{ order.code }}<br>
-									{{ date('Y-m-d H:i', strtotime(order.created_at)) }}
+									<i class="fa fa-calendar"></i> {{ date('Y-m-d H:i', strtotime(order.created_at)) }}
 								</strong>
 							</td>
 							<td class="text-nowrap">
@@ -99,24 +99,27 @@
 									{% endif %}
 								</strong>
 								<br>
-								<strong>Jadwal :</strong>
-								{{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}<br>
-								<strong>Aktual :</strong>
+								<strong><i class="fa fa-calendar-o"></i> </strong>
+								{{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}
+								<br>
+								<strong><i class="fa fa-calendar-check-o"></i> </strong>
 								{% if order.status == 1 %}{{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}{% else %}-{% endif %}
 							</td>
 							<td>
-								{{ order.name }}<br>
-								<i class="fa fa-phone-square"></i>&nbsp;{{ order.buyer_phone }}
+								<i class="fa fa-user"></i> {{ order.name }}<br>
+								<i class="fa fa-mobile"></i>&nbsp;{{ order.buyer_phone }}
 							</td>
 							<td>
-								{% if order.merchant_company %}{{ order.merchant_company }}{% else %}{{ order.merchant_name }}{% endif %}<br>
-								<i class="fa fa-phone-square"></i>&nbsp;{{ order.merchant_phone }}
-							</td>
-							<td class="text-right">
-								Rp. {{ number_format(order.final_bill) }} / Rp. {{ number_format(order.admin_fee) }}
+								<i class="fa fa-user"></i> {% if order.merchant_company %}{{ order.merchant_company }}{% else %}{{ order.merchant_name }}{% endif %}<br>
+								<i class="fa fa-mobile"></i>&nbsp;{{ order.merchant_phone }}
 							</td>
 							<td>
-								<a href="/admin/orders/{{ order.id }}" title="Detail"><i class="fa fa-info-circle fa-2x"></i></a>
+								<i class="fa fa-shopping-bag"></i> Rp. {{ number_format(order.final_bill) }}
+								<br>
+								<i class="fa fa-check-square"></i> {% if order.admin_fee %}Rp. {{ number_format(order.admin_fee) }}{% else %}-{% endif %}
+							</td>
+							<td>
+								<a href="/admin/orders/{{ order.id }}" title="Detail"><i class="fa fa-external-link fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
