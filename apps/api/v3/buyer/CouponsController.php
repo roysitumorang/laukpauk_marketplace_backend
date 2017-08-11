@@ -50,7 +50,7 @@ QUERY
 			if (!$coupon ||
 				($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) ||
 				($coupon->minimum_version && (!$this->_server->app_version || !Release::findFirst(['user_type = ?0 AND version = ?1', 'bind' => ['buyer', $this->_server->app_version]]) || $this->_server->app_version < $coupon->minimum_version)) ||
-				(!$coupon->multiple_use && $coupon->personal_usage > 1)) {
+				(!$coupon->multiple_use && $coupon->personal_usage >= 1)) {
 				throw new Exception("Kode voucher {$code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 			}
 			foreach ($this->_server->orders as $cart) {
