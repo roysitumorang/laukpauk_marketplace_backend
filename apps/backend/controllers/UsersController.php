@@ -222,7 +222,7 @@ class UsersController extends ControllerBase {
 		}
 		$user->activate();
 		$this->flashSession->success('Aktivasi member berhasil.');
-		return $this->response->redirect('/admin/users?status=1#' . $user->id);
+		return $this->response->redirect('/admin/users/index/status:1#' . $user->id);
 	}
 
 	function suspendAction($id) {
@@ -239,7 +239,7 @@ class UsersController extends ControllerBase {
 		}
 		$user->suspend();
 		$this->flashSession->success('Member berhasil dinonaktifkan.');
-		return $this->response->redirect('/admin/users?status=-1#' . $user->id);
+		return $this->response->redirect('/admin/users/index/status:-1#' . $user->id);
 	}
 
 	function reactivateAction($id) {
@@ -256,7 +256,7 @@ class UsersController extends ControllerBase {
 		}
 		$user->reactivate();
 		$this->flashSession->success('Member berhasil diaktifkan kembali.');
-		return $this->response->redirect('/admin/users?status=1#' . $user->id);
+		return $this->response->redirect('/admin/users/index/status:1#' . $user->id);
 	}
 
 	function excelAction() {

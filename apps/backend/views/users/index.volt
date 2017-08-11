@@ -42,10 +42,7 @@
 						<form action="/admin/users" method="GET" id="search">
 							<table class="table table-striped">
 								<tr>
-									<td colspan="6"><b>Cari berdasarkan :</b></td>
-								</tr>
-								<tr>
-									<td>Status</td>
+									<td><i class="fa fa-tag"></i> Status</td>
 									<td>
 										<select name="status">
 											{% for value, label in status %}
@@ -53,7 +50,7 @@
 											{% endfor %}
 										</select>
 									</td>
-									<td>Role</td>
+									<td class="text-nowrap"><i class="fa fa-users"></i> Role</td>
 									<td>
 										<select name="role_id">
 											<option value="">Any Roles</option>
@@ -62,7 +59,7 @@
 											{% endfor %}
 										</select>
 									</td>
-									<td>Premium Merchant</td>
+									<td class="text-nowrap"><i class="fa fa-id-badge"></i> Premium Merchant</td>
 									<td>
 										<select name="merchant_id">
 											<option value=""></option>
@@ -73,11 +70,9 @@
 									</td>
 								</tr>
 								<tr>
-									<td>Nama / Toko / Nomor HP</td>
-									<td>
+									<td class="text-nowrap" colspan="6">
+										<i class="fa fa-user"></i> Nama / Toko / Nomor HP
 										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Toko / Nomor HP">
-									</td>
-									<td colspan="4">
 										<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
 										<a type="button" href="/admin/users/excel" target="_blank" class="btn btn-success"><i class="fa fa-file-excel-o"></i> Excel</a>
 									</td>
@@ -105,7 +100,7 @@
 										<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 										{% endif %}
 										<i class="fa fa-key"></i>&nbsp;&nbsp;{{ user.api_key | default('-') }}<br>
-										<i class="fa fa-phone-square"></i>&nbsp;&nbsp;{{ user.mobile_phone }}<br>
+										<i class="fa fa-mobile"></i>&nbsp;&nbsp;{{ user.mobile_phone }}<br>
 										<i class="fa fa-sign-in"></i>&nbsp;
 										{% if user.last_login %}
 										<a href="/admin/users/{{ user.id }}/login_history">{{ user.last_login }}</a>
@@ -113,38 +108,25 @@
 										No login yet
 										{% endif %}
 										{% if user.village %}
-										<br><i class="fa fa-home"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}, {{ user.city }}, {{ user.province }}
+										<br><i class="fa fa-map-marker"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}, {{ user.city }}, {{ user.province }}
 										{% endif %}
 									</td>
 									<td>
-										Join Date {{ date('d M Y', strtotime(user.created_at)) }}<br>
-										<br><i class="fa fa-money"></i>&nbsp;Rp. {{ number_format(user.deposit) }}
-										{% if in_array('Merchant', user.roles) or in_array('Buyer', user_roles) %}
-										<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}">Orders: {{ user.total_orders }}</a>
-										<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=0">Pending Orders: {{ user.total_pending_orders }} / Rp. {{ number_format(user.total_pending_bill) }}</a>
-										<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=1">Completed Orders: {{ user.total_completed_orders }} / Rp. {{ number_format(user.total_completed_bill) }}</a>
-										<br><a href="/admin/orders?{% if in_array('Merchant', user.roles) %}merchant_id{% else %}buyer_id{% endif %}={{ user.id }}&amp;status=-1">Cancelled Orders: {{ user.total_cancelled_orders }}</a>
-										{% endif %}
-										{% if in_array('Merchant', user.roles) %}
-										<br><a href="/admin/users/{{ user.id }}/store_items">Products: {{ user.total_products }}</a>
-										<br><a href="/admin/users/{{ user.id }}/service_areas">Service Areas: {{ user.total_service_areas }}</a>
-										{% endif %}
+										<i class="fa fa-calendar-check-o"></i> {{ date('d M Y H:i', strtotime(user.created_at)) }}<br>
+										<br><i class="fa fa-money"></i>&nbsp;{% if user.deposit %}Rp. {{ number_format(user.deposit) }}{% else %}-{% endif %}
 									</td>
 									<td>
 										{% if user.status == 'HOLD' %}
-										<a href="javascript:confirm('Anda yakin mengaktifkan member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/activate')" title="Activated"><img src="/backend/images/bullet-red.png" border="0"></a>
-										<b><font color="#FF0000">HOLD</font></b>&nbsp;
-										<a href="javascript:open_window('/admin/emails/create?user_id={{ user.id }}')" title="send email"><img src="/backend/images/send-email-small.png" border="0"></a>
+										<a href="javascript:void(0)" onclick="confirm('Anda yakin mengaktifkan member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/activate')" title="Hold"><font color="#FF0000"><i class="fa fa-user-o fa-2x"></i></font></a>
 										{% elseif user.status == 'ACTIVE' %}
-										<a href="javascript:confirm('Anda yakin menonaktifkan member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/suspend')" title="Hold"><img src="/backend/images/bullet-green.png" border="0"></a>&nbsp;<b>ACTIVE</b>
+										<a href="javascript:void(0)" onclick="confirm('Anda yakin menonaktifkan member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/suspend')" title="Active"><i class="fa fa-user fa-2x"></i></a>
 										{% else %}
-										<a href="javascript:confirm('Anda yakin mengaktifkan kembali member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/reactivate')" title="Reactivated"><img src="/backend/images/bullet-red.png" border="0"></a>
-										<b><font color="#FF0000">SUSPENDED</font></b>
+										<a href="javascript:void(0)" onclick="confirm('Anda yakin mengaktifkan kembali member ini ?')&amp;&amp;(location.href='/admin/users/{{ user.id }}/reactivate')" title="Suspended"><font color="#FF0000"><i class="fa fa-user-times fa-2x"></i></font></a>
 										{% endif %}
 									</td>
 									<td>
 										{% if user.status == 'ACTIVE' %}
-											<a href="/admin/users/{{ user.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+											<a href="/admin/users/{{ user.id }}" title="Ubah"><i class="fa fa-external-link fa-2x"></i></a>
 											{% if user.role == 'Buyer' %}
 												<a href="/admin/orders/create/buyer_id:{{ user.id }}"><i class="fa fa-cart-plus fa-2x"></i></a>
 											{% endif %}
