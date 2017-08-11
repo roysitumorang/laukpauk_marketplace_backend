@@ -354,6 +354,9 @@ class User extends ModelBase {
 				$this->terms_conditions = null;
 			}
 		}
+		if (!is_int($this->accumulation_divisor)) {
+			$this->accumulation_divisor = 0;
+		}
 	}
 
 	function validation() {
