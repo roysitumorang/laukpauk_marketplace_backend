@@ -314,7 +314,14 @@ $di->set('router', function() {
 		'controller' => 1,
 		'action'     => 2,
 		'params'     => 3,
-	]);
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', strtolower($old_action));
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return $new_action;
+	});
 
 	$router->add('/admin/:controller/:int/:action', [
 		'module'     => 'backend',

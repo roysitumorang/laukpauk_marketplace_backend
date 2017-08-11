@@ -144,7 +144,10 @@
 									</td>
 									<td>
 										{% if user.status == 'ACTIVE' %}
-										<a href="/admin/users/{{ user.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a><br>
+											<a href="/admin/users/{{ user.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+											{% if user.role == 'Buyer' %}
+												<a href="/admin/orders/create/buyer_id:{{ user.id }}"><i class="fa fa-cart-plus fa-2x"></i></a>
+											{% endif %}
 										{% endif %}
 									</td>
 								</tr>
