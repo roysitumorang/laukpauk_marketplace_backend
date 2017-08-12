@@ -58,7 +58,7 @@
 						<tr>
 							<td>{{ coupon.rank }}</td>
 							<td>
-								<font color="#006bb3"><strong><a href="/admin/coupons/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>
+								<font color="#006bb3"><strong><a href="/admin/coupons/{{ coupon.id }}"{% if coupon.expiry_date <= current_date %} style="text-decoration:line-through"{% endif %}>{{ coupon.code }}</a></strong></font>
 								<br>
 								{{ coupon.multiple_use }}
 								<br>
