@@ -7,7 +7,7 @@ use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
 use Phalcon\Db;
-use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class UsersController extends ControllerBase {
 	function indexAction() {
@@ -93,7 +93,7 @@ class UsersController extends ControllerBase {
 			]);
 		}
 		$builder->andWhere('a.merchant_id ' . ($current_premium_merchant ? "= {$current_premium_merchant}" : 'IS NULL'));
-		$paginator = new PaginatorQueryBuilder([
+		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
@@ -382,6 +382,7 @@ QUERY
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
 		$user->setTermsConditions($this->request->getPost('terms_conditions'));
 		$user->setMerchantNote($this->request->getPost('merchant_note'));
+		$user->setContact($this->request->getPost('contact'));
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {
 			$user->setDeliveryHours($this->request->getPost('delivery_hours'));

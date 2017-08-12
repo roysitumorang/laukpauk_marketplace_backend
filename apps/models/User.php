@@ -10,7 +10,7 @@ use Phalcon\Validation\Validator\Between;
 use Phalcon\Validation\Validator\Confirmation;
 use Phalcon\Validation\Validator\Date;
 use Phalcon\Validation\Validator\Email;
-use Phalcon\Validation\Validator\File as FileValidator;
+use Phalcon\Validation\Validator\File;
 use Phalcon\Validation\Validator\Numericality;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Regex;
@@ -471,7 +471,7 @@ class User extends ModelBase {
 			'message' => 'deposit harus dalam bentuk angka',
 		]));
 		if ($this->new_avatar) {
-			$validator->add('new_avatar', new FileValidator([
+			$validator->add('new_avatar', new File([
 				'maxSize'      => $max_size,
 				'messageSize'  => 'ukuran file maksimal ' . $max_size,
 				'allowedTypes' => ['image/jpeg', 'image/png'],

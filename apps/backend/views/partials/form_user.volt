@@ -83,6 +83,12 @@
 		</tr>
 		<tr>
 			<td>
+				Hubungi Kami (* untuk premium merchant) :<br>
+				<textarea name="contact" cols="50" rows="5" placeholder="Hubungi kami">{{ user.contact }}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>
 				Catatan Penjual (untuk merchant) :<br>
 				<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
 			</td>
