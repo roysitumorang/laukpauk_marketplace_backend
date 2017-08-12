@@ -113,7 +113,15 @@
 								{% endif %}
 							</td>
 							<td class="text-nowrap">
-								{{ item.quantity }} x Rp. {{ number_format(item.price) }} @ {{ item.stock_unit }}
+								<select name="quantity[{{ item.id }}]" class="quantity" data-id="{{ item.id }}">
+								{% for i in 1..10 %}
+									{% if i > item.stock %}
+										{% break %}
+									{% endif %}
+									<option value="{{ i }}"{% if i == item.quantity%} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+								</select>
+								x Rp. {{ number_format(item.price) }} @ {{ item.stock_unit }}
 							</td>
 							<td><b>Rp. {{ number_format(item.quantity * item.price) }}</b></td>
 							<td>
@@ -291,6 +299,23 @@
 			input.name = 'user_product_id',
 			input.value = product.dataset.id,
 			form.appendChild(input),
+			document.body.appendChild(form),
+			form.submit()
+		}
+	}),
+	document.querySelectorAll('.quantity').forEach(product => {
+		product.onchange = () => {
+			let form = document.createElement('form'), input_id = document.createElement('input'), input_quantity = document.createElement('input');
+			form.method = 'POST',
+			form.action = '/admin/orders/add_product/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
+			input_id.type = 'hidden',
+			input_id.name = 'user_product_id',
+			input_id.value = product.dataset.id,
+			input_quantity.type = 'hidden',
+			input_quantity.name = 'quantity',
+			input_quantity.value = product.value,
+			form.appendChild(input_id),
+			form.appendChild(input_quantity),
 			document.body.appendChild(form),
 			form.submit()
 		}

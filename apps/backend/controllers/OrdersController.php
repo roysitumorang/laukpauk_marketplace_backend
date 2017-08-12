@@ -568,7 +568,7 @@ QUERY
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			if (($row->maximum_usage && $row->total_usage >= $row->maximum_usage) ||
-				(!$row->multiple_use && $row->personal_usage > 1)) {
+				(!$row->multiple_use && $row->personal_usage >= 1)) {
 				continue;
 			}
 			$coupons[] = $row;
