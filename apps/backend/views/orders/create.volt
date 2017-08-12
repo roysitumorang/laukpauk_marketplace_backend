@@ -264,29 +264,33 @@
 		}
 		event.preventDefault(),
 		location.href = url
-	}, false),
-	coupon_id.onchange = () => {
-		let form = document.createElement('form'), input = document.createElement('input');
-		form.method = 'POST',
-		form.action = '/admin/orders/apply_coupon/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
-		input.type = 'hidden',
-		input.name = 'coupon_id',
-		input.value = coupon_id.value,
-		form.appendChild(input),
-		document.body.appendChild(form),
-		form.submit()
-	},
-	scheduled_delivery.onchange = () => {
-		let form = document.createElement('form'), input = document.createElement('input');
-		form.method = 'POST',
-		form.action = '/admin/orders/set_delivery/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
-		input.type = 'hidden',
-		input.name = 'scheduled_delivery',
-		input.value = scheduled_delivery.value,
-		form.appendChild(input),
-		document.body.appendChild(form),
-		form.submit()
-	},
+	}, false)
+	if (coupon_id) {
+		coupon_id.onchange = () => {
+			let form = document.createElement('form'), input = document.createElement('input');
+			form.method = 'POST',
+			form.action = '/admin/orders/apply_coupon/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
+			input.type = 'hidden',
+			input.name = 'coupon_id',
+			input.value = coupon_id.value,
+			form.appendChild(input),
+			document.body.appendChild(form),
+			form.submit()
+		}
+	}
+	if (scheduled_delivery) {
+		scheduled_delivery.onchange = () => {
+			let form = document.createElement('form'), input = document.createElement('input');
+			form.method = 'POST',
+			form.action = '/admin/orders/set_delivery/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
+			input.type = 'hidden',
+			input.name = 'scheduled_delivery',
+			input.value = scheduled_delivery.value,
+			form.appendChild(input),
+			document.body.appendChild(form),
+			form.submit()
+		}
+	}
 	document.querySelectorAll('.remove').forEach(product => {
 		product.onclick = () => {
 			if (!confirm('Anda yakin ingin menghapus produk ini ?')) {
