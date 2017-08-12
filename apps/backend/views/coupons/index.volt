@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="GET" action="/admin/coupons">
+				<form method="GET" action="/admin/coupons/index" id="search">
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -34,7 +34,7 @@
 								<select name="status">
 									<option value="">All</option>
 									{% for key, value in status %}
-									<option value="{{ key }}"{% if current_status === key %} selected{% endif %}>{{ value }}</option>
+									<option value="{{ key }}"{% if current_status == key %} selected{% endif %}>{{ value }}</option>
 									{% endfor %}
 								</select>
 								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
@@ -63,9 +63,13 @@
 								<br>
 								{{ coupon.multiple_use }}
 								<br>
-								Pemakaian maksimal {{ number_format(coupon.maximum_usage) }} order
+								Pemakaian Maksimal : {{ number_format(coupon.maximum_usage) }} order
 								<br>
-								Min. Pembelian: Rp. {{ number_format(coupon.minimum_purchase) }}
+								Pembelian Minimal : Rp. {{ number_format(coupon.minimum_purchase) }}
+								{% if coupon.minimum_version %}
+								<br>
+								Versi Aplikasi Minimal : {{ coupon.minimum_version }}
+								{% endif %}
 							</td>
 							<td>
 								{% if coupon.discount_type == 1 %}
@@ -74,7 +78,7 @@
 									{{ coupon.price_discount }} %
 								{% endif %}
 							</td>
-							<td>{{ coupon.effective_date_start }} s/d {{ coupon.effective_date_end }}</td>
+							<td>{{ coupon.effective_date_start }} - {{ coupon.effective_date_end }}</td>
 							<td>{% if coupon.total_usage %}{{ number_format(coupon.total_usage) }}{% else %}-{% endif %}</td>
 							<td>
 								{% if coupon.expiry_date > current_date %}<a href="javascript:void(0)" class="status" data-id="{{ coupon.id }}">{% endif %}
@@ -114,6 +118,7 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
+	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
 	document.querySelectorAll('.status').forEach(link => {
 		link.onclick = () => {
 			let form = document.createElement('form'), input = document.createElement('input');
@@ -122,5 +127,17 @@
 			document.body.appendChild(form),
 			form.submit()
 		}
-	})
+	}),
+	search.addEventListener('submit', event => {
+		if (search.keyword.value) {
+			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+				return replacement[match]
+			})
+		}
+		if (search.status.value) {
+			url += '/status:' + search.status.value
+		}
+		event.preventDefault(),
+		location.href = url
+	}, false)
 </script>

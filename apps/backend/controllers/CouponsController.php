@@ -20,7 +20,7 @@ class CouponsController extends ControllerBase {
 			IntlDateFormatter::NONE,
 			$this->currentDatetime->getTimezone(),
 			IntlDateFormatter::GREGORIAN,
-			'EEEE, d MMMM yyyy'
+			'd MMMM yyyy'
 		);
 	}
 
@@ -28,8 +28,8 @@ class CouponsController extends ControllerBase {
 		$limit          = $this->config->per_page;
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset         = ($current_page - 1) * $limit;
-		$keyword        = $this->request->get('keyword', 'string');
-		$current_status = filter_var($this->request->get('status'), FILTER_VALIDATE_INT);
+		$keyword        = $this->dispatcher->getParam('keyword', 'string');
+		$current_status = $this->dispatcher->getParam('status', 'int');
 		$builder        = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
@@ -43,18 +43,19 @@ class CouponsController extends ControllerBase {
 				'a.minimum_purchase',
 				'a.release_id',
 				'a.maximum_usage',
-				'total_usage' => 'SUM(b.discount) / a.price_discount'
+				'minimum_version' => "STRING_AGG(b.version, '')",
+				'total_usage'     => 'SUM(c.discount) / a.price_discount',
 			])
 			->from(['a' => 'Application\Models\Coupon'])
-			->leftJoin('Application\Models\Order', 'a.id = b.coupon_id AND b.status = 1', 'b')
-			->where('1 = 1')
+			->leftJoin('Application\Models\Release', 'a.release_id = b.id', 'b')
+			->leftJoin('Application\Models\Order', 'a.id = c.coupon_id AND c.status = 1', 'c')
 			->groupBy('a.id')
 			->orderBy('a.id DESC');
 		if ($keyword) {
-			$builder->andWhere('a.code ILIKE ?', "%{$keyword}%");
+			$builder->andWhere('a.code ILIKE :code:', ['code' => "%{$keyword}%"]);
 		}
-		if ($current_status) {
-			$builder->andWhere('a.status = ?', $current_status);
+		if (ctype_digit($current_status)) {
+			$builder->andWhere("a.status = :status:", ['status' => $current_status]);
 		}
 		$paginator = new QueryBuilder([
 			'builder' => $builder,
