@@ -715,6 +715,9 @@ QUERY;
 					if ($new_order->get('cart')->get($user_product->user_id)->isEmpty()) {
 						$new_order->get('cart')->remove($user_product->user_id);
 					}
+					if ($new_order->get('cart')->isEmpty() && $new_order->hasKey('coupon_id')) {
+						$new_order->remove('coupon_id');
+					}
 				}
 			}
 			$this->session->set('order', serialize($new_order));
