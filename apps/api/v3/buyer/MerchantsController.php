@@ -170,7 +170,7 @@ QUERY
 			'status' => 1,
 			'data'   => ['company_profile' => $premium_merchant->company_profile],
 		];
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 
@@ -186,7 +186,7 @@ QUERY
 			'status' => 1,
 			'data'   => ['terms_conditions' => $premium_merchant->terms_conditions],
 		];
-		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 }

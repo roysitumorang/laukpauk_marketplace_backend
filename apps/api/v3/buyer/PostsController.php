@@ -31,7 +31,7 @@ class PostsController extends ControllerBase {
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
-			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+			$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 			return $this->response;
 		}
 	}
