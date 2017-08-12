@@ -292,7 +292,6 @@ QUERY
 					$order->shipping_cost = $merchant->shipping_cost;
 					$order->orderProducts = $order_products;
 					if (!$order->validation()) {
-						var_dump($order->toArray());exit;
 						foreach ($order->getMessages() as $error) {
 							$this->flashSession->error($error);
 						}
