@@ -284,6 +284,17 @@ QUERY
 				$discount          = max($discount - $order->discount, 0);
 				$order->create();
 			}
+			$params = [];
+			if ($this->_current_user->name != $this->_post->delivery->name) {
+				$params['name'] = $this->_post->delivery->name;
+			}
+			if (!$this->_current_user->address || $this->_current_user->address != $this->_post->delivery->address) {
+				$params['address'] = $this->_post->delivery->address;
+			}
+			if ($params) {
+				$params['updated_by'] = $this->_current_user->id;
+				$this->_current_user->update($params);
+			}
 			$this->_response['status'] = 1;
 			throw new Exception('Terima kasih, order Anda segera kami proses.');
 		} catch (Exception $e) {

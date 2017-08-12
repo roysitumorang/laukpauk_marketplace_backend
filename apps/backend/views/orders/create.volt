@@ -32,7 +32,7 @@
 								<b><font color="#000099"><i class="fa fa-user"></i> Pembeli :</font></b>
 							</td>
 							<td>
-								{{ buyer.name }}
+								<input type="text" name="name" value="{{ buyer.name }}" placeholder="Nama" class="form-control">
 							</td>
 							<td>
 								<b><font color="#000099"><i class="fa fa-mobile"></i> Nomor HP :</font></b>

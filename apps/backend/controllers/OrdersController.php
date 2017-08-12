@@ -319,6 +319,16 @@ QUERY
 					$discount          = max($discount - $order->discount, 0);
 					$order->create();
 				}
+				$params = [];
+				if ($buyer->name != $this->request->getPost('name')) {
+					$params['name'] = $this->request->getPost('name');
+				}
+				if (!$buyer->address || $buyer->address != $this->request->getPost('address')) {
+					$params['address'] = $this->request->getPost('address');
+				}
+				if ($params) {
+					$buyer->update($params);
+				}
 				$this->flashSession->success('Order berhasil ditambah!');
 				return $this->response->redirect('/admin/orders');
 			} catch (Exception $e) {
