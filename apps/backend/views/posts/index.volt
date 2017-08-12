@@ -30,36 +30,27 @@
 							<td>Merchant :</td>
 							<td>
 								<select name="user_id" onchange="location.href='/admin/posts'+(this.value?'/index/user_id:'+this.value:'')">
-									<option value=""></option>
-									{% for merchant in merchants %}
-										<option value="{{ merchant.id }}"{% if merchant.id == user_id %} selected{% endif %}>{{ merchant.company }}</option>
+									{% for item in users %}
+										<option value="{{ item.id }}"{% if item.id == user.id %} selected{% endif %}>{{ item.company }}</option>
 									{% endfor %}
 								</select>
 							</td>
 						</tr>
-						{% for post in posts %}
 						<tr>
-							<td>{{ post.name }} :</td>
-							<td><textarea name="posts[{{ post.post_category_id }}]" cols="70" rows="10" placeholder="{{ post.name }}">{{ post.body }}</textarea></td>
+							<td>Tentang Kami :</td>
+							<td><textarea name="company_profile" cols="70" rows="10" placeholder="Tentang Kami">{{ user.company_profile }}</textarea></td>
 						</tr>
-						{% endfor %}
+						<tr>
+							<td>Kebijakan dan Privasi :</td>
+							<td><textarea name="terms_conditions" cols="70" rows="10" placeholder="Kebijakan dan Privasi">{{ user.terms_conditions }}</textarea></td>
+						</tr>
+						<tr>
+							<td>Hubungi Kami :</td>
+							<td><textarea name="contact" cols="70" rows="10" placeholder="Hubungi Kami">{{ user.contact }}</textarea></td>
+						</tr>
 					</table>
 					<button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> SIMPAN</button>
 				</form>
-				{% if page.total_pages > 1 %}
-				<div class="weepaging">
-					<p>
-						<b>Halaman:</b>&nbsp;&nbsp;
-						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
-							{% else %}
-							<a href="/admin/posts/index{% if user_id %}/user_id:{{ user_id }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
-							{% endif %}
-						{% endfor %}
-					</p>
-				</div>
-				{% endif %}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->

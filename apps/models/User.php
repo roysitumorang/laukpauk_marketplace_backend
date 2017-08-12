@@ -37,6 +37,7 @@ class User extends ModelBase {
 	public $merchant_id;
 	public $merchant_token;
 	public $merchant_note;
+	public $contact;
 	public $domain;
 	public $minimum_purchase;
 	public $admin_fee;
@@ -148,6 +149,10 @@ class User extends ModelBase {
 
 	function setMerchantNote($merchant_note) {
 		$this->merchant_note = $this->_filter->sanitize($merchant_note, 'trim') ?: null;
+	}
+
+	function setContact($contact) {
+		$this->contact = $this->_filter->sanitize($contact, 'trim') ?: null;
 	}
 
 	function setDomain($domain) {
@@ -343,16 +348,17 @@ class User extends ModelBase {
 		if (!$this->id || $this->new_password) {
 			$this->password = password_hash($this->new_password, PASSWORD_DEFAULT);
 		}
-		if ($this->role->id != Role::MERCHANT) {
+		if ($this->role_id != Role::MERCHANT) {
 			$this->premium_merchant = null;
 			$this->minimum_purchase = 0;
 			$this->admin_fee        = 0;
 			$this->merchant_note    = null;
-			if (!$this->premium_merchant) {
-				$this->domain           = null;
-				$this->company_profile  = null;
-				$this->terms_conditions = null;
-			}
+		}
+		if (!$this->premium_merchant && $this->role_id != Role::SUPER_ADMIN) {
+			$this->domain           = null;
+			$this->company_profile  = null;
+			$this->terms_conditions = null;
+			$this->contact          = null;
 		}
 		if (!is_int($this->accumulation_divisor)) {
 			$this->accumulation_divisor = 0;
@@ -420,7 +426,7 @@ class User extends ModelBase {
 					'message' => 'domain sudah ada',
 				]));
 			}
-			if ($this->premium_merchant) {
+			if (($this->role_id == Role::SUPER_ADMIN || $this->premium_merchant) && $this->onesignal_app_id) {
 				$validator->add('onesignal_app_id', new Uniqueness([
 					'message' => 'application id onesignal sudah ada',
 				]));
