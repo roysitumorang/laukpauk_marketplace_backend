@@ -2,7 +2,6 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\Post;
 use Application\Models\User;
 use Application\Models\Role;
 use Phalcon\Db;
@@ -164,11 +163,12 @@ QUERY
 			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
 
 		}
+		if (!$premium_merchant) {
+			$premium_merchant = User::findFirst(1);
+		}
 		$this->_response = [
 			'status' => 1,
-			'data'   => [
-				'company_profile' => $premium_merchant ? $premium_merchant->company_profile : Post::findFirstByPermalink('tentang-kami')->body,
-			],
+			'data'   => ['company_profile' => $premium_merchant->company_profile],
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 		return $this->response;
@@ -179,11 +179,12 @@ QUERY
 			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
 
 		}
+		if (!$premium_merchant) {
+			$premium_merchant = User::findFirst(1);
+		}
 		$this->_response = [
 			'status' => 1,
-			'data'   => [
-				'terms_conditions' => $premium_merchant ? $premium_merchant->terms_conditions : Post::findFirstByPermalink('syarat-ketentuan')->body,
-			],
+			'data'   => ['terms_conditions' => $premium_merchant->terms_conditions],
 		];
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 		return $this->response;

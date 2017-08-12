@@ -2,7 +2,8 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Phalcon\Db;
+use Application\Models\User;
+use Ds\Map;
 use Phalcon\Exception;
 
 class PostsController extends ControllerBase {
@@ -14,14 +15,18 @@ class PostsController extends ControllerBase {
 
 	function showAction($permalink) {
 		try {
-			$post = $this->db->fetchOne('SELECT a.name, b.body FROM post_categories a LEFT JOIN posts b ON a.id = b.post_category_id AND b.user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . ' WHERE a.permalink = ?', Db::FETCH_OBJ, [$permalink]);
-			if (!$post) {
+			$user       = $this->_premium_merchant ?: User::findFirst(1);
+			$permalinks = new Map([
+				'hubungi-kami' => 'contact',
+			]);
+			if (!$permalinks->hasKey($permalink)) {
 				throw new Exception('Konten tidak ditemukan!');
 			}
+			$attribute                       = $permalinks->get($permalink);
 			$this->_response['status']       = 1;
 			$this->_response['data']['post'] = [
-				'subject' => $post->name,
-				'body'    => strtr($post->body, ["\r\n" => '']),
+				'subject' => ucwords(strtr($permalink, ['-' => ' '])),
+				'body'    => strtr($user->$attribute, ["\r\n" => '']),
 			];
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
