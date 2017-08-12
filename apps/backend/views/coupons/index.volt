@@ -24,7 +24,6 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/coupons/create">Tambah Kupon</a></p>
 				<form method="GET" action="/admin/coupons">
 					<table class="table table-striped">
 						<tr>
@@ -39,6 +38,7 @@
 									{% endfor %}
 								</select>
 								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
+								<a type="button" href="/admin/coupons/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah Kupon</a>
 							</td>
 						</tr>
 					</table>
@@ -50,6 +50,7 @@
 							<th>Kode</th>
 							<th>Diskon</th>
 							<th>Masa Berlaku</th>
+							<th>Pemakaian</th>
 							<th colspan="2">#</th>
 						</tr>
 					</thead>
@@ -74,6 +75,7 @@
 								{% endif %}
 							</td>
 							<td>{{ coupon.effective_date_start }} s/d {{ coupon.effective_date_end }}</td>
+							<td>{% if coupon.total_usage %}{{ number_format(coupon.total_usage) }}{% else %}-{% endif %}</td>
 							<td>
 								{% if coupon.expiry_date > current_date %}<a href="javascript:void(0)" class="status" data-id="{{ coupon.id }}">{% endif %}
 									<i class="fa fa-eye{% if !coupon.status or coupon.expiry_date <= current_date %}-slash{% endif %} fa-2x"></i>
@@ -85,7 +87,7 @@
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="6"><i>Belum ada kupon</i></td>
+							<td colspan="7"><i>Belum ada kupon</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>

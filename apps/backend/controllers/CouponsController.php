@@ -6,7 +6,7 @@ use Application\Models\Coupon;
 use Application\Models\Release;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CouponsController extends ControllerBase {
 	private $_date_formatter;
@@ -30,25 +30,36 @@ class CouponsController extends ControllerBase {
 		$offset         = ($current_page - 1) * $limit;
 		$keyword        = $this->request->get('keyword', 'string');
 		$current_status = filter_var($this->request->get('status'), FILTER_VALIDATE_INT);
-		$params         = [];
-		$conditions     = [];
+		$builder        = $this->modelsManager->createBuilder()
+			->columns([
+				'a.id',
+				'a.code',
+				'a.effective_date',
+				'a.expiry_date',
+				'a.price_discount',
+				'a.discount_type',
+				'a.status',
+				'a.multiple_use',
+				'a.minimum_purchase',
+				'a.release_id',
+				'a.maximum_usage',
+				'total_usage' => 'SUM(b.discount) / a.price_discount'
+			])
+			->from(['a' => 'Application\Models\Coupon'])
+			->leftJoin('Application\Models\Order', 'a.id = b.coupon_id AND b.status = 1', 'b')
+			->where('1 = 1')
+			->groupBy('a.id')
+			->orderBy('a.id DESC');
 		if ($keyword) {
-			$conditions[0][]    = 'code LIKE :code:';
-			$conditions['code'] = "%{$keyword}%";
+			$builder->andWhere('a.code ILIKE ?', "%{$keyword}%");
 		}
 		if ($current_status) {
-			$conditions[0][]      = 'status = :status:';
-			$conditions['status'] = $current_status;
+			$builder->andWhere('a.status = ?', $current_status);
 		}
-		if ($conditions) {
-			$params['conditions'] = implode(' AND ', array_shift($conditions));
-			$params['bind']       = $conditions;
-		}
-		$params['order'] = 'id DESC';
-		$paginator       = new Model([
-			'data'  => Coupon::find($params),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$paginator = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page    = $paginator->getPaginate();
 		$pages   = $this->_setPaginationRange($page);
