@@ -66,6 +66,7 @@ class CouponsController extends ControllerBase {
 		$this->view->status         = Coupon::STATUS;
 		$this->view->keyword        = $keyword;
 		$this->view->current_status = $current_status;
+		$this->view->current_date   = $this->currentDatetime->format('Y-m-d');
 	}
 
 	function showAction($id) {
@@ -113,6 +114,18 @@ class CouponsController extends ControllerBase {
 			}
 		}
 		$this->_prepare_form($coupon);
+	}
+
+	function toggleStatusAction($id) {
+		$keyword = $this->dispatcher->getParam('keyword');
+		$status  = $this->dispatcher->getParam('status', 'int');
+		$page    = $this->dispatcher->getParam('page', 'int');
+		if (!$this->request->isPost() || !($coupon = Coupon::findFirst(['id = ?0 AND expiry_date > ?1', 'bind' => [$id, $this->currentDatetime->format('Y-m-d')]]))) {
+			$this->flashSession->error('Kupon tidak ditemukan.');
+		} else {
+			$coupon->update(['status' => $coupon->status ? 0 : 1]);
+		}
+		return $this->response->redirect("/admin/coupons/index" . ($keyword ? "/keyword:{$keyword}" : '') . ($status ? "/status:{$status}" : '') . ($page ? "/page:{$page}" : ''));
 	}
 
 	private function _prepare_form(Coupon &$coupon) {

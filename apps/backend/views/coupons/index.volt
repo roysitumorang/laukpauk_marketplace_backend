@@ -38,7 +38,7 @@
 									<option value="{{ key }}"{% if current_status === key %} selected{% endif %}>{{ value }}</option>
 									{% endfor %}
 								</select>
-								<button type="submit" class="btn btn-info">CARI</button>
+								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
 							</td>
 						</tr>
 					</table>
@@ -46,11 +46,11 @@
 				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th width="25"><b>No</b></th>
-							<th><b>Kupon</b></th>
-							<th><b>Diskon</b></th>
-							<th><b>Masa Berlaku</b></th>
-							<th><b>#</b></th>
+							<th width="25">No</th>
+							<th>Kode</th>
+							<th>Diskon</th>
+							<th>Masa Berlaku</th>
+							<th colspan="2">#</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -58,8 +58,8 @@
 						<tr>
 							<td>{{ coupon.rank }}</td>
 							<td>
-								<font size="4" color="#006bb3"><strong><a href="/admin/coupons/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>&nbsp;
-								<img src="/assets/image/bullet-{% if coupon.status == 1 %}green{% else %}red{% endif %}.png" border="0"><br>
+								<font color="#006bb3"><strong><a href="/admin/coupons/{{ coupon.id }}">{{ coupon.code }}</a></strong></font>
+								<br>
 								{{ coupon.multiple_use }}
 								<br>
 								Pemakaian maksimal {{ number_format(coupon.maximum_usage) }} order
@@ -67,22 +67,25 @@
 								Min. Pembelian: Rp. {{ number_format(coupon.minimum_purchase) }}
 							</td>
 							<td>
-								<font size="4">
-									{% if coupon.discount_type == 1 %}
+								{% if coupon.discount_type == 1 %}
 									Rp. {{ number_format(coupon.price_discount) }}
-									{% else %}
+								{% else %}
 									{{ coupon.price_discount }} %
-									{% endif %}
-								</font>
+								{% endif %}
 							</td>
 							<td>{{ coupon.effective_date_start }} s/d {{ coupon.effective_date_end }}</td>
+							<td>
+								{% if coupon.expiry_date > current_date %}<a href="javascript:void(0)" class="status" data-id="{{ coupon.id }}">{% endif %}
+									<i class="fa fa-eye{% if !coupon.status or coupon.expiry_date <= current_date %}-slash{% endif %} fa-2x"></i>
+								{% if coupon.expiry_date > current_date %}</a>{% endif %}
+							</td>
 							<td>
 								<a href="/admin/coupons/{{ coupon.id }}/update" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="5"><i>Belum ada kupon</i></td>
+							<td colspan="6"><i>Belum ada kupon</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>
@@ -95,7 +98,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/coupons{% if i > 1%}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+							<a href="/admin/coupons/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if i > 1%}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -108,3 +111,14 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	document.querySelectorAll('.status').forEach(link => {
+		link.onclick = () => {
+			let form = document.createElement('form'), input = document.createElement('input');
+			form.method = 'POST',
+			form.action = '/admin/coupons/' + link.dataset.id + '/toggle_status',
+			document.body.appendChild(form),
+			form.submit()
+		}
+	})
+</script>
