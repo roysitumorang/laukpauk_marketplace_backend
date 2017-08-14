@@ -44,7 +44,7 @@ class HomeController extends ControllerBase {
 		$this->view->monthly_sales = json_encode($monthly_sales, JSON_NUMERIC_CHECK);
 		$this->view->annual_sales  = json_encode($annual_sales, JSON_NUMERIC_CHECK);
 		$this->view->best_sales    = json_encode($best_sales, JSON_NUMERIC_CHECK);
-		$this->view->today_orders  = $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE DATE(created_at) = ? AND status != -1', [$this->currentDatetime->format('Y-m-d')]);
+		$this->view->today_orders  = $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE (DATE(created_at) = ? OR DATE(scheduled_delivery) = ?) AND status != -1', [$this->currentDatetime->format('Y-m-d'), $this->currentDatetime->format('Y-m-d')]);
 		$this->view->total_profit  = $this->db->fetchColumn('SELECT SUM(admin_fee) FROM orders WHERE status = 1');
 		$this->view->menu          = $this->_menu();
 	}
