@@ -70,9 +70,9 @@ QUERY
 			if (!$merchant) {
 				throw new Exception('Order Anda tidak valid!');
 			}
-			$minimum_purchase = $merchant->minimum_purchase ?: Setting::findFirstByName('minimum_purchase')->value;
+			$minimum_purchase = max($merchant->minimum_purchase, Setting::findFirstByName('minimum_purchase')->value);
 			if ($this->_input->coupon_code) {
-				$today = $this->currentDatetime->format('Y-m-d');
+				$today  = $this->currentDatetime->format('Y-m-d');
 				$params = [<<<QUERY
 					SELECT
 						a.id,
@@ -80,17 +80,24 @@ QUERY
 						a.discount_type,
 						a.multiple_use,
 						a.minimum_purchase,
-						COUNT(1) AS usage
+						d.version AS minimum_version,
+						a.maximum_usage,
+						COUNT(DISTINCT b.id) AS personal_usage,
+						COUNT(DISTINCT c.id) AS total_usage
 					FROM
 						coupons a
-						LEFT JOIN orders b ON a.id = b.coupon_id AND b.status = '1' AND b.buyer_id = ?
+						LEFT JOIN orders b ON a.id = b.coupon_id AND b.status != '-1' AND b.buyer_id = ?
+						LEFT JOIN orders c ON a.id = c.coupon_id AND c.status != '-1'
+						LEFT JOIN releases d ON a.release_id = d.id
 					WHERE
 						a.status = '1' AND
 						a.effective_date <= ? AND
 						a.expiry_date > ? AND
 						a.code = ? AND
 						a.user_id IS NULL
-					GROUP BY a.id
+					GROUP BY
+						a.id,
+						d.version
 QUERY
 					,
 					$this->_current_user->id,
@@ -98,9 +105,15 @@ QUERY
 					$today,
 					$this->_input->coupon_code,
 				];
-				$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
-				if (!$coupon || ($coupon->multiple_use && $coupon->usage > 1)) {
+				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				if (!$coupon) {
 					throw new Exception('Voucher tidak valid! Silahkan cek ulang atau kosongkan untuk melanjutkan pemesanan.');
+				} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
+					throw new Exception('Pemakaian voucher udah melebihi batas maksimal!');
+				} else if ($coupon->minimum_version && (!$this->_input->app_version || !Release::findFirst(['user_type = ?0 AND version = ?1', 'bind' => ['buyer', $this->_input->app_version]]) || $this->_input->app_version < $coupon->minimum_version)) {
+					throw new Exception('Voucher berlaku untuk versi minimal ' . $coupon->minimum_version . '! Silahkan upgrade aplikasi Anda.');
+				} else if (!$coupon->multiple_use && $coupon->personal_usage >= 1) {
+					throw new Exception('Voucher cuma berlaku untuk sekali pemakaian!');
 				}
 			}
 			$order          = new Order;
