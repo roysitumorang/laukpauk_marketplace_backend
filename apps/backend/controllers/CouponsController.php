@@ -43,7 +43,7 @@ class CouponsController extends ControllerBase {
 				'a.minimum_purchase',
 				'a.release_id',
 				'a.maximum_usage',
-				'minimum_version' => "STRING_AGG(b.version, '')",
+				'minimum_version' => "STRING_AGG(DISTINCT b.version, '')",
 				'total_usage'     => 'SUM(c.discount) / a.price_discount',
 			])
 			->from(['a' => 'Application\Models\Coupon'])
