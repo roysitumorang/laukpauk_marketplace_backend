@@ -14,7 +14,7 @@ return new Config([
 		'host'       => 'localhost',
 		'username'   => 'postgres',
 		'password'   => 'tR1adpass#',
-		'dbname'     => 'sayur',
+		'dbname'     => 'laukpauk_marketplace',
 		'persistent' => true,
 		'options'    => [
 			PDO::ATTR_EMULATE_PREPARES => false,
