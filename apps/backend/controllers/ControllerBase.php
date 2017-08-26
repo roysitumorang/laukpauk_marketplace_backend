@@ -129,10 +129,11 @@ class ControllerBase extends Controller {
 				'icon'      => 'wrench',
 				'expanded'  => $expanded == 'Options',
 				'sub_items' => [
-					['label' => 'Settings',        'link' => 'settings'],
-					['label' => 'Rekening Bank',   'link' => 'bank_accounts'],
-					['label' => 'Daftar Propinsi', 'link' => 'provinces'],
-					['label' => 'Release APK',     'link' => 'releases'],
+					['label' => 'Settings',            'link' => 'settings'],
+					['label' => 'Rekening Bank',       'link' => 'bank_accounts'],
+					['label' => 'Daftar Propinsi',     'link' => 'provinces'],
+					['label' => 'Release APK',         'link' => 'releases'],
+					['label' => 'Template Notifikasi', 'link' => 'notification_templates'],
 				],
 			], [
 				'label'     => 'Manage User',

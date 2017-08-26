@@ -54,15 +54,14 @@ class NotificationTemplate extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['notification_type', 'name', 'title', 'target_url'], new PresenceOf([
+		$validator->add(['name', 'title', 'admin_target_url', 'merchant_target_url', 'old_mobile_target_url', 'new_mobile_target_url'], new PresenceOf([
 			'message' => [
-				'notification_type'     => 'tipe harus diisi',
 				'name'                  => 'nama harus diisi',
-				'title'                 => 'judul harus diisi',
-				'admin_target_url'      => 'link target admin harus diisi',
-				'merchant_target_url'   => 'link target merchant harus diisi',
-				'old_mobile_target_url' => 'link target mobile lama harus diisi',
-				'new_mobile_target_url' => 'link target mobile baru harus diisi',
+				'title'                 => 'teks harus diisi',
+				'admin_target_url'      => 'link admin harus diisi',
+				'merchant_target_url'   => 'link merchant harus diisi',
+				'old_mobile_target_url' => 'link mobile lama harus diisi',
+				'new_mobile_target_url' => 'link mobile baru harus diisi',
 			],
 		]));
 		$validator->add('name', new Uniqueness([
