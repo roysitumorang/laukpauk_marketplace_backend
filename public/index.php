@@ -7,6 +7,44 @@ use Phalcon\Di\FactoryDefault;
 use Phalcon\Exception;
 use Phalcon\Mvc\Application;
 
+$request_uri = filter_input(INPUT_GET, '_url');
+
+if (preg_match('#^/api/v\d/(buyer|merchant)/[a-z\d]{32}#', $request_uri)) {
+	$curl = curl_init();
+	curl_setopt_array($curl, [
+		CURLOPT_URL     => 'http://laukpauk.id:3001' . $request_uri,
+		CURLOPT_HEADER  => 0,
+		CURLOPT_TIMEOUT => 30,
+	]);
+	$custom_header = [];
+	$authorization = filter_input(INPUT_SERVER, 'Authorization');
+	$user_data     = filter_input(INPUT_SERVER, 'HTTP_USER_DATA');
+	if ($authorization) {
+		$custom_header[] = 'Authorization: ' . $authorization;
+	}
+	if ($user_data) {
+		$custom_header[] = 'User-Data: ' . $user_data;
+	}
+	switch (filter_input(INPUT_SERVER, 'REQUEST_METHOD')) {
+		case 'POST':
+			$custom_header[] = 'Content-Type: ' . filter_input(INPUT_SERVER, 'CONTENT_TYPE');
+			curl_setopt_array($curl, [
+				CURLOPT_POST       => 1,
+				CURLOPT_POSTFIELDS => json_encode(json_decode(file_get_contents('php://input'))),
+			]);
+			break;
+		case 'OPTIONS':
+			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'OPTIONS');
+			break;
+	}
+	if ($custom_header) {
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $custom_header);
+	}
+	curl_exec($curl);
+	curl_close($curl);
+	exit;
+}
+
 define('APP_PATH', realpath('..') . '/');
 
 /**
