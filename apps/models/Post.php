@@ -4,11 +4,9 @@ namespace Application\Models;
 
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
 
 class Post extends ModelBase {
 	public $id;
-	public $user_id;
 	public $post_category_id;
 	public $body;
 	public $created_by;
@@ -23,10 +21,6 @@ class Post extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
-		]);
 		$this->belongsTo('post_category_id', 'Application\Models\PostCategory', 'id', [
 			'alias'    => 'category',
 			'reusable' => true,
@@ -44,9 +38,6 @@ class Post extends ModelBase {
 				'post_category_id' => 'kategori harus diisi',
 				'body'             => 'konten harus diisi',
 			],
-		]));
-		$validator->add(['user_id', 'post_category_id'], new Uniqueness([
-			'message' => 'konten sudah ada',
 		]));
 		return $this->validate($validator);
 	}

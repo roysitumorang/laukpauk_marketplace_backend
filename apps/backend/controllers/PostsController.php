@@ -2,40 +2,29 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Role;
-use Application\Models\User;
+use Application\Models\Post;
+use Ds\Set;
 
 class PostsController extends ControllerBase {
 	function indexAction() {
-		$user_id = $this->request->getPost('user_id', 'int') ?: $this->dispatcher->getParam('user_id', 'int');
-		$users   = [];
-		$result = User::find(['status = 1 AND (role_id = ?0 OR (role_id = ?1 AND premium_merchant = 1))', 'bind' => [Role::SUPER_ADMIN, Role::MERCHANT], 'order' => 'role_id, company']);
-		foreach ($result as $user) {
-			$users[] = $user;
+		$posts  = new Set;
+		$errors = 0;
+		foreach (Post::find(['order' => 'id']) as $post) {
+			if ($this->request->isPost()) {
+				$post->setBody($this->request->getPost('body')[$post->id]);
+				if (!$post->validation() || !$post->update()) {
+					foreach ($post->getMessages() as $error) {
+						$this->flashSession->error($error);
+						$errors++;
+					}
+				}
+			}
+			$posts->add($post);
 		}
-		if (!$user_id || !($user = User::findFirst(['status = 1 AND (role_id = ?0 OR (role_id = ?1 AND premium_merchant = 1)) AND id = ?2', 'bind' => [Role::SUPER_ADMIN, Role::MERCHANT, $user_id]]))) {
-			$user = $users[0];
+		if ($this->request->isPost() && !$errors) {
+			$this->flashSession->success('Update konten berhasil.');
 		}
 		$this->view->menu  = $this->_menu('Content');
-		$this->view->users = $users;
-		$this->view->user  = $user;
-	}
-
-	function saveAction() {
-		if ($this->request->isPost() &&
-			($user_id = $this->request->getPost('user_id', 'int')) &&
-			($user = User::findFirst(['status = 1 AND (role_id = ?0 OR (role_id = ?1 AND premium_merchant = 1)) AND id = ?2', 'bind' => [Role::SUPER_ADMIN, Role::MERCHANT, $user_id]]))) {
-			$user->setCompanyProfile($this->request->getPost('company_profile'));
-			$user->setTermsConditions($this->request->getPost('terms_conditions'));
-			$user->setContact($this->request->getPost('contact'));
-			if ($user->validation() && $user->update()) {
-				$this->flashSession->success('Update konten berhasil.');
-				return $this->response->redirect("/admin/posts/index/user_id:{$user->id}");
-			}
-			foreach ($user->getMessages() as $error) {
-				$this->flashSession->error($error);
-			}
-		}
-		return $this->dispatcher->forward(['action' => 'index']);
+		$this->view->posts = $posts;
 	}
 }

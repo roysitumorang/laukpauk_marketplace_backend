@@ -114,7 +114,6 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Sms', 'user_id', ['alias' => 'ownSms']);
 		$this->hasMany('id', 'Application\Models\Payment', 'user_id', ['alias' => 'payments']);
 		$this->hasMany('id', 'Application\Models\Banner', 'user_id', ['alias' => 'banners']);
-		$this->hasMany('id', 'Application\Models\Post', 'user_id', ['alias' => 'posts']);
 	}
 
 	function setMerchantNote($merchant_note) {
