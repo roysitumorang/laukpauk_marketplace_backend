@@ -80,7 +80,7 @@
 					</thead>
 					<tbody>
 					{% for order in orders %}
-						<tr id="{{ order.id }}">
+						<tr id="{{ order.code }}">
 							<td class="text-right">{{ order.rank }}</td>
 							<td class="text-nowrap" style="background:#{% if order.status == 0 %}FFCCCC{% elseif order.status == 1 %}CCFFCC{% elseif order.status == -1 %}FF0000;color:#FFFFFF{% endif %}">
 								<strong>
@@ -119,7 +119,7 @@
 								<i class="fa fa-check-square"></i> {% if order.admin_fee %}Rp. {{ number_format(order.admin_fee) }}{% else %}-{% endif %}
 							</td>
 							<td>
-								<a href="/admin/orders/{{ order.id }}" title="Detail"><i class="fa fa-external-link fa-2x"></i></a>
+								<a href="/admin/orders/{{ order.code }}" title="Detail"><i class="fa fa-external-link fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
@@ -137,7 +137,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}/page:{{ i }}">{{ i }}</a>
+							<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

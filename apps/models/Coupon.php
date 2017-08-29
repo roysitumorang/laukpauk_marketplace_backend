@@ -17,7 +17,6 @@ class Coupon extends ModelBase {
 	];
 
 	public $id;
-	public $user_id;
 	public $code;
 	public $effective_date;
 	public $expiry_date;
@@ -41,10 +40,6 @@ class Coupon extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->hasMany('id', 'Application\Models\Order', 'coupon_id', ['alias' => 'orders']);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
-		]);
 		$this->belongsTo('release_id', 'Application\Models\Release', 'id', [
 			'alias'    => 'release',
 			'reusable' => true,

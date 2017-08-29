@@ -137,7 +137,7 @@ class OrdersController extends ControllerBase {
 		}
 		$order->complete();
 		$this->flashSession->success('Order #' . $order->code . ' telah selesai');
-		return $this->response->redirect("/admin/orders/{$order->id}");
+		return $this->response->redirect("/admin/orders/{$order->code}");
 	}
 
 	function cancelAction($id) {
@@ -151,7 +151,7 @@ class OrdersController extends ControllerBase {
 		foreach ($order->getMessages() as $error) {
 			$this->flashSession->error($error);
 		}
-		return $this->response->redirect("/admin/orders/{$order->id}");
+		return $this->response->redirect("/admin/orders/{$order->code}");
 	}
 
 	function printAction($id) {
@@ -214,8 +214,8 @@ class OrdersController extends ControllerBase {
 							a.status = '1' AND
 							a.effective_date <= ? AND
 							a.expiry_date > ? AND
-							a.id = ? AND
-							a.user_id
+							a.id = ?
+						GROUP BY a.id, d.version
 QUERY
 						,
 						$buyer->id,
@@ -223,8 +223,7 @@ QUERY
 						$this->currentDatetime->format('Y-m-d'),
 						$new_order->get('coupon_id'),
 					];
-					$params[0] .= ($buyer->merchant_id ? " = {$buyer->merchant_id}" : ' IS NULL') . ' GROUP BY a.id, d.version';
-					$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+					$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 					if (!$coupon) {
 						throw new Exception('Voucher tidak valid!');
 					} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
@@ -247,12 +246,10 @@ QUERY
 							a.status = 1 AND
 							a.role_id = ? AND
 							a.id = ? AND
-							b.village_id = ? AND
-							a.premium_merchant
+							b.village_id = ?
 QUERY
 						, Role::MERCHANT, $merchant_id, $buyer->village_id];
-					$params[0] .= $buyer->merchant_id ? ' = 1' : ' IS NULL';
-					$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+					$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 					if (!$merchant) {
 						throw new Exception('Merchant tidak valid!');
 					}
@@ -300,7 +297,7 @@ QUERY
 					$total   += $order->final_bill;
 					$orders[] = $order;
 				}
-				if (!$buyer->merchant_id && $total < $minimum_purchase) {
+				if ($total < $minimum_purchase) {
 					throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 				}
 				if ($coupon) {
@@ -348,7 +345,7 @@ QUERY
 		$current_page         = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$limit                = 15;
 		$products             = [];
-		$result               = $this->db->query('SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.user_id ' . ($buyer->merchant_id ? "= {$buyer->merchant_id}" : 'IS NULL') . ' GROUP BY a.id ORDER BY a.name');
+		$result               = $this->db->query('SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id GROUP BY a.id ORDER BY a.name');
 		$builder             = $this->modelsManager->createBuilder()
 			->columns([
 				'b.id',
@@ -376,9 +373,6 @@ QUERY
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$product_categories[] = $row;
-		}
-		if ($buyer->merchant_id) {
-			$builder->andWhere("b.user_id = {$buyer->merchant_id}");
 		}
 		if ($product_category_id) {
 			$builder->andWhere("a.product_category_id = {$product_category_id}");
@@ -453,8 +447,8 @@ QUERY
 						a.status = '1' AND
 						a.effective_date <= ? AND
 						a.expiry_date > ? AND
-						a.id = ? AND
-						a.user_id
+						a.id = ?
+					GROUP BY a.id
 QUERY
 					,
 					$buyer->id,
@@ -462,7 +456,6 @@ QUERY
 					$this->currentDatetime->format('Y-m-d'),
 					$new_order->get('coupon_id'),
 				];
-				$params[0] .= ($buyer->merchant_id ? " = {$buyer->merchant_id}" : ' IS NULL') . ' GROUP BY a.id';
 				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if ($coupon &&
 					(($coupon->maximum_usage && $coupon->total_usage < $coupon->maximum_usage) &&
@@ -495,14 +488,9 @@ QUERY
 				WHERE
 					a.status = 1 AND
 					b.name = 'Merchant' AND
-					c.village_id = {$buyer->village->id} AND
-QUERY;
-			if ($buyer->merchant_id) {
-				$query .= " a.premium_merchant = 1 AND a.id = {$buyer->merchant_id}";
-			} else {
-				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . $new_order->get('cart')->keys()->join(',') . ')';
-			}
-			$query .= ' GROUP BY a.id';
+					c.village_id = {$buyer->village->id}
+QUERY
+					. ' AND a.id IN(' . $new_order->get('cart')->keys()->join(',') . ') GROUP BY a.id';
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
@@ -554,16 +542,16 @@ QUERY;
 			WHERE
 				a.status = '1' AND
 				a.effective_date <= ? AND
-				a.expiry_date > ? AND
-				a.user_id
+				a.expiry_date > ?
+			GROUP BY a.id
+			ORDER BY a.code
 QUERY
 			,
 			$buyer->id,
 			$this->currentDatetime->format('Y-m-d'),
 			$this->currentDatetime->format('Y-m-d'),
 		];
-		$params[0] .= ($buyer->merchant_id ? " = {$buyer->merchant_id}" : ' IS NULL') . ' GROUP BY a.id ORDER BY a.code';
-		$result     = $this->db->query(array_shift($params), $params);
+		$result = $this->db->query(array_shift($params), $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			if (($row->maximum_usage && $row->total_usage >= $row->maximum_usage) ||
@@ -628,9 +616,6 @@ QUERY
 					AND c.status = 1
 					AND b.id = {$user_product_id}
 QUERY;
-			if ($buyer->merchant_id) {
-				$query .= " AND b.user_id = {$buyer->merchant_id}";
-			}
 			if ($product_category_id) {
 				$query .= " AND a.product_category_id = {$product_category_id}";
 			}
@@ -695,9 +680,6 @@ QUERY;
 					AND c.status = 1
 					AND b.id = {$user_product_id}
 QUERY;
-			if ($buyer->merchant_id) {
-				$query .= " AND b.user_id = {$buyer->merchant_id}";
-			}
 			if ($product_category_id) {
 				$query .= " AND a.product_category_id = {$product_category_id}";
 			}
@@ -761,8 +743,8 @@ QUERY;
 						a.status = '1' AND
 						a.effective_date <= ? AND
 						a.expiry_date > ? AND
-						a.id = ? AND
-						a.user_id
+						a.id = ?
+					GROUP BY a.id
 QUERY
 					,
 					$buyer->id,
@@ -770,7 +752,6 @@ QUERY
 					$this->currentDatetime->format('Y-m-d'),
 					$coupon_id,
 				];
-				$params[0] .= ($buyer->merchant_id ? " = {$buyer->merchant_id}" : ' IS NULL') . ' GROUP BY a.id';
 				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if ($coupon &&
 					(($coupon->maximum_usage && $coupon->total_usage < $coupon->maximum_usage) &&
