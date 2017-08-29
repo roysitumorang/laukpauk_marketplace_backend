@@ -19,17 +19,13 @@ class UsersController extends ControllerBase {
 		if ($current_status === null || !array_key_exists($current_status, $status)) {
 			$current_status = array_search('ACTIVE', $status);
 		}
-		$current_role             = $this->dispatcher->getParam('role_id', 'int');
-		$current_premium_merchant = $this->dispatcher->getParam('merchant_id', 'int');
-		$keyword                  = str_replace([':', '/'], '', $this->dispatcher->getParam('keyword', 'string'));
-		$users                    = [];
-		$premium_merchants        = [];
-		$builder                  = $this->modelsManager->createBuilder()
+		$current_role = $this->dispatcher->getParam('role_id', 'int');
+		$keyword      = strtr($this->dispatcher->getParam('keyword', 'string'), [':' => '', '/' => '']);
+		$users        = [];
+		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
 				'a.api_key',
-				'a.premium_merchant',
-				'a.merchant_token',
 				'a.name',
 				'a.email',
 				'a.password',
@@ -42,8 +38,6 @@ class UsersController extends ControllerBase {
 				'a.password_reset_token',
 				'a.deposit',
 				'a.company',
-				'a.company_profile',
-				'a.terms_conditions',
 				'a.registration_ip',
 				'a.gender',
 				'a.date_of_birth',
@@ -68,7 +62,6 @@ class UsersController extends ControllerBase {
 				'city'                     => 'e.name',
 				'province'                 => 'f.name',
 				'last_login'               => 'g.sign_in_at',
-				'merchant'                 => 'h.company',
 			])
 			->from(['a' => 'Application\Models\User'])
 			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
@@ -77,7 +70,6 @@ class UsersController extends ControllerBase {
 			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
 			->leftJoin('Application\Models\Province', 'e.province_id = f.id', 'f')
 			->leftJoin('Application\Models\LoginHistory', 'a.id = g.user_id', 'g')
-			->leftJoin('Application\Models\User', 'a.merchant_id = h.id', 'h')
 			->orderBy('a.id DESC')
 			->where('a.status = ' . $current_status)
 			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory h WHERE g.user_id = h.user_id AND h.id > g.id)');
@@ -92,7 +84,6 @@ class UsersController extends ControllerBase {
 				$keyword_placeholder,
 			]);
 		}
-		$builder->andWhere('a.merchant_id ' . ($current_premium_merchant ? "= {$current_premium_merchant}" : 'IS NULL'));
 		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
@@ -105,19 +96,14 @@ class UsersController extends ControllerBase {
 			$item->writeAttribute('status', $status[$item->status]);
 			$users[] = $item;
 		}
-		foreach (User::find(['role_id = ?0 AND premium_merchant = 1 AND status = 1', 'bind' => [Role::MERCHANT], 'columns' => 'id, company', 'order' => 'company']) as $merchant) {
-			$premium_merchants[] = $merchant;
-		}
 		$this->view->menu                     = $this->_menu('Members');
 		$this->view->users                    = $users;
-		$this->view->premium_merchants        = $premium_merchants;
 		$this->view->pages                    = $pages;
 		$this->view->page                     = $paginator->getPaginate();
 		$this->view->status                   = $status;
 		$this->view->current_status           = $current_status;
 		$this->view->roles                    = Role::find(['id > 1', 'order' => 'name']);
 		$this->view->current_role             = $current_role;
-		$this->view->current_premium_merchant = $current_premium_merchant;
 		$this->view->keyword                  = $keyword;
 		$this->view->total_users              = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
 		$this->view->total_pending_users      = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 0');
@@ -264,7 +250,7 @@ class UsersController extends ControllerBase {
 		$this->response->setHeader('Content-Type', 'application/octet-stream');
 		$this->response->setHeader('Content-Disposition', 'attachment; filename=users.csv');
 		$output = fopen('php://output', 'w');
-		foreach (User::find(['premium_merchant IS NULL AND merchant_id IS NULL AND status = 1', 'columns' => 'name, mobile_phone', 'order' => 'name']) as $user) {
+		foreach (User::find(['status = 1', 'columns' => 'name, mobile_phone', 'order' => 'name']) as $user) {
 			fputs($output, sprintf('"%s","","%s"' . "\r\n", strtr($user->name, '"', '\"'), preg_replace('/[^\d]+/', '', $user->mobile_phone)));
 		}
 		fclose($output);
@@ -353,10 +339,6 @@ QUERY
 		if ($user->role->name == 'Merchant') {
 			$user->setDeposit($this->request->getPost('deposit'));
 		}
-		$user->setPremiumMerchant($this->request->getPost('premium_merchant'));
-		$user->setOnesignalAppId($this->request->getPost('onesignal_app_id'));
-		$user->setOnesignalApiKey($this->request->getPost('onesignal_api_key'));
-		$user->setDomain($this->request->getPost('domain'));
 		$user->setMinimumPurchase($this->request->getPost('minimum_purchase'));
 		$user->setAdminFee($this->request->getPost('admin_fee'));
 		$user->setAccumulationDivisor($this->request->getPost('accumulation_divisor'));
@@ -367,7 +349,6 @@ QUERY
 		$user->setAddress($this->request->getPost('address'));
 		$user->setMobilePhone($this->request->getPost('mobile_phone'));
 		$user->setCompany($this->request->getPost('company'));
-		$user->setCompanyProfile($this->request->getPost('company_profile'));
 		$user->setGender($this->request->getPost('gender'));
 		$user->setDateOfBirth($this->request->getPost('date_of_birth'));
 		$user->setNewAvatar($_FILES['new_avatar']);
@@ -380,9 +361,7 @@ QUERY
 		$user->setOpenOnSaturday($this->request->getPost('open_on_saturday'));
 		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
 		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
-		$user->setTermsConditions($this->request->getPost('terms_conditions'));
 		$user->setMerchantNote($this->request->getPost('merchant_note'));
-		$user->setContact($this->request->getPost('contact'));
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {
 			$user->setDeliveryHours($this->request->getPost('delivery_hours'));

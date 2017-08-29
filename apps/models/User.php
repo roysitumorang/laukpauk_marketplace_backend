@@ -31,14 +31,7 @@ class User extends ModelBase {
 	public $id;
 	public $role_id;
 	public $api_key;
-	public $premium_merchant;
-	public $onesignal_app_id;
-	public $onesignal_api_key;
-	public $merchant_id;
-	public $merchant_token;
 	public $merchant_note;
-	public $contact;
-	public $domain;
 	public $minimum_purchase;
 	public $admin_fee;
 	public $accumulation_divisor;
@@ -57,8 +50,6 @@ class User extends ModelBase {
 	public $password_reset_token;
 	public $deposit;
 	public $company;
-	public $company_profile;
-	public $terms_conditions;
 	public $registration_ip;
 	public $gender;
 	public $date_of_birth;
@@ -108,10 +99,6 @@ class User extends ModelBase {
 				'message'    => 'kelurahan harus diisi',
 			],
 		]);
-		$this->belongsTo('merchant_id', 'Application\Models\User', 'id', [
-			'alias'    => 'merchant',
-			'reusable' => true,
-		]);
 		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', ['alias' => 'loginHistory']);
 		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyerOrders']);
 		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchantOrders']);
@@ -131,32 +118,8 @@ class User extends ModelBase {
 		$this->hasMany('id', 'Application\Models\Post', 'user_id', ['alias' => 'posts']);
 	}
 
-	function setPremiumMerchant($premium_merchant) {
-		$this->premium_merchant = $this->_filter->sanitize($premium_merchant, 'int') ?: null;
-	}
-
-	function setOnesignalAppId($onesignal_app_id) {
-		$this->onesignal_app_id = $onesignal_app_id ?: null;
-	}
-
-	function setOnesignalApiKey($onesignal_api_key) {
-		$this->onesignal_api_key = $onesignal_api_key ?: null;
-	}
-
-	function setMerchantId($merchant_id) {
-		$this->merchant_id = $this->_filter->sanitize($merchant_id, 'int') ?: null;
-	}
-
 	function setMerchantNote($merchant_note) {
 		$this->merchant_note = $this->_filter->sanitize($merchant_note, 'trim') ?: null;
-	}
-
-	function setContact($contact) {
-		$this->contact = $this->_filter->sanitize($contact, 'trim') ?: null;
-	}
-
-	function setDomain($domain) {
-		$this->domain = $this->_filter->sanitize($domain, ['string', 'trim']) ?: null;
 	}
 
 	function setMinimumPurchase($minimum_purchase) {
@@ -232,18 +195,6 @@ class User extends ModelBase {
 	function setCompany($company) {
 		if ($company) {
 			$this->company = $this->_filter->sanitize($company, ['string', 'trim']);
-		}
-	}
-
-	function setCompanyProfile($company_profile) {
-		if ($company_profile) {
-			$this->company_profile = $this->_filter->sanitize($company_profile, 'trim');
-		}
-	}
-
-	function setTermsConditions($terms_conditions) {
-		if ($terms_conditions) {
-			$this->terms_conditions = $this->_filter->sanitize($terms_conditions, 'trim');
 		}
 	}
 
@@ -349,16 +300,9 @@ class User extends ModelBase {
 			$this->password = password_hash($this->new_password, PASSWORD_DEFAULT);
 		}
 		if ($this->role_id != Role::MERCHANT) {
-			$this->premium_merchant = null;
 			$this->minimum_purchase = 0;
 			$this->admin_fee        = 0;
 			$this->merchant_note    = null;
-		}
-		if (!$this->premium_merchant && $this->role_id != Role::SUPER_ADMIN) {
-			$this->domain           = null;
-			$this->company_profile  = null;
-			$this->terms_conditions = null;
-			$this->contact          = null;
 		}
 		if (!is_int($this->accumulation_divisor)) {
 			$this->accumulation_divisor = 0;
@@ -417,23 +361,9 @@ class User extends ModelBase {
 				},
 				'message'  => 'biaya administrasi harus diisi angka, minimal 0',
 			]));
-			if ($this->domain) {
-				$validator->add('domain', new Uniqueness([
-					'convert' => function(array $values) : array {
-						$values['domain'] = strtolower($values['domain']);
-						return $values;
-					},
-					'message' => 'domain sudah ada',
-				]));
-			}
-			if (($this->role_id == Role::SUPER_ADMIN || $this->premium_merchant) && $this->onesignal_app_id) {
-				$validator->add('onesignal_app_id', new Uniqueness([
-					'message' => 'application id onesignal sudah ada',
-				]));
-			}
 		}
 		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
-			$validator->add(['mobile_phone', 'merchant_id'], new Uniqueness([
+			$validator->add('mobile_phone', new Uniqueness([
 				'message' => 'nomor HP sudah terdaftar',
 			]));
 		}
@@ -494,18 +424,7 @@ class User extends ModelBase {
 		if ($this->delivery_hours) {
 			$this->delivery_hours = join(',', $this->delivery_hours);
 		}
-		if ($this->role_id == Role::MERCHANT && $this->premium_merchant) {
-			if (!$this->merchant_token) {
-				do {
-					$this->merchant_token = $random->hex(16);
-					if (!static::findFirstByMerchantToken($this->merchant_token)) {
-						break;
-					}
-				} while (1);
-			}
-		} else {
-			$this->onesignal_app_id     = null;
-			$this->onesignal_api_key    = null;
+		if ($this->role_id != Role::MERCHANT) {
 			$this->accumulation_divisor = 0;
 		}
 	}

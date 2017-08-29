@@ -59,18 +59,9 @@
 											{% endfor %}
 										</select>
 									</td>
-									<td class="text-nowrap"><i class="fa fa-id-badge"></i> Premium Merchant</td>
-									<td>
-										<select name="merchant_id">
-											<option value=""></option>
-											{% for merchant in premium_merchants %}
-											<option value="{{ merchant.id }}"{% if current_premium_merchant == merchant.id %} selected{% endif %}>{{ merchant.company }}</option>
-											{% endfor %}
-										</select>
-									</td>
 								</tr>
 								<tr>
-									<td class="text-nowrap" colspan="6">
+									<td class="text-nowrap" colspan="4">
 										<i class="fa fa-user"></i> Nama / Toko / Nomor HP
 										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Toko / Nomor HP">
 										<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
@@ -93,9 +84,9 @@
 								<tr id="{{ user.id }}">
 									<td>{{ user.rank }}</td>
 									<td>
-										<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}{% if user.company %} / {{ user.company }}{% endif %} {% if user.premium_merchant %} <i class="fa fa-check-circle"></i>{% endif %}</a></font>
+										<font size="4"><a href="/admin/users/{{ user.id }}" title="{{ user.name }}">{{ user.name }}{% if user.company %} / {{ user.company }}{% endif %}</a></font>
 										<br>
-										<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}{% if user.premium_merchant %} / <i class="fa fa-check-circle"></i> {{ user.merchant_token }}{% elseif user.merchant %} <i class="fa fa-home"></i> {{ user.merchant }}{% endif %}<br>
+										<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}<br>
 										{% if user.email %}
 										<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 										{% endif %}
@@ -148,7 +139,7 @@
 									{% if i == page.current %}
 									<b>{{ i }}</b>
 									{% else %}
-									<a href="/admin/users/index{% if current_status %}/status:{{ current_status }}{% endif %}{% if current_role %}/role_id:{{ current_role }}{% endif %}{% if current_premium_merchant %}/merchant_id:{{ current_premium_merchant }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+									<a href="/admin/users/index{% if current_status %}/status:{{ current_status }}{% endif %}{% if current_role %}/role_id:{{ current_role }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 									{% endif %}
 								{% endfor %}
 							</p>
@@ -172,9 +163,6 @@
 		}
 		if (search.role_id.value) {
 			url += '/role_id:' + search.role_id.value;
-		}
-		if (search.merchant_id.value) {
-			url += '/merchant_id:' + search.merchant_id.value;
 		}
 		if (search.keyword.value) {
 			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {

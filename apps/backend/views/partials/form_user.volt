@@ -47,48 +47,6 @@
 		</tr>
 		<tr>
 			<td>
-				Premium Merchant (untuk merchant) :<br>
-				<input type="checkbox" name="premium_merchant" value="1"{% if user.premium_merchant %} checked{% endif %}>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Application ID Onesignal (untuk premium merchant) :<br>
-				<input type="text" name="onesignal_app_id" value="{{ user.onesignal_app_id }}" size="50" placeholder="Application ID Onesignal">
-			</td>
-		</tr>
-		<tr>
-			<td>
-				API Key Onesignal (untuk premium merchant) :<br>
-				<input type="text" name="onesignal_api_key" value="{{ user.onesignal_api_key }}" size="50" placeholder="API Key Onesignal">
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Domain (untuk premium merchant) :<br>
-				<input type="text" name="domain" value="{{ user.domain }}" size="50" placeholder="Domain">
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Tentang Kami (* untuk premium merchant) :<br>
-				<textarea name="company_profile" cols="50" rows="5" placeholder="Tentang kami">{{ user.company_profile }}</textarea>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Syarat dan Ketentuan (* untuk premium merchant) :<br>
-				<textarea name="terms_conditions" cols="50" rows="5" placeholder="Syarat dan ketentuan">{{ user.terms_conditions }}</textarea>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				Hubungi Kami (* untuk premium merchant) :<br>
-				<textarea name="contact" cols="50" rows="5" placeholder="Hubungi kami">{{ user.contact }}</textarea>
-			</td>
-		</tr>
-		<tr>
-			<td>
 				Catatan Penjual (untuk merchant) :<br>
 				<textarea name="merchant_note" cols="50" rows="5" placeholder="Catatan penjual">{{ user.merchant_note }}</textarea>
 			</td>

@@ -33,9 +33,6 @@
 								<thead>
 									<tr>
 										<th><i class="fa fa-user"></i> Nama</td>
-										{% if user.merchant %}
-										<th><i class="fa fa-id-badge"></i> Merchant</th>
-										{% endif %}
 										<th><i class="fa fa-sign-in"></i> Login Terakhir</td>
 										<th><i class="fa fa-tag"></i> Status</td>
 										<th><i class="fa fa-money"></i> Deposit</td>
@@ -44,11 +41,8 @@
 								<tbody>
 									<tr>
 										<td>
-											<font size="5">{{ user.name }}{% if user.company %} ({{ user.company }}{% endif %}{% if user.premium_merchant%} <i class="fa fa-check-circle"></i>){% endif %}</font>
+											<font size="5">{{ user.name }}{% if user.company %} ({{ user.company }}){% endif %}</font>
 										</td>
-										{% if user.merchant %}
-										<td>{{ user.merchant.company }}</td>
-										{% endif %}
 										<td>{{ last_login | default('No login yet') }}</td>
 										<td>{{ status[user.status] }}</td>
 										<td>{% if user.deposit %}Rp. {{ number_format(user.deposit) }}{% else %}-{% endif %}</td>
@@ -76,12 +70,6 @@
 									<td><i class="fa fa-key"></i> API Key</td>
 									<td>{{ user.api_key }}</td>
 								</tr>
-								{% if user.premium_merchant %}
-								<tr>
-									<td><i class="fa fa-id-card"></i> Merchant Token</td>
-									<td>{{ user.merchant_token }}</td>
-								</tr>
-								{% endif %}
 								{% if user.email %}
 								<tr>
 									<td><i class="fa fa-email"></i> Email</td>
