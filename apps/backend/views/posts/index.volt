@@ -28,8 +28,8 @@
 					<table class="table table-striped">
 						{% for post in posts %}
 						<tr>
-							<td>{{ post.category.name }} :</td>
-							<td><textarea name="body[{{ post.id }}]" cols="70" rows="10" placeholder="{{ post.category.name }}">{{ post.body }}</textarea></td>
+							<td>{{ post.subject }} :</td>
+							<td><textarea name="body[{{ post.id }}]" cols="70" rows="10" placeholder="{{ post.subject }}">{{ post.body }}</textarea></td>
 						</tr>
 						{% endfor %}
 					</table>

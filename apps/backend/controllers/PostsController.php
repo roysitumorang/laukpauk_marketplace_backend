@@ -9,7 +9,7 @@ class PostsController extends ControllerBase {
 	function indexAction() {
 		$posts  = new Set;
 		$errors = 0;
-		foreach (Post::find(['order' => 'id']) as $post) {
+		foreach (Post::find(['order' => 'subject']) as $post) {
 			if ($this->request->isPost()) {
 				$post->setBody($this->request->getPost('body')[$post->id]);
 				if (!$post->validation() || !$post->update()) {
