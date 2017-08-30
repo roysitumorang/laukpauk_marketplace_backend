@@ -55,7 +55,7 @@
 									</tr>
 								</table>
 							</form>
-							{% if products %}
+							{% if !products.isEmpty() %}
 								<div><i class="fa fa-plus"></i> Checklist produk yang ingin ditambahkan pada slot <strong>{{ group.name }}</strong></div>
 								<div><input type="checkbox" onclick="var checked=this.checked;document.querySelectorAll('input[type=checkbox]').forEach(function(item){item.checked=checked})"> <i>Check / Uncheck All</i> | <strong>Total Produk :</strong> {{ count(products) }}</div>
 								<form method="POST" action="/admin/product_group_members/create/product_group_id:{{ product_group.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">

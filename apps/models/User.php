@@ -108,7 +108,6 @@ class User extends ModelBase {
 		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
 		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
 		$this->hasManyToMany('id', 'Application\Models\SmsRecipient', 'user_id', 'sms_id', 'Application\Models\Sms', 'id', ['alias' => 'sms']);
-		$this->hasMany('id', 'Application\Models\ProductGroup', 'user_id', ['alias' => 'productGroups']);
 		$this->hasMany('id', 'Application\Models\Notification', 'user_id', ['alias' => 'ownNotifications']);
 		$this->hasMany('id', 'Application\Models\Sms', 'user_id', ['alias' => 'ownSms']);
 		$this->hasMany('id', 'Application\Models\Payment', 'user_id', ['alias' => 'payments']);

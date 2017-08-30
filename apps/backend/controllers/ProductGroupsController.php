@@ -4,8 +4,9 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\ProductGroup;
 use Application\Models\ProductGroupMember;
-use Error;
-use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
+use Ds\Set;
+use Exception;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductGroupsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -27,23 +28,22 @@ class ProductGroupsController extends ControllerBase {
 			])
 			->from(['a' => 'Application\Models\ProductGroup'])
 			->leftJoin('Application\Models\ProductGroupMember', 'a.id = b.product_group_id', 'b')
-			->where('a.user_id IS NULL')
 			->groupBy('a.id')
 			->orderBy('a.name ASC');
 		if ($keyword) {
-			$builder->andWhere('a.name ILIKE ?0', ["%{$keyword}%"]);
+			$builder->where('a.name ILIKE ?0', ["%{$keyword}%"]);
 		}
-		$paginator = new PaginatorQueryBuilder([
+		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
 		$page           = $paginator->getPaginate();
 		$pages          = $this->_setPaginationRange($page);
-		$product_groups = [];
+		$product_groups = new Set;
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$product_groups[] = $item;
+			$product_groups->add($item);
 		}
 		$this->view->keyword        = $keyword;
 		$this->view->product_groups = $product_groups;
@@ -57,10 +57,10 @@ class ProductGroupsController extends ControllerBase {
 			$product_group->name      = $this->request->getPost('name');
 			$product_group->published = $this->request->getPost('published');
 			if ($product_group->validation() && $product_group->create()) {
-				$this->flashSession->success('Penambahan data berhasil.');
+				$this->flashSession->success('Penambahan group produk berhasil.');
 				return $this->response->redirect('/admin/product_groups');
 			}
-			$this->flashSession->error('Penambahan data tidak berhasil, silahkan cek form dan coba lagi.');
+			$this->flashSession->error('Penambahan group produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product_group->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
@@ -69,19 +69,18 @@ class ProductGroupsController extends ControllerBase {
 	}
 
 	function updateAction($id) {
-		$product_group = ProductGroup::findFirst(['id = ?0 AND user_id IS NULL', 'bind' => [$id]]);
-		if (!$product_group) {
-			$this->flashSession->error('Group produk tidak ditemukan.');
+		if (!$product_group = ProductGroup::findFirst($id)) {
+			$this->flashSession->error('Grup produk tidak ditemukan.');
 			return $this->response->redirect('/admin/product_groups');
 		}
 		if ($this->request->isPost()) {
 			$product_group->name      = $this->request->getPost('name');
 			$product_group->published = $this->request->getPost('published');
 			if ($product_group->validation() && $product_group->update()) {
-				$this->flashSession->success('Update data berhasil.');
+				$this->flashSession->success('Update group produk berhasil.');
 				return $this->response->redirect('/admin/product_groups');
 			}
-			$this->flashSession->error('Update data tidak berhasil, silahkan cek form dan coba lagi.');
+			$this->flashSession->error('Update group produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product_group->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
@@ -89,25 +88,12 @@ class ProductGroupsController extends ControllerBase {
 		$this->view->product_group = $product_group;
 	}
 
-	function publishAction($id) {
+	function toggleStatusAction($id) {
 		if ($this->request->isPost()) {
-			$product_group = ProductGroup::findFirst(['id = ?0 AND user_id IS NULL AND published = 0', 'bind' => [$id]]);
-			if ($product_group) {
-				$product_group->update(['published' => 1]);
+			if ($product_group = ProductGroup::findFirst($id)) {
+				$product_group->update(['published' => $product_group->published ? 0 : 1]);
 			} else {
-				$this->flashSession->error('Group produk tidak ditemukan!');
-			}
-		}
-		return $this->response->redirect($this->request->get('next'));
-	}
-
-	function unpublishAction($id) {
-		if ($this->request->isPost()) {
-			$product_group = ProductGroup::findFirst(['id = ?0 AND user_id IS NULL AND published = 1', 'bind' => [$id]]);
-			if ($product_group) {
-				$product_group->update(['published' => 0]);
-			} else {
-				$this->flashSession->error('Group produk tidak ditemukan!');
+				$this->flashSession->error('Grup produk tidak ditemukan!');
 			}
 		}
 		return $this->response->redirect($this->request->get('next'));
@@ -115,16 +101,15 @@ class ProductGroupsController extends ControllerBase {
 
 	function deleteAction($id) {
 		try {
-			$product_group = ProductGroup::findFirst(['id = ?0 AND user_id IS NULL', 'bind' => [$id]]);
-			if (!$product_group) {
-				throw new Error('Data tidak ditemukan.');
+			if (!$product_group = ProductGroup::findFirst($id)) {
+				throw new Error('Grup produk tidak ditemukan.');
 			}
 			if (ProductGroupMember::findFirstByProductGroupId($product_group->id)) {
-				throw new Error('Data tidak dapat dihapus.');
+				throw new Error('Grup produk tidak dapat dihapus.');
 			}
 			$product_group->delete();
-			$this->flashSession->success('Data berhasil dihapus');
-		} catch (Error $e) {
+			$this->flashSession->success('Grup produk berhasil dihapus');
+		} catch (Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
 			return $this->response->redirect('/admin/product_groups');

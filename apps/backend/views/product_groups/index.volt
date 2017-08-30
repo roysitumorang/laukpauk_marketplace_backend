@@ -34,11 +34,11 @@
 										<form method="GET" action="/admin/product_groups/index" id="search">
 											<input type="text" name="keyword" value="{{ keyword }}" size="40" placeholder="Nama">&nbsp;
 											<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
+											<a type="button" href="/admin/product_groups/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah</a>
 										</form>
 									</td>
 								</tr>
 							</table>
-							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_groups/create">Tambah Group Produk</a></p>
 							<table class="table table-striped">
 								<thead>
 									<tr>
@@ -108,7 +108,7 @@
 			form.method = 'POST',
 			form.action = 'delete' === item.className
 			? '/admin/product_groups/delete/' + item.dataset.id
-			: '/admin/product_groups/' + (item.dataset.published == 1 ? 'un' : '') + 'publish/' + item.dataset.id + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			: '/admin/product_groups/' + item.dataset.id + '/toggle_status?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}
