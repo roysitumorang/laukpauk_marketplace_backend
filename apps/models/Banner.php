@@ -9,7 +9,6 @@ use Phalcon\Validation\Validator\Callback;
 
 class Banner extends ModelBase {
 	public $id;
-	public $user_id;
 	public $published;
 	public $file;
 	public $new_file;
@@ -35,10 +34,6 @@ class Banner extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
-		]);
 	}
 
 	function setPublished($published) {

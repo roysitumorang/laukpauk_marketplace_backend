@@ -28,16 +28,6 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								<b>Merchant :</b>
-								<br>
-								<select name="user_id" onchange="location.href='/admin/banners'+(this.value?'/index/user_id:'+this.value:'')">
-									<option value=""></option>
-									{% for merchant in merchants %}
-										<option value="{{ merchant.id }}"{% if merchant.id == user_id %} selected{% endif %}>{{ merchant.company }} ({{ merchant.total_banners }})</option>
-									{% endfor %}
-								</select>
-							</td>
-							<td>
 								<b>Gambar :</b>
 								<br>
 								<input type="file" name="new_file">
@@ -49,7 +39,7 @@
 								<input type="radio" name="published" value="0"{% if !banner.published %} checked{% endif %}> Sembunyikan
 							</td>
 							<td>
-								<button type="submit" class="btn btn-primary">SIMPAN</button>
+								<button type="submit" class="btn btn-primary">UPLOAD</button>
 							</td>
 						</tr>
 					</table>
@@ -61,7 +51,7 @@
 							<a href="/assets/image/{{ banner.file }}" class="image-popup-no-margins"><img src="/assets/image/{{ banner.file }}" border="0" width="300px"></a>
 						</td>
 						<td>
-							<form method="POST" action="/admin/banners/{{ banner.id }}/{% if banner.published %}un{% endif %}publish">
+							<form method="POST" action="/admin/banners/{{ banner.id }}/toggle_status">
 								<button type="submit" class="btn btn-primary">
 									<i class="fa fa-eye{% if !banner.published %}-slash{% endif %} fa-2x"></i>
 								</button>
@@ -69,7 +59,7 @@
 						</td>
 						<td>
 							<form method="POST" action="/admin/banners/{{ banner.id }}/delete">
-								<button type="submit" class="btn btn-danger">
+								<button type="submit" class="btn btn-danger" onclick="return confirm('Anda yakin mau menghapus banner ini ?')">
 									<i class="fa fa-trash-o fa-2x"></i>
 								</button>
 							</form>
