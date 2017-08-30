@@ -24,17 +24,16 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/releases/create" class="new">Tambah Release APK</a></p>
+				<p style="margin-left:5px"><a type="button" href="/admin/releases/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah</a></p>
 				<table class="table table-striped">
 					<thead>
 						<tr>
-							<th class="text-center" width="5%"><b>No</b></th>
-							<th class="text-center"><b>Versi</b></th>
-							<th class="text-center"><b>Tipe Aplikasi</b></th>
-							<th class="text-center"><b>Tipe User</b></th>
-							<th class="text-center"><b>Fitur</b></th>
-							<th class="text-center"><b>Tanggal</b></th>
-							<th class="text-center"><b>#</b></th>
+							<th class="text-center" width="5%">No</th>
+							<th class="text-center">Versi</th>
+							<th class="text-center">Tipe User</th>
+							<th class="text-center">Fitur</th>
+							<th class="text-center">Tanggal</th>
+							<th class="text-center">#</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -42,17 +41,16 @@
 						<tr id="{{ release.id }}">
 							<td class="text-right">{{ release.rank }}</td>
 							<td>{{ release.version }}</td>
-							<td>{{ release.application_type }}</td>
 							<td>{{ release.user_type }}</td>
 							<td>{{ release.features }}</td>
 							<td>{{ release.created_at }}</td>
 							<td class="text-center">
-								<a href="/admin/releases/update/{{ release.id }}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+								<a href="/admin/releases/{{ release.id }}/update" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="5"><i>Belum ada nomor rekening</i></td>
+							<td colspan="6"><i>Belum ada data</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>

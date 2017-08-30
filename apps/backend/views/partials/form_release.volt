@@ -9,14 +9,6 @@
 		</tr>
 		<tr>
 			<td>
-				Tipe Aplikasi<br>
-				{% for application_type in application_types %}
-				<input type="radio" name="application_type" value="{{ application_type }}"{% if release.application_type == application_type %} checked{% endif %}> {{ application_type }}&nbsp;&nbsp;
-				{% endfor %}
-			</td>
-		</tr>
-		<tr>
-			<td>
 				Tipe User<br>
 				{% for user_type in user_types %}
 				<input type="radio" name="user_type" value="{{ user_type }}"{% if release.user_type == user_type %} checked{% endif %}> {{ user_type }}&nbsp;&nbsp;

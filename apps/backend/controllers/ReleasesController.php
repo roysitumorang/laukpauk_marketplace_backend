@@ -14,8 +14,7 @@ class ReleasesController extends ControllerBase {
 		parent::beforeExecuteRoute();
 		$this->view->menu = $this->_menu('Options');
 		if ($this->dispatcher->getActionName() != 'index') {
-			$this->view->application_types = Release::APPLICATION_TYPES;
-			$this->view->user_types        = Release::USER_TYPES;
+			$this->view->user_types = Release::USER_TYPES;
 		} else {
 			$this->_date_formatter = new IntlDateFormatter(
 				'id_ID',
@@ -33,7 +32,7 @@ class ReleasesController extends ControllerBase {
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
 		$paginator    = new Model([
-			'data'  => Release::find(['order' => 'version DESC, application_type, user_type']),
+			'data'  => Release::find(['order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
@@ -52,9 +51,8 @@ class ReleasesController extends ControllerBase {
 	}
 
 	function createAction() {
-		$release                   = new Release;
-		$release->application_type = Release::APPLICATION_TYPES[0];
-		$release->user_type        = Release::USER_TYPES[0];
+		$release            = new Release;
+		$release->user_type = Release::USER_TYPES[0];
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($release);
 			if ($release->validation() && $release->create()) {
@@ -70,8 +68,7 @@ class ReleasesController extends ControllerBase {
 	}
 
 	function updateAction($id) {
-		$release = Release::findFirst($id);
-		if (!$release) {
+		if (!$release = Release::findFirst($id)) {
 			$this->flashSession->error('Data tidak ditemukan.');
 			return $this->dispatcher->forward('releases');
 		}
@@ -91,7 +88,6 @@ class ReleasesController extends ControllerBase {
 
 	private function _set_model_attributes(Release &$release) {
 		$release->setVersion($this->request->getPost('version'));
-		$release->setApplicationType($this->request->getPost('application_type'));
 		$release->setUserType($this->request->getPost('user_type'));
 		$release->setFeatures($this->request->getPost('features'));
 	}
