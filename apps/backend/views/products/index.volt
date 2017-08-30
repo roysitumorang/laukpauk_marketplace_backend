@@ -28,34 +28,18 @@
 					<table class="table table-striped">
 						<tr>
 							<td>
-								Merchant :
-							</td>
-							<td>
-								<select name="user_id" id="user_id">
-									<option value=""></option>
-									{% for merchant in merchants %}
-										<option value="{{ merchant.id }}"{% if merchant.id == user_id %} selected{% endif %}>{{ merchant.company }}</option>
-									{% endfor %}
-								</select>
-							</td>
-							<td>
-								Kategori :
-							</td>
-							<td>
+								<b>Kategori :</b>
+								<br>
 								<select name="category_id" id="category_id">
 									<option value="">Semua</option>
 									{% for category in categories %}
-									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{% if category.parent_id %}{{ category.parent.name }} &raquo; {% endif %}{{ category.name }} ({{ category.total_products }})</option>
+									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{{ category.name }} ({{ category.total_products }})</option>
 									{% endfor %}
 								</select>
 							</td>
-							<td>&nbsp;</td>
-						</tr>
-						<tr>
 							<td>
-								Status :
-							</td>
-							<td>
+								<b>Status :</b>
+								<br>
 								<select name="published">
 									<option value="">Semua</option>
 									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
@@ -63,20 +47,20 @@
 								</select>
 							</td>
 							<td>
-								ID / Nama :
-							</td>
-							<td>
+								<b>ID / Nama :</b>
+								<br>
 								<input type="text" name="keyword" value="{{ keyword }}" placeholder="ID / Nama">&nbsp;
 							</td>
 							<td>
+								<br>
 								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
+								<a type="button" href="/admin/products/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah</a>
 							</td>
 						</tr>
 					</table>
 				</form>
-				<i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/products/create" title="Tambah Produk">Tambah Produk</a>
 				{% if page.total_items %}
-				<span style="float:right"><strong>{{ page.total_items }} Product{% if page.total_items > 1 %}s{% endif %}</strong></span>
+				<span style="float:right"><strong>Total : {{ page.total_items }} produk</strong></span>
 				{% endif %}
 				<table class="table table-striped">
 					<thead>
@@ -148,12 +132,9 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), user_id = document.getElementById('user_id'), category_id = document.getElementById('category_id'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
+	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), category_id = document.getElementById('category_id'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
 	search.addEventListener('submit', event => {
 		event.preventDefault();
-		if (search.user_id.value) {
-			url += '/user_id:' + search.user_id.value;
-		}
 		if (search.category_id.value) {
 			url += '/category_id:' + search.category_id.value;
 		}
@@ -170,27 +151,16 @@
 	for ( ; i--; ) {
 		let item = items[i];
 		item.onclick = () => {
-			if ('delete' === item.className && !confirm('Anda yakin ingin menghapus product ini ?')) {
+			if ('delete' === item.className && !confirm('Anda yakin ingin menghapus produk ini ?')) {
 				return !1
 			}
 			let form = document.createElement('form');
 			form.method = 'POST',
 			form.action = 'delete' === item.className
 			? '/admin/products/' + item.dataset.id + '/delete'
-			: '/admin/products/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			: '/admin/products/' + item.dataset.id + '/toggle_status?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}
 	}
-	user_id.onchange = () => {
-		fetch('/admin/products/categories' + (user_id.value ? '/user_id:' + user_id.value : ''), { credentials: 'include' }).then(response => {
-			return response.text()
-		}).then(payload => {
-			let result = JSON.parse(payload), new_options = '<option value="">Semua</option>';
-			result.forEach(item => {
-				new_options += '<option value="' + item.id + '">' + item.name + ' (' + item.total_products +')</option>'
-			}),
-			category_id.innerHTML = new_options
-		})
-	};
 </script>

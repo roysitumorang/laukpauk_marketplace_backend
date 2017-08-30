@@ -19,7 +19,6 @@ class Product extends ModelBase {
 	public $name;
 	public $description;
 	public $stock_unit;
-	public $lifetime;
 	public $picture;
 	public $new_picture;
 	public $thumbnails;
@@ -73,10 +72,6 @@ class Product extends ModelBase {
 
 	function setStockUnit($stock_unit) {
 		$this->stock_unit = $this->_filter->sanitize($stock_unit, ['string', 'trim']);
-	}
-
-	function setLifetime($lifetime) {
-		$this->lifetime = $this->_filter->sanitize($lifetime, 'int') ?: null;
 	}
 
 	function setNewPicture($new_picture) {
