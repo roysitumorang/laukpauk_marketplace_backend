@@ -82,14 +82,6 @@ try {
 			'className' => 'Application\Frontend\Module',
 			'path'      => APP_PATH . 'apps/frontend/Module.php',
 		],
-		'v1' => [
-			'className' => 'Application\Api\V1\Module',
-			'path'      => APP_PATH . 'apps/api/v1/Module.php',
-		],
-		'v2' => [
-			'className' => 'Application\Api\V2\Module',
-			'path'      => APP_PATH . 'apps/api/v2/Module.php',
-		],
 		'v3' => [
 			'className' => 'Application\Api\V3\Module',
 			'path'      => APP_PATH . 'apps/api/v3/Module.php',

@@ -2,7 +2,7 @@
 
 namespace Application\Api\V3;
 
-use Phalcon\Cache\Backend\Apc;
+use Phalcon\Cache\Backend\Redis;
 use Phalcon\Cache\Frontend\Data as FrontData;
 use Phalcon\DiInterface;
 use Phalcon\Events\Event;
@@ -92,7 +92,12 @@ class Module implements ModuleDefinitionInterface {
 
 		// Register the cache component
 		$di->set('cache', function() {
-			$cache = new Apc(new FrontData(['lifetime' => 172800]));
+			$cache = new Redis(new FrontData(['lifetime' => 172800]), [
+				'host'       => 'localhost',
+				'port'       => 6379,
+				'persistent' => true,
+				'index'      => 0,
+			]);
 			return $cache;
 		});
 
