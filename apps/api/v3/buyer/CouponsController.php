@@ -4,8 +4,8 @@ namespace Application\Api\V3\Buyer;
 
 use Application\Models\Release;
 use Application\Models\Role;
-use Phalcon\Db;
 use Exception;
+use Phalcon\Db;
 
 class CouponsController extends ControllerBase {
 	function checkAction() {
@@ -36,8 +36,8 @@ class CouponsController extends ControllerBase {
 					a.status = '1' AND
 					a.effective_date <= ? AND
 					a.expiry_date > ? AND
-					a.code = ? AND
-					a.user_id
+					a.code = ?
+				GROUP BY a.id, d.version
 QUERY
 				,
 				$this->_current_user->id,
@@ -45,8 +45,7 @@ QUERY
 				$today,
 				$code,
 			];
-			$params[0] .= ($this->_premium_merchant ? ' = 1' : ' IS NULL') . ' GROUP BY a.id, d.version';
-			$coupon     = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+			$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 			if (!$coupon ||
 				($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) ||
 				($coupon->minimum_version && (!$this->_server->app_version || !Release::findFirst(['user_type = ?0 AND version = ?1', 'bind' => ['buyer', $this->_server->app_version]]) || $this->_server->app_version < $coupon->minimum_version)) ||
@@ -67,12 +66,10 @@ QUERY
 						a.status = 1 AND
 						a.role_id = ? AND
 						a.id = ? AND
-						b.village_id = ? AND
-						a.premium_merchant
+						b.village_id = ?
 QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
-				$params[0] .= $this->_premium_merchant ? ' = 1' : ' IS NULL';
-				$merchant   = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new Exception("Kode voucher {$code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 				}

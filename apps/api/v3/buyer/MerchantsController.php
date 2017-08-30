@@ -2,8 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\User;
-use Application\Models\Role;
+use Application\Models\Post;
 use Phalcon\Db;
 
 class MerchantsController extends ControllerBase {
@@ -41,23 +40,14 @@ class MerchantsController extends ControllerBase {
 			WHERE
 				a.status = 1 AND
 				b.name = 'Merchant' AND
-				c.village_id = {$this->_current_user->village->id} AND
-				a.premium_merchant
+				c.village_id = {$this->_current_user->village->id}
 QUERY;
-		if ($this->_premium_merchant) {
-			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
-			if ($search_query && $keywords) {
-				$query .= " AND e.keywords @@ TO_TSQUERY('{$keywords}')";
+		if ($search_query && $keywords) {
+			$query .= ' AND (';
+			foreach (['e.keywords', 'a.keywords'] as $i => $field) {
+				$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
 			}
-		} else {
-			$query .= ' IS NULL';
-			if ($search_query && $keywords) {
-				$query .= ' AND (';
-				foreach (['e.keywords', 'a.keywords'] as $i => $field) {
-					$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
-				}
-				$query .= ')';
-			}
+			$query .= ')';
 		}
 		$total_merchants = $this->db->fetchColumn($query, $params);
 		$total_pages     = ceil($total_merchants / $limit);
@@ -85,7 +75,7 @@ QUERY
 			]) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
-			unset($row->relevancy);
+			unset($item->relevancy);
 			$availability = 'Hari ini ';
 			if (($today == 1 && $item->open_on_monday) ||
 				($today == 2 && $item->open_on_tuesday) ||
@@ -159,32 +149,18 @@ QUERY
 	}
 
 	function aboutAction() {
-		if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
-			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
-
-		}
-		if (!$premium_merchant) {
-			$premium_merchant = User::findFirst(1);
-		}
 		$this->_response = [
 			'status' => 1,
-			'data'   => ['company_profile' => $premium_merchant->company_profile],
+			'data'   => ['company_profile' => Post::findFirstBySubject('Tentang Kami')->body],
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
 
 	function termsConditionsAction() {
-		if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
-			$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
-
-		}
-		if (!$premium_merchant) {
-			$premium_merchant = User::findFirst(1);
-		}
 		$this->_response = [
 			'status' => 1,
-			'data'   => ['terms_conditions' => $premium_merchant->terms_conditions],
+			'data'   => ['terms_conditions' => Post::findFirstBySubject('Kebijakan dan Privasi')->body],
 		];
 		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
 		return $this->response;

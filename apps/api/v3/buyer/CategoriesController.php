@@ -11,8 +11,8 @@ class CategoriesController extends ControllerBase {
 		$merchant_ids     = new Set;
 		$merchants        = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
-		foreach (["!= 'Lain-Lain'", "= 'Lain-Lain'"] as $condition) {
-			$result = $this->db->query('SELECT id, name FROM product_categories WHERE user_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL') . " AND published = 1 AND name {$condition} ORDER BY name");
+		foreach (['!', ''] as $condition) {
+			$result = $this->db->query("SELECT id, name FROM product_categories WHERE published = 1 AND name {$condition}= 'Lain-Lain' ORDER BY name");
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($category = $result->fetch()) {
 				$products = [];
@@ -30,14 +30,8 @@ class CategoriesController extends ControllerBase {
 						c.published = 1 AND
 						c.stock > 0 AND
 						d.published = 1 AND
-						a.premium_merchant
+						d.product_category_id = {$category->id}
 QUERY;
-				if ($this->_premium_merchant) {
-					$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
-				} else {
-					$query .= ' IS NULL';
-				}
-				$query .= " AND d.product_category_id = {$category->id}";
 				$total_products = $this->db->fetchColumn($query);
 				if (!$total_products) {
 					continue;
@@ -61,7 +55,7 @@ QUERY;
 		if (!$merchant_ids->isEmpty()) {
 			$today    = $this->currentDatetime->format('N');
 			$tomorrow = $this->currentDatetime->modify('+1 day')->format('N');
-			$query    = <<<QUERY
+			$query    = sprintf(<<<QUERY
 				SELECT
 					DISTINCT
 					a.id,
@@ -91,13 +85,10 @@ QUERY;
 					a.status = 1 AND
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
-QUERY;
-			if ($this->_premium_merchant) {
-				$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
-			} else {
-				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . $merchant_ids->join(',') . ')';
-			}
-			$query .= ' ORDER BY a.company';
+					a.id IN(%s)
+				ORDER BY a.company
+QUERY
+				, $merchant_ids->join(','));
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {

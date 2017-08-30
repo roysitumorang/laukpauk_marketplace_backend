@@ -40,30 +40,21 @@ class ProductsController extends ControllerBase {
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
 				d.published = 1 AND
-				e.published = 1 AND
-				a.premium_merchant
+				e.published = 1
 QUERY;
-		if ($this->_premium_merchant) {
-			$query .= " = 1 AND a.id = {$this->_premium_merchant->id}";
-			if ($search_query && $keywords) {
-				$query .= " AND e.keywords @@ TO_TSQUERY('{$keywords}')";
-			}
-		} else {
-			$query .= ' IS NULL';
-			if ($merchant_id) {
-				$query .= " AND a.id = {$merchant_id}";
-			}
-			if ($search_query) {
-				if ($this->db->fetchColumn('SELECT COUNT(1) FROM product_groups WHERE published = 1 AND name = ?', [$search_query])) {
-					$query   .= ' AND h.published = 1 AND h.name = ?';
-					$params[] = $search_query;
-				} else if ($keywords) {
-					$query .= ' AND (';
-					foreach (['e.keywords', 'a.keywords'] as $i => $field) {
-						$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
-					}
-					$query .= ')';
+		if ($merchant_id) {
+			$query .= " AND a.id = {$merchant_id}";
+		}
+		if ($search_query) {
+			if ($this->db->fetchColumn('SELECT COUNT(1) FROM product_groups WHERE published = 1 AND name = ?', [$search_query])) {
+				$query   .= ' AND h.published = 1 AND h.name = ?';
+				$params[] = $search_query;
+			} else if ($keywords) {
+				$query .= ' AND (';
+				foreach (['e.keywords', 'a.keywords'] as $i => $field) {
+					$query .= ($i ? ' OR ' : '') . "{$field} @@ TO_TSQUERY('{$keywords}')";
 				}
+				$query .= ')';
 			}
 		}
 		if ($category_id) {
@@ -103,7 +94,7 @@ QUERY
 		if (!$merchant_ids->isEmpty()) {
 			$today    = $this->currentDatetime->format('N');
 			$tomorrow = $this->currentDatetime->modify('+1 day')->format('N');
-			$query    = <<<QUERY
+			$query    = sprintf(<<<QUERY
 				SELECT
 					DISTINCT
 					a.id,
@@ -133,13 +124,10 @@ QUERY
 					a.status = 1 AND
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
-QUERY;
-			if ($this->_premium_merchant) {
-				$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
-			} else {
-				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . $merchant_ids->join(',') . ')';
-			}
-			$query .= ' ORDER BY a.company';
+					a.id IN(%s)
+				ORDER BY a.company
+QUERY
+				, $merchant_ids->join(','));
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
@@ -203,7 +191,7 @@ QUERY;
 			}
 		}
 		if (!$total_products) {
-			if ($keyword) {
+			if ($keywords) {
 				$this->_response['message'] = 'Produk tidak ditemukan.';
 			} else if (!$total_pages) {
 				$this->_response['message'] = 'Produk belum ada.';

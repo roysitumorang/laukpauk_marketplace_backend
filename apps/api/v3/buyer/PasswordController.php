@@ -5,8 +5,8 @@ namespace Application\Api\V3\Buyer;
 use Application\Models\Device;
 use Application\Models\Role;
 use Application\Models\User;
+use Exception;
 use Phalcon\Crypt;
-use Phalcon\Exception;
 
 class PasswordController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -57,7 +57,7 @@ class PasswordController extends ControllerBase {
 
 	function sendResetTokenAction() {
 		try {
-			if (!$this->_post->mobile_phone || !($user = User::findFirst(['role_id = ?0 AND mobile_phone = ?1 AND merchant_id ' . ($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL'), 'bind' => [Role::BUYER, $this->_post->mobile_phone]]))) {
+			if (!$this->_post->mobile_phone || !($user = User::findFirst(['role_id = ?0 AND mobile_phone = ?1', 'bind' => [Role::BUYER, $this->_post->mobile_phone]]))) {
 				throw new Exception('No HP tidak terdaftar!');
 			}
 			if ($user->status == -1) {
@@ -125,10 +125,7 @@ class PasswordController extends ControllerBase {
 						'name' => $user->village->subdistrict->city->province->name,
 					],
 				];
-				$payload = ['api_key' => $user->api_key];
-				if ($merchant_token) {
-					$payload['merchant_token'] = $merchant_token;
-				}
+				$payload                                 = ['api_key' => $user->api_key];
 				$this->_response['status']               = 1;
 				$this->_response['data']['access_token'] = strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
 					'+' => '-',

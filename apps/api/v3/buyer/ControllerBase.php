@@ -5,9 +5,9 @@ namespace Application\Api\V3\Buyer;
 use Application\Models\Role;
 use Application\Models\Setting;
 use Application\Models\User;
+use Exception;
 use IntlDateFormatter;
 use Phalcon\Crypt;
-use Phalcon\Exception;
 use Phalcon\Mvc\Controller;
 
 abstract class ControllerBase extends Controller {
@@ -17,7 +17,6 @@ abstract class ControllerBase extends Controller {
 		'data'   => [],
 	];
 	protected $_current_user;
-	protected $_premium_merchant;
 	protected $_post;
 	protected $_server;
 	protected $_date_formatter;
@@ -55,24 +54,16 @@ abstract class ControllerBase extends Controller {
 
 	function beforeExecuteRoute() {
 		try {
-			$access_token   = str_replace('Bearer ', '', filter_input(INPUT_SERVER, 'Authorization'));
-			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
-			if (!$access_token) {
-				throw new Exception(static::INVALID_API_KEY_MESSAGE);
-			}
-			if ($merchant_token && !($this->_premium_merchant = User::findFirst(['status = 1 AND role_id = ?0 AND premium_merchant = 1 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]))) {
+			if (!$access_token = strtr(filter_input(INPUT_SERVER, 'Authorization'), ['Bearer ' => ''])) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
 			$encrypted_data = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
 			$crypt          = new Crypt;
 			$payload        = json_decode($crypt->decryptBase64($encrypted_data, $this->config->encryption_key));
-			$params         = $this->_premium_merchant
-					? ['status = 1 AND role_id = ?0 AND api_key = ?1 AND merchant_id = ?2', 'bind' => [Role::BUYER, $payload->api_key, $this->_premium_merchant->id]]
-					: ['status = 1 AND role_id = ?0 AND api_key = ?1 AND merchant_id IS NULL', 'bind' => [Role::BUYER, $payload->api_key]];
-			if (($merchant_token && $payload->merchant_token != $merchant_token) || !($this->_current_user = User::findFirst($params))) {
+			if (!$this->_current_user = User::findFirst(['status = 1 AND role_id = ?0 AND api_key = ?1', 'bind' => [Role::BUYER, $payload->api_key]])) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
-			$this->_response['version'] = $this->db->fetchColumn("SELECT MAX(version) FROM releases WHERE user_type = 'buyer' AND application_type = '" . ($this->_premium_merchant ? 'premium' : 'free') . "'");
+			$this->_response['version'] = $this->db->fetchColumn("SELECT MAX(version) FROM releases WHERE user_type = 'buyer'");
 		} catch (Exception $e) {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();
@@ -80,21 +71,5 @@ abstract class ControllerBase extends Controller {
 			$this->response->send();
 			exit;
 		}
-	}
-
-	protected function _setPaginationRange($total_pages, $current_page = 1) : array {
-		if ($total_pages < 2) {
-			return [];
-		}
-		$start_page = min(max($current_page - 3, 1), $total_pages);
-		$end_page   = max(min($current_page + 3, $total_pages), 1);
-		$pages      = range($start_page, $end_page);
-		if ($start_page > 1) {
-			array_unshift($pages, 1);
-		}
-		if ($end_page < $total_pages) {
-			$pages[] = $total_pages;
-		}
-		return $pages;
 	}
 }

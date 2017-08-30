@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\NotificationRecipient;
-use Phalcon\Exception;
+use Exception;
 
 class NotificationsController extends ControllerBase {
 	function indexAction() {

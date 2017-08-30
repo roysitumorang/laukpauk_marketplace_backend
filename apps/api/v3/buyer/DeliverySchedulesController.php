@@ -5,9 +5,9 @@ namespace Application\Api\V3\Buyer;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Exception;
 use IntlDateFormatter;
 use Phalcon\Db;
-use Phalcon\Exception;
 use stdClass;
 
 class DeliverySchedulesController extends ControllerBase {
@@ -44,7 +44,7 @@ class DeliverySchedulesController extends ControllerBase {
 			$day               .= ' / ' . $this->_date_formatter->format($date);
 			$days_of_week[$day] = $date;
 		}
-		$query = <<<QUERY
+		$query = sprintf(<<<QUERY
 			SELECT
 				a.id,
 				a.open_on_sunday,
@@ -67,13 +67,10 @@ class DeliverySchedulesController extends ControllerBase {
 				a.status = 1 AND
 				b.name = 'Merchant' AND
 				c.village_id = {$this->_current_user->village->id} AND
-QUERY;
-		if ($this->_premium_merchant) {
-			$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
-		} else {
-			$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
-		}
-		$query .= ' GROUP BY a.id';
+				a.id IN(%s)
+			GROUP BY a.id
+QUERY
+		, implode(',', $merchant_ids));
 		$result = $this->db->query($query);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
@@ -84,7 +81,6 @@ QUERY;
 				if ($day == $this->currentDatetime && $current_hour >= max($delivery_hours)) {
 					continue;
 				}
-				$current_day  = $day->format('l');
 				$current_date = $day->format('Y-m-d');
 				if (!isset($delivery_dates[$current_date])) {
 					$delivery_dates[$current_date]        = new stdClass;
@@ -149,7 +145,7 @@ QUERY;
 			}
 			$delivery_schedule = new DateTime($delivery_date, $this->currentDatetime->getTimezone());
 			$delivery_day      = $delivery_schedule->format('l');
-			$query             = <<<QUERY
+			$query             = sprintf(<<<QUERY
 				SELECT
 					a.id,
 					a.company,
@@ -173,13 +169,10 @@ QUERY;
 					a.status = 1 AND
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
-QUERY;
-			if ($this->_premium_merchant) {
-				$query .= " a.premium_merchant = 1 AND a.id = {$this->_premium_merchant->id}";
-			} else {
-				$query .= ' a.premium_merchant IS NULL AND a.id IN(' . implode(',', $merchant_ids) . ')';
-			}
-			$query .= ' GROUP BY a.id';
+					a.id IN(%s)
+				GROUP BY a.id
+QUERY
+				, implode(',', $merchant_ids));
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {

@@ -8,16 +8,14 @@ use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
 use Ds\Set;
+use Exception;
 use Phalcon\Crypt;
 use Phalcon\Db;
-use Phalcon\Exception;
 
 class AccountController extends ControllerBase {
 	function beforeExecuteRoute() {
 		if ($this->dispatcher->getActionName() === 'update') {
 			parent::beforeExecuteRoute();
-		} else if ($merchant_token = $this->dispatcher->getParam('merchant_token', 'string')) {
-			$this->_premium_merchant = User::findFirst(['status = 1 AND role_id = ?0 AND premium_merchant = 1 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
 		}
 	}
 
@@ -25,10 +23,6 @@ class AccountController extends ControllerBase {
 		try {
 			if (!$this->request->isPost()) {
 				throw new Exception('Request tidak valid!');
-			}
-			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
-			if ($merchant_token) {
-				$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
 			}
 			$village_id    = filter_var($this->_post->village_id, FILTER_VALIDATE_INT);
 			$user          = new User;
@@ -38,10 +32,7 @@ class AccountController extends ControllerBase {
 			$user->setNewPasswordConfirmation($this->_post->new_password);
 			$user->setMobilePhone($this->_post->mobile_phone);
 			$user->setDeposit(0);
-			$user->role_id = Role::findFirstByName('Buyer')->id;
-			if ($premium_merchant) {
-				$user->merchant_id = $premium_merchant->id;
-			}
+			$user->role_id = Role::BUYER;
 			if (!$user->validation() || !$user->create()) {
 				$errors = new Set;
 				foreach ($user->getMessages() as $error) {
@@ -80,14 +71,7 @@ class AccountController extends ControllerBase {
 			if (!$this->request->isPost()) {
 				throw new Exception('Request tidak valid!');
 			}
-			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
-			if ($merchant_token) {
-				$premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]);
-			}
-			$params = $premium_merchant
-				? ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id = ?2', 'bind' => [Role::BUYER, $activation_token, $premium_merchant->id]]
-				: ['status = 0 AND role_id = ?0 AND activation_token = ?1 AND merchant_id IS NULL', 'bind' => [Role::BUYER, $activation_token]];
-			if (!($user = User::findFirst($params))) {
+			if (!$user = User::findFirst(['status = 0 AND role_id = ?0 AND activation_token = ?1', 'bind' => [Role::BUYER, $activation_token]])) {
 				throw new Exception('Token aktivasi tidak valid!');
 			}
 			$user->activate();
@@ -115,10 +99,7 @@ class AccountController extends ControllerBase {
 					'name' => $user->village->subdistrict->city->province->name,
 				],
 			];
-			$payload = ['api_key' => $user->api_key];
-			if ($premium_merchant) {
-				$payload['merchant_token'] = $premium_merchant->merchant_token;
-			}
+			$payload                                 = ['api_key' => $user->api_key];
 			$this->_response['status']               = 1;
 			$this->_response['message']              = 'Aktivasi account berhasil!';
 			$this->_response['data']['access_token'] = strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
@@ -153,9 +134,9 @@ class AccountController extends ControllerBase {
 						JOIN villages d ON c.id = d.subdistrict_id
 						JOIN coverage_area e ON d.id = e.village_id
 						JOIN users f ON e.user_id = f.id
-					WHERE
+					GROUP BY a.id
+					ORDER BY a.name
 QUERY
-					. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY a.id ORDER BY a.name'
 				);
 				$result->setFetchMode(Db::FETCH_OBJ);
 				while ($row = $result->fetch()) {
@@ -171,9 +152,9 @@ QUERY
 						JOIN villages d ON c.id = d.subdistrict_id
 						JOIN coverage_area e ON d.id = e.village_id
 						JOIN users f ON e.user_id = f.id
-					WHERE
+					GROUP BY b.id
+					ORDER BY name
 QUERY
-					. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY name"
 				);
 				$result->setFetchMode(Db::FETCH_OBJ);
 				while ($row = $result->fetch()) {
@@ -188,9 +169,9 @@ QUERY
 						JOIN villages d ON c.id = d.subdistrict_id
 						JOIN coverage_area e ON d.id = e.village_id
 						JOIN users f ON e.user_id = f.id
-					WHERE
+					GROUP BY c.id
+					ORDER BY c.name
 QUERY
-					. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY c.id ORDER BY c.name'
 				);
 				$result->setFetchMode(Db::FETCH_OBJ);
 				while ($row = $result->fetch()) {
@@ -206,8 +187,10 @@ QUERY
 						JOIN coverage_area e ON d.id = e.village_id
 						JOIN users f ON e.user_id = f.id
 					WHERE
+						c.id = {$this->_current_user->village->subdistrict_id}
+					GROUP BY d.id
+					ORDER BY d.name
 QUERY
-					. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " AND c.id = {$this->_current_user->village->subdistrict->id} GROUP BY d.id ORDER BY d.name"
 				);
 				$result->setFetchMode(Db::FETCH_OBJ);
 				while ($row = $result->fetch()) {
@@ -269,7 +252,7 @@ QUERY
 				],
 			];
 			$this->_response['status']               = 1;
-			$this->_response['message']              = 'Edit profil berhasil!';
+			$this->_response['message']              = 'Update profil berhasil!';
 			$this->_response['data']['current_user'] = $current_user;
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
@@ -281,10 +264,6 @@ QUERY
 
 	function authorizeAction() {
 		try {
-			$merchant_token = $this->dispatcher->getParam('merchant_token', 'string');
-			if ($merchant_token && !($premium_merchant = User::findFirst(['status = 1 AND premium_merchant = 1 AND role_id = ?0 AND merchant_token = ?1', 'bind' => [Role::MERCHANT, $merchant_token]]))) {
-				throw new Exception('Merchant token tidak valid, silahkan hubungi Tim LaukPauk.id!');
-			}
 			$errors = new Set;
 			if (!$this->_post->mobile_phone) {
 				$errors->add('nomor HP harus diisi');
@@ -295,10 +274,7 @@ QUERY
 			if (!$errors->isEmpty()) {
 				throw new Exception($errors->join('<br>'));
 			}
-			$params = $premium_merchant
-				? ['status = 1 AND role_id = ?0 AND mobile_phone = ?1 AND merchant_id = ?2', 'bind' => [Role::BUYER, $this->_post->mobile_phone, $premium_merchant->id]]
-				: ['status = 1 AND role_id = ?0 AND mobile_phone = ?1 AND merchant_id IS NULL', 'bind' => [Role::BUYER, $this->_post->mobile_phone]];
-			$user = User::findFirst($params);
+			$user = User::findFirst(['status = 1 AND role_id = ?0 AND mobile_phone = ?1', 'bind' => [Role::BUYER, $this->_post->mobile_phone]]);
 			if (!$user || !$this->security->checkHash($this->_post->password, $user->password)) {
 				throw new Exception('Nomor HP dan/atau password salah!');
 			}
@@ -343,10 +319,7 @@ QUERY
 					'name' => $user->village->subdistrict->city->province->name,
 				],
 			];
-			$payload = ['api_key' => $user->api_key];
-			if ($merchant_token) {
-				$payload['merchant_token'] = $merchant_token;
-			}
+			$payload                                 = ['api_key' => $user->api_key];
 			$this->_response['status']               = 1;
 			$this->_response['data']['access_token'] = strtr($crypt->encryptBase64(json_encode($payload), $this->config->encryption_key), [
 				'+' => '-',
@@ -375,9 +348,9 @@ QUERY
 				JOIN villages d ON c.id = d.subdistrict_id
 				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
-			WHERE
+			GROUP BY a.id
+			ORDER BY a.name
 QUERY
-			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY a.id ORDER BY a.name'
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -402,10 +375,10 @@ QUERY
 				JOIN villages d ON c.id = d.subdistrict_id
 				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
-			WHERE
-				a.id = {$id} AND
+			WHERE a.id = {$id}
+			GROUP BY b.id
+			ORDER BY name
 QUERY
-			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . " GROUP BY b.id ORDER BY name"
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -429,10 +402,10 @@ QUERY
 				JOIN villages d ON c.id = d.subdistrict_id
 				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
-			WHERE
-				b.id = {$id} AND
+			WHERE b.id = {$id}
+			GROUP BY c.id
+			ORDER BY c.name
 QUERY
-			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY c.id ORDER BY c.name'
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
@@ -455,10 +428,10 @@ QUERY
 				JOIN villages d ON c.id = d.subdistrict_id
 				JOIN coverage_area e ON d.id = e.village_id
 				JOIN users f ON e.user_id = f.id
-			WHERE
-				c.id = {$id} AND
+			WHERE c.id = {$id}
+			GROUP BY d.id
+			ORDER BY d.name
 QUERY
-			. ($this->_premium_merchant ? " e.user_id = {$this->_premium_merchant->id}" : ' f.premium_merchant IS NULL') . ' GROUP BY d.id ORDER BY d.name'
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
