@@ -28,19 +28,13 @@
 					<tr>
 						<td>
 							<form method="GET" action="/admin/product_categories" id="search">
-								Merchant <select name="user_id">
-									<option value=""></option>
-									{% for merchant in merchants %}
-										<option value="{{ merchant.id }}"{% if merchant.id == user_id %} selected{% endif %}>{{ merchant.company }}</option>
-									{% endfor %}
-								</select>
 								<input type="text" name="keyword" value="{{ keyword }}" placeholder="Nama">&nbsp;
-								<button type="submit" class="btn btn-info">CARI</button>
+								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
+								<a type="button" href="/admin/product_categories/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah</a>
 							</form>
 						</td>
 					</tr>
 				</table>
-				<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/product_categories/create">Tambah Kategori</a></p>
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -116,7 +110,7 @@
 			form.method = 'POST',
 			form.action = 'delete' === item.className
 			? url + item.dataset.id + '/delete'
-			: url + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			: url + item.dataset.id + '/toggle_status?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
 		}
@@ -124,9 +118,6 @@
 	search.addEventListener('submit', event => {
 		event.preventDefault();
 		url += 'index';
-		if (search.user_id.value) {
-			url += '/user_id:' + search.user_id.value;
-		}
 		if (search.keyword.value) {
 			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
 				return replacement[match];

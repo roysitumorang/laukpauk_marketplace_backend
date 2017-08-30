@@ -2,21 +2,6 @@
 <form method="POST" action="{{ action }}" enctype="multipart/form-data">
 	<table class="table table-striped">
 		<tr>
-			<td><b>Merchant</b></td>
-			<td>
-				{% if category.id %}
-					{{ category.user.company }}
-				{% else %}
-					<select name="user_id">
-						<option value=""></option>
-						{% for merchant in merchants %}
-							<option value="{{ merchant.id }}"{% if merchant.id == category.user_id %} selected{% endif %}>{{ merchant.company }}</option>
-						{% endfor %}
-					</select>
-				{% endif %}
-			</td>
-		</tr>
-		<tr>
 			<td width="30%"><b>Nama</b></td>
 			<td><input type="text" name="name" value="{{ category.name }}" size="40" placeholder="Nama"></td>
 		</tr>
@@ -86,7 +71,7 @@
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td><button type="submit" class="btn btn-info">SIMPAN</button></td>
+			<td><button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> SIMPAN</button></td>
 		</tr>
 	</table>
 </form>

@@ -6,7 +6,7 @@ use Phalcon\Image;
 use Phalcon\Image\Adapter\Gd;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\File as FileValidator;
+use Phalcon\Validation\Validator\File;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
 
@@ -14,7 +14,6 @@ class ProductCategory extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
 
 	public $id;
-	public $user_id;
 	public $name;
 	public $permalink;
 	public $new_permalink;
@@ -47,18 +46,7 @@ class ProductCategory extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
-		]);
 		$this->hasMany('id', 'Application\Models\Product', 'product_category_id', ['alias' => 'products']);
-	}
-
-	function setUserId(int $user_id = null) {
-		if (!$this->id) {
-			$user          = User::findFirst(['id = ?0 AND role_id = ?1 AND premium_merchant = 1', 'bind' => [$user_id, Role::MERCHANT]]);
-			$this->user_id = $user ? $user->id : null;
-		}
 	}
 
 	function setName(string $name) {
@@ -108,7 +96,7 @@ class ProductCategory extends ModelBase {
 		$validator->add('name', new PresenceOf([
 			'message' => 'nama harus diisi',
 		]));
-		$validator->add(['name', 'user_id'], new Uniqueness([
+		$validator->add('name', new Uniqueness([
 			'convert' => function(array $values) : array {
 				$values['name'] = strtolower($values['name']);
 				return $values;
@@ -116,14 +104,14 @@ class ProductCategory extends ModelBase {
 			'message' => 'nama sudah ada',
 		]));
 		if (!$this->id || $this->new_permalink) {
-			$validator->add(['new_permalink', 'user_id'], new Uniqueness([
+			$validator->add('new_permalink', new Uniqueness([
 				'attribute' => 'permalink',
 				'message'   => 'permalink sudah ada',
 			]));
 		}
 		if ($this->new_picture) {
 			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_picture', new FileValidator([
+			$validator->add('new_picture', new File([
 				'maxSize'      => $max_size,
 				'messageSize'  => 'ukuran file maksimal ' . $max_size,
 				'allowedTypes' => ['image/jpeg', 'image/png'],

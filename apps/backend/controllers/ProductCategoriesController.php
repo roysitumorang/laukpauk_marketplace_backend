@@ -3,8 +3,8 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\ProductCategory;
-use Application\Models\User;
-use Phalcon\Exception;
+use Ds\Set;
+use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductCategoriesController extends ControllerBase {
@@ -17,12 +17,10 @@ class ProductCategoriesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$user_id      = $this->dispatcher->getParam('user_id', 'int');
 		$keyword      = $this->dispatcher->getParam('keyword');
 		$builder      = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
-				'a.user_id',
 				'a.name',
 				'permalink'      => 'a.permalink',
 				'picture'        => 'a.picture',
@@ -39,31 +37,29 @@ class ProductCategoriesController extends ControllerBase {
 			])
 			->from(['a' => 'Application\Models\ProductCategory'])
 			->leftJoin('Application\Models\Product', 'a.id = b.product_category_id', 'b')
-			->where('a.user_id ' . ($user_id ? "= {$user_id}" : 'IS NULL'))
 			->groupBy('a.id')
 			->orderBy('a.name ASC');
 		if ($keyword) {
-			$builder->andWhere('a.name ILIKE ?0', ["%{$keyword}%"]);
+			$builder->where('a.name ILIKE ?0', ["%{$keyword}%"]);
 		}
-		$paginator  = new QueryBuilder([
+		$paginator = new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
 		$page       = $paginator->getPaginate();
 		$pages      = $this->_setPaginationRange($page);
-		$categories = [];
+		$categories = new Set;
 		foreach ($page->items as $item) {
 			$category = ProductCategory::findFirst($item->id);
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('thumbnail', $category->thumbnail(120));
-			$categories[] = $item;
+			$categories->add($item);
 		}
-		$this->view->user_id    = $user_id;
 		$this->view->keyword    = $keyword;
-		$this->view->categories = $categories;
 		$this->view->page       = $paginator->getPaginate();
 		$this->view->pages      = $pages;
+		$this->view->categories = $categories;
 		$this->_prepare_datas();
 	}
 
@@ -106,26 +102,10 @@ class ProductCategoriesController extends ControllerBase {
 		$this->_prepare_datas($category);
 	}
 
-	function publishAction($id) {
+	function toggleStatusAction($id) {
 		if ($this->request->isPost()) {
-			$category = ProductCategory::findFirst(['id = ?0 AND published = 0', 'bind' => [$id]]);
-			if ($category) {
-				$category->update(['published' => 1]);
-			} else {
-				$this->flashSession->error('Kategori tidak ditemukan!');
-			}
-		}
-		return $this->response->redirect($this->request->get('next'));
-	}
-
-	function unpublishAction($id) {
-		if ($this->request->isPost()) {
-			$category = ProductCategory::findFirst(['id = ?0 AND published = 1', 'bind' => [$id]]);
-			if ($category) {
-				$category->update(['published' => 0]);
-			} else {
-				$this->flashSession->error('Kategori tidak ditemukan!');
-			}
+			$category = ProductCategory::findFirst($id);
+			$category ? $category->update(['published' => $category->published ? 0 : 1]) : $this->flashSession->error('Kategori tidak ditemukan!');
 		}
 		return $this->response->redirect($this->request->get('next'));
 	}
@@ -157,19 +137,10 @@ class ProductCategoriesController extends ControllerBase {
 	}
 
 	private function _prepare_datas(ProductCategory $category = null) {
-		$this->view->category  = $category;
-		$this->view->merchants = User::find([
-			'premium_merchant = 1 AND status = 1',
-			'columns' => 'id, company',
-			'order'   => 'company'
-		]);
+		$this->view->category = $category;
 	}
 
 	private function _set_model_attributes(&$category) {
-		$user_id = $this->request->getPost('user_id', 'int');
-		if (!$category->id && $user_id && User::findFirst(['premium_merchant = 1 AND status = 1 AND id = ?0', 'bind' => [$user_id]])) {
-			$category->user_id = $user_id;
-		}
 		$category->setName($this->request->getPost('name'));
 		$category->setNewPermalink($this->request->getPost('new_permalink'));
 		$category->setPublished($this->request->getPost('published'));
