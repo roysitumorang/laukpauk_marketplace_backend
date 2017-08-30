@@ -14,7 +14,7 @@ class OperationsController extends ControllerBase {
 		$search_query   = $this->dispatcher->getParam('keyword', 'string');
 		$business_hours = [];
 		$conditions     = [
-			'status = 1 AND role_id = ?0 AND premium_merchant IS NULL',
+			'status = 1 AND role_id = ?0',
 			'bind'  => [Role::MERCHANT],
 			'order' => 'company',
 		];
@@ -52,7 +52,7 @@ class OperationsController extends ControllerBase {
 		$merchants = $this->request->getPost('merchants');
 		if ($this->request->isPost()) {
 			foreach ($merchants as $id => $operation) {
-				if ($user = User::findFirst(['status = 1 AND role_id = ?0 AND premium_merchant IS NULL AND id = ?1', 'bind' => [Role::MERCHANT, $id]])) {
+				if ($user = User::findFirst(['status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [Role::MERCHANT, $id]])) {
 					$user->setOpenOnSunday($operation['open_on_sunday']);
 					$user->setOpenOnMonday($operation['open_on_monday']);
 					$user->setOpenOnTuesday($operation['open_on_tuesday']);
