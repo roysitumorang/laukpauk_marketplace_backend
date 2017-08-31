@@ -10,17 +10,16 @@ class ProductGroupsController extends ControllerBase {
 		$search_query   = $this->dispatcher->getParam('keyword', 'string') ?: null;
 		$limit          = 10;
 		$product_groups = [];
+		$query          = 'SELECT COUNT(1) FROM product_groups WHERE published = 1';
 		$keywords       = '';
 		if ($search_query) {
 			$words = preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY);
 			foreach ($words as $i => $word) {
 				$keywords .= ($i > 0 ? ' & ' : '') . $word . ':*';
 			}
-		}
-		$query = 'SELECT COUNT(1) FROM product_groups WHERE published = 1 AND user_id ' .
-			($this->_premium_merchant ? "= {$this->_premium_merchant->id}" : 'IS NULL');
-		if ($keywords) {
-			$query .= " AND keywords @@ TO_TSQUERY('{$keywords}')";
+			if ($keywords) {
+				$query .= " AND keywords @@ TO_TSQUERY('{$keywords}')";
+			}
 		}
 		$total_rows   = $this->db->fetchColumn($query);
 		$total_pages  = ceil($total_rows / $limit);
