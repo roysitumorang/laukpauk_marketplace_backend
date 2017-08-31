@@ -8,6 +8,7 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\File;
 use Phalcon\Validation\Validator\InclusionIn;
 use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\StringLength;
 use Phalcon\Validation\Validator\Uniqueness;
 
 class Product extends ModelBase {
@@ -99,6 +100,12 @@ class Product extends ModelBase {
 				'name'       => 'nama harus diisi',
 				'stock_unit' => 'satuan harus diisi',
 			],
+		]));
+		$validator->add('stock_unit', new StringLength([
+			'min'            => 1,
+			'max'            => 10,
+			'messageMinimum' => 'satuan minimal 1 karakter',
+			'messageMaximum' => 'satuan maksimal 10 karakter',
 		]));
 		$validator->add(['user_id', 'product_category_id', 'name', 'stock_unit'], new Uniqueness([
 			'message' => 'nama, satuan dan kategori sudah ada',
