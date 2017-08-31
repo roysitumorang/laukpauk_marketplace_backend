@@ -93,13 +93,8 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Members',
-				'link'      => null,
+				'link'      => 'users',
 				'icon'      => 'users',
-				'expanded'  => $expanded == 'Members',
-				'sub_items' => [
-					['label' => 'Member List',   'link' => 'users'],
-					['label' => 'Tambah Member', 'link' => 'users/create'],
-				],
 			], [
 				'label'     => 'Products',
 				'link'      => null,
@@ -117,12 +112,8 @@ class ControllerBase extends Controller {
 				],
 			], [
 				'label'     => 'Order',
-				'link'      => null,
+				'link'      => 'orders',
 				'icon'      => 'shopping-cart',
-				'expanded'  => $expanded == 'Order',
-				'sub_items' => [
-					['label' => 'Order List', 'link' => 'orders'],
-				],
 			], [
 				'label'     => 'Options',
 				'link'      => null,
@@ -135,10 +126,6 @@ class ControllerBase extends Controller {
 					['label' => 'Release APK',         'link' => 'releases'],
 					['label' => 'Template Notifikasi', 'link' => 'notification_templates'],
 				],
-			], [
-				'label'     => 'Manage User',
-				'link'      => 'users',
-				'icon'      => 'user-plus',
 			], [
 				'label'     => 'Logout',
 				'link'      => 'sessions/delete',
