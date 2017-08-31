@@ -23,8 +23,11 @@ class HomeController extends ControllerBase {
 		foreach ($this->db->fetchAll("SELECT TO_CHAR(a.name, 'DD') AS date, COUNT(b.id) AS amount FROM dates a LEFT JOIN orders b ON a.name = DATE(b.created_at) AND b.status = 1 WHERE a.name BETWEEN ? AND ? GROUP BY date ORDER BY date", Db::FETCH_OBJ, [$this->currentDatetime->format('Y-m') . '-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
 			$daily_sales[] = [$sale->date, $sale->amount];
 		}
-		foreach ($this->db->fetchAll("SELECT TO_CHAR(created_at, 'MM') AS month_number, TO_CHAR(created_at, 'Mon') AS month_name, COUNT(1) AS amount FROM orders WHERE status = 1 AND DATE(created_at) BETWEEN ? AND ? GROUP BY month_number, month_name ORDER BY month_number", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
-			$monthly_sales[] = [$sale->month_name, $sale->amount];
+		foreach ($this->db->fetchAll("WITH a AS (SELECT * FROM UNNEST(ARRAY['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']) WITH ORDINALITY a(month, rn)), b AS (SELECT TO_CHAR(created_at, 'MM')::INT AS month, COUNT(1) AS amount FROM orders WHERE status = 1 AND TO_CHAR(created_at, 'YYYY') = ? GROUP BY month) SELECT a.month, COALESCE(b.amount, 0) AS amount FROM a LEFT JOIN b ON a.rn = b.month ORDER BY a.rn", Db::FETCH_OBJ, [$this->currentDatetime->format('Y')]) as $sale) {
+			$monthly_sales[] = [$sale->month, $sale->amount];
+			if ($sale->month == $this->currentDatetime->format('M')) {
+				break;
+			}
 		}
 		foreach ($this->db->fetchAll("SELECT TO_CHAR(created_at, 'YYYY') AS year, COUNT(1) AS amount FROM orders WHERE status = 1 GROUP BY year ORDER BY year", Db::FETCH_OBJ) as $sale) {
 			$annual_sales[] = [$sale->year, $sale->amount];
