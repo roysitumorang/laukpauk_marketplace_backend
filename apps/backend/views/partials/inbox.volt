@@ -59,7 +59,7 @@
 					</li>
 				{% elsefor %}
 					<li>
-						<a href="/admin/web_notifications" class="clearfix">
+						<a href="/admin/notifications" class="clearfix">
 							<span class="title">Maaf</span>
 							<span class="message">Belum ada notifikasi</span>
 						</a>
@@ -68,7 +68,7 @@
 				</ul>
 				<hr>
 				<div class="text-right">
-					<a href="/admin/web_notifications" class="view-more">Tampilkan Semua</a>
+					<a href="/admin/notifications" class="view-more">Tampilkan Semua</a>
 				</div>
 			</div>
 		</div>

@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/web_notifications"><h2>Notifikasi</h2></a>
+				<a href="/admin/notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}"><h2>Notifikasi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/web_notifications">Notifikasi</a></span></li>
+						<li><span><a href="/admin/notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}">Notifikasi</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -54,9 +54,9 @@
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
 							{% if i == page.current %}
-							<b>{{ i }}</b>
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/web_notifications/index/page:{{ i }}">{{ i }}</a>
+								<a href="/admin/notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -75,7 +75,7 @@
 		notification.setAttribute('style', 'cursor:pointer'),
 		notification.onclick = () => {
 			if (this.dataset.id) {
-				fetch('/admin/web_notifications/update/' + this.dataset.id + '/read:1')
+				fetch('/admin/notifications/' + this.dataset.id + '/read', { credentials: 'include', method: 'POST' })
 			}
 			location.href = this.dataset.targetUrl;
 		}

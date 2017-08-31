@@ -7,7 +7,7 @@ use DateTime;
 use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model as PaginatorModel;
 
-class WebNotificationsController extends ControllerBase {
+class NotificationsController extends ControllerBase {
 	function indexAction() {
 		$datetime_formatter = new IntlDateFormatter(
 			'id_ID',
@@ -42,14 +42,11 @@ class WebNotificationsController extends ControllerBase {
 		$this->view->page          = $paginator->getPaginate();
 	}
 
-	function updateAction($id) {
-		if ($this->dispatcher->getParam('read')) {
+	function readAction($id) {
+		if ($this->request->isPost()) {
 			$notification_recipient = NotificationRecipient::findFirst([
 				'conditions' => 'user_id = ?0 AND notification_id = ?1 AND read_at IS NULL',
-				'bind'       => [
-					$this->currentUser->id,
-					$id,
-				],
+				'bind'       => [$this->currentUser->id, $id],
 			]);
 			if ($notification_recipient) {
 				$notification_recipient->update(['read_at' => $this->currentDatetime->format('Y-m-d H:i:s')]);
