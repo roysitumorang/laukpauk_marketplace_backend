@@ -20,7 +20,7 @@
 				</figure>
 				<div class="profile-info" data-lock-name="{{ current_user.name }}" data-lock-email="{{ current_user.email }}">
 					<span class="name">{{ current_user.name }}</span>
-					<span class="role">{{ current_user.user_type }}</span>
+					<span class="role">{{ current_user.role.name }}</span>
 				</div>
 				<i class="fa custom-caret"></i>
 			</a>
