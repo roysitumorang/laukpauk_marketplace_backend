@@ -16,7 +16,7 @@ if (preg_match('#^/api/v\d/(buyer|merchant)/[a-z\d]{32}#', $request_uri)) {
 		CURLOPT_HEADER  => 0,
 		CURLOPT_TIMEOUT => 30,
 	]);
-	$custom_header = [];
+	$custom_header = ['X-Requested-With: ' . filter_input(INPUT_SERVER, 'HTTP_X_REQUESTED_WITH')];
 	$authorization = filter_input(INPUT_SERVER, 'Authorization');
 	$user_data     = filter_input(INPUT_SERVER, 'HTTP_USER_DATA');
 	if ($authorization) {
