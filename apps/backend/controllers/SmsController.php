@@ -37,27 +37,18 @@ class SmsController extends ControllerBase {
 	}
 
 	function createAction() {
-		$sms         = new Sms;
-		$merchants   = [];
-		$roles       = [];
-		$recipients  = [];
-		$merchant_id = '';
-		$role_id     = '';
-		$user_id     = '';
-		$condition   = 'status = 1';
-		foreach (User::find(['status = 1 AND premium_merchant = 1', 'column' => 'id, name, mobile_phone', 'order' => 'LOWER(company)']) as $item) {
-			$merchants[] = $item;
-		}
+		$sms        = new Sms;
+		$roles      = [];
+		$recipients = [];
+		$role_id    = '';
+		$user_id    = '';
+		$condition  = 'status = 1';
 		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'LOWER(name) DESC']) as $item) {
 			$roles[] = $item;
 		}
 		if ($this->request->isPost()) {
-			$merchant_id = $this->request->getPost('merchant_id', 'int');
-			$role_id     = $this->request->getPost('role_id', 'int');
-			$user_id     = $this->request->getPost('user_id');
-			if ($merchant_id && $merchant = User::findFirst("status = 1 AND premium_merchant = 1 AND id = {$merchant_id}")) {
-				$condition .= " AND (id = {$merchant->id} OR merchant_id = {$merchant->id})";
-			}
+			$role_id = $this->request->getPost('role_id', 'int');
+			$user_id = $this->request->getPost('user_id');
 			if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
 				$condition .= " AND role_id = {$role->id}";
 			}
@@ -82,27 +73,21 @@ class SmsController extends ControllerBase {
 				}
 			}
 		} else {
-			foreach (User::find([$condition . ' AND premium_merchant IS NULL AND merchant_id IS NULL', 'order' => 'LOWER(name)']) as $item) {
+			foreach (User::find([$condition, 'order' => 'LOWER(name)']) as $item) {
 				$recipients[] = $item;
 			}
 		}
-		$this->view->sms         = $sms;
-		$this->view->merchants   = $merchants;
-		$this->view->roles       = $roles;
-		$this->view->users       = $recipients;
-		$this->view->merchant_id = $merchant_id;
-		$this->view->role_id     = $role_id;
-		$this->view->user_id     = $user_id;
+		$this->view->sms     = $sms;
+		$this->view->roles   = $roles;
+		$this->view->users   = $recipients;
+		$this->view->role_id = $role_id;
+		$this->view->user_id = $user_id;
 	}
 
 	function recipientsAction() {
-		$condition   = 'status = 1';
-		$recipients  = [];
-		$merchant_id = $this->dispatcher->getParam('merchant_id', 'int');
-		$role_id     = $this->dispatcher->getParam('role_id', 'int');
-		if ($merchant_id && $merchant = User::findFirst("status = 1 AND premium_merchant = 1 AND id = {$merchant_id}")) {
-			$condition .= " AND (id = {$merchant->id} OR merchant_id = {$merchant->id})";
-		}
+		$condition  = 'status = 1';
+		$recipients = [];
+		$role_id    = $this->dispatcher->getParam('role_id', 'int');
 		if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
 			$condition .= " AND role_id = {$role->id}";
 		}
