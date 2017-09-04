@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/mobile_notifications"><h2>Kirim Notifikasi</h2></a>
+				<a href="/admin/push_notifications"><h2>Kirim Notifikasi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/mobile_notifications">Notifikasi Mobile</a></span></li>
+						<li><span><a href="/admin/push_notifications">Push Notifikasi</a></span></li>
 						<li><span>Kirim Notifikasi</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -25,7 +25,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="POST" action="/admin/mobile_notifications/create">
+				<form method="POST" action="/admin/push_notifications/create">
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -66,7 +66,7 @@
 						</tr>
 						<tr>
 							<td>
-								<a type="button" class="btn btn-default" href="/admin/mobile_notifications"><i class="fa fa-chevron-left"></i> Kembali</a>
+								<a type="button" class="btn btn-default" href="/admin/push_notifications"><i class="fa fa-chevron-left"></i> Kembali</a>
 								<button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane"></i> Kirim</button>
 							</td>
 						</tr>
@@ -82,7 +82,7 @@
 <script>
 	let role_id = document.getElementById('role_id');
 	role_id.onchange = () => {
-		fetch('/admin/mobile_notifications/recipients' + (role_id.value ? '/role_id:' + role_id.value : ''), { credentials: 'include' }).then(response => {
+		fetch('/admin/push_notifications/recipients' + (role_id.value ? '/role_id:' + role_id.value : ''), { credentials: 'include' }).then(response => {
 			return response.text()
 		}).then(payload => {
 			let result = JSON.parse(payload), new_options = '<option value="">Semua Member</option>'

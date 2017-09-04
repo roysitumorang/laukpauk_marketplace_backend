@@ -8,23 +8,23 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/mobile_notifications"><h2>Notifikasi Mobile</h2></a>
+				<a href="/admin/push_notifications"><h2>Push Notifikasi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/mobile_notifications">Notifikasi Mobile</a></span></li>
+						<li><span><a href="/admin/push_notifications">Push Notifikasi</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Notifikasi Mobile</h2>
+				<h2 class="panel-title">Push Notifikasi</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<a href="/admin/mobile_notifications/create" title="Kirim Notifikasi"><i class="fa fa-paper-plane"></i> Kirim Notifikasi</a><br><br>
+				<a href="/admin/push_notifications/create" title="Kirim Notifikasi"><i class="fa fa-paper-plane"></i> Kirim Notifikasi</a><br><br>
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -48,7 +48,7 @@
 						</tr>
 					{% elsefor %}
 						<tr>
-							<td colspan="4"><i>Belum ada notifikasi</i></td>
+							<td colspan="4"><i>Belum ada data</i></td>
 						</tr>
 					{% endfor %}
 					</tbody>
@@ -61,7 +61,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/mobile_notifications/index/page:{{ i }}">{{ i }}</a>
+							<a href="/admin/push_notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

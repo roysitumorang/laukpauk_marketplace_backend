@@ -9,7 +9,7 @@ use DateTime;
 use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model;
 
-class MobileNotificationsController extends ControllerBase {
+class PushNotificationsController extends ControllerBase {
 	function beforeExecuteRoute() {
 		parent::beforeExecuteRoute();
 		$this->view->menu = $this->_menu('Mailbox');
@@ -88,7 +88,7 @@ class MobileNotificationsController extends ControllerBase {
 					$notification->setOldMobileTargetUrl($notification->old_mobile_target_url . $notification->id);
 					$notification->update();
 					$this->flashSession->success('Notifikasi berhasil dikirim.');
-					return $this->response->redirect('/admin/mobile_notifications');
+					return $this->response->redirect('/admin/push_notifications');
 				}
 				$this->flashSession->error('Notifikasi tidak terkirim, silahkan cek form dan coba lagi.');
 				foreach ($notification->getMessages() as $error) {

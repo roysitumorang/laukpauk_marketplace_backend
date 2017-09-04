@@ -79,7 +79,7 @@ class ControllerBase extends Controller {
 					['label' => 'Kirim Pesan',       'link' => 'messages/create'],
 					['label' => 'Semua Pesan',       'link' => 'messages'],
 					['label' => 'Feedbacks',         'link' => 'feedbacks'],
-					['label' => 'Notifikasi Mobile', 'link' => 'mobile_notifications'],
+					['label' => 'Push Notifikasi',   'link' => 'push_notifications'],
 					['label' => 'SMS',               'link' => 'sms'],
 				],
 			], [
