@@ -48,31 +48,19 @@
 	<!-- Examples -->
 	<script src="/backend/javascripts/dashboard/examples.dashboard.min.js"></script>
 	<script>
-		let attachEvent = () => {
-			for (let notifications = document.querySelectorAll('.notification'), i = notifications.length; i--; ) {
-				let notification = notifications[i];
-				notification.onclick = () => {
-					fetch('/admin/notifications/' + notification.dataset.id + '/read', { credentials: 'include', method: 'POST' }).then(() => {
-						location.href = notification.dataset.targetUrl
-					})
-				}
-			}
-		};
+		let attachEvent = () => document.querySelectorAll('.notification').forEach(notification => {
+			notification.onclick = () => fetch('/admin/notifications/' + notification.dataset.id + '/read', { credentials: 'include', method: 'POST' }).then(() => location.href = notification.dataset.targetUrl)
+		});
 		attachEvent(),
-		setInterval(() => {
-			fetch('/admin/home/inbox', { credentials: 'include' }).then(response => {
-				return response.text()
-			}).then(payload => {
-				try {
-					let response = JSON.parse(payload);
-					document.getElementById('inbox').innerHTML = response.data,
-					attachEvent()
-				} catch (e) {
-					location.href = '/admin/sessions/create?next=' + location.pathname + location.search;
-					return
-				}
-			})
-		}, 6e4),
+		setInterval(() => fetch('/admin/home/inbox', { credentials: 'include' }).then(response => response.text()).then(payload => {
+			try {
+				let response = JSON.parse(payload);
+				document.getElementById('inbox').innerHTML = response.data,
+				attachEvent()
+			} catch (e) {
+				return location.href = '/admin/sessions/create?next=' + location.pathname + location.search
+			}
+		}), 6e4),
 		$('.summernote').summernote()
 	</script>
 	{% endif %}
