@@ -2,3 +2,41 @@
 .form-control {
 	height: auto;
 }
+.weepaging {
+	background: #f2f2f2;
+	color: #666;
+	padding: 4px 2px 4px 7px;
+	border: 1px solid #ddd;
+	margin: 0 0 1.5em;
+}
+.weepaging p { font-size: 14px; }
+.weepaging p a:link, .weepaging p a:visited, .weepaging p a:hover, .weepaging p a:active {
+	font-size: 14px;
+	color: #101AA7;
+	text-decoration: none;
+	background: #fff;
+	padding: 2px 5px;
+	border: 1px solid #ccc;
+	margin-right: 1px;
+	font-weight: normal;
+}
+.weepaging p a:hover {
+	background: #101AA7;
+	color: #fff;
+}
+.weepaging p span {
+	text-decoration: none;
+	background: #fff;
+	padding: 2px 5px;
+	border: 1px solid #ccc;
+	color: #666666;
+	font-weight: normal;
+	margin-right: 1px;
+	font-size: 14px;
+}
+.weepaging * { margin: 0 }
+.weepaging h4 {
+	margin-top: -1.45em;
+	padding: 0;
+	border: none;
+}
