@@ -2,8 +2,7 @@
 
 namespace Application\Models;
 
-use Phalcon\Image;
-use Phalcon\Image\Adapter\Gd;
+use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\File;
@@ -136,19 +135,18 @@ class ProductCategory extends ModelBase {
 					}
 				} while (1);
 			}
-			$picture = $this->_upload_config->path . $this->picture;
-			$gd      = new Gd($this->new_picture['tmp_name']);
-			imageinterlace($gd->getImage(), 1);
-			$gd->save($picture, 100);
+			$image = new Imagick($this->new_picture['tmp_name']);
+			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
-				$file = str_replace('.jpg', $width . '.jpg', $this->picture);
+				$file = strtr($this->picture, ['.jpg' => $width . '.jpg']);
 				$path = $this->_upload_config->path . $file;
 				in_array($file, $this->thumbnails) || $this->thumbnails[] = $file;
-				$gd = new Gd($this->new_picture['tmp_name']);
-				imageinterlace($gd->getImage(), 1);
-				$gd->resize($width, null, Image::WIDTH);
-				$gd->save($path, 100);
+				$thumbnail = clone $image;
+				$thumbnail->thumbnailImage($width, 0);
+				$thumbnail->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+				$thumbnail->writeImage($path);
 			}
+			$image->writeImage($this->_upload_config->path . $this->picture);
 			unlink($this->new_picture['tmp_name']);
 		}
 		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
