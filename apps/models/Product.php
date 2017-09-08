@@ -15,7 +15,6 @@ class Product extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
 
 	public $id;
-	public $user_id;
 	public $product_category_id;
 	public $name;
 	public $description;
@@ -51,10 +50,6 @@ class Product extends ModelBase {
 				'allowNulls' => false,
 				'message'    => 'kategori harus diisi',
 			],
-		]);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
-			'alias'    => 'user',
-			'reusable' => true,
 		]);
 		$this->hasManyToMany('id', 'Application\Models\ProductGroupMember', 'product_id', 'product_group_id', 'Application\Models\ProductGroup', 'id', ['alias' => 'groups']);
 		$this->hasManyToMany('id', 'Application\Models\UserProduct', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
@@ -107,7 +102,7 @@ class Product extends ModelBase {
 			'messageMinimum' => 'satuan minimal 1 karakter',
 			'messageMaximum' => 'satuan maksimal 10 karakter',
 		]));
-		$validator->add(['user_id', 'product_category_id', 'name', 'stock_unit'], new Uniqueness([
+		$validator->add(['product_category_id', 'name', 'stock_unit'], new Uniqueness([
 			'message' => 'nama, satuan dan kategori sudah ada',
 		]));
 		if ($this->new_picture) {
