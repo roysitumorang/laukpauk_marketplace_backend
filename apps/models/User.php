@@ -437,10 +437,9 @@ class User extends ModelBase {
 	function afterSave() {
 		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
 		if ($this->new_avatar) {
-			$avatar  = $this->_upload_config->path . $this->avatar;
 			$imagick = new Imagick($this->new_avatar['tmp_name']);
 			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
-			$imagick->writeImage($avatar);
+			$imagick->writeImage($this->_upload_config->path . $this->avatar);
 			unlink($this->new_avatar['tmp_name']);
 		}
 		if ($this->delivery_hours) {
@@ -473,7 +472,7 @@ class User extends ModelBase {
 		if (!$avatar) {
 			return null;
 		}
-		$thumbnail = str_replace('.jpg', $width . $height . '.jpg', $avatar);
+		$thumbnail = strtr($avatar, ['.jpg' => $width . $height . '.jpg']);
 		if (!in_array($thumbnail, $this->thumbnails)) {
 			$imagick = new Imagick($this->_upload_config->path . $avatar);
 			$imagick->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1);
