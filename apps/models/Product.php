@@ -132,19 +132,17 @@ class Product extends ModelBase {
 					}
 				} while (1);
 			}
-			$picture = $this->_upload_config->path . $this->picture;
-			$image   = new Imagick($this->new_picture['tmp_name']);
+			$image = new Imagick($this->new_picture['tmp_name']);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
-			$image->writeImage($picture);
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
-				$file = str_replace('.jpg', $width . '.jpg', $this->picture);
-				$path = $this->_upload_config->path . $file;
+				$file = strtr($this->picture, ['.jpg' => $width . '.jpg']);
 				in_array($file, $this->thumbnails) || $this->thumbnails[] = $file;
-				$image = new Imagick($this->new_picture['tmp_name']);
-				$image->thumbnailImage($width, 0);
-				$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
-				$image->writeImage($path);
+				$thumbnail = clone $image;
+				$thumbnail->thumbnailImage($width, 0);
+				$thumbnail->writeImage($this->_upload_config->path . $file);
 			}
+			$image->thumbnailImage(512, 0);
+			$image->writeImage($this->_upload_config->path . $this->picture);
 			unlink($this->new_picture['tmp_name']);
 		}
 		$this->thumbnails  = implode(',', array_filter($this->thumbnails)) ?: null;
