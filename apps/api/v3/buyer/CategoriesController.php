@@ -2,6 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
+use Application\Models\Banner;
 use Ds\Set;
 use Phalcon\Db;
 
@@ -10,6 +11,7 @@ class CategoriesController extends ControllerBase {
 		$categories       = [];
 		$merchant_ids     = new Set;
 		$merchants        = [];
+		$banners          = [];
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
 		foreach (['!', ''] as $condition) {
 			$result = $this->db->query("SELECT id, name FROM product_categories WHERE published = 1 AND name {$condition}= 'Lain-Lain' ORDER BY name");
@@ -151,9 +153,13 @@ QUERY
 				];
 			}
 		}
+		foreach (Banner::find(['published = 1', 'columns' => 'file', 'order' => 'id DESC']) as $banner) {
+			$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file;
+		}
 		$this->_response['status']                          = 1;
 		$this->_response['data']['categories']              = $categories;
 		$this->_response['data']['merchants']               = $merchants;
+		$this->_response['data']['banners']                 = $banners;
 		$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
