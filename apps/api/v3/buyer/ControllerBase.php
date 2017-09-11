@@ -63,7 +63,7 @@ abstract class ControllerBase extends Controller {
 			if (!$this->_current_user = User::findFirst(['status = 1 AND role_id = ?0 AND api_key = ?1', 'bind' => [Role::BUYER, $payload->api_key]])) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
-			$this->_response['version'] = $this->db->fetchColumn("SELECT MAX(version) FROM releases WHERE user_type = 'buyer'");
+			$this->_response['version'] = $this->db->fetchColumn("SELECT a.version FROM releases a WHERE a.user_type = 'buyer' AND NOT EXISTS(SELECT 1 FROM releases b WHERE b.user_type = a.user_type AND b.id > a.id)");
 		} catch (Exception $e) {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();
