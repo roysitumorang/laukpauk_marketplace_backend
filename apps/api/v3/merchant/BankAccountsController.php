@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Merchant;
 
 use Application\Models\BankAccount;
-use Phalcon\Exception;
+use Exception;
 
 class BankAccountsController extends ControllerBase {
 	function indexAction() {
