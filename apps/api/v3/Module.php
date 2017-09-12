@@ -2,6 +2,9 @@
 
 namespace Application\Api\V3;
 
+use Application\Models\Role;
+use Application\Models\User;
+use IntlDateFormatter;
 use Phalcon\Cache\Backend\Redis;
 use Phalcon\Cache\Frontend\Data as FrontData;
 use Phalcon\DiInterface;
@@ -103,6 +106,45 @@ class Module implements ModuleDefinitionInterface {
 
 		$di->set('session', function() {
 			return null;
+		});
+
+		$di->set('currentUser', function() {
+			$access_token = strtr(filter_input(INPUT_SERVER, 'Authorization'), ['Bearer ' => '']);
+			if (!$access_token) {
+				return null;
+			}
+			$payload = $this->getJsonWebToken()->decode($access_token);
+			return User::findFirst(['status = 1 AND api_key = ?0 AND (role_id = ?1 OR role_id = ?2)', 'bind' => [$payload->api_key, Role::MERCHANT, Role::BUYER]]);
+		});
+
+		$di->set('post', function() {
+			return $this->getRequest()->getJsonRawBody();
+		});
+
+		$di->set('server', function() {
+			return json_decode($this->getRequest()->getServer('HTTP_USER_DATA'));
+		});
+
+		$di->set('dateFormatter', function() {
+			return new IntlDateFormatter(
+				'id_ID',
+				IntlDateFormatter::FULL,
+				IntlDateFormatter::NONE,
+				$this->getCurrentDatetime()->getTimezone(),
+				IntlDateFormatter::GREGORIAN,
+				'd MMM yyyy'
+			);
+		});
+
+		$di->set('dayFormatter', function() {
+			return new IntlDateFormatter(
+				'id_ID',
+				IntlDateFormatter::FULL,
+				IntlDateFormatter::NONE,
+				$this->getCurrentDatetime()->getTimezone(),
+				IntlDateFormatter::GREGORIAN,
+				'EEEE'
+			);
 		});
 	}
 }
