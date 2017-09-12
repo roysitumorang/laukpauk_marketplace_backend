@@ -3,8 +3,8 @@
 namespace Application\Api\V3\Merchant;
 
 use Application\Models\UserProduct;
+use Exception;
 use Phalcon\Db;
-use Phalcon\Exception;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {

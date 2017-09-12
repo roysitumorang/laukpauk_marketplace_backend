@@ -5,8 +5,8 @@ namespace Application\Api\V3\Merchant;
 use Application\Models\Role;
 use Application\Models\Setting;
 use Application\Models\User;
+use Exception;
 use Phalcon\Crypt;
-use Phalcon\Exception;
 use Phalcon\Mvc\Controller;
 
 abstract class ControllerBase extends Controller {
@@ -55,7 +55,7 @@ abstract class ControllerBase extends Controller {
 			if (!$this->_current_user) {
 				throw new Exception(static::INVALID_API_KEY_MESSAGE);
 			}
-			$this->_response['version'] = $this->db->fetchColumn("SELECT MAX(version) FROM releases WHERE user_type = 'merchant' AND application_type = '" . ($this->_current_user->premium_merchant ? 'premium' : 'free') . "'");
+			$this->_response['version'] = $this->db->fetchColumn("SELECT a.version FROM releases a WHERE a.user_type = 'merchant' AND NOT EXISTS(SELECT 1 FROM releases b WHERE b.user_type = a.user_type AND b.id > a.id)");
 		} catch (Exception $e) {
 			$this->_response['invalid_api_key'] = 1;
 			$this->_response['message']         = $e->getMessage();
@@ -63,21 +63,5 @@ abstract class ControllerBase extends Controller {
 			$this->response->send();
 			exit;
 		}
-	}
-
-	protected function _setPaginationRange($total_pages, $current_page = 1) : array {
-		if ($total_pages < 2) {
-			return [];
-		}
-		$start_page = min(max($current_page - 3, 1), $total_pages);
-		$end_page   = max(min($current_page + 3, $total_pages), 1);
-		$pages      = range($start_page, $end_page);
-		if ($start_page > 1) {
-			array_unshift($pages, 1);
-		}
-		if ($end_page < $total_pages) {
-			$pages[] = $total_pages;
-		}
-		return $pages;
 	}
 }
