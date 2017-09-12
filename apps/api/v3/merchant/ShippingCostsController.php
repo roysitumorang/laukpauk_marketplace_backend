@@ -13,7 +13,7 @@ class ShippingCostsController extends ControllerBase {
 		$limit          = 10;
 		$keywords       = [];
 		$shipping_costs = [];
-		$params         = [$this->_current_user->id];
+		$params         = [$this->currentUser->id];
 		$query          = <<<QUERY
 			SELECT
 				COUNT(1)
