@@ -22,7 +22,7 @@ class ProductsController extends ControllerBase {
 				user_product a
 				JOIN products b ON a.product_id = b.id
 			WHERE
-				a.user_id = {$this->_current_user->id} AND
+				a.user_id = {$this->currentUser->id} AND
 				b.published = 1
 QUERY;
 		if ($search_query) {
@@ -82,8 +82,8 @@ QUERY
 			if (!$this->request->isPost()) {
 				throw new Exception('Request tidak valid!');
 			}
-			foreach ($this->_post as $item) {
-				$user_product = UserProduct::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->_current_user->id, $item->id]]);
+			foreach ($this->post as $item) {
+				$user_product = UserProduct::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $item->id]]);
 				if (!$user_product) {
 					continue;
 				}
