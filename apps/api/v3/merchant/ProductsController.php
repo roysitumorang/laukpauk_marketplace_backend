@@ -13,6 +13,7 @@ class ProductsController extends ControllerBase {
 		$search_query = $this->dispatcher->getParam('keyword', 'string') ?: null;
 		$limit        = 10;
 		$params       = [];
+		$keywords     = '';
 		$products     = [];
 		$query        = <<<QUERY
 			SELECT
@@ -26,7 +27,6 @@ class ProductsController extends ControllerBase {
 QUERY;
 		if ($search_query) {
 			$stop_words = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
-			$keywords   = '';
 			$words      = array_values(array_diff(preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY), $stop_words));
 			foreach ($words as $i => $word) {
 				$keywords .= ($i > 0 ? ' & ' : '') . $word . ':*';
@@ -64,7 +64,7 @@ QUERY
 			$products[] = $row;
 		}
 		if (!$total_products) {
-			if ($keyword) {
+			if ($keywords) {
 				$this->_response['message'] = 'Produk tidak ditemukan.';
 			} else if (!$total_pages) {
 				$this->_response['message'] = 'Produk belum ada.';
