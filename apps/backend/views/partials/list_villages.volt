@@ -1,9 +1,9 @@
 <table class="table table-striped">
 	<thead>
 		<tr>
-			<th class="text-center" width="5%"><b>No</b></th>
-			<th class="text-center"><b>Kelurahan</b></th>
-			<th class="text-center"><b>#</b></th>
+			<th class="text-center" width="5%">No</th>
+			<th class="text-center">Kelurahan</th>
+			<th class="text-center">#</th>
 		</tr>
 	</thead>
 	<tbody>
