@@ -46,7 +46,6 @@ QUERY;
 			a.price,
 			a.stock,
 			b.stock_unit,
-			b.picture,
 			a.published,
 			TS_RANK(b.keywords, TO_TSQUERY('{$keywords}')) AS relevancy
 QUERY
@@ -55,12 +54,6 @@ QUERY
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			unset($row->relevancy);
-			if ($row->picture) {
-				$row->thumbnail = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
-				$row->picture   = $picture_root_url . strtr($row->picture, ['.jpg' => '300.jpg']);
-			} else {
-				unset($row->picture);
-			}
 			$products[] = $row;
 		}
 		if (!$total_products) {
