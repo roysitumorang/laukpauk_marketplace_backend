@@ -30,7 +30,7 @@
 			{% if i == page.current %}
 			<b>{{ i }}</b>
 			{% else %}
-			<a href="/admin/villages/index/subdisitrict_id:{{ subdistrict.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+			<a href="/admin/villages/index/subdistrict_id:{{ subdistrict.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 			{% endif %}
 		{% endfor %}
 	</p>
