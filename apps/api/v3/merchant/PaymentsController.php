@@ -5,8 +5,8 @@ namespace Application\Api\V3\Merchant;
 use Application\Models\BankAccount;
 use Application\Models\Payment;
 use Ds\Set;
+use Exception;
 use Phalcon\Db;
-use Phalcon\Exception;
 
 class PaymentsController extends ControllerBase {
 	function indexAction() {
@@ -29,7 +29,7 @@ class PaymentsController extends ControllerBase {
 			FROM
 				payments a
 				JOIN bank_accounts b ON a.bank_account_id = b.id
-			WHERE a.user_id = {$this->_current_user->id}
+			WHERE a.user_id = {$this->currentUser->id}
 			ORDER BY a.id DESC
 			LIMIT {$limit} OFFSET {$offset}
 QUERY
@@ -45,12 +45,8 @@ QUERY
 			}
 			$payments[] = $payment;
 		}
-		$this->_response['status'] = 1;
-		$this->_response['data']   = [
-			'payments'                => $payments,
-			'total_new_orders'        => $this->_current_user->totalNewOrders(),
-			'total_new_notifications' => $this->_current_user->totalNewNotifications(),
-		];
+		$this->_response['status']           = 1;
+		$this->_response['data']['payments'] = $payments;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
@@ -61,13 +57,13 @@ QUERY
 				throw new Exception('Request tidak valid!');
 			}
 			$payment                  = new Payment;
-			$payment->user_id         = $this->_current_user->id;
-			$payment->bank_account_id = BankAccount::findFirstById($this->_post->bank_account_id)->id;
-			$payment->setPayerBank($this->_post->payer_bank);
-			$payment->setPayerAccountNumber($this->_post->payer_account_number);
-			$payment->setAmount($this->_post->amount);
+			$payment->user_id         = $this->currentUser->id;
+			$payment->bank_account_id = BankAccount::findFirstById($this->post->bank_account_id)->id;
+			$payment->setPayerBank($this->post->payer_bank);
+			$payment->setPayerAccountNumber($this->post->payer_account_number);
+			$payment->setAmount($this->post->amount);
 			$payment->setStatus(0);
-			$payment->created_by = $this->_current_user->id;
+			$payment->created_by = $this->currentUser->id;
 			if (!$payment->validation() || !$payment->create()) {
 				$errors = new Set;
 				foreach ($payment->getMessages() as $error) {
@@ -80,8 +76,6 @@ QUERY
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
-			$this->_response['data']['total_new_orders']        = $this->_current_user->totalNewOrders();
-			$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
 			return $this->response;
 		}
