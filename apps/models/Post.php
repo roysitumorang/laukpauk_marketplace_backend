@@ -2,6 +2,7 @@
 
 namespace Application\Models;
 
+use Phalcon\Utils\Slug;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 use Phalcon\Validation\Validator\Uniqueness;
@@ -9,6 +10,7 @@ use Phalcon\Validation\Validator\Uniqueness;
 class Post extends ModelBase {
 	public $id;
 	public $post_category_id;
+	public $permalink;
 	public $subject;
 	public $body;
 	public $created_by;
@@ -49,5 +51,11 @@ class Post extends ModelBase {
 			'message' => 'judul sudah ada',
 		]));
 		return $this->validate($validator);
+	}
+
+	function beforeSave() {
+		if (!$this->permalink) {
+			$this->permalink = Slug::generate($this->subject);
+		}
 	}
 }

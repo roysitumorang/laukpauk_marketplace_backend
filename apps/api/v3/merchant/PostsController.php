@@ -2,19 +2,13 @@
 
 namespace Application\Api\V3\Merchant;
 
-use Application\Models\PostCategory;
-use Phalcon\Exception;
+use Application\Models\Post;
+use Exception;
 
 class PostsController extends ControllerBase {
-	function beforeExecuteRoute() {}
-
 	function showAction($permalink) {
 		try {
-			$category = PostCategory::findFirst("published = 1 AND name = 'App Info'");
-			if (!$category) {
-				throw new Exception('Konten tidak ditemukan!');
-			}
-			$post = $category->getPosts(['published = 1 AND permalink = ?0', 'bind' => [$permalink]])->getFirst();
+			$post = Post::findFirstByPermalink($permalink);
 			if (!$post) {
 				throw new Exception('Konten tidak ditemukan!');
 			}
@@ -24,8 +18,9 @@ class PostsController extends ControllerBase {
 			];
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+			return $this->response;
 		}
-		$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
-		return $this->response;
 	}
 }
