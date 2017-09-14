@@ -107,9 +107,10 @@
 			<td>
 				Propinsi (*) :<br>
 				<select name="province_id" id="province_id">
-				{% for id, name in provinces %}
-					<option value="{{ id }}"{% if user.village.subdistrict.city.province.id == id %} selected{% endif %}>{{ name }}</option>
-				{% endfor %}
+					<option value=""></option>
+					{% for province in provinces %}
+						<option value="{{ province.id }}"{% if province_id == province.id %} selected{% endif %}>{{ province.name }}</option>
+					{% endfor %}
 				</select>
 			</td>
 		</tr>
@@ -117,9 +118,10 @@
 			<td>
 				Kabupaten / Kota (*) :<br>
 				<select name="city_id" id="city_id">
-				{% for id, name in current_cities %}
-					<option value="{{ id }}"{% if user.village.subdistrict.city.id == id %} selected{% endif %}>{{ name }}</option>
-				{% endfor %}
+					<option value=""></option>
+					{% for city in cities %}
+						<option value="{{ city.id }}"{% if city_id == city.id %} selected{% endif %}>{{ city.name }}</option>
+					{% endfor %}
 				</select>
 			</td>
 		</tr>
@@ -127,9 +129,10 @@
 			<td>
 				Kecamatan (*) :<br>
 				<select name="subdistrict_id" id="subdistrict_id">
-				{% for id, name in current_subdistricts %}
-					<option value="{{ id }}"{% if user.village.subdistrict.id == id %} selected{% endif %}>{{ name }}</option>
-				{% endfor %}
+					<option value=""></option>
+					{% for subdistrict in subdistricts %}
+						<option value="{{ subdistrict.id }}"{% if subdistrict_id == subdistrict.id %} selected{% endif %}>{{ subdistrict.name }}</option>
+					{% endfor %}
 				</select>
 			</td>
 		</tr>
@@ -137,9 +140,10 @@
 			<td>
 				Kelurahan (*) :<br>
 				<select name="village_id" id="village_id">
-				{% for id, name in current_villages %}
-					<option value="{{ id }}"{% if user.village.id == id %} selected{% endif %}>{{ name }}</option>
-				{% endfor %}
+					<option value=""></option>
+					{% for village in villages %}
+						<option value="{{ village.id }}"{% if user.village_id == village.id %} selected{% endif %}>{{ village.name }}</option>
+					{% endfor %}
 				</select>
 			</td>
 		</tr>
@@ -224,34 +228,43 @@
 		{% endif %}
 		<tr>
 			<td>
-				<button type="submit" class="btn btn-info">SIMPAN</button>
+				<button type="submit" class="btn btn-primary">SIMPAN</button>
 			</td>
 		</tr>
 	</table>
 </form>
 <script>
-	let cities = {{ cities | json_encode }}, subdistricts = {{ subdistricts | json_encode }}, villages = {{ villages | json_encode }}, province = document.getElementById('province_id'), city = document.getElementById('city_id'), subdistrict = document.getElementById('subdistrict_id'), village = document.getElementById('village_id'), avatar = document.querySelector('.delete-avatar');
+	let province = document.querySelector('#province_id'), city = document.querySelector('#city_id'), subdistrict = document.querySelector('#subdistrict_id'), village = document.querySelector('#village_id'), avatar = document.querySelector('.delete-avatar');
 	province.onchange = () => {
-		let current_cities = cities[province.value], new_options = '';
-		for (var i in current_cities) {
-			new_options += '<option value="' + i + '">' + current_cities[i] + '</option>'
-		}
-		city.innerHTML = new_options
-	}
+		fetch('/admin/users/cities/' + province.value, { credentials: 'include' }).then(response => response.json()).then(items => {
+			let new_options = '<option value=""></option>';
+			subdistrict.innerHTML = new_options,
+			village.innerHTML = new_options,
+			items.forEach(item => new_options += '<option value="' + item.id + '">' + item.name + '</option>'),
+			city.innerHTML = new_options
+		})
+	},
 	city.onchange = () => {
-		let current_subdistricts = subdistricts[city.value], new_options = '';
-		for (var i in current_subdistricts) {
-			new_options += '<option value="' + i + '">' + current_subdistricts[i] + '</option>'
+		if (!city.value) {
+			return
 		}
-		subdistrict.innerHTML = new_options
-	}
+		fetch('/admin/users/subdistricts/' + city.value, { credentials: 'include' }).then(response => response.json()).then(items => {
+			let new_options = '<option value=""></option>';
+			village.innerHTML = new_options,
+			items.forEach(item => new_options += '<option value="' + item.id + '">' + item.name + '</option>'),
+			subdistrict.innerHTML = new_options
+		})
+	},
 	subdistrict.onchange = () => {
-		let current_villages = villages[subdistrict.value], new_options = '';
-		for (var i in current_villages) {
-			new_options += '<option value="' + i + '">' + current_villages[i] + '</option>'
+		if (!subdistrict.value) {
+			return
 		}
-		village.innerHTML = new_options
-	}
+		fetch('/admin/users/villages/' + subdistrict.value, { credentials: 'include' }).then(response => response.json()).then(items => {
+			let new_options = '<option value=""></option>';
+			items.forEach(item => new_options += '<option value="' + item.id + '">' + item.name + '</option>'),
+			village.innerHTML = new_options
+		})
+	},
 	avatar.onclick = () => {
 		if (confirm('Anda yakin menghapus gambar ini ?')) {
 			let form = document.createElement('form');

@@ -258,12 +258,150 @@ class UsersController extends ControllerBase {
 		exit;
 	}
 
+	function citiesAction($province_id) {
+		$cities = [];
+		$result = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				CONCAT_WS(' ', a.type, a.name) AS name
+			FROM
+				cities a
+				JOIN subdistricts b ON a.id = b.city_id
+				JOIN villages c ON b.id = c.subdistrict_id
+			WHERE
+				a.province_id = {$province_id}
+			GROUP BY a.id
+			ORDER BY name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$cities[] = $row;
+		}
+		$this->response->setJsonContent($cities, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function subdistrictsAction($city_id) {
+		$subdistricts = [];
+		$result       = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				a.name
+			FROM
+				subdistricts a
+				JOIN villages b ON a.id = b.subdistrict_id
+			WHERE
+				a.city_id = {$city_id}
+			GROUP BY a.id
+			ORDER BY a.name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$subdistricts[] = $row;
+		}
+		$this->response->setJsonContent($subdistricts, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
+	function villagesAction($subdistrict_id) {
+		$villages = [];
+		$result   = $this->db->query(<<<QUERY
+			SELECT
+				id,
+				name
+			FROM
+				villages
+			WHERE
+				subdistrict_id = {$subdistrict_id}
+			ORDER BY name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$villages[] = $row;
+		}
+		$this->response->setJsonContent($villages, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+		return $this->response;
+	}
+
 	private function _prepare_form_datas(User $user) {
 		$provinces      = [];
 		$cities         = [];
 		$subdistricts   = [];
 		$villages       = [];
 		$business_hours = [];
+		$result         = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				a.name
+			FROM
+				provinces a
+				JOIN cities b ON a.id = b.province_id
+				JOIN subdistricts c ON b.id = c.city_id
+				JOIN villages d ON c.id = d.subdistrict_id
+			GROUP BY a.id
+			ORDER BY a.name
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$provinces[] = $row;
+		}
+		if ($province_id = $user->village->subdistrict->city->province_id ?: $this->request->getPost('province_id', 'int')) {
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					a.id,
+					CONCAT_WS(' ', a.type, a.name) AS name
+				FROM
+					cities a
+					JOIN subdistricts b ON a.id = b.city_id
+					JOIN villages c ON b.id = c.subdistrict_id
+				WHERE a.province_id = {$province_id}
+				GROUP BY a.id
+				ORDER BY name
+QUERY
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				$cities[] = $row;
+			}
+		}
+		if ($city_id = $user->village->subdistrict->city_id ?: $this->request->getPost('city_id', 'int')) {
+			$result  = $this->db->query(<<<QUERY
+				SELECT
+					a.id,
+					a.name
+				FROM
+					subdistricts a
+					JOIN villages b ON a.id = b.subdistrict_id
+				WHERE a.city_id = {$city_id}
+				GROUP BY a.id
+				ORDER BY a.name
+QUERY
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				$subdistricts[] = $row;
+			}
+		}
+		if ($subdistrict_id = $user->village->subdistrict_id ?: $this->request->getPost('subdistrict_id', 'int')) {
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					id,
+					name
+				FROM
+					villages
+				WHERE subdistrict_id = {$subdistrict_id}
+				ORDER BY name
+QUERY
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($row = $result->fetch()) {
+				$villages[] = $row;
+			}
+		}
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 			$business_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 		}
@@ -273,68 +411,23 @@ class UsersController extends ControllerBase {
 			'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT, Role::BUYER]],
 			'order' => 'name',
 		]);
-		$result = $this->db->query(<<<QUERY
-			SELECT
-				a.id AS province_id,
-				a.name AS province_name,
-				b.id AS city_id,
-				CONCAT_WS(' ', b.type, b.name) AS city_name,
-				c.id AS subdistrict_id,
-				c.name AS subdistrict_name,
-				d.id AS village_id,
-				d.name AS village_name
-			FROM provinces a
-			JOIN cities b ON a.id = b.province_id
-			JOIN subdistricts c ON b.id = c.city_id
-			JOIN villages d ON c.id = d.subdistrict_id
-			ORDER BY province_name, city_name, subdistrict_name, village_name
-QUERY
-		);
-		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($row = $result->fetch()) {
-			$provinces[$row->province_id] = $row->province_name;
-			if (!isset($cities[$row->province_id])) {
-				$cities[$row->province_id] = [];
-			}
-			if (!isset($cities[$row->province_id][$row->city_id])) {
-				$cities[$row->province_id][$row->city_id] = $row->city_name;
-			}
-			if (!isset($subdistricts[$row->city_id])) {
-				$subdistricts[$row->city_id] = [];
-			}
-			if (!isset($subdistricts[$row->city_id][$row->subdistrict_id])) {
-				$subdistricts[$row->city_id][$row->subdistrict_id] = $row->subdistrict_name;
-			}
-			if (!isset($villages[$row->subdistrict_id])) {
-				$villages[$row->subdistrict_id] = [];
-			}
-			if (!isset($villages[$row->subdistrict_id][$row->village_id])) {
-				$villages[$row->subdistrict_id][$row->village_id] = $row->village_name;
-			}
-		}
-		$current_province_id              = $user->village->subdistrict->city->province->id ?? array_keys($provinces)[0];
-		$current_cities                   = $cities[$current_province_id];
-		$current_city_id                  = $user->village->subdistrict->city->id ?? array_keys($current_cities)[0];
-		$current_subdistricts             = $subdistricts[$current_city_id];
-		$current_subdistrict_id           = $user->village->subdistrict->id ?? array_keys($current_subdistricts)[0];
-		$current_villages                 = $villages[$current_subdistrict_id];
-		$this->view->user                 = $user;
-		$this->view->status               = User::STATUS;
-		$this->view->genders              = User::GENDERS;
-		$this->view->business_hours       = $business_hours;
-		$this->view->provinces            = $provinces;
-		$this->view->cities               = $cities;
-		$this->view->subdistricts         = $subdistricts;
-		$this->view->villages             = $villages;
-		$this->view->current_cities       = $current_cities;
-		$this->view->current_subdistricts = $current_subdistricts;
-		$this->view->current_villages     = $current_villages;
+		$this->view->user           = $user;
+		$this->view->status         = User::STATUS;
+		$this->view->genders        = User::GENDERS;
+		$this->view->business_hours = $business_hours;
+		$this->view->provinces      = $provinces;
+		$this->view->cities         = $cities;
+		$this->view->subdistricts   = $subdistricts;
+		$this->view->villages       = $villages;
+		$this->view->province_id    = $province_id;
+		$this->view->city_id        = $city_id;
+		$this->view->subdistrict_id = $subdistrict_id;
 	}
 
 	private function _set_model_attributes(&$user) {
 		$village_id = $this->request->getPost('village_id', 'int');
 		if ($village_id) {
-			$user->village = Village::findFirst($village_id);
+			$user->village_id = Village::findFirst($village_id)->id;
 		}
 		if ($user->role->name == 'Merchant') {
 			$user->setDeposit($this->request->getPost('deposit'));
