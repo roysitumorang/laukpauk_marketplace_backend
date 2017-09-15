@@ -119,7 +119,7 @@
 										<td>{{ coverage_area.city_name }}</td>
 										<td>{{ coverage_area.subdistrict_name }}</td>
 										<td>{{ coverage_area.village_name }}</td>
-										<td>{% if coverage_area.shipping_cost %}Rp. {{ number_format(coverage_area.shipping_cost, 0, ',', '.') }}{% else %}-{% endif %}</td>
+										<td>{% if coverage_area.shipping_cost %}Rp. {{ coverage_area.shipping_cost | number_format(0, ',', '.') }}{% else %}-{% endif %}</td>
 										<td>
 											<a href="javascript:void(0)" data-user-id="{{ user.id }}" data-id="{{ coverage_area.village_id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 										</td>

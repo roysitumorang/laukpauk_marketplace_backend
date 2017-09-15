@@ -3,12 +3,12 @@
 		<a href="#" class="dropdown-toggle notification-icon" data-toggle="dropdown">
 			<i class="fa fa-envelope"></i>
 			{% if count(unread_messages) %}
-			<span class="badge">{{ count(unread_messages) }}</span>
+			<span class="badge">{{ unread_messages | count }}</span>
 			{% endif %}
 		</a>
 		<div class="dropdown-menu notification-menu">
 			<div class="notification-title">
-				<span class="pull-right label label-default">{{ count(unread_messages) }}</span>
+				<span class="pull-right label label-default">{{ unread_messages | count }}</span>
 				Messages
 			</div>
 			<div class="content">
@@ -40,12 +40,12 @@
 		<a href="#" class="dropdown-toggle notification-icon" data-toggle="dropdown">
 			<i class="fa fa-bell"></i>
 			{% if count(unread_notifications) %}
-			<span class="badge">{{ count(unread_notifications) }}</span>
+			<span class="badge">{{ unread_notifications | count }}</span>
 			{% endif %}
 		</a>
 		<div class="dropdown-menu notification-menu">
 			<div class="notification-title">
-				<span class="pull-right label label-default">{{ count(unread_notifications) }}</span>
+				<span class="pull-right label label-default">{{ unread_notifications | count }}</span>
 				Notifikasi
 			</div>
 			<div class="content">

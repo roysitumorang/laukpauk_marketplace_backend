@@ -45,7 +45,7 @@
 										</td>
 										<td>{{ last_login | default('No login yet') }}</td>
 										<td>{{ status[user.status] }}</td>
-										<td>{% if user.deposit %}Rp. {{ number_format(user.deposit) }}{% else %}-{% endif %}</td>
+										<td>{% if user.deposit %}Rp. {{ user.deposit | number_format }}{% else %}-{% endif %}</td>
 									</tr>
 								</tbody>
 							</table>

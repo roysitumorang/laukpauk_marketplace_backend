@@ -91,7 +91,7 @@
 											<div class="summary">
 												<h4 class="title">Total Profit</h4>
 												<div class="info">
-													<strong class="amount">Rp. {{ number_format(total_profit) }}</strong>
+													<strong class="amount">Rp. {{ total_profit | number_format }}</strong>
 												</div>
 											</div>
 											<div class="summary-footer">

@@ -73,7 +73,7 @@
 							<td><a href="/admin/users/{{ payment.user_id }}" target="_blank">{{ payment.user.company }}</a></td>
 							<td>{{ payment.payer_bank }} / {{ payment.payer_account_number }}</td>
 							<td>{{ payment.bankAccount.bank }} / {{ payment.bankAccount.number }}</td>
-							<td>Rp. {{ number_format(payment.amount) }}</td>
+							<td>Rp. {{ payment.amount | number_format }}</td>
 							<td class="text-nowrap">{{ payment.created_at }}</td>
 							<td>
 								{% if payment.status == 1 %}

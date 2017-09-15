@@ -63,9 +63,9 @@
 								<br>
 								{{ coupon.multiple_use }}
 								<br>
-								Pemakaian Maksimal : {{ number_format(coupon.maximum_usage) }} order
+								Pemakaian Maksimal : {{ coupon.maximum_usage | number_format }} order
 								<br>
-								Pembelian Minimal : Rp. {{ number_format(coupon.minimum_purchase) }}
+								Pembelian Minimal : Rp. {{ coupon.minimum_purchase | number_format }}
 								{% if coupon.minimum_version %}
 								<br>
 								Versi Aplikasi Minimal : {{ coupon.minimum_version }}
@@ -73,13 +73,13 @@
 							</td>
 							<td>
 								{% if coupon.discount_type == 1 %}
-									Rp. {{ number_format(coupon.price_discount) }}
+									Rp. {{ coupon.price_discount | number_format }}
 								{% else %}
 									{{ coupon.price_discount }} %
 								{% endif %}
 							</td>
 							<td>{{ coupon.effective_date_start }} - {{ coupon.effective_date_end }}</td>
-							<td>{% if coupon.total_usage %}{{ number_format(coupon.total_usage) }}{% else %}-{% endif %}</td>
+							<td>{% if coupon.total_usage %}{{ coupon.total_usage | number_format }}{% else %}-{% endif %}</td>
 							<td>
 								{% if coupon.expiry_date > current_date %}<a href="javascript:void(0)" class="status" data-id="{{ coupon.id }}">{% endif %}
 									<i class="fa fa-eye{% if !coupon.status or coupon.expiry_date <= current_date %}-slash{% endif %} fa-2x"></i>

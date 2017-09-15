@@ -62,8 +62,8 @@
 				<table class="table table-striped">
 					<tr>
 						<td class="text-center"><b>Total Order : {{ page.total_items }}</b></td>
-						<td class="text-center"><b>Total Tagihan : Rp. {{ number_format(total_final_bill) }}</b></td>
-						<td class="text-center"><b>Total Biaya Admin : Rp. {{ number_format(total_admin_fee) }}</b></td>
+						<td class="text-center"><b>Total Tagihan : Rp. {{ total_final_bill | number_format }}</b></td>
+						<td class="text-center"><b>Total Biaya Admin : Rp. {{ total_admin_fee | number_format }}</b></td>
 					</tr>
 				</table>
 				<table class="table table-striped">
@@ -85,7 +85,7 @@
 							<td class="text-nowrap" style="background:#{% if order.status == 0 %}FFCCCC{% elseif order.status == 1 %}CCFFCC{% elseif order.status == -1 %}FF0000;color:#FFFFFF{% endif %}">
 								<strong>
 									#{{ order.code }}<br>
-									<i class="fa fa-calendar"></i> {{ date('Y-m-d H:i', strtotime(order.created_at)) }}
+									<i class="fa fa-calendar"></i> {{ order.created_at | datetime }}
 								</strong>
 							</td>
 							<td class="text-nowrap">
@@ -100,10 +100,10 @@
 								</strong>
 								<br>
 								<strong><i class="fa fa-calendar-o"></i> </strong>
-								{{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}
+								{{ order.scheduled_delivery | datetime }}
 								<br>
 								<strong><i class="fa fa-calendar-check-o"></i> </strong>
-								{% if order.status == 1 %}{{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}{% else %}-{% endif %}
+								{% if order.status == 1 %}{{ order.actual_delivery | datetime }}{% else %}-{% endif %}
 							</td>
 							<td>
 								<i class="fa fa-user"></i> {{ order.name }}<br>
@@ -114,9 +114,9 @@
 								<i class="fa fa-mobile"></i>&nbsp;{{ order.merchant_phone }}
 							</td>
 							<td>
-								<i class="fa fa-shopping-bag"></i> Rp. {{ number_format(order.final_bill) }}
+								<i class="fa fa-shopping-bag"></i> Rp. {{ order.final_bill | number_format }}
 								<br>
-								<i class="fa fa-check-square"></i> {% if order.admin_fee %}Rp. {{ number_format(order.admin_fee) }}{% else %}-{% endif %}
+								<i class="fa fa-check-square"></i> {% if order.admin_fee %}Rp. {{ order.admin_fee | number_format }}{% else %}-{% endif %}
 							</td>
 							<td>
 								<a href="/admin/orders/{{ order.code }}" title="Detail"><i class="fa fa-external-link fa-2x"></i></a>

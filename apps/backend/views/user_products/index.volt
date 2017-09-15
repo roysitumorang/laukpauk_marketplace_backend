@@ -111,7 +111,7 @@
 										<td class="text-right">{{ user_product.rank }}</td>
 										<td>{{ user_product.category }}</td>
 										<td>{{ user_product.name }} ({{ user_product.stock_unit }})</td>
-										<td>Rp. {{ number_format(user_product.price, 0, ',', '.') }}</td>
+										<td>Rp. {{ user_product.price | number_format(0, ',', '.') }}</td>
 										<td class="text-center">{{ user_product.stock }}</td>
 										<td class="text-center">
 											{% if user_product.price %}

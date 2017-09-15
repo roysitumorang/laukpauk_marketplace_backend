@@ -40,7 +40,7 @@
 							<td>
 								<font size="6">
 								{% if coupon.discount_type == 1 %}
-									Rp. {{ number_format(coupon.price_discount) }}
+									Rp. {{ coupon.price_discount | number_format }}
 								{% else %}
 									{{ coupon.price_discount }} %
 								{% endif %}
@@ -57,7 +57,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td>Rp. {{ number_format(coupon.minimum_purchase) }}</td>
+							<td>Rp. {{ coupon.minimum_purchase | number_format }}</td>
 						</tr>
 					</tbody>
 				</table>

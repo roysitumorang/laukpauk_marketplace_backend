@@ -62,17 +62,17 @@
 							<br>
 							<strong>
 							{% if order.coupon %}
-								<span style="text-decoration:line-through">Rp. {{ number_format(order.original_bill) }}</span>&nbsp;&nbsp;
-								Rp. {{ number_format(order.final_bill) }}
+								<span style="text-decoration:line-through">Rp. {{ order.original_bill | number_format }}</span>&nbsp;&nbsp;
+								Rp. {{ order.final_bill | number_format }}
 							{% else %}
-								Rp. {{ number_format(order.original_bill) }}
+								Rp. {{ order.original_bill | number_format }}
 							{% endif %}
 							</strong>
 						</td>
 						<td bgcolor="#E0EBEB" colspan="2">
 							<b><font color="#000099"><i class="fa fa-check-square"></i> Biaya Admin</font></b>
 							<br>
-							Rp. {{ number_format(order.admin_fee) }}
+							Rp. {{ order.admin_fee | number_format }}
 						</td>
 					</tr>
 					<tr>
@@ -121,18 +121,18 @@
 						<td>
 							<b><font color="#000099"><i class="fa fa-calendar"></i> Tanggal Order</font></b>
 							<br>
-							{{ date('Y-m-d H:i', strtotime(order.created_at)) }}
+							{{ order.created_at | datetime }}
 						</td>
 						<td>
 							<b><font color="#000099"><i class="fa fa-calendar-o"></i> Jadwal Pengantaran</font></b>
 							<br>
-							{{ date('Y-m-d H:i', strtotime(order.scheduled_delivery)) }}
+							{{ order.scheduled_delivery | datetime }}
 						</td>
 						<td colspan="2">
 							<b><font color="#000099"><i class="fa fa-calendar-check-o"></i> Aktual Pengantaran</font></b>
 							<br>
 							{% if order.status == 'COMPLETED' %}
-							{{ date('Y-m-d H:i', strtotime(order.actual_delivery)) }}
+							{{ order.actual_delivery | datetime }}
 							{% else %}
 							-
 							{% endif %}
@@ -153,31 +153,31 @@
 					<tr>
 						<td colspan="2">
 							<b>{{ item.name }}</b><br>
-							{{ item.quantity }} x Rp. {{ number_format(item.price) }} @ {{ item.stock_unit }}
+							{{ item.quantity }} x Rp. {{ item.price | number_format }} @ {{ item.stock_unit }}
 						</td>
-						<td colspan="2">Rp. {{ number_format(item.quantity * item.price) }}</td>
+						<td colspan="2">Rp. {{ item.quantity * item.price | number_format }}</td>
 					</tr>
 					{% endfor %}
 					<tr>
 						<td>
 							<b><font color="#000099"><i class="fa fa-shopping-basket"></i> Subtotal</font></b>
 							<br>
-							Rp. {{ number_format(order.original_bill) }}
+							Rp. {{ order.original_bill | number_format }}
 						</td>
 						<td>
 							<b><font color="#000099"><i class="fa fa-paper-plane"></i> Ongkos Kirim</font></b>
 							<br>
-							{% if order.shipping_cost %}Rp. {{ number_format(order.shipping_cost) }}{% else %}-{% endif %}
+							{% if order.shipping_cost %}Rp. {{ order.shipping_cost | number_format }}{% else %}-{% endif %}
 						</td>
 						<td>
 							<b><font color="#000099"><i class="fa fa-minus-square"></i> Diskon</font></b>
 							<br>
-							{% if order.discount %}Rp. {{ number_format(order.discount) }}{% else %}-{% endif %}
+							{% if order.discount %}Rp. {{ order.discount | number_format }}{% else %}-{% endif %}
 						</td>
 						<td>
 							<b><font color="#000099"><i class="fa fa-shopping-bag"></i> Total</font></b>
 							<br>
-							Rp. {{ number_format(order.final_bill) }}
+							Rp. {{ order.final_bill | number_format }}
 						</td>
 					</tr>
 				</table>

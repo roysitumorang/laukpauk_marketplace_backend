@@ -85,7 +85,7 @@
 									<select name="coupon_id" id="coupon_id">
 										<option value=""></option>
 										{% for coupon in coupons %}
-											<option value="{{ coupon.id }}"{% if coupon.id == order.coupon_id %} selected{% endif %}>{{ coupon.code }} / diskon {% if coupon.discount_type == 1 %}{{ number_format(coupon.price_discount) }}{% else %}{{ coupon.price_discount }} %{% endif %}{% if coupon.minimum_purchase %} / min. order {{ number_format(coupon.minimum_purchase) }}{% endif %})</option>
+											<option value="{{ coupon.id }}"{% if coupon.id == order.coupon_id %} selected{% endif %}>{{ coupon.code }} / diskon {% if coupon.discount_type == 1 %}{{ coupon.price_discount | number_format }}{% else %}{{ coupon.price_discount }} %{% endif %}{% if coupon.minimum_purchase %} / min. order {{ coupon.minimum_purchase | number_format }}{% endif %})</option>
 										{% endfor %}
 									</select>
 								{% endif %}
@@ -121,9 +121,9 @@
 									<option value="{{ i }}"{% if i == item.quantity%} selected{% endif %}>{{ i }}</option>
 								{% endfor %}
 								</select>
-								x Rp. {{ number_format(item.price) }} @ {{ item.stock_unit }}
+								x Rp. {{ item.price | number_format }} @ {{ item.stock_unit }}
 							</td>
-							<td><b>Rp. {{ number_format(item.quantity * item.price) }}</b></td>
+							<td><b>Rp. {{ item.quantity * item.price | number_format }}</b></td>
 							<td>
 								<a type="button" class="remove btn btn-danger btn-sm" data-id="{{ item.id }}"><i class="fa fa-cart-arrow-down"></i></a>
 							</td>
@@ -133,14 +133,14 @@
 							<td>
 								<b><font color="#000099"><i class="fa fa-shopping-basket"></i> Subtotal :</font></b>
 								<br>
-								<b>Rp. {{ number_format(order.original_bill) }}</b>
+								<b>Rp. {{ order.original_bill | number_format }}</b>
 							</td>
 							<td>
 								<b><font color="#000099"><i class="fa fa-paper-plane"></i> Ongkos Kirim :</font></b>
 								<br>
 								<b>
 								{% if order.shipping_cost %}
-									Rp. {{ number_format(order.shipping_cost) }}
+									Rp. {{ order.shipping_cost | number_format }}
 								{% else %}
 									-
 								{% endif %}
@@ -151,7 +151,7 @@
 								<br>
 								<b>
 								{% if order.discount %}
-									Rp. {{ number_format(order.discount) }}
+									Rp. {{ order.discount | number_format }}
 								{% else %}
 									-
 								{% endif %}
@@ -160,7 +160,7 @@
 							<td>
 								<b><font color="#000099"><i class="fa fa-shopping-bag"></i> Total :</font></b>
 								<br>
-								<b>Rp. {{ number_format(order.final_bill) }}</b>
+								<b>Rp. {{ order.final_bill | number_format }}</b>
 							</td>
 						</tr>
 						<tr>
@@ -201,7 +201,7 @@
 									<br>
 									<strong>{{ product.name }}</strong>
 									<br>
-									Rp. {{ number_format(product.price) }} @ {{ product.stock_unit }}
+									Rp. {{ product.price | number_format }} @ {{ product.stock_unit }}
 									<br>
 									<strong><i class="fa fa-user"></i> {{ product.company }}</strong>
 									<br>

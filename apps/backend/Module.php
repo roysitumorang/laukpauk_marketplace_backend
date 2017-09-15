@@ -2,6 +2,7 @@
 
 namespace Application\Backend;
 
+use Application\Models\User;
 use Exception;
 use Phalcon\Dispatcher;
 use Phalcon\DiInterface;
@@ -13,7 +14,7 @@ use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt;
-use Application\Models\User;
+use Phalcon\Session\Adapter\Database;
 
 class Module implements ModuleDefinitionInterface {
 	/**
@@ -21,7 +22,7 @@ class Module implements ModuleDefinitionInterface {
 	 */
 	function registerAutoloaders(DiInterface $di = null) {
 		$application = $di->getConfig()->application;
-		$loader      = new Loader();
+		$loader      = new Loader;
 		$loader->registerNamespaces([
 			'Application\Backend\Controllers' => APP_PATH . 'apps/backend/controllers/',
 			'Application\Backend\Forms'       => APP_PATH . 'apps/backend/forms',
@@ -40,7 +41,7 @@ class Module implements ModuleDefinitionInterface {
 		 * Start the session the first time some component request the session service
 		 */
 		$di->setShared('session', function() {
-			$session = new \Phalcon\Session\Adapter\Database([
+			$session = new Database([
 				'db'    => $this->getDb(),
 				'table' => 'sessions',
 			]);
@@ -93,16 +94,18 @@ class Module implements ModuleDefinitionInterface {
 						'compiledSeparator' => '_',
 					]);
 					$volt->getCompiler()
-						->addFunction('is_a', 'is_a')
 						->addFunction('is_int', 'is_int')
-						->addFunction('count', 'count')
-						->addFunction('number_format', 'number_format')
-						->addFunction('date', 'date')
-						->addFunction('strtotime', 'strtotime')
 						->addFunction('in_array', 'in_array')
-						->addFunction('strip_tags', 'strip_tags')
-						->addFunction('substr', 'substr')
-						->addFunction('strftime', 'strftime');
+						->addFunction('count', 'count')
+						->addFilter('count', function($resolved_args, $expr_args) {
+							return 'count(' . $resolved_args . ')';
+						})
+						->addFilter('number_format', function($resolved_args, $expr_args) {
+							return 'number_format(' . $resolved_args . ')';
+						})
+						->addFilter('datetime', function($resolved_args, $expr_args) {
+							return 'date("d M Y H:i", strtotime(' . $resolved_args . '))';
+						});
 					return $volt;
 				},
 			]);

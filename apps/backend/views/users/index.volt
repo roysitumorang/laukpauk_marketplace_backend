@@ -103,8 +103,8 @@
 										{% endif %}
 									</td>
 									<td>
-										<i class="fa fa-calendar-check-o"></i> {{ date('d M Y H:i', strtotime(user.created_at)) }}<br>
-										<br><i class="fa fa-money"></i>&nbsp;{% if user.deposit %}Rp. {{ number_format(user.deposit) }}{% else %}-{% endif %}
+										<i class="fa fa-calendar-check-o"></i> {{ user.created_at | datetime }}<br>
+										<br><i class="fa fa-money"></i>&nbsp;{% if user.deposit %}Rp. {{ user.deposit | number_format }}{% else %}-{% endif %}
 									</td>
 									<td>
 										{% if user.status == 'HOLD' %}
