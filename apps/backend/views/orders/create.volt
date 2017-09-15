@@ -123,7 +123,7 @@
 								</select>
 								x Rp. {{ item.price | number_format }} @ {{ item.stock_unit }}
 							</td>
-							<td><b>Rp. {{ item.quantity * item.price | number_format }}</b></td>
+							<td><b>Rp. {{ (item.quantity * item.price) | number_format }}</b></td>
 							<td>
 								<a type="button" class="remove btn btn-danger btn-sm" data-id="{{ item.id }}"><i class="fa fa-cart-arrow-down"></i></a>
 							</td>

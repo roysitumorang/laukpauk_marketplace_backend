@@ -155,7 +155,7 @@
 							<b>{{ item.name }}</b><br>
 							{{ item.quantity }} x Rp. {{ item.price | number_format }} @ {{ item.stock_unit }}
 						</td>
-						<td colspan="2">Rp. {{ item.quantity * item.price | number_format }}</td>
+						<td colspan="2">Rp. {{ (item.quantity * item.price) | number_format }}</td>
 					</tr>
 					{% endfor %}
 					<tr>
