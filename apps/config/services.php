@@ -103,7 +103,7 @@ $di->set('currentDatetime', function() {
 
 $di->set('jsonWebToken', function() use($di) {
 	return new class($di) {
-		private $_timestamp, $secret_key;
+		private $_timestamp, $_secret_key;
 
 		function __construct($di) {
 			$this->_timestamp  = $di->getCurrentDatetime()->format('U');
