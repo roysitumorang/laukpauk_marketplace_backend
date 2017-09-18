@@ -25,20 +25,22 @@ class NotificationsController extends ControllerBase {
 	function showAction($id) {
 		try {
 			$notification = $this->_current_user->getRelated('notifications', [
-				'Application\Models\NotificationRecipient.read_at IS NULL AND Application\Models\Notification.id = ?0',
+				'id = ?0',
 				'bind' => [$id]
 			])->getFirst();
 			if (!$notification) {
 				throw new Exception('Notifikasi tidak ditemukan!');
 			}
 			$notification_recipient = NotificationRecipient::findFirst([
-				'user_id = ?0 AND notification_id = ?1',
+				'user_id = ?0 AND notification_id = ?1 AND read_at IS NULL',
 				'bind' => [
 					$this->_current_user->id,
 					$notification->id,
 				],
 			]);
-			$notification_recipient->read();
+			if ($notification_recipient) {
+				$notification_recipient->read();
+			}
 			$this->_response['status']               = 1;
 			$this->_response['data']['notification'] = [
 				'id'                => $notification->id,
