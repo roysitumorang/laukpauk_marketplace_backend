@@ -33,6 +33,13 @@ class AccountController extends ControllerBase {
 			$user->setMobilePhone($this->_post->mobile_phone);
 			$user->setDeposit(0);
 			$user->role_id = Role::BUYER;
+			if ($this->_post->device_token && strlen($this->_post->device_token) > 36) {
+				$old_owner = User::findFirstByDeviceToken($this->_post->device_token);
+				if ($old_owner) {
+					$old_owner->update(['device_token' => null]);
+				}
+				$user->setDeviceToken($this->_post->device_token);
+			}
 			if (!$user->validation() || !$user->create()) {
 				$errors = new Set;
 				foreach ($user->getMessages() as $error) {
@@ -42,7 +49,7 @@ class AccountController extends ControllerBase {
 				}
 				throw new Exception($errors->join('<br>'));
 			}
-			if ($this->_post->device_token) {
+			if ($this->_post->device_token && strlen($this->_post->device_token) === 36 && !$user->device_token) {
 				$device = Device::findFirstByToken($this->_post->device_token);
 				if (!$device) {
 					$device             = new Device;
@@ -215,17 +222,26 @@ QUERY
 				throw new Exception($errors->join('<br>'));
 			}
 			if ($this->_post->device_token) {
-				$device = Device::findFirstByToken($this->_post->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->user       = $this->_current_user;
-					$device->token      = $this->_post->device_token;
-					$device->created_by = $this->_current_user->id;
-					$device->create();
-				} else {
-					$device->user       = $this->_current_user;
-					$device->updated_by = $this->_current_user->id;
-					$device->update();
+				if (strlen($this->_post->device_token) === 36 && !$this->_current_user->device_token) {
+					$device = Device::findFirstByToken($this->_post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->user       = $this->_current_user;
+						$device->token      = $this->_post->device_token;
+						$device->created_by = $this->_current_user->id;
+						$device->create();
+					} else {
+						$device->user       = $this->_current_user;
+						$device->updated_by = $this->_current_user->id;
+						$device->update();
+					}
+				} else if ($this->_post->device_token != $this->_current_user->device_token) {
+					$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
+					if ($old_owner) {
+						$old_owner->update(['device_token' => null]);
+					}
+					$this->_current_user->update(['device_token' => $this->_post->device_token]);
+					$this->_current_user->getDevices()->delete();
 				}
 			}
 			$current_user = [
@@ -279,17 +295,26 @@ QUERY
 				throw new Exception('Nomor HP dan/atau password salah!');
 			}
 			if ($this->_post->device_token) {
-				$device = Device::findFirstByToken($this->_post->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->user       = $user;
-					$device->token      = $this->_post->device_token;
-					$device->created_by = $user->id;
-					$device->create();
-				} else if ($device->user_id != $user->id) {
-					$device->user       = $user;
-					$device->updated_by = $user->id;
-					$device->update();
+				if (strlen($this->_post->device_token) === 36 && !$user->device_token) {
+					$device = Device::findFirstByToken($this->_post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->user       = $user;
+						$device->token      = $this->_post->device_token;
+						$device->created_by = $user->id;
+						$device->create();
+					} else if ($device->user_id != $user->id) {
+						$device->user       = $user;
+						$device->updated_by = $user->id;
+						$device->update();
+					}
+				} else if ($this->_post->device_token != $user->device_token) {
+					$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$user->id, $this->_post->device_token]]);
+					if ($old_owner) {
+						$old_owner->update(['device_token' => null]);
+					}
+					$user->update(['device_token' => $this->_post->device_token]);
+					$user->getDevices()->delete();
 				}
 			}
 			$crypt                  = new Crypt;

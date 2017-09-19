@@ -155,17 +155,26 @@ QUERY
 				throw new Exception($errors->join('<br>'));
 			}
 			if ($this->post->device_token) {
-				$device = Device::findFirstByToken($this->post->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->user_id    = $this->currentUser->id;
-					$device->token      = $this->post->device_token;
-					$device->created_by = $this->currentUser->id;
-					$device->create();
-				} else {
-					$device->user_id    = $this->currentUser->id;
-					$device->updated_by = $this->currentUser->id;
-					$device->update();
+				if (strlen($this->post->device_token) === 36 && !$this->currentUser->device_token) {
+					$device = Device::findFirstByToken($this->post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->user_id    = $this->currentUser->id;
+						$device->token      = $this->post->device_token;
+						$device->created_by = $this->currentUser->id;
+						$device->create();
+					} else {
+						$device->user_id    = $this->currentUser->id;
+						$device->updated_by = $this->currentUser->id;
+						$device->update();
+					}
+				} else if ($this->post->device_token != $this->currentUser->device_token) {
+					$old_owner = User::findFirstByDeviceToken($this->post->device_token);
+					if ($old_owner) {
+						$old_owner->update(['device_token' => null]);
+					}
+					$this->currentUser->update(['device_token' => $this->post->device_token]);
+					$this->currentUser->getDevices()->delete();
 				}
 			}
 			$this->_response['status']               = 1;
@@ -235,17 +244,26 @@ QUERY
 				return $this->response;
 			}
 			if ($this->post->device_token) {
-				$device = Device::findFirstByToken($this->post->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->token      = $this->post->device_token;
-					$device->user_id    = $user->id;
-					$device->created_by = $user->id;
-					$device->create();
-				} else if ($device->user_id != $user->id) {
-					$device->user_id    = $user->id;
-					$device->updated_by = $user->id;
-					$device->update();
+				if (strlen($this->post->device_token) === 36 && !$user->device_token) {
+					$device = Device::findFirstByToken($this->post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->token      = $this->post->device_token;
+						$device->user_id    = $user->id;
+						$device->created_by = $user->id;
+						$device->create();
+					} else if ($device->user_id != $user->id) {
+						$device->user_id    = $user->id;
+						$device->updated_by = $user->id;
+						$device->update();
+					}
+				} else if ($this->post->device_token != $user->device_token) {
+					$old_owner = User::findFirstByDeviceToken($this->post->device_token);
+					if ($old_owner) {
+						$old_owner->update(['device_token' => null]);
+					}
+					$user->update(['device_token' => $this->post->device_token]);
+					$user->getDevices()->delete();
 				}
 			}
 			$login_history = new LoginHistory;

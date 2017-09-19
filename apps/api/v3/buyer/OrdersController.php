@@ -144,17 +144,26 @@ QUERY
 				throw new Exception('Order Anda tidak valid!');
 			}
 			if ($this->_post->device_token) {
-				$device = Device::findFirstByToken($this->_post->device_token);
-				if (!$device) {
-					$device             = new Device;
-					$device->token      = $this->_post->device_token;
-					$device->user_id    = $this->_current_user->id;
-					$device->created_by = $this->_current_user->id;
-					$device->create();
-				} else if ($device->user_id != $this->_current_user->id) {
-					$device->user_id    = $this->_current_user->id;
-					$device->updated_by = $this->_current_user->id;
-					$device->update();
+				if (strlen($this->_post->device_token) === 36 && !$this->_current_user->device_token) {
+					$device = Device::findFirstByToken($this->_post->device_token);
+					if (!$device) {
+						$device             = new Device;
+						$device->token      = $this->_post->device_token;
+						$device->user_id    = $this->_current_user->id;
+						$device->created_by = $this->_current_user->id;
+						$device->create();
+					} else if ($device->user_id != $this->_current_user->id) {
+						$device->user_id    = $this->_current_user->id;
+						$device->updated_by = $this->_current_user->id;
+						$device->update();
+					}
+				} else if ($this->_post->device_token != $this->_current_user->device_token) {
+					$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
+					if ($old_owner) {
+						$old_owner->update(['device_token' => null]);
+					}
+					$this->_current_user->update(['device_token' => $this->_post->device_token]);
+					$this->_current_user->getDevices()->delete();
 				}
 			}
 			$delivery_date->setTime($this->_post->delivery->hour, 0, 0);

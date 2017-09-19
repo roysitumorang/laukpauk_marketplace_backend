@@ -30,17 +30,26 @@ class PasswordController extends ControllerBase {
 			$this->_current_user->setNewPasswordConfirmation($this->_post->new_password);
 			if ($this->_current_user->validation() && $this->_current_user->update()) {
 				if ($this->_post->device_token) {
-					$device = Device::findFirstByToken($this->_post->device_token);
-					if (!$device) {
-						$device             = new Device;
-						$device->user_id    = $this->_current_user->id;
-						$device->token      = $this->_post->device_token;
-						$device->created_by = $this->_current_user->id;
-						$device->create();
-					} else if ($device->user_id != $this->_current_user->id) {
-						$device->user_id    = $this->_current_user->id;
-						$device->updated_by = $this->_current_user->id;
-						$device->update();
+					if (strlen($this->_post->device_token) === 36 && !$this->_current_user->device_token) {
+						$device = Device::findFirstByToken($this->_post->device_token);
+						if (!$device) {
+							$device             = new Device;
+							$device->user_id    = $this->_current_user->id;
+							$device->token      = $this->_post->device_token;
+							$device->created_by = $this->_current_user->id;
+							$device->create();
+						} else if ($device->user_id != $this->_current_user->id) {
+							$device->user_id    = $this->_current_user->id;
+							$device->updated_by = $this->_current_user->id;
+							$device->update();
+						}
+					} else if ($this->_post->device_token != $this->_current_user->device_token) {
+						$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
+						if ($old_owner) {
+							$old_owner->update(['device_token' => null]);
+						}
+						$this->_current_user->update(['device_token' => $this->_post->device_token]);
+						$this->_current_user->getDevices()->delete();
 					}
 				}
 				$this->_response['status'] = 1;
@@ -84,17 +93,26 @@ class PasswordController extends ControllerBase {
 			}
 			if ($user->resetPassword($this->_post->new_password)) {
 				if ($this->_post->device_token) {
-					$device = Device::findFirstByToken($this->_post->device_token);
-					if (!$device) {
-						$device             = new Device;
-						$device->user_id    = $user->id;
-						$device->token      = $this->_post->device_token;
-						$device->created_by = $user->id;
-						$device->create();
-					} else if ($device->user_id != $user->id) {
-						$device->user_id    = $user->id;
-						$device->updated_by = $user->id;
-						$device->update();
+					if (strlen($this->_post->device_token) === 36 && !$user->device_token) {
+						$device = Device::findFirstByToken($this->_post->device_token);
+						if (!$device) {
+							$device             = new Device;
+							$device->user_id    = $user->id;
+							$device->token      = $this->_post->device_token;
+							$device->created_by = $user->id;
+							$device->create();
+						} else if ($device->user_id != $user->id) {
+							$device->user_id    = $user->id;
+							$device->updated_by = $user->id;
+							$device->update();
+						}
+					} else if ($this->_post->device_token != $user->device_token) {
+						$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
+						if ($old_owner) {
+							$old_owner->update(['device_token' => null]);
+						}
+						$user->update(['device_token' => $this->_post->device_token]);
+						$user->getDevices()->delete();
 					}
 				}
 				$crypt        = new Crypt;

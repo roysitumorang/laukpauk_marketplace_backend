@@ -53,21 +53,16 @@ class PushNotificationsController extends ControllerBase {
 		$recipients   = [];
 		$role_id      = '';
 		$user_id      = '';
-		$condition    = 'status = 1 AND EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id)';
+		$condition    = 'status = 1 AND (device_token IS NOT NULL OR EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id))';
 		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'LOWER(name) DESC']) as $item) {
 			$roles[] = $item;
 		}
 		if ($this->request->isPost()) {
-			$result  = User::query()->where('status = 1')->join('Application\Models\Device', 'Application\Models\User.id = b.user_id', 'b')->columns(['token']);
-			$role_id = $this->request->getPost('role_id', 'int');
-			$user_id = $this->request->getPost('user_id');
-			if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
-				$condition .= " AND role_id = {$role->id}";
-				$result->andWhere("role_id = {$role->id}");
+			if ($role_id = $this->request->getPost('role_id', 'int')) {
+				$condition .= " AND role_id = {$role_id}";
 			}
-			if ($user_id && $user = User::findFirst("status = 1 AND id = {$user_id}")) {
-				$condition .= " AND id = {$user->id}";
-				$result->andWhere("Application\Models\User.id = {$user->id}");
+			if ($user_id = $this->request->getPost('user_id')) {
+				$condition .= " AND id = {$user_id}";
 			}
 			foreach (User::find($condition) as $user) {
 				$recipients[] = $user;
@@ -108,11 +103,10 @@ class PushNotificationsController extends ControllerBase {
 	}
 
 	function recipientsAction() {
-		$condition  = 'status = 1 AND EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id)';
+		$condition  = 'status = 1 AND (device_token IS NOT NULL OR EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id))';
 		$recipients = [];
-		$role_id    = $this->dispatcher->getParam('role_id', 'int');
-		if ($role_id && $role = Role::findFirst("name IN('Merchant', 'Buyer') AND id = {$role_id}")) {
-			$condition .= " AND role_id = {$role->id}";
+		if ($role_id = $this->dispatcher->getParam('role_id', 'int')) {
+			$condition .= " AND role_id = {$role_id}";
 		}
 		$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'LOWER(name)']);
 		foreach ($result as $item) {

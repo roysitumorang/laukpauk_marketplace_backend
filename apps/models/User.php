@@ -44,6 +44,7 @@ class User extends ModelBase {
 	public $address;
 	public $village_id;
 	public $mobile_phone;
+	public $device_token;
 	public $status;
 	public $activated_at;
 	public $activation_token;
@@ -163,6 +164,10 @@ class User extends ModelBase {
 
 	function setMobilePhone($mobile_phone) {
 		$this->mobile_phone = $this->_filter->sanitize($mobile_phone, 'int');
+	}
+
+	function setDeviceToken($device_token) {
+		$this->device_token = $device_token;
 	}
 
 	function setStatus($status) {
@@ -302,6 +307,9 @@ class User extends ModelBase {
 		if (!is_int($this->accumulation_divisor)) {
 			$this->accumulation_divisor = 0;
 		}
+		if (!$this->device_token) {
+			$this->device_token = null;
+		}
 	}
 
 	function validation() {
@@ -322,6 +330,11 @@ class User extends ModelBase {
 			'pattern' => '/^(\+?0?62)?0?8\d{8,11}$/',
 			'message' => 'nomor HP tidak valid',
 		]));
+		if ($this->device_token) {
+			$validator->add('device_token', new Uniqueness([
+				'message' => 'token notifikasi sudah terdaftar',
+			]));
+		}
 		if ($this->role_id == Role::MERCHANT) {
 			$validator->add('company', new PresenceOf(['message' => 'nama toko harus diisi']));
 			$validator->add(['business_opening_hour', 'business_closing_hour'], new PresenceOf([

@@ -117,19 +117,28 @@ class Notification extends ModelBase {
 		if (!$this->new_mobile_target_parameters) {
 			$this->update(['new_mobile_target_parameters' => sprintf('{"notificationId":%d}', $this->id)]);
 		}
-		$device_tokens = [];
+		$onesignal_device_tokens = [];
+		$fcm_device_tokens       = [];
 		foreach ($recipients as $recipient) {
-			foreach ($recipient->devices as $device) {
-				$device_tokens[] = $device->token;
+			$device_token_exists = false;
+			if ($recipient->device_token) {
+				$fcm_device_tokens[] = $recipient->device_token;
+				$device_token_exists = true;
+			} else {
+				foreach ($recipient->devices as $device) {
+					$onesignal_device_tokens[] = $device->token;
+					$device_token_exists       = true;
+				}
 			}
-			$relation = new NotificationRecipient([
-				'notification_id' => $this->id,
-				'user_id'         => $recipient->id,
-			]);
-			$relation->create();
+			if ($device_token_exists) {
+				$relation = new NotificationRecipient([
+					'notification_id' => $this->id,
+					'user_id'         => $recipient->id,
+				]);
+				$relation->create();
+			}
 		}
-		$this->recipients = $recipients;
-		if ($device_tokens) {
+		if ($onesignal_device_tokens) {
 			$config = $this->getDI()->getConfig()->onesignal;
 			$ch     = curl_init();
 			curl_setopt_array($ch, [
@@ -143,12 +152,41 @@ class Notification extends ModelBase {
 				CURLOPT_SSL_VERIFYPEER => 0,
 				CURLOPT_POSTFIELDS     => json_encode([
 					'app_id'             => $config->app_id,
-					'include_player_ids' => $device_tokens,
+					'include_player_ids' => $onesignal_device_tokens,
 					'priority'           => 10,
 					'headings'           => ['en' => $this->title],
 					'contents'           => ['en' => $this->message],
 					'data'               => [
 						'link'              => $this->old_mobile_target_url,
+						'target_url'        => $this->new_mobile_target_url,
+						'target_parameters' => json_decode($this->new_mobile_target_parameters),
+					],
+				]),
+			]);
+			curl_exec($ch);
+			curl_close($ch);
+		}
+		if ($fcm_device_tokens) {
+			$ch = curl_init('https://fcm.googleapis.com/fcm/send');
+			curl_setopt_array($ch, [
+				CURLOPT_POST           => 1,
+				CURLOPT_HTTPHEADER     => [
+					'Authorization: key=' . $this->getDI()->getConfig()->push_api_key,
+					'Content-Type: application/json',
+				],
+				CURLOPT_RETURNTRANSFER => 1,
+				CURLOPT_SSL_VERIFYPEER => 0,
+				CURLOPT_POSTFIELDS     => json_encode([
+					'registration_ids' => $fcm_device_tokens,
+					'priority'         => 'high',
+					'notification'     => [
+						'title'        => $this->title,
+						'body'         => $this->message,
+						'sound'        => 'default',
+						'click_action' => 'FCM_PLUGIN_ACTIVITY',
+						'icon'         => 'fcm_push_icon'
+					],
+					'data'             => [
 						'target_url'        => $this->new_mobile_target_url,
 						'target_parameters' => json_decode($this->new_mobile_target_parameters),
 					],
