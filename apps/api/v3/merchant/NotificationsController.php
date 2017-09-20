@@ -42,14 +42,15 @@ class NotificationsController extends ControllerBase {
 			}
 			$this->_response['status']               = 1;
 			$this->_response['data']['notification'] = [
-				'id'                => $notification->id,
-				'title'             => $notification->title,
-				'message'           => $notification->message,
+				'id'      => $notification->id,
+				'title'   => $notification->title,
+				'message' => $notification->message,
 			];
 			if ($notification->new_mobile_target_url != 'tab.notification') {
 				$this->_response['data']['notification']['target_url']        = $notification->new_mobile_target_url;
 				$this->_response['data']['notification']['target_parameters'] = $notification->new_mobile_target_parameters;
 			}
+			$this->_response['data']['total_new_notifications'] = $this->currentUser->totalNewNotifications();
 		} catch (Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
