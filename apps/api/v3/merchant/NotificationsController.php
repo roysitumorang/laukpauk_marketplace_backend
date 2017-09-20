@@ -9,13 +9,11 @@ class NotificationsController extends ControllerBase {
 		$notifications = [];
 		$result        = $this->currentUser->getRelated('notifications', [
 			'Application\Models\NotificationRecipient.read_at IS NULL',
-			'order' => 'id DESC',
+			'order'   => 'id DESC',
+			'columns' => 'id, title',
 		]);
 		foreach ($result as $notification) {
-			$notifications[] = [
-				'id'    => $notification->id,
-				'title' => $notification->title,
-			];
+			$notifications[] = $notification;
 		}
 		$this->_response['status']                = 1;
 		$this->_response['data']['notifications'] = $notifications;

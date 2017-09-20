@@ -10,10 +10,11 @@ class NotificationsController extends ControllerBase {
 		$notifications = [];
 		$result        = $this->_current_user->getRelated('notifications', [
 			'Application\Models\NotificationRecipient.read_at IS NULL',
-			'order' => 'Application\Models\Notification.id DESC',
+			'order'   => 'id DESC',
+			'columns' => 'id, title',
 		]);
 		foreach ($result as $notification) {
-			$notifications[] = ['id' => $notification->id, 'title' => $notification->title, 'target_url' => $notification->new_mobile_target_url, 'target_parameters' => $notification->new_mobile_target_parameters];
+			$notifications[] = $notification;
 		}
 		$this->_response['status']                          = 1;
 		$this->_response['data']['notifications']           = $notifications;
