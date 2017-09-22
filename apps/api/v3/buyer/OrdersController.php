@@ -7,6 +7,7 @@ use Application\Models\Order;
 use Application\Models\OrderProduct;
 use Application\Models\Release;
 use Application\Models\Role;
+use Application\Models\User;
 use Application\Models\Setting;
 use Application\Models\Village;
 use DateTime;
