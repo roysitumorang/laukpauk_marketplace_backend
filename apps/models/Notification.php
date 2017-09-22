@@ -130,7 +130,7 @@ class Notification extends ModelBase {
 					$device_token_exists       = true;
 				}
 			}
-			if ($device_token_exists) {
+			if ($device_token_exists || ($recipient->status == 1 && ($recipient->role_id == Role::SUPER_ADMIN || $recipient->role_id == Role::ADMIN))) {
 				$relation = new NotificationRecipient([
 					'notification_id' => $this->id,
 					'user_id'         => $recipient->id,
