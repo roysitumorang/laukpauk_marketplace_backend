@@ -3,10 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Digit;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{Digit, InclusionIn, PresenceOf, Uniqueness};
 
 class UserProduct extends ModelBase {
 	public $id;
@@ -51,6 +48,7 @@ class UserProduct extends ModelBase {
 				'message'    => 'produk harus diisi',
 			],
 		]);
+		$this->hasManyToMany('id', 'Application\Models\SalePackageProduct', 'user_product_id', 'sale_package_id', 'Application\Models\SalePackage', 'id', ['alias' => 'salePackages']);
 	}
 
 	function setPrice($price) {

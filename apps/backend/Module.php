@@ -105,6 +105,9 @@ class Module implements ModuleDefinitionInterface {
 						})
 						->addFilter('datetime', function($resolved_args, $expr_args) {
 							return 'date("d M Y H:i", strtotime(' . $resolved_args . '))';
+						})
+						->addFilter('strtr', function($resolved_args, $expr_args) {
+							return 'strtr(' . $resolved_args . ')';
 						});
 					return $volt;
 				},

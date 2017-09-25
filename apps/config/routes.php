@@ -318,6 +318,37 @@ $di->set('router', function() {
 		'params'     => 2,
 	]);
 
+	$router->add('/admin/users/:int/sale_packages/:params', [
+		'module'     => 'backend',
+		'controller' => 'sale_packages',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$router->add('/admin/users/:int/sale_packages/:action/:params', [
+		'module'     => 'backend',
+		'controller' => 'sale_packages',
+		'action'     => 2,
+		'user_id'    => 1,
+		'params'     => 3,
+	]);
+
+	$router->add('/admin/users/:int/sale_packages/:int/:action', [
+		'module'     => 'backend',
+		'controller' => 'sale_packages',
+		'action'     => 3,
+		'user_id'    => 1,
+		'params'     => 2,
+	])->convert('action', function($old_action) {
+		$parts      = explode('_', strtolower($old_action));
+		$new_action = '';
+		foreach ($parts as $i => $part) {
+			$new_action .= $i ? ucfirst($part) : $part;
+		}
+		return $new_action;
+	});
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',

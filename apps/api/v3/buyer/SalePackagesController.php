@@ -2,84 +2,72 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\Banner;
 use Ds\Set;
 use Phalcon\Db;
 
-class CategoriesController extends ControllerBase {
+class SalePackagesController extends ControllerBase {
 	function indexAction() {
-		$categories       = [];
-		$sale_packages    = [];
-		$merchant_ids     = new Set;
-		$merchants        = [];
-		$banners          = [];
-		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
-		foreach (['!', ''] as $condition) {
-			$result = $this->db->query("SELECT id, name FROM product_categories WHERE published = 1 AND name {$condition}= 'Lain-Lain' ORDER BY name");
-			$result->setFetchMode(Db::FETCH_OBJ);
-			while ($category = $result->fetch()) {
-				$products = [];
-				$query    = <<<QUERY
-					SELECT
-						COUNT(DISTINCT c.id)
-					FROM
-						users a
-						JOIN coverage_area b ON a.id = b.user_id
-						JOIN user_product c ON a.id = c.user_id
-						JOIN products d ON c.product_id = d.id
-					WHERE
-						a.status = 1 AND
-						b.village_id = {$this->_current_user->village->id} AND
-						c.published = 1 AND
-						c.stock > 0 AND
-						d.published = 1 AND
-						d.product_category_id = {$category->id}
-QUERY;
-				$total_products = $this->db->fetchColumn($query);
-				if (!$total_products) {
-					continue;
-				}
-				$sub_result = $this->db->query('SELECT e.* FROM (' . strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ') e ORDER BY RANDOM() LIMIT 2 OFFSET 0');
-				$sub_result->setFetchMode(Db::FETCH_OBJ);
-				while ($product = $sub_result->fetch()) {
-					$merchant_ids->contains($product->user_id) || $merchant_ids->add($product->user_id);
-					if ($product->picture) {
-						$product->thumbnail = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
-						$product->picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
-					} else {
-						unset($product->picture);
-					}
-					$products[] = $product;
-				}
-				$category->products = $products;
-				$categories[]       = $category;
+		$page          = $this->dispatcher->getParam('page', 'int');
+		$search_query  = $this->dispatcher->getParam('keyword', 'string') ?: null;
+		$limit         = 10;
+		$params        = [];
+		$sale_packages = [];
+		$merchant_ids  = new Set;
+		$merchants     = [];
+		$stop_words    = preg_split('/,/', $this->db->fetchColumn("SELECT value FROM settings WHERE name = 'stop_words'"), -1, PREG_SPLIT_NO_EMPTY);
+		$keywords      = '';
+		if ($search_query) {
+			$words = array_values(array_diff(preg_split('/ /', strtolower($search_query), -1, PREG_SPLIT_NO_EMPTY), $stop_words));
+			foreach ($words as $i => $word) {
+				$keywords .= ($i > 0 ? ' & ' : '') . $word . ':*';
 			}
 		}
-		$result = $this->db->query(<<<QUERY
+		$query = <<<QUERY
 			SELECT
-				a.id,
-				a.user_id,
-				a.name,
-				a.price,
-				a.picture
+				COUNT(DISTINCT a.id)
 			FROM
 				sale_packages a
 				JOIN coverage_area b USING(user_id)
+				LEFT JOIN sale_package_product c ON a.id = c.sale_package_id
+				LEFT JOIN user_product d ON c.user_product_id = d.id
+				LEFT JOIN products e ON d.product_id = e.id
 			WHERE
 				b.village_id = {$this->_current_user->village->id} AND
 				a.published = '1'
-			ORDER BY RANDOM()
-			LIMIT 2 OFFSET 0
-QUERY
-		);
-		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($item = $result->fetch()) {
-			$merchant_ids->contains($item->user_id) || $merchant_ids->add($item->user_id);
-			if ($item->picture) {
-				$item->thumbnail = $picture_root_url . strtr($item->picture, ['.jpg' => '120.jpg']);
+QUERY;
+		if ($search_query) {
+			if ($this->db->fetchColumn("SELECT COUNT(1) FROM sale_packages a JOIN coverage_area b USING(user_id) WHERE b.village_id = {$this->_current_user->village->id} AND a.published = '1' AND a.name = ?", [$search_query])) {
+				$query   .= ' AND a.name = ?';
+				$params[] = $search_query;
+			} else if ($keywords) {
+				$query .= " AND a.keywords @@ TO_TSQUERY('{$keywords}')";
 			}
-			unset($item->picture);
-			$sale_packages[] = $item;
+		}
+		$total_products = $this->db->fetchColumn($query, $params);
+		$total_pages    = ceil($total_products / $limit);
+		$current_page   = $page > 0 ? $page : 1;
+		$offset         = ($current_page - 1) * $limit;
+		$result         = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => <<<QUERY
+			a.id,
+			a.user_id,
+			a.name,
+			a.price,
+			a.picture,
+			TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy,
+			STRING_AGG(e.name || ' (' || e.stock_unit || ')', ',') AS products
+QUERY
+		]) . " GROUP BY a.id ORDER BY relevancy DESC, a.name LIMIT {$limit} OFFSET {$offset}", $params);
+		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($row = $result->fetch()) {
+			$merchant_ids->contains($row->user_id) || $merchant_ids->add($row->user_id);
+			if ($row->picture) {
+				$row->thumbnail = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
+				$row->picture   = $picture_root_url . strtr($row->picture, ['.jpg' => '300.jpg']);
+			}
+			$row->products = explode(',', $row->products);
+			unset($row->picture, $row->relevancy);
+			$sale_packages[] = $row;
 		}
 		if (!$merchant_ids->isEmpty()) {
 			$today    = $this->currentDatetime->format('N');
@@ -180,15 +168,18 @@ QUERY
 				];
 			}
 		}
-		foreach (Banner::find(['published = 1', 'columns' => 'file', 'order' => 'id DESC']) as $banner) {
-			$banners[] = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/' . $banner->file;
+		if (!$total_products) {
+			if ($keywords) {
+				$this->_response['message'] = 'Paket belanja tidak ditemukan.';
+			} else if (!$total_pages) {
+				$this->_response['message'] = 'Paket belanja belum ada.';
+			}
+		} else {
+			$this->_response['status'] = 1;
 		}
-		$this->_response['status']                          = 1;
-		$this->_response['data']['categories']              = $categories;
-		$this->_response['data']['sale_packages']           = $sale_packages;
-		$this->_response['data']['merchants']               = $merchants;
-		$this->_response['data']['banners']                 = $banners;
-		$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
+		$this->_response['data']['sale_packages'] = $sale_packages;
+		$this->_response['data']['current_hour']  = $this->currentDatetime->format('G');
+		$this->_response['data']['merchants']     = $merchants;
 		$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 		return $this->response;
 	}
