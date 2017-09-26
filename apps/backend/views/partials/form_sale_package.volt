@@ -4,18 +4,32 @@
 		<tr>
 			<td>
 				<b>Nama :</b>
-				<input type="text" name="name" value="{{ sale_package.name }}">
+			</td>
+			<td>
+				<input type="text" name="name" value="{{ sale_package.name }}" placeholder="Nama">
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<b>Harga :</b>
-				<input type="text" name="price" value="{{ sale_package.price }}">
+			</td>
+			<td>
+				<input type="text" name="price" value="{{ sale_package.price }}" placeholder="Harga">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<b>Stok :</b>
+			</td>
+			<td>
+				<input type="text" name="stock" value="{{ sale_package.stock }}" placeholder="Stok">
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<b>Gambar :</b>
+			</td>
+			<td>
 				<input type="file" name="new_picture">
 				{% if sale_package.picture %}
 					<img src="/assets/image/{{ sale_package.picture | strtr(['.jpg': '300.jpg']) }}">
@@ -41,6 +55,7 @@
 			<th>No</th>
 			<th>Nama</th>
 			<th>Harga</th>
+			<th>Quantity</th>
 			<th>#</th>
 		</tr>
 		{% for product in products %}
@@ -48,10 +63,15 @@
 			<td>{{ product.rank }}</td>
 			<td>{{ product.name }} ({{ product.stock_unit }})</td>
 			<td>Rp. {{ product.price | number_format }}</td>
-			<td><input type="checkbox" name="user_product_ids[]" value="{{ product.id }}"{% if in_array(product.id, user_product_ids) %} checked{% endif %}></td>
+			<td>
+				<input type="hidden" name="products[{{ product.user_product_id }}][id]" value="{{ product.id }}">
+				<input type="text" name="products[{{ product.user_product_id }}][quantity]" value="{{ product.quantity }}" id="{{ product.user_product_id }}" placeholder="Quantity"{% if !user_product_ids.contains(product.user_product_id) %} disabled{% endif %}>
+			</td>
+			<td><input type="checkbox" name="products[{{ product.user_product_id }}][user_product_id]" value="{{ product.user_product_id }}" data-user-product-id="{{ product.user_product_id }}"{% if user_product_ids.contains(product.user_product_id) %} checked{% endif %}></td>
 		</tr>
 		{% endfor %}
 		<tr>
+			<td></td>
 			<td></td>
 			<td></td>
 			<td></td>
@@ -59,3 +79,13 @@
 		</tr>
 	</table>
 </form>
+<script>
+	document.querySelectorAll('[type=checkbox]').forEach(item => {
+		item.addEventListener('click', event => {
+			let target = document.getElementById(event.target.dataset.userProductId);
+			event.target.checked
+			? target.removeAttribute('disabled')
+			: target.setAttribute('disabled', '')
+		}, false)
+	})
+</script>

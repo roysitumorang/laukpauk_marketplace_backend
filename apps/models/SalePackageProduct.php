@@ -3,12 +3,13 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{Digit, Uniqueness};
 
 class SalePackageProduct extends ModelBase {
 	public $id;
 	public $sale_package_id;
 	public $user_product_id;
+	public $quantity;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -43,6 +44,9 @@ class SalePackageProduct extends ModelBase {
 		$validator = new Validation;
 		$validator->add(['sale_package_id', 'user_product_id'], new Uniqueness([
 			'message' => 'produk sudah ada dalam paket',
+		]));
+		$validator->add('quantity', new Digit([
+			'message' => 'quantity harus diisi dalam bentuk angka',
 		]));
 		return $this->validate($validator);
 	}

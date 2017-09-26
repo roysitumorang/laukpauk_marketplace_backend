@@ -5,7 +5,7 @@ namespace Application\Models;
 use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Between, File, PresenceOf, Uniqueness};
+use Phalcon\Validation\Validator\{Between, Digit, File, PresenceOf, Uniqueness};
 
 class SalePackage extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
@@ -14,6 +14,7 @@ class SalePackage extends ModelBase {
 	public $user_id;
 	public $name;
 	public $price;
+	public $stock;
 	public $picture;
 	public $new_picture;
 	public $thumbnails;
@@ -49,6 +50,10 @@ class SalePackage extends ModelBase {
 		$this->price = $price;
 	}
 
+	function setStock(string $stock) {
+		$this->stock = $stock;
+	}
+
 	function setNewPicture($new_picture) {
 		if (is_array($new_picture) && $new_picture['tmp_name'] && $new_picture['size'] && !$new_picture['error']) {
 			$this->new_picture = $new_picture;
@@ -61,8 +66,18 @@ class SalePackage extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add('name', new PresenceOf([
-			'message' => 'nama harus diisi',
+		$validator->add(['name', 'price', 'stock'], new PresenceOf([
+			'message' => [
+				'name'  => 'nama harus diisi',
+				'price' => 'harga harus diisi',
+				'stock' => 'stok harus diisi',
+			]
+		]));
+		$validator->add(['price', 'stock'], new Digit([
+			'message' => [
+				'price' => 'harga dalam bentuk angka',
+				'stock' => 'stok dalam bentuk angka',
+			]
 		]));
 		$validator->add(['user_id', 'name'], new Uniqueness([
 			'message' => 'nama sudah ada',

@@ -3,6 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{Role, SalePackage, SalePackageProduct, User};
+use Ds\Vector;
 use Phalcon\Paginator\Adapter\{Model, QueryBuilder};
 
 class SalePackagesController extends ControllerBase {
@@ -56,18 +57,30 @@ class SalePackagesController extends ControllerBase {
 		$sale_package          = new SalePackage;
 		$sale_package->user_id = $this->_user->id;
 		if ($this->request->isPost()) {
-			$sale_package->assign($_POST, null, ['name', 'price']);
+			$sale_package->assign($_POST, null, ['name', 'price', 'stock']);
 			$sale_package->setPublished(0);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->create()) {
-				foreach ($this->request->getPost('user_product_ids') as $user_product_id) {
-					$sale_package_product                  = new SalePackageProduct;
-					$sale_package_product->sale_package_id = $sale_package->id;
-					$sale_package_product->user_product_id = $user_product_id;
-					$sale_package_product->create();
+				$products = array_filter($this->request->getPost('products') ?: [], function($v, $k) {
+					return $k == $v['user_product_id'];
+				}, ARRAY_FILTER_USE_BOTH);
+				foreach ($products as $item) {
+					$product = filter_var_array($item, [
+						'user_product_id' => FILTER_VALIDATE_INT,
+						'quantity'        => FILTER_VALIDATE_INT,
+					]);
+					if (!$product['user_product_id']) {
+						continue;
+					}
+					$sale_package_product = new SalePackageProduct;
+					$sale_package_product->create([
+						'sale_package_id' => $sale_package->id,
+						'user_product_id' => $product['user_product_id'],
+						'quantity'        => $product['quantity'] ?: 0,
+					]);
 				}
-				$this->flashSession->success('Penambahan paket penjualan berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
+				$this->flashSession->success('Penambahan paket belanja berhasil!');
+				return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$sale_package->id}/update");
 			}
 			foreach ($sale_package->getMessages() as $error) {
 				$this->flashSession->error($error);
@@ -83,23 +96,40 @@ class SalePackagesController extends ControllerBase {
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
 		if ($this->request->isPost()) {
-			$sale_package->assign($_POST, null, ['name', 'price']);
+			$sale_package->assign($_POST, null, ['name', 'price', 'stock']);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->update()) {
-				if ($user_product_ids = $this->request->getPost('user_product_ids')) {
-					SalePackageProduct::find(['sale_package_id = ?0 AND user_product_id NOT IN({user_product_ids:array})', 'bind' => [$sale_package->id, 'user_product_ids' => $user_product_ids]])->delete();
-					foreach ($user_product_ids as $user_product_id) {
-						if (!SalePackageProduct::findFirst(['sale_package_id = ?0 AND user_product_id = ?1', 'bind' => [$sale_package->id, $user_product_id]])) {
-							$sale_package_product = new SalePackageProduct;
-							$sale_package_product->create([
-								'sale_package_id' => $sale_package->id,
-								'user_product_id' => $user_product_id,
-							]);
-						}
-					}
+				$products = array_filter($this->request->getPost('products') ?: [], function($v, $k) {
+					return $k == $v['user_product_id'];
+				}, ARRAY_FILTER_USE_BOTH);
+				$params = ['sale_package_id = ?0', 'bind' => [$sale_package->id]];
+				if ($products) {
+					$params[0]                         .= ' AND user_product_id NOT IN({user_product_ids:array})';
+					$params['bind']['user_product_ids'] = array_keys($products);
 				}
-				$this->flashSession->success('Update paket penjualan berhasil!');
-				return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
+				SalePackageProduct::find($params)->delete();
+				foreach ($products as $item) {
+					$product = filter_var_array($item, [
+						'user_product_id' => FILTER_VALIDATE_INT,
+						'quantity'        => FILTER_VALIDATE_INT,
+						'id'              => FILTER_VALIDATE_INT,
+					]);
+					if (!$product['user_product_id']) {
+						continue;
+					}
+					if ($product['id'] && $sale_package_product = SalePackageProduct::findFirst(['id = ?0 AND sale_package_id = ?1', 'bind' => [$product['id'], $sale_package->id]])) {
+						$sale_package_product->update(['quantity' => $product['quantity'] ?: 0]);
+						continue;
+					}
+					$sale_package_product = new SalePackageProduct;
+					$sale_package_product->create([
+						'sale_package_id' => $sale_package->id,
+						'user_product_id' => $product['user_product_id'],
+						'quantity'        => $product['quantity'] ?: 0,
+					]);
+				}
+				$this->flashSession->success('Update paket belanja berhasil!');
+				return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$sale_package->id}/update");
 			}
 			foreach ($sale_package->getMessages() as $error) {
 				$this->flashSession->error($error);
@@ -129,18 +159,33 @@ class SalePackagesController extends ControllerBase {
 	}
 
 	private function _prepare(SalePackage $sale_package = null) {
-		$products     = [];
-		$search_query = $this->dispatcher->getParam('keyword', 'string') ?: null;
-		$builder      = $this->modelsManager->createBuilder()
+		$posted_products  = [];
+		$products         = [];
+		$user_product_ids = new Vector;
+		$search_query     = $this->dispatcher->getParam('keyword', 'string') ?: null;
+		if ($this->request->isPost()) {
+			$posted_products = array_filter($this->request->getPost('products') ?: [], function($v, $k) {
+				return $k == $v['user_product_id'];
+			}, ARRAY_FILTER_USE_BOTH);
+			$user_product_ids = new Vector(array_keys($posted_products));
+		} else if ($sale_package->id) {
+			foreach (SalePackageProduct::findBySalePackageId($sale_package->id) as $item) {
+				$user_product_ids->push($item->user_product_id);
+			}
+		}
+		$builder = $this->modelsManager->createBuilder()
 			->columns([
-				'a.id',
+				'c.id',
+				'user_product_id' => 'a.id',
 				'b.name',
 				'b.stock_unit',
 				'a.price',
 				'a.published',
+				'c.quantity'
 			])
 			->from(['a' => 'Application\Models\UserProduct'])
 			->join('Application\Models\Product', 'a.product_id = b.id', 'b')
+			->leftJoin('Application\Models\SalePackageProduct', 'a.id = c.user_product_id AND c.sale_package_id ' . ($sale_package->id ? "= {$sale_package->id}" : 'IS NULL'), 'c')
 			->orderBy('b.name, b.stock_unit')
 			->where('a.user_id = ' . $this->_user->id);
 		if ($search_query) {
@@ -156,15 +201,10 @@ class SalePackagesController extends ControllerBase {
 		$page = $paginator->getPaginate();
 		foreach ($page->items as $i => $item) {
 			$item->writeAttribute('rank', $i + 1);
-			$products[] = $item;
-		}
-		if ($this->request->isPost()) {
-			$user_product_ids = $this->request->getPost('user_product_ids');
-		} else if ($sale_package->id) {
-			$user_product_ids = [];
-			foreach (SalePackageProduct::findBySalePackageId($sale_package->id) as $item) {
-				$user_product_ids[] = $item->user_product_id;
+			if ($this->request->isPost() && $user_product_ids->contains($item->user_product_id)) {
+				$item->quantity = $posted_products[$item->user_product_id]['quantity'];
 			}
+			$products[] = $item;
 		}
 		$this->view->page             = $paginator->getPaginate();
 		$this->view->sale_package     = $sale_package;
