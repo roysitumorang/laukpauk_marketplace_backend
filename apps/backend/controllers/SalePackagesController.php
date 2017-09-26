@@ -79,7 +79,7 @@ class SalePackagesController extends ControllerBase {
 	function updateAction($id) {
 		$sale_package = $this->_user->getRelated('salePackages', ['id = ?0', 'bind' => [$id]])->getFirst();
 		if (!$sale_package) {
-			$this->flashSession->error('Paket penjualan tidak ditemukan!');
+			$this->flashSession->error('Paket belanja tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
 		if ($this->request->isPost()) {
@@ -111,7 +111,7 @@ class SalePackagesController extends ControllerBase {
 	function toggleStatusAction($id) {
 		$sale_package = $this->_user->getRelated('salePackages', ['id = ?0', 'bind' => [$id]])->getFirst();
 		if (!$sale_package) {
-			$this->flashSession->error('Paket penjualan tidak ditemukan!');
+			$this->flashSession->error('Paket belanja tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
 		$sale_package->update(['published' => $sale_package->published ? 0 : 1]);
@@ -121,7 +121,7 @@ class SalePackagesController extends ControllerBase {
 	function deletePictureAction($id) {
 		$sale_package = $this->_user->getRelated('salePackages', ['id = ?0 AND picture IS NOT NULL', 'bind' => [$id]])->getFirst();
 		if (!$sale_package) {
-			$this->flashSession->error('Paket penjualan tidak ditemukan!');
+			$this->flashSession->error('Paket belanja tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
 		$sale_package->deletePicture();

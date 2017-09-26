@@ -8,21 +8,21 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/{{ user.id }}/sale_packages"><h2>Tambah Paket Penjualan</h2></a>
+				<a href="/admin/users/{{ user.id }}/sale_packages"><h2>Tambah Paket Belanja</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span><a href="/admin/users">Daftar Member</a></span></li>
 						<li><span><a href="/admin/users/{{ user.id }}">{{ user.name }}</a></span></li>
-						<li><span><a href="/admin/users/{{ user.id }}/sale_packages">Daftar Paket Penjualan</a></span></li>
-						<li><span>Tambah Paket Penjualan</span></li>
+						<li><span><a href="/admin/users/{{ user.id }}/sale_packages">Daftar Paket Belanja</a></span></li>
+						<li><span>Tambah Paket Belanja</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
 			</header>
 			<!-- start: page -->
 			<header class="panel-heading">
-				<h2 class="panel-title">Tambah Paket Penjualan {{ user.name }}</h2>
+				<h2 class="panel-title">Tambah Paket Belanja {{ user.name }}</h2>
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
