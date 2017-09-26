@@ -76,7 +76,7 @@ class SalePackagesController extends ControllerBase {
 					$sale_package_product->create([
 						'sale_package_id' => $sale_package->id,
 						'user_product_id' => $product['user_product_id'],
-						'quantity'        => $product['quantity'] ?: 0,
+						'quantity'        => $product['quantity'] ?: 1,
 					]);
 				}
 				$this->flashSession->success('Penambahan paket belanja berhasil!');
@@ -118,14 +118,14 @@ class SalePackagesController extends ControllerBase {
 						continue;
 					}
 					if ($product['id'] && $sale_package_product = SalePackageProduct::findFirst(['id = ?0 AND sale_package_id = ?1', 'bind' => [$product['id'], $sale_package->id]])) {
-						$sale_package_product->update(['quantity' => $product['quantity'] ?: 0]);
+						$sale_package_product->update(['quantity' => $product['quantity'] ?: 1]);
 						continue;
 					}
 					$sale_package_product = new SalePackageProduct;
 					$sale_package_product->create([
 						'sale_package_id' => $sale_package->id,
 						'user_product_id' => $product['user_product_id'],
-						'quantity'        => $product['quantity'] ?: 0,
+						'quantity'        => $product['quantity'] ?: 1,
 					]);
 				}
 				$this->flashSession->success('Update paket belanja berhasil!');
@@ -161,6 +161,7 @@ class SalePackagesController extends ControllerBase {
 	private function _prepare(SalePackage $sale_package = null) {
 		$posted_products  = [];
 		$products         = [];
+		$quantities       = range(1, 10);
 		$user_product_ids = new Vector;
 		$search_query     = $this->dispatcher->getParam('keyword', 'string') ?: null;
 		if ($this->request->isPost()) {
@@ -210,5 +211,6 @@ class SalePackagesController extends ControllerBase {
 		$this->view->sale_package     = $sale_package;
 		$this->view->products         = $products;
 		$this->view->user_product_ids = $user_product_ids;
+		$this->view->quantities       = $quantities;
 	}
 }

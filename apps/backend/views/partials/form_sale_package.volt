@@ -64,10 +64,14 @@
 			<td>{{ product.name }} ({{ product.stock_unit }})</td>
 			<td>Rp. {{ product.price | number_format }}</td>
 			<td>
-				<input type="hidden" name="products[{{ product.user_product_id }}][id]" value="{{ product.id }}">
-				<input type="text" name="products[{{ product.user_product_id }}][quantity]" value="{{ product.quantity }}" id="{{ product.user_product_id }}" placeholder="Quantity"{% if !user_product_ids.contains(product.user_product_id) %} disabled{% endif %}>
+				<input type="hidden" name="products[{{ product.user_product_id }}][id]" value="{{ product.id }}" data-id="{{ product.user_product_id }}"{% if !user_product_ids.contains(product.user_product_id) %} disabled{% endif %}>
+				<select name="products[{{ product.user_product_id }}][quantity]" data-id="{{ product.user_product_id }}"{% if !user_product_ids.contains(product.user_product_id) %} disabled{% endif %}>
+				{% for quantity in quantities %}
+					<option value="{{ quantity }}"{% if quantity == product.quantity %} selected{% endif %}>{{ quantity }}</option>
+				{% endfor %}
+				</select>
 			</td>
-			<td><input type="checkbox" name="products[{{ product.user_product_id }}][user_product_id]" value="{{ product.user_product_id }}" data-user-product-id="{{ product.user_product_id }}"{% if user_product_ids.contains(product.user_product_id) %} checked{% endif %}></td>
+			<td><input type="checkbox" name="products[{{ product.user_product_id }}][user_product_id]" value="{{ product.user_product_id }}"{% if user_product_ids.contains(product.user_product_id) %} checked{% endif %}></td>
 		</tr>
 		{% endfor %}
 		<tr>
@@ -82,10 +86,11 @@
 <script>
 	document.querySelectorAll('[type=checkbox]').forEach(item => {
 		item.addEventListener('click', event => {
-			let target = document.getElementById(event.target.dataset.userProductId);
-			event.target.checked
-			? target.removeAttribute('disabled')
-			: target.setAttribute('disabled', '')
+			document.querySelectorAll('[data-id="' + event.target.value + '"]').forEach(target => {
+				event.target.checked
+				? target.removeAttribute('disabled')
+				: target.setAttribute('disabled', '')
+			})
 		}, false)
 	})
 </script>

@@ -61,13 +61,19 @@ QUERY;
 				a.user_id,
 				a.name,
 				a.price,
-				a.picture
+				a.stock,
+				a.picture,
+				STRING_AGG(e.name || ' (' || e.stock_unit || ')', ',') AS products
 			FROM
 				sale_packages a
 				JOIN coverage_area b USING(user_id)
+				LEFT JOIN sale_package_product c ON a.id = c.sale_package_id
+				LEFT JOIN user_product d ON c.user_product_id = d.id
+				LEFT JOIN products e ON d.product_id = e.id
 			WHERE
 				b.village_id = {$this->_current_user->village->id} AND
 				a.published = '1'
+			GROUP BY a.id
 			ORDER BY RANDOM()
 			LIMIT 2 OFFSET 0
 QUERY
@@ -78,6 +84,7 @@ QUERY
 			if ($item->picture) {
 				$item->thumbnail = $picture_root_url . strtr($item->picture, ['.jpg' => '120.jpg']);
 			}
+			$item->products = explode(',', $item->products);
 			unset($item->picture);
 			$sale_packages[] = $item;
 		}

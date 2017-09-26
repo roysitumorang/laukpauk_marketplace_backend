@@ -52,6 +52,7 @@ QUERY;
 			a.user_id,
 			a.name,
 			a.price,
+			a.stock,
 			a.picture,
 			TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy,
 			STRING_AGG(e.name || ' (' || e.stock_unit || ')', ',') AS products

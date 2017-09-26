@@ -81,6 +81,13 @@ QUERY
 					}
 					$purchase += min(max($item->quantity, 0), $product->stock) * $product->price;
 				}
+				foreach ($cart->sale_packages as $item) {
+					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					if (!$sale_package) {
+						throw new Exception('Order Anda tidak valid');
+					}
+					$purchase += min(max($item->quantity, 0), $sale_package->stock) * $sale_package->price;
+				}
 				if ($purchase < $merchant->minimum_purchase) {
 					throw new Exception("Order di {$merchant->company} minimal Rp. " . number_format($merchant->minimum_purchase) . " untuk dapat diproses!");
 				}
