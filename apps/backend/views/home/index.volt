@@ -44,31 +44,10 @@
 										<div id="salesSelectorItems" class="chart-data-selector-items mt-sm">
 											<!-- Flot: Sales Porto Admin -->
 											<div class="chart chart-sm chart-active" data-sales-rel="Transaksi Harian" id="flotDashSales1"></div>
-											<script>
-												var flotDashSales1Data = [{
-												    data: {{ daily_sales }},
-												    color: "#0088cc"
-												}];
-												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
-											</script>
 											<!-- Flot: Sales Porto Drupal -->
 											<div class="chart chart-sm chart-hidden" data-sales-rel="Transaksi Bulanan" id="flotDashSales2"></div>
-											<script>
-												var flotDashSales2Data = [{
-												    data: {{ monthly_sales }},
-												    color: "#2baab1"
-												}];
-												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
-											</script>
 											<!-- Flot: Sales Porto Wordpress -->
 											<div class="chart chart-sm chart-hidden" data-sales-rel="Transaksi Tahunan" id="flotDashSales3"></div>
-											<script>
-												var flotDashSales3Data = [{
-												    data: {{ annual_sales }},
-												    color: "#734ba9"
-												}];
-												// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
-											</script>
 										</div>
 									</div>
 								</div>
@@ -143,10 +122,6 @@
 						<div class="panel-body">
 							<!-- Flot: Basic -->
 							<div class="chart chart-md" id="flotDashBasic"></div>
-							<script>
-								var flotDashBasicData = {{ best_sales }};
-								// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
-							</script>
 						</div>
 					</section>
 				</div>
@@ -156,3 +131,19 @@
 	</div>
 	{{ partial('partials/right_side') }}
 </section>
+<script>
+	var flotDashSales1Data = [{
+	    data: {{ daily_sales }},
+	    color: "#0088cc"
+	}],
+	flotDashSales2Data = [{
+	    data: {{ monthly_sales }},
+	    color: "#2baab1"
+	}],
+	flotDashSales3Data = [{
+	    data: {{ annual_sales }},
+	    color: "#734ba9"
+	}],
+	flotDashBasicData = {{ best_sales }}
+	// See: assets/javascripts/dashboard/examples.dashboard.js for more settings.
+</script>
