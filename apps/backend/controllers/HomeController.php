@@ -23,23 +23,21 @@ class HomeController extends ControllerBase {
 		foreach ($this->db->fetchAll("SELECT TO_CHAR(a.name, 'DD') AS date, COUNT(b.id) AS amount FROM dates a LEFT JOIN orders b ON a.name = DATE(b.created_at) AND b.status = 1 WHERE a.name BETWEEN ? AND ? GROUP BY date ORDER BY date", Db::FETCH_OBJ, [$this->currentDatetime->format('Y-m') . '-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
 			$daily_sales[] = [$sale->date, $sale->amount];
 		}
-		foreach ($this->db->fetchAll("WITH a AS (SELECT * FROM UNNEST(ARRAY['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']) WITH ORDINALITY a(month, rn)), b AS (SELECT TO_CHAR(created_at, 'MM')::INT AS month, COUNT(1) AS amount FROM orders WHERE status = 1 AND TO_CHAR(created_at, 'YYYY') = ? GROUP BY month) SELECT a.month, COALESCE(b.amount, 0) AS amount FROM a LEFT JOIN b ON a.rn = b.month ORDER BY a.rn", Db::FETCH_OBJ, [$this->currentDatetime->format('Y')]) as $sale) {
+
+		foreach ($this->db->fetchAll("SELECT a.id, a.name AS month, COUNT(b.id) AS amount FROM months a LEFT JOIN orders b ON a.name = TO_CHAR(b.created_at, 'Mon') AND b.status = 1 AND b.created_at BETWEEN ? AND ? WHERE a.id <= ? GROUP BY a.id ORDER BY a.id", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d'), $this->currentDatetime->format('n')]) as $sale) {
 			$monthly_sales[] = [$sale->month, $sale->amount];
-			if ($sale->month == $this->currentDatetime->format('M')) {
-				break;
-			}
 		}
 		foreach ($this->db->fetchAll("SELECT TO_CHAR(created_at, 'YYYY') AS year, COUNT(1) AS amount FROM orders WHERE status = 1 GROUP BY year ORDER BY year", Db::FETCH_OBJ) as $sale) {
 			$annual_sales[] = [$sale->year, $sale->amount];
 		}
-		foreach ($this->db->fetchAll("SELECT c.name, SUM(b.quantity) AS quantity FROM orders a JOIN order_product b ON a.id = b.order_id JOIN products c ON b.product_id = c.id WHERE a.status = 1 AND TO_CHAR(a.created_at, 'YYYY') = ? GROUP BY c.id ORDER BY quantity DESC LIMIT 3 OFFSET 0", Db::FETCH_OBJ, [$this->currentDatetime->format('Y')]) as $product) {
+		foreach ($this->db->fetchAll("SELECT c.id, c.name, c.stock_unit, SUM(b.quantity) AS quantity FROM orders a JOIN order_product b ON a.id = b.order_id JOIN products c ON b.product_id = c.id WHERE a.status = 1 AND a.created_at BETWEEN ? AND ? GROUP BY c.id ORDER BY quantity DESC LIMIT 10 OFFSET 0", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $product) {
 			$sales = [
-				'label' => $product->name,
+				'label' => $product->name . ' (' . $product->stock_unit . ')',
 				'color' => array_shift($colors),
 				'data'  => [],
 			];
-			foreach ($this->db->fetchAll("SELECT TO_CHAR(a.created_at, 'Mon') AS month, COUNT(1) AS amount FROM orders a JOIN order_product b ON a.id = b.order_id WHERE a.status = 1 AND b.product_id = ? AND DATE(a.created_at) BETWEEN ? AND ? GROUP BY month ORDER BY month", Db::FETCH_OBJ, [$product->id, $this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d')]) as $sale) {
-				$sales['data'][] = [$sale->month, $sale->amount];
+			foreach ($this->db->fetchAll("SELECT a.id, SUM(COALESCE(c.quantity, 0)) AS amount FROM months a LEFT JOIN orders b ON a.name = TO_CHAR(b.created_at, 'Mon') AND b.status = 1 AND b.created_at BETWEEN ? AND ? LEFT JOIN order_product c ON b.id = c.order_id AND c.product_id = ? WHERE a.id <= ? GROUP BY a.id ORDER BY a.id", Db::FETCH_OBJ, [$this->currentDatetime->format('Y') . '-01-01', $this->currentDatetime->format('Y-m-d'), $product->id, $this->currentDatetime->format('n')]) as $sale) {
+				$sales['data'][] = [$sale->id, $sale->amount];
 			}
 			$best_sales[] = $sales;
 		}
