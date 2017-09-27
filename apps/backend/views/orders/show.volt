@@ -149,7 +149,7 @@
 							<b><font color="#000099"><i class="fa fa-shopping-cart"></i> Produk</font></b>
 						</td>
 					</tr>
-					{% for item in order.orderProducts %}
+					{% for item in order.getRelated('orderProducts', ['parent_id IS NULL']) %}
 					<tr>
 						<td colspan="2">
 							<b>{{ item.name }}</b><br>

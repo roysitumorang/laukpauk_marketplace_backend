@@ -2,19 +2,12 @@
 
 namespace Application\Models;
 
-use Application\Models\Notification;
-use Application\Models\NotificationTemplate;
 use DateInterval;
 use DatePeriod;
 use DateTimeImmutable;
 use DateTimeZone;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Callback;
-use Phalcon\Validation\Validator\Date;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Regex;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{Callback, Date, InclusionIn, PresenceOf, Regex, Uniqueness};
 
 class Order extends ModelBase {
 	public $id;
@@ -194,9 +187,12 @@ class Order extends ModelBase {
 
 	function complete() {
 		$session = $this->getDI()->getSession();
-		foreach ($this->orderProducts as $item) {
-			$user_product = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->merchant_id, $item->product_id]]);
-			$user_product->update(['stock' => max(0, $user_product->stock - $item->quantity)]);
+		foreach ($this->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
+			if ($item->salePackage) {
+				$item->salePackage->update(['stock' => max(0, $item->salePackage->stock - $item->quantity)]);
+				continue;
+			}
+			$item->product->update(['stock' => max(0, $item->product->stock - $item->quantity)]);
 		}
 		$this->update([
 			'status'          => array_search('COMPLETED', static::STATUS),

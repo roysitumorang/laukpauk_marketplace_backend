@@ -40,6 +40,7 @@ class SalePackage extends ModelBase {
 			],
 		]);
 		$this->hasManyToMany('id', 'Application\Models\SalePackageProduct', 'sale_package_id', 'user_product_id', 'Application\Models\UserProduct', 'id', ['alias' => 'userProducts']);
+		$this->hasManyToMany('id', 'Application\Models\OrderProduct', 'sale_package_id', 'order_id', 'Application\Models\Order', 'id', ['alias' => 'orders']);
 	}
 
 	function setName(string $name) {

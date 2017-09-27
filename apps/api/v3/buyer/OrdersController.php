@@ -264,6 +264,21 @@ QUERY
 					$order->original_bill     += $order_product->quantity * $product->price;
 					$order_products[]          = $order_product;
 				}
+				foreach ($cart->sale_packages as $item) {
+					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					if (!$sale_package) {
+						throw new Exception('Order Anda tidak valid');
+					}
+					$order_product                  = new OrderProduct;
+					$order_product->sale_package_id = $sale_package->id;
+					$order_product->name            = $sale_package->name;
+					$order_product->price           = $sale_package->price;
+					$order_product->stock_unit      = '1 Paket';
+					$order_product->quantity        = min(max($item->quantity, 0), $sale_package->stock);
+					$order_product->created_by      = $this->_current_user->id;
+					$order->original_bill          += $order_product->quantity * $sale_package->price;
+					$order_products[]               = $order_product;
+				}
 				if ($order->original_bill < $merchant->minimum_purchase) {
 					throw new Exception('Order Anda tidak valid!');
 				}
@@ -325,7 +340,7 @@ QUERY
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
 			$merchant = $order->merchant;
-			foreach ($order->orderProducts as $item) {
+			foreach ($order->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
 				$items[$item->id] = [
 					'name'       => $item->name,
 					'stock_unit' => $item->stock_unit,

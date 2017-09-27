@@ -108,7 +108,7 @@ QUERY
 		} else {
 			$items   = [];
 			$village = Village::findFirst($order->village_id);
-			foreach ($order->orderProducts as $item) {
+			foreach ($order->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
 				$items[$item->id] = [
 					'name'       => $item->name,
 					'stock_unit' => $item->stock_unit,
