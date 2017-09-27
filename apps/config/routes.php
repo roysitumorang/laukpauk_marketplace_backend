@@ -349,6 +349,23 @@ $di->set('router', function() {
 		return $new_action;
 	});
 
+	$router->addPost('/admin/users/:int/sale_packages/:int/products/:action', [
+		'module'          => 'backend',
+		'controller'      => 'sale_package_products',
+		'action'          => 3,
+		'user_id'         => 1,
+		'sale_package_id' => 2,
+	]);
+
+	$router->addPost('/admin/users/:int/sale_packages/:int/products/:params/delete', [
+		'module'          => 'backend',
+		'controller'      => 'sale_package_products',
+		'action'          => 'delete',
+		'user_id'         => 1,
+		'sale_package_id' => 2,
+		'params'          => 3,
+	]);
+
 	$router->notFound([
 		'module'     => 'frontend',
 		'controller' => 'home',

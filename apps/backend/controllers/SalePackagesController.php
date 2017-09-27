@@ -2,9 +2,10 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\{Role, SalePackage, SalePackageProduct, User};
+use Application\Models\{Role, SalePackage, User};
 use Ds\Vector;
-use Phalcon\Paginator\Adapter\{Model, QueryBuilder};
+use Phalcon\Db;
+use Phalcon\Paginator\Adapter\Model;
 
 class SalePackagesController extends ControllerBase {
 	private $_user;
@@ -61,24 +62,6 @@ class SalePackagesController extends ControllerBase {
 			$sale_package->setPublished(0);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->create()) {
-				$products = array_filter($this->request->getPost('products') ?: [], function($v, $k) {
-					return $k == $v['user_product_id'];
-				}, ARRAY_FILTER_USE_BOTH);
-				foreach ($products as $item) {
-					$product = filter_var_array($item, [
-						'user_product_id' => FILTER_VALIDATE_INT,
-						'quantity'        => FILTER_VALIDATE_INT,
-					]);
-					if (!$product['user_product_id']) {
-						continue;
-					}
-					$sale_package_product = new SalePackageProduct;
-					$sale_package_product->create([
-						'sale_package_id' => $sale_package->id,
-						'user_product_id' => $product['user_product_id'],
-						'quantity'        => $product['quantity'] ?: 1,
-					]);
-				}
 				$this->flashSession->success('Penambahan paket belanja berhasil!');
 				return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$sale_package->id}/update");
 			}
@@ -99,35 +82,6 @@ class SalePackagesController extends ControllerBase {
 			$sale_package->assign($_POST, null, ['name', 'price', 'stock']);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->update()) {
-				$products = array_filter($this->request->getPost('products') ?: [], function($v, $k) {
-					return $k == $v['user_product_id'];
-				}, ARRAY_FILTER_USE_BOTH);
-				$params = ['sale_package_id = ?0', 'bind' => [$sale_package->id]];
-				if ($products) {
-					$params[0]                         .= ' AND user_product_id NOT IN({user_product_ids:array})';
-					$params['bind']['user_product_ids'] = array_keys($products);
-				}
-				SalePackageProduct::find($params)->delete();
-				foreach ($products as $item) {
-					$product = filter_var_array($item, [
-						'user_product_id' => FILTER_VALIDATE_INT,
-						'quantity'        => FILTER_VALIDATE_INT,
-						'id'              => FILTER_VALIDATE_INT,
-					]);
-					if (!$product['user_product_id']) {
-						continue;
-					}
-					if ($product['id'] && $sale_package_product = SalePackageProduct::findFirst(['id = ?0 AND sale_package_id = ?1', 'bind' => [$product['id'], $sale_package->id]])) {
-						$sale_package_product->update(['quantity' => $product['quantity'] ?: 1]);
-						continue;
-					}
-					$sale_package_product = new SalePackageProduct;
-					$sale_package_product->create([
-						'sale_package_id' => $sale_package->id,
-						'user_product_id' => $product['user_product_id'],
-						'quantity'        => $product['quantity'] ?: 1,
-					]);
-				}
 				$this->flashSession->success('Update paket belanja berhasil!');
 				return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$sale_package->id}/update");
 			}
@@ -159,58 +113,63 @@ class SalePackagesController extends ControllerBase {
 	}
 
 	private function _prepare(SalePackage $sale_package = null) {
-		$posted_products  = [];
-		$products         = [];
-		$quantities       = range(1, 10);
-		$user_product_ids = new Vector;
-		$search_query     = $this->dispatcher->getParam('keyword', 'string') ?: null;
-		if ($this->request->isPost()) {
-			$posted_products = array_filter($this->request->getPost('products') ?: [], function($v, $k) {
-				return $k == $v['user_product_id'];
-			}, ARRAY_FILTER_USE_BOTH);
-			$user_product_ids = new Vector(array_keys($posted_products));
-		} else if ($sale_package->id) {
-			foreach (SalePackageProduct::findBySalePackageId($sale_package->id) as $item) {
-				$user_product_ids->push($item->user_product_id);
+		$existing_products = new Vector;
+		$new_products      = new Vector;
+		$new_product       = $this->request->getPost('new_product') ?: [];
+		$quantities        = range(1, 10);
+		$result            = $this->db->query(<<<QUERY
+			SELECT
+				a.id,
+				c.name,
+				c.stock_unit,
+				b.price,
+				b.published,
+				a.quantity
+			FROM
+				sale_package_product a
+				JOIN user_product b ON a.user_product_id = b.id
+				JOIN products c ON b.product_id = c.id
+			WHERE
+				a.sale_package_id = {$sale_package->id}
+			ORDER BY
+				name,
+				stock_unit
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		$i = 0;
+		while ($item = $result->fetch()) {
+			if ($this->request->isPost()) {
+				$item->quantity = $this->request->getPost('product')[$item->id]['quantity'];
 			}
+			$item->rank = ++$i;
+			$existing_products->push($item);
 		}
-		$builder = $this->modelsManager->createBuilder()
-			->columns([
-				'c.id',
-				'user_product_id' => 'a.id',
-				'b.name',
-				'b.stock_unit',
-				'a.price',
-				'a.published',
-				'c.quantity'
-			])
-			->from(['a' => 'Application\Models\UserProduct'])
-			->join('Application\Models\Product', 'a.product_id = b.id', 'b')
-			->leftJoin('Application\Models\SalePackageProduct', 'a.id = c.user_product_id AND c.sale_package_id ' . ($sale_package->id ? "= {$sale_package->id}" : 'IS NULL'), 'c')
-			->orderBy('b.name, b.stock_unit')
-			->where('a.user_id = ' . $this->_user->id);
-		if ($search_query) {
-			$keywords = preg_split('/ /', $search_query, -1, PREG_SPLIT_NO_EMPTY);
-			foreach ($keywords as $keyword) {
-				$builder->andWhere("b.name ILIKE '%{$keyword}%'");
-			}
+		$result = $this->db->query(<<<QUERY
+			SELECT
+				a.id AS user_product_id,
+				b.name,
+				b.stock_unit
+			FROM
+				user_product a
+				JOIN products b ON a.product_id = b.id
+				LEFT JOIN sale_package_product c ON a.id = c.user_product_id AND c.sale_package_id = {$sale_package->id}
+			WHERE
+				a.user_id = {$this->_user->id} AND
+				c.id IS NULL
+			ORDER BY
+				name,
+				stock_unit
+QUERY
+		);
+		$result->setFetchMode(Db::FETCH_OBJ);
+		while ($item = $result->fetch()) {
+			$new_products->push($item);
 		}
-		$paginator = new QueryBuilder([
-			'builder' => $builder,
-			'limit'   => null,
-		]);
-		$page = $paginator->getPaginate();
-		foreach ($page->items as $i => $item) {
-			$item->writeAttribute('rank', $i + 1);
-			if ($this->request->isPost() && $user_product_ids->contains($item->user_product_id)) {
-				$item->quantity = $posted_products[$item->user_product_id]['quantity'];
-			}
-			$products[] = $item;
-		}
-		$this->view->page             = $paginator->getPaginate();
-		$this->view->sale_package     = $sale_package;
-		$this->view->products         = $products;
-		$this->view->user_product_ids = $user_product_ids;
-		$this->view->quantities       = $quantities;
+		$this->view->sale_package      = $sale_package;
+		$this->view->existing_products = $existing_products;
+		$this->view->new_products      = $new_products;
+		$this->view->new_product       = $new_product;
+		$this->view->quantities        = $quantities;
 	}
 }
