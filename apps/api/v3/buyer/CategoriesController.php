@@ -63,7 +63,7 @@ QUERY;
 				a.price,
 				a.stock,
 				a.picture,
-				STRING_AGG(e.name || ' (' || e.stock_unit || ')', ',') AS products
+				STRING_AGG(e.name || ' (' || e.stock_unit || ') x ' || c.quantity, ',') AS products
 			FROM
 				sale_packages a
 				JOIN coverage_area b USING(user_id)

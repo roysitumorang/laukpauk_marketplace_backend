@@ -55,7 +55,7 @@ QUERY;
 			a.stock,
 			a.picture,
 			TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy,
-			STRING_AGG(e.name || ' (' || e.stock_unit || ')', ',') AS products
+			STRING_AGG(e.name || ' (' || e.stock_unit || ') x ' || c.quantity, ',') AS products
 QUERY
 		]) . " GROUP BY a.id ORDER BY relevancy DESC, a.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
