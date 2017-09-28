@@ -8,7 +8,7 @@
 				<br>
 				<select name="product_category_id" id="category_id">
 				{% for category in categories %}
-					<option value="{{ category.id }}"{% if category.id == product.category_id %} selected{% endif %}>{{ category.name }} ({{ category.total_products }})</option>
+					<option value="{{ category.id }}"{% if category.id == product.product_category_id %} selected{% endif %}>{{ category.name }} ({{ category.total_products }})</option>
 				{% endfor %}
 				</select>
 			</td>
