@@ -117,54 +117,56 @@ class SalePackagesController extends ControllerBase {
 		$new_products      = new Vector;
 		$new_product       = $this->request->getPost('new_product') ?: [];
 		$quantities        = range(1, 10);
-		$result            = $this->db->query(<<<QUERY
-			SELECT
-				a.id,
-				c.name,
-				c.stock_unit,
-				b.price,
-				b.published,
-				a.quantity
-			FROM
-				sale_package_product a
-				JOIN user_product b ON a.user_product_id = b.id
-				JOIN products c ON b.product_id = c.id
-			WHERE
-				a.sale_package_id = {$sale_package->id}
-			ORDER BY
-				name,
-				stock_unit
+		if ($sale_package->id) {
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					a.id,
+					c.name,
+					c.stock_unit,
+					b.price,
+					b.published,
+					a.quantity
+				FROM
+					sale_package_product a
+					JOIN user_product b ON a.user_product_id = b.id
+					JOIN products c ON b.product_id = c.id
+				WHERE
+					a.sale_package_id = {$sale_package->id}
+				ORDER BY
+					name,
+					stock_unit
 QUERY
-		);
-		$result->setFetchMode(Db::FETCH_OBJ);
-		$i = 0;
-		while ($item = $result->fetch()) {
-			if ($this->request->isPost()) {
-				$item->quantity = $this->request->getPost('product')[$item->id]['quantity'];
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			$i = 0;
+			while ($item = $result->fetch()) {
+				if ($this->request->isPost()) {
+					$item->quantity = $this->request->getPost('product')[$item->id]['quantity'];
+				}
+				$item->rank = ++$i;
+				$existing_products->push($item);
 			}
-			$item->rank = ++$i;
-			$existing_products->push($item);
-		}
-		$result = $this->db->query(<<<QUERY
-			SELECT
-				a.id AS user_product_id,
-				b.name,
-				b.stock_unit
-			FROM
-				user_product a
-				JOIN products b ON a.product_id = b.id
-				LEFT JOIN sale_package_product c ON a.id = c.user_product_id AND c.sale_package_id = {$sale_package->id}
-			WHERE
-				a.user_id = {$this->_user->id} AND
-				c.id IS NULL
-			ORDER BY
-				name,
-				stock_unit
+			$result = $this->db->query(<<<QUERY
+				SELECT
+					a.id AS user_product_id,
+					b.name,
+					b.stock_unit
+				FROM
+					user_product a
+					JOIN products b ON a.product_id = b.id
+					LEFT JOIN sale_package_product c ON a.id = c.user_product_id AND c.sale_package_id = {$sale_package->id}
+				WHERE
+					a.user_id = {$this->_user->id} AND
+					c.id IS NULL
+				ORDER BY
+					name,
+					stock_unit
 QUERY
-		);
-		$result->setFetchMode(Db::FETCH_OBJ);
-		while ($item = $result->fetch()) {
-			$new_products->push($item);
+			);
+			$result->setFetchMode(Db::FETCH_OBJ);
+			while ($item = $result->fetch()) {
+				$new_products->push($item);
+			}
 		}
 		$this->view->sale_package      = $sale_package;
 		$this->view->existing_products = $existing_products;
