@@ -52,6 +52,8 @@ class UsersController extends ControllerBase {
 				'a.open_on_saturday',
 				'a.business_opening_hour',
 				'a.business_closing_hour',
+				'a.latitude',
+				'a.longitude',
 				'a.created_by',
 				'a.created_at',
 				'a.updated_by',

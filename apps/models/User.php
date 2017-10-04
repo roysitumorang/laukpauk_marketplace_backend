@@ -67,6 +67,8 @@ class User extends ModelBase {
 	public $business_opening_hour;
 	public $business_closing_hour;
 	public $delivery_hours;
+	public $latitude;
+	public $longitude;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -267,6 +269,14 @@ class User extends ModelBase {
 				return $v >= $this->business_opening_hour && $v <= $this->business_closing_hour;
 			}, ARRAY_FILTER_USE_BOTH);
 		}
+	}
+
+	function setLatitude($latitude) {
+		$this->latitude = $this->_filter->sanitize($latitude, 'float') ?: null;
+	}
+
+	function setLongitude($longitude) {
+		$this->longitude = $this->_filter->sanitize($longitude, 'float') ?: null;
 	}
 
 	function beforeValidationOnCreate() {

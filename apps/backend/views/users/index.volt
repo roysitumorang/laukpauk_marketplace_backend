@@ -99,7 +99,10 @@
 										No login yet
 										{% endif %}
 										{% if user.village %}
-										<br><i class="fa fa-map-marker"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}, {{ user.city }}, {{ user.province }}
+										<br><i class="fa fa-home"></i>&nbsp;&nbsp;{{ user.village }}, {{ user.subdistrict }}, {{ user.city }}, {{ user.province }}
+										{% endif %}
+										{% if user.latitude and user.longitude %}
+										<br><i class="fa fa-map-marker"></i>&nbsp;&nbsp;{{ user.latitude }}, {{ user.longitude }}
 										{% endif %}
 									</td>
 									<td>
