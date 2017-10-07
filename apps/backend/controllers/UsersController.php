@@ -460,6 +460,9 @@ QUERY
 		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {
 			$user->setDeliveryHours($this->request->getPost('delivery_hours'));
+			$user->setMaxDeliveryDistance($this->request->getPost('max_delivery_distance'));
+			$user->setFreeDeliveryDistance($this->request->getPost('free_delivery_distance'));
+			$user->setDeliveryRate($this->request->getPost('delivery_rate'));
 		}
 	}
 }

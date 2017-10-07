@@ -69,6 +69,9 @@ class User extends ModelBase {
 	public $delivery_hours;
 	public $latitude;
 	public $longitude;
+	public $max_delivery_distance;
+	public $free_delivery_distance;
+	public $delivery_rate;
 	public $created_by;
 	public $created_at;
 	public $updated_by;
@@ -277,6 +280,18 @@ class User extends ModelBase {
 
 	function setLongitude($longitude) {
 		$this->longitude = $this->_filter->sanitize($longitude, 'float') ?: null;
+	}
+
+	function setMaxDeliveryDistance($max_delivery_distance) {
+		$this->max_delivery_distance = $this->_filter->sanitize($max_delivery_distance, 'int') ?: 0;
+	}
+
+	function setFreeDeliveryDistance($free_delivery_distance) {
+		$this->free_delivery_distance = $this->_filter->sanitize($free_delivery_distance, 'int') ?: 0;
+	}
+
+	function setDeliveryRate($delivery_rate) {
+		$this->delivery_rate = $this->_filter->sanitize($delivery_rate, 'int') ?: 0;
 	}
 
 	function beforeValidationOnCreate() {

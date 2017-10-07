@@ -69,6 +69,24 @@
 				<input type="text" name="accumulation_divisor" value="{{ user.accumulation_divisor }}" size="20" placeholder="Jumlah Akumulasi Dikenai Biaya Administrasi">
 			</td>
 		</tr>
+		<tr>
+			<td>
+				Jarak pengiriman maksimal (untuk merchant) :<br>
+				<input type="text" name="max_delivery_distance" value="{{ user.max_delivery_distance }}" size="20" placeholder="Jarak pengiriman maksimal">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Jarak pengiriman gratis (untuk merchant) :<br>
+				<input type="text" name="free_delivery_distance" value="{{ user.free_delivery_distance }}" size="20" placeholder="Jarak pengiriman gratis">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				Tarif pengiriman per KM (untuk merchant) :<br>
+				<input type="text" name="delivery_rate" value="{{ user.delivery_rate }}" size="20" placeholder="Tarif pengiriman per KM">
+			</td>
+		</tr>
 		{% if user.role.name == 'Merchant' %}
 		<tr>
 			<td>
