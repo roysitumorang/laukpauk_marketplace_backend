@@ -13,7 +13,7 @@ class ControllerBase extends Controller {
 	function beforeExecuteRoute() {
 		register_shutdown_function(function() {
 			$this->db->insertAsDict('api_calls', [
-				'user_id'        => $this->currentUser->id,
+				'user_id'        => $this->currentUser ? $this->currentUser->id : null,
 				'url'            => $this->request->getServer('REQUEST_URI'),
 				'request_method' => $this->request->getMethod(),
 				'ip_address'     => $this->request->getServer('REMOTE_ADDR'),
