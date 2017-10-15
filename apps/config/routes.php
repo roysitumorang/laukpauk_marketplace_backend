@@ -1,370 +1,302 @@
 <?php
 
+use Application\Api\V3\{Buyer, Merchant};
 use Phalcon\Mvc\Router;
+use Phalcon\Mvc\Router\Group;
 
 $di->set('router', function() {
-	$router = new Router(false);
+	$router     = new Router(false);
+	$frontend   = new Group(['module' => 'frontend']);
+	$backend    = new Group(['module' => 'backend']);
+	$apiV3Buyer = new Group([
+		'module'    => 'v3',
+		'namespace' => Buyer::class,
+		'prefix'    => '/api/v3/buyer',
+	]);
+	$apiV3Merchant = new Group([
+		'module'    => 'v3',
+		'namespace' => Merchant::class,
+		'prefix'    => '/api/v3/merchant',
+	]);
+	$backend->setPrefix('/admin');
+	$apiV3Buyer->setPrefix('/api/v3/buyer');
+	$apiV3Merchant->setPrefix('/api/v3/merchant');
 
-	$router->add('/', [
-		'module'     => 'frontend',
+	$frontend->add('[/]?', [
 		'controller' => 'home',
 		'action'     => 'index',
 	]);
 
-	$router->add('/:controller', [
-		'module'     => 'frontend',
+	$frontend->add('/:controller', [
 		'controller' => 1,
 		'action'     => 'index'
 	]);
 
-	$router->add('/:controller/:action/:params', [
-		'module'     => 'frontend',
+	$frontend->add('/:controller/:action/:params', [
 		'controller' => 1,
 		'action'     => 2,
 		'params'     => 3
 	]);
 
-	$router->add('/:controller/:int/:action', [
-		'module'     => 'frontend',
+	$frontend->add('/:controller/:int/:action', [
 		'controller' => 1,
+		'params'     => 2,
 		'action'     => 3,
-		'params'     => 2,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
 	});
 
-	$router->add('/:controller/:int', [
-		'module'     => 'frontend',
+	$frontend->add('/:controller/:int', [
 		'controller' => 1,
-		'action'     => 'show',
 		'params'     => 2,
+		'action'     => 'show',
 	]);
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller/:action/:params', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 4,
-		'params'         => 5,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
+	$apiV3Buyer->add('/:controller/:action/:params', [
+		'controller' => 1,
+		'action'     => 2,
+		'params'     => 3,
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
 	});
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller/:int/:action', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 5,
-		'params'         => 4,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
+	$apiV3Buyer->add('/:controller/:int/:action', [
+		'controller'     => 1,
+		'params'         => 2,
+		'action'         => 3,
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
 	});
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller/:int', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 'show',
-		'params'         => 4,
+	$apiV3Buyer->add('/:controller/:int', [
+		'controller' => 1,
+		'params'     => 2,
+		'action'     => 'show',
 	]);
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/posts/:params', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 'posts',
-		'action'         => 'show',
-		'params'         => 3,
+	$apiV3Buyer->add('/posts/:params', [
+		'controller' => 'posts',
+		'action'     => 'show',
+		'params'     => 1,
 	]);
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 'products',
-		'action'         => 'index',
-		'merchant_id'    => 4,
-		'category_id'    => 6,
-		'params'         => 7,
+	$apiV3Buyer->add('(/merchants/:int)?(/categories/:int)?/products/index/:params', [
+		'controller'  => 'products',
+		'action'      => 'index',
+		'merchant_id' => 1,
+		'category_id' => 2,
+		'params'      => 3,
 	]);
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?/:controller', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 'index',
+	$apiV3Buyer->add('/:controller', [
+		'controller' => 1,
+		'action'     => 'index',
 	]);
 
-	$router->add('/api/v3/buyer(/([a-z0-9]{32}))?', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Buyer',
-		'merchant_token' => 2,
-		'controller'     => 'home',
-		'action'         => 'index',
-	]);
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller/:action/:params', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 4,
-		'params'         => 5,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
-	});
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller/:int/:action', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 5,
-		'params'         => 4,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
-	});
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller/:int', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 'show',
-		'params'         => 4,
-	]);
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/posts/:params', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 'posts',
-		'action'         => 'show',
-		'params'         => 3,
-	]);
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?(/merchants/:int)?(/categories/:int)?/products/index/:params', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 'products',
-		'action'         => 'index',
-		'merchant_id'    => 4,
-		'category_id'    => 6,
-		'params'         => 7,
-	]);
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?/:controller', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 3,
-		'action'         => 'index',
-	]);
-
-	$router->add('/api/v3/merchant(/([a-z0-9]{32}))?', [
-		'module'         => 'v3',
-		'namespace'      => 'Application\\Api\\V3\\Merchant',
-		'merchant_token' => 2,
-		'controller'     => 'home',
-		'action'         => 'index',
-	]);
-
-	$router->add('/admin', [
-		'module'     => 'backend',
+	$apiV3Buyer->add('[/]?', [
 		'controller' => 'home',
 		'action'     => 'index',
 	]);
 
-	$router->add('/admin/:controller', [
-		'module'     => 'backend',
-		'controller' => 1,
-		'action'     => 'index',
-	]);
-
-	$router->add('/admin/:controller/:action/:params', [
-		'module'     => 'backend',
+	$apiV3Merchant->add('/:controller/:action/:params', [
 		'controller' => 1,
 		'action'     => 2,
 		'params'     => 3,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
 	});
 
-	$router->add('/admin/:controller/:int/:action', [
-		'module'     => 'backend',
+	$apiV3Merchant->add('/:controller/:int/:action', [
 		'controller' => 1,
-		'action'     => 3,
 		'params'     => 2,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
+		'action'     => 3,
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
 	});
 
-	$router->add('/admin/:controller/:int', [
-		'module'     => 'backend',
+	$apiV3Merchant->add('/:controller/:int', [
 		'controller' => 1,
+		'params'     => 2,
 		'action'     => 'show',
-		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/coverage_areas/:params', [
-		'module'     => 'backend',
-		'controller' => 'coverage_areas',
+	$apiV3Merchant->add('/posts/:params', [
+		'controller' => 'posts',
+		'action'     => 'show',
+		'params'     => 1,
+	]);
+
+	$apiV3Merchant->add('(/merchants/:int)?(/categories/:int)?/products/index/:params', [
+		'controller'     => 'products',
+		'action'         => 'index',
+		'merchant_id'    => 1,
+		'category_id'    => 2,
+		'params'         => 3,
+	]);
+
+	$apiV3Merchant->add('/:controller', [
+		'controller' => 1,
 		'action'     => 'index',
-		'user_id'    => 1,
-		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/coverage_areas/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'coverage_areas',
-		'action'     => 2,
-		'user_id'    => 1,
-		'params'     => 3,
-	]);
-
-	$router->add('/admin/users/:int/coverage_areas/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'coverage_areas',
-		'action'     => 3,
-		'user_id'    => 1,
-		'params'     => 2,
-	]);
-
-	$router->add('/admin/users/:int/products/:params', [
-		'module'     => 'backend',
-		'controller' => 'user_products',
+	$apiV3Merchant->add('[/]?', [
+		'controller' => 'home',
 		'action'     => 'index',
-		'user_id'    => 1,
-		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/products/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'user_products',
-		'action'     => 2,
-		'user_id'    => 1,
-		'params'     => 3,
-	]);
-
-	$router->add('/admin/users/:int/products/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'user_products',
-		'action'     => 3,
-		'user_id'    => 1,
-		'params'     => 2,
-	]);
-
-	$router->add('/admin/users/:int/product_categories/:params', [
-		'module'     => 'backend',
-		'controller' => 'product_categories',
+	$backend->add('[/]?', [
+		'controller' => 'home',
 		'action'     => 'index',
-		'user_id'    => 1,
-		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/product_categories/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'product_categories',
-		'action'     => 2,
-		'user_id'    => 1,
-		'params'     => 3,
-	]);
-
-	$router->add('/admin/users/:int/product_categories/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'product_categories',
-		'action'     => 3,
-		'user_id'    => 1,
-		'params'     => 2,
-	]);
-
-	$router->add('/admin/users/:int/sale_packages/:params', [
-		'module'     => 'backend',
-		'controller' => 'sale_packages',
+	$backend->add('/:controller', [
+		'controller' => 1,
 		'action'     => 'index',
-		'user_id'    => 1,
-		'params'     => 2,
 	]);
 
-	$router->add('/admin/users/:int/sale_packages/:action/:params', [
-		'module'     => 'backend',
-		'controller' => 'sale_packages',
+	$backend->add('/:controller/:action/:params', [
+		'controller' => 1,
 		'action'     => 2,
-		'user_id'    => 1,
 		'params'     => 3,
-	]);
-
-	$router->add('/admin/users/:int/sale_packages/:int/:action', [
-		'module'     => 'backend',
-		'controller' => 'sale_packages',
-		'action'     => 3,
-		'user_id'    => 1,
-		'params'     => 2,
-	])->convert('action', function($old_action) {
-		$parts      = explode('_', strtolower($old_action));
-		$new_action = '';
-		foreach ($parts as $i => $part) {
-			$new_action .= $i ? ucfirst($part) : $part;
-		}
-		return $new_action;
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
 	});
 
-	$router->addPost('/admin/users/:int/sale_packages/:int/products/:action', [
-		'module'          => 'backend',
+	$backend->add('/:controller/:int/:action', [
+		'controller' => 1,
+		'params'     => 2,
+		'action'     => 3,
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
+	});
+
+	$backend->add('/:controller/:int', [
+		'controller' => 1,
+		'params'     => 2,
+		'action'     => 'show',
+	]);
+
+	$backend->add('/users/:int/coverage_areas/:params', [
+		'controller' => 'coverage_areas',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$backend->add('/users/:int/coverage_areas/:action/:params', [
+		'controller' => 'coverage_areas',
+		'user_id'    => 1,
+		'action'     => 2,
+		'params'     => 3,
+	]);
+
+	$backend->add('/users/:int/coverage_areas/:int/:action', [
+		'controller' => 'coverage_areas',
+		'user_id'    => 1,
+		'params'     => 2,
+		'action'     => 3,
+	]);
+
+	$backend->add('/users/:int/products/:params', [
+		'controller' => 'user_products',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$backend->add('/users/:int/products/:action/:params', [
+		'controller' => 'user_products',
+		'user_id'    => 1,
+		'action'     => 2,
+		'params'     => 3,
+	]);
+
+	$backend->add('/users/:int/products/:int/:action', [
+		'controller' => 'user_products',
+		'user_id'    => 1,
+		'params'     => 2,
+		'action'     => 3,
+	]);
+
+	$backend->add('/users/:int/product_categories/:params', [
+		'controller' => 'product_categories',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$backend->add('/users/:int/product_categories/:action/:params', [
+		'controller' => 'product_categories',
+		'user_id'    => 1,
+		'action'     => 2,
+		'params'     => 3,
+	]);
+
+	$backend->add('/users/:int/product_categories/:int/:action', [
+		'controller' => 'product_categories',
+		'user_id'    => 1,
+		'params'     => 2,
+		'action'     => 3,
+	]);
+
+	$backend->add('/users/:int/sale_packages/:params', [
+		'controller' => 'sale_packages',
+		'action'     => 'index',
+		'user_id'    => 1,
+		'params'     => 2,
+	]);
+
+	$backend->add('/users/:int/sale_packages/:action/:params', [
+		'controller' => 'sale_packages',
+		'user_id'    => 1,
+		'action'     => 2,
+		'params'     => 3,
+	]);
+
+	$backend->add('/users/:int/sale_packages/:int/:action', [
+		'controller' => 'sale_packages',
+		'user_id'    => 1,
+		'params'     => 2,
+		'action'     => 3,
+	])->convert('action', function($action) {
+		return preg_replace_callback('/\_([a-z])/', function($matches) {
+			return strtoupper($matches[1]);
+		}, $action);
+	});
+
+	$backend->addPost('/users/:int/sale_packages/:int/products/:action', [
 		'controller'      => 'sale_package_products',
-		'action'          => 3,
 		'user_id'         => 1,
 		'sale_package_id' => 2,
+		'action'          => 3,
 	]);
 
-	$router->addPost('/admin/users/:int/sale_packages/:int/products/:params/delete', [
-		'module'          => 'backend',
+	$backend->addPost('/users/:int/sale_packages/:int/products/:params/delete', [
 		'controller'      => 'sale_package_products',
 		'action'          => 'delete',
 		'user_id'         => 1,
 		'sale_package_id' => 2,
 		'params'          => 3,
 	]);
+
+	$router->mount($frontend);
+	$router->mount($backend);
+	$router->mount($apiV3Buyer);
+	$router->mount($apiV3Merchant);
 
 	$router->notFound([
 		'module'     => 'frontend',
