@@ -105,7 +105,7 @@ class OrdersController extends ControllerBase {
 		}
 		$this->view->orders                 = $orders;
 		$this->view->pages                  = $pages;
-		$this->view->page                   = $paginator->getPaginate();
+		$this->view->page                   = $page;
 		$this->view->from                   = $from;
 		$this->view->to                     = $to;
 		$this->view->status                 = $status;

@@ -33,7 +33,7 @@ class SmsController extends ControllerBase {
 		}
 		$this->view->texts = $texts;
 		$this->view->pages = $pages;
-		$this->view->page  = $paginator->getPaginate();
+		$this->view->page  = $page;
 	}
 
 	function createAction() {

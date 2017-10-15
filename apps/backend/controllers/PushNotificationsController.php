@@ -44,7 +44,7 @@ class PushNotificationsController extends ControllerBase {
 		}
 		$this->view->notifications = $notifications;
 		$this->view->pages         = $pages;
-		$this->view->page          = $paginator->getPaginate();
+		$this->view->page          = $page;
 	}
 
 	function createAction() {

@@ -28,7 +28,7 @@ class MessagesController extends ControllerBase {
 		$this->view->menu                  = $this->_menu('Mailbox');
 		$this->view->messages              = $messages;
 		$this->view->pages                 = $pages;
-		$this->view->page                  = $paginator->getPaginate();
+		$this->view->page                  = $page;
 		$this->view->total_messages        = $this->db->fetchColumn("SELECT COUNT(1) FROM message_recipients a JOIN messages b ON a.message_id = b.id WHERE a.user_id = {$this->currentUser->id}");
 		$this->view->total_unread_messages = $this->db->fetchColumn("SELECT COUNT(1) FROM message_recipients a JOIN messages b ON a.message_id = b.id WHERE a.user_id = {$this->currentUser->id} AND a.read_at IS NULL");
 		$this->view->total_read_messages   = $this->db->fetchColumn("SELECT COUNT(1) FROM message_recipients a JOIN messages b ON a.message_id = b.id WHERE a.user_id = {$this->currentUser->id} AND a.read_at IS NOT NULL");

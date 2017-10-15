@@ -101,7 +101,7 @@ class UsersController extends ControllerBase {
 		$this->view->menu                     = $this->_menu('Members');
 		$this->view->users                    = $users;
 		$this->view->pages                    = $pages;
-		$this->view->page                     = $paginator->getPaginate();
+		$this->view->page                     = $page;
 		$this->view->status                   = $status;
 		$this->view->current_status           = $current_status;
 		$this->view->roles                    = Role::find(['id > 1', 'order' => 'name']);

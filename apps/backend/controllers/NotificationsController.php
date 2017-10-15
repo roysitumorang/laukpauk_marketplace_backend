@@ -39,7 +39,7 @@ class NotificationsController extends ControllerBase {
 		$this->view->menu          = $this->_menu('Options');
 		$this->view->notifications = $notifications;
 		$this->view->pages         = $pages;
-		$this->view->page          = $paginator->getPaginate();
+		$this->view->page          = $page;
 	}
 
 	function readAction($id) {

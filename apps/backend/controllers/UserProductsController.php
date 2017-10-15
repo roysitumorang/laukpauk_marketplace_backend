@@ -151,7 +151,7 @@ class UserProductsController extends ControllerBase {
 		$this->view->menu             = $this->_menu('Members');
 		$this->view->user             = $this->_user;
 		$this->view->pages            = $pages;
-		$this->view->page             = $paginator->getPaginate();
+		$this->view->page             = $page;
 		$this->view->user_products    = $user_products;
 		$this->view->categories       = $categories;
 		$this->view->products         = $products;

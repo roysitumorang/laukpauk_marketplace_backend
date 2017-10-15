@@ -47,7 +47,7 @@ class ProductGroupsController extends ControllerBase {
 		}
 		$this->view->keyword        = $keyword;
 		$this->view->product_groups = $product_groups;
-		$this->view->page           = $paginator->getPaginate();
+		$this->view->page           = $page;
 		$this->view->pages          = $pages;
 	}
 

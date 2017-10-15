@@ -48,7 +48,7 @@ class SalePackagesController extends ControllerBase {
 			$sale_packages[] = $item;
 		}
 		$this->view->pages         = $pages;
-		$this->view->page          = $paginator->getPaginate();
+		$this->view->page          = $page;
 		$this->view->sale_packages = $sale_packages;
 		$this->view->keyword       = $search_query;
 		$this->view->next          = $this->request->getServer('REQUEST_URI');

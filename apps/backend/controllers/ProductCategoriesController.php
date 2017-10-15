@@ -57,7 +57,7 @@ class ProductCategoriesController extends ControllerBase {
 			$categories->add($item);
 		}
 		$this->view->keyword    = $keyword;
-		$this->view->page       = $paginator->getPaginate();
+		$this->view->page       = $page;
 		$this->view->pages      = $pages;
 		$this->view->categories = $categories;
 		$this->_prepare_datas();
