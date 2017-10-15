@@ -94,10 +94,11 @@ class Banner extends ModelBase {
 			}
 			$this->thumbnails = [];
 		}
-		$this->thumbnails = json_encode($this->thumbnails);
+		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
 	}
 
 	function afterSave() {
+		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
 		if (!$this->new_file) {
 			return true;
 		}
@@ -116,7 +117,7 @@ class Banner extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
+		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
 	}
 
 	function getThumbnail(int $width, int $height) {

@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/banners{% if user_id %}/index/user_id:{{ user_id }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"><h2>Banner</h2></a>
+				<a href="/admin/banners{% if user_id %}/index/user_id:{{ user_id }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}"><h2>Banner</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -24,26 +24,26 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="POST" action="/admin/banners/create" enctype="multipart/form-data">
+				{{ form('/admin/banners/create', 'enctype': 'multipart/form-data') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<b>Gambar :</b>
 								<br>
-								<input type="file" name="new_file">
+								{{ fileField('new_file') }}
 							</td>
 							<td>
 								<b>Status :</b>
 								<br>
-								<input type="radio" name="published" value="1"{% if banner.published %} checked{% endif %}> Tampilkan&nbsp;
-								<input type="radio" name="published" value="0"{% if !banner.published %} checked{% endif %}> Sembunyikan
+								{{ radio_field('published', 'value': 1, 'checked': banner.published ? true: null, 'id': 'published_' ~ 1) }} Tampilkan&nbsp;&nbsp;
+								{{ radio_field('published', 'value': 0, 'checked': banner.published ? null: true, 'id': 'published_' ~ 1) }} Sembunyikan
 							</td>
 							<td>
 								<button type="submit" class="btn btn-primary">UPLOAD</button>
 							</td>
 						</tr>
 					</table>
-				</form>
+				{{ endForm() }}
 				<table class="table table-striped">
 				{% for banner in banners %}
 					<tr>
@@ -51,31 +51,35 @@
 							<a href="/assets/image/{{ banner.file }}" class="image-popup-no-margins"><img src="/assets/image/{{ banner.file }}" border="0" width="300px"></a>
 						</td>
 						<td>
-							<form method="POST" action="/admin/banners/{{ banner.id }}/toggle_status">
+							{{ form('/admin/banners/' ~ banner.id ~ '/toggle_status') }}
 								<button type="submit" class="btn btn-primary">
 									<i class="fa fa-eye{% if !banner.published %}-slash{% endif %} fa-2x"></i>
 								</button>
-							</form>
+							{{ endForm() }}
 						</td>
 						<td>
-							<form method="POST" action="/admin/banners/{{ banner.id }}/delete">
+							{{ form('/admin/banners/' ~ banner.id ~ '/delete') }}
 								<button type="submit" class="btn btn-danger" onclick="return confirm('Anda yakin mau menghapus banner ini ?')">
 									<i class="fa fa-trash-o fa-2x"></i>
 								</button>
-							</form>
+							{{ endForm() }}
 						</td>
+					</tr>
+				{% elsefor %}
+					<tr>
+						<td colspan="3">Belum ada data</td>
 					</tr>
 				{% endfor %}
 				</table>
-				{% if page.total_pages > 1 %}
+				{% if pagination.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
+							{% if i == pagination.current %}
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/banners/index{% if user_id %}/user_id:{{ user_id }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/banners/index{% if user_id %}/user_id:{{ user_id }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

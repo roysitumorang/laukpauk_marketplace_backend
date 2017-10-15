@@ -3,38 +3,33 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Banner;
-use Ds\Set;
-use Exception;
 use Phalcon\Paginator\Adapter\Model;
 
 class BannersController extends ControllerBase {
 	function indexAction() {
+		$banners      = [];
 		$limit        = $this->config->per_page;
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page = $this->dispatcher->getParam('page', 'int', 1);
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
+		$pagination   = (new Model([
 			'data'  => Banner::find(['order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]);
-		$page    = $paginator->getPaginate();
-		$pages   = $this->_setPaginationRange($page);
-		$banners = new Set;
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$banners->add($item);
+			$banners[] = $item;
 		}
-		$this->view->menu    = $this->_menu('Content');
-		$this->view->page    = $page;
-		$this->view->pages   = $pages;
-		$this->view->banners = $banners;
+		$this->view->menu       = $this->_menu('Content');
+		$this->view->pagination = $pagination;
+		$this->view->pages      = $this->_setPaginationRange($pagination);
+		$this->view->banners    = $banners;
 	}
 
 	function createAction() {
 		$banner = new Banner;
 		if ($this->request->isPost()) {
-			$banner->setPublished($this->request->getPost('published'));
-			$banner->setNewFile($_FILES['new_file']);
+			$banner->assign(array_merge($_POST, $_FILES), null, ['published', 'new_file']);
 			if ($banner->validation() && $banner->create()) {
 				$this->flashSession->success('Penambahan banner berhasil.');
 				return $this->response->redirect('/admin/banners');
@@ -49,25 +44,25 @@ class BannersController extends ControllerBase {
 	}
 
 	function toggleStatusAction($id) {
-		if (!$banner = Banner::findFirst($id)) {
-			$this->flashSession->error('Banner tidak ditemukan.');
-			return $this->dispatcher->forward('/admin/banners');
+		if ($this->request->isPost()) {
+			if (!$banner = Banner::findFirst($id)) {
+				$this->flashSession->error('Banner tidak ditemukan.');
+			} else {
+				$banner->update(['published' => $banner->published ? 0 : 1]);
+			}
 		}
-		$banner->update(['published' => $banner->published ? 0 : 1]);
 		return $this->response->redirect('/admin/banners');
 	}
 
 	function deleteAction($id) {
-		try {
+		if ($this->request->isPost()) {
 			if (!$banner = Banner::findFirst($id)) {
-				throw new Exception('Banner tidak ditemukan.');
+				$this->flashSession->error('Banner tidak ditemukan.');
+			} else {
+				$banner->delete();
+				$this->flashSession->success('Banner berhasil dihapus');
 			}
-			$banner->delete();
-			$this->flashSession->success('Banner berhasil dihapus');
-		} catch (Exception $e) {
-			$this->flashSession->error($e->getMessage());
-		} finally {
-			return $this->response->redirect('/admin/banners');
 		}
+		return $this->response->redirect('/admin/banners');
 	}
 }
