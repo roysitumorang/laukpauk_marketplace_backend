@@ -2,8 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\City;
-use Application\Models\Province;
+use Application\Models\{City, Province};
 use Phalcon\Paginator\Adapter\Model;
 
 class CitiesController extends ControllerBase {
@@ -26,10 +25,9 @@ class CitiesController extends ControllerBase {
 		$city           = new City;
 		$city->province = $this->_province;
 		if ($this->request->isPost()) {
-			$city->setType($this->request->getPost('type'));
-			$city->setName($this->request->getPost('name'));
+			$city->assign($_POST, null, ['type', 'name']);
 			if ($city->validation() && $city->create()) {
-				$page = $this->dispatcher->getParam('page', 'int') ?: 1;
+				$page = $this->dispatcher->getParam('page', 'int', 1);
 				$this->flashSession->success('Penambahan kabupaten / kota berhasil!');
 				return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
 			}
@@ -42,14 +40,13 @@ class CitiesController extends ControllerBase {
 
 	function updateAction($id) {
 		$city = $this->_province->getRelated('cities', ['id = ?0', 'bind' => [$id]])->getFirst();
-		$page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$page = $this->dispatcher->getParam('page', 'int', 1);
 		if (!$city) {
 			$this->flashSession->error('Kabupaten / kota tidak ditemukan!');
 			return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
 		}
 		if ($this->request->isPost()) {
-			$city->setType($this->request->getPost('type'));
-			$city->setName($this->request->getPost('name'));
+			$city->assign($_POST, null, ['type', 'name']);
 			if ($city->validation() && $city->update()) {
 				$this->flashSession->success('Update kabupaten / kota berhasil!');
 				return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
@@ -62,30 +59,28 @@ class CitiesController extends ControllerBase {
 	}
 
 	private function _render(City $city = null) {
+		$cities       = [];
 		$limit        = $this->config->per_page;
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page = $this->dispatcher->getParam('page', 'int', 1);
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
+		$pagination   = (new Model([
 			'data'  => $this->_province->getRelated('cities', ['order' => 'type, name']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]);
-		$page   = $paginator->getPaginate();
-		$pages  = $this->_setPaginationRange($page);
-		$cities = [];
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$cities[] = $item;
 		}
-		$this->view->menu       = $this->_menu('Options');
-		$this->view->active_tab = 'cities';
-		$this->view->province   = $this->_province;
-		$this->view->cities     = $cities;
-		$this->view->page       = $page;
-		$this->view->pages      = $pages;
-		$this->view->types      = City::TYPES;
-		if ($city) {
-			$this->view->city = $city;
-		}
+		$this->view->setVars([
+			'menu'       => $this->_menu('Options'),
+			'active_tab' => 'cities',
+			'province'   => $this->_province,
+			'cities'     => $cities,
+			'pagination' => $pagination,
+			'pages'      => $this->_setPaginationRange($pagination),
+			'types'      => array_combine(City::TYPES, City::TYPES),
+			'city'       => $city,
+		]);
 	}
 }

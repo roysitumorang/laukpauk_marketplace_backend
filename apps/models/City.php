@@ -3,9 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{InclusionIn, PresenceOf, Uniqueness};
 
 class City extends ModelBase {
 	const TYPES = ['Kabupaten', 'Kota'];
@@ -18,6 +16,8 @@ class City extends ModelBase {
 	public $created_at;
 	public $updated_by;
 	public $updated_at;
+
+	private $_filter;
 
 	function getSource() {
 		return 'cities';
@@ -35,14 +35,15 @@ class City extends ModelBase {
 				'message' => 'kota / kabupaten tidak dapat dihapus karena memiliki kecamatan',
 			],
 		]);
+		$this->_filter = $this->getDI()->getFilter();
 	}
 
 	function setType($type) {
-		$this->type = $this->getDI()->getFilter()->sanitize($type, ['string', 'trim']);
+		$this->type = $this->_filter->sanitize($type, ['string', 'trim']);
 	}
 
 	function setName($name) {
-		$this->name = $this->getDI()->getFilter()->sanitize($name, ['string', 'trim']);
+		$this->name = $this->_filter->sanitize($name, ['string', 'trim']);
 	}
 
 	function validation() {

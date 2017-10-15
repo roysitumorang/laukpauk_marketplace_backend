@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/cities/create/province_id:{{ province.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"><h2>Tambah Kabupaten / Kota</h2></a>
+				<a href="/admin/cities/create/province_id:{{ province.id }}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}"><h2>Tambah Kabupaten / Kota</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -29,7 +29,7 @@
 					{{ partial('partials/tabs_province', ['active_tab': active_tab, 'province': province]) }}
 					<div class="tab-content">
 						<div id="cities" class="tab-pane active">
-							{{ partial('partials/form_city', ['action': '/admin/cities/create/province_id:' ~ province.id, 'pages': pages, 'page': page, 'province': province, 'cities': cities, 'types': types]) }}
+							{{ partial('partials/form_city', ['action': '/admin/cities/create/province_id:' ~ province.id, 'pages': pages, 'pagination': pagination, 'province': province, 'cities': cities, 'types': types]) }}
 						</div>
 					</div>
 				</div>
