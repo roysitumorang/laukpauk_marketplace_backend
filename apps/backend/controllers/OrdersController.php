@@ -108,9 +108,9 @@ class OrdersController extends ControllerBase {
 			'total_final_bill'       => $this->db->fetchColumn('SELECT SUM(a.final_bill) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0,
 			'total_admin_fee'        => $this->db->fetchColumn('SELECT SUM(a.admin_fee) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0,
 			'total_orders'           => $this->db->fetchColumn('SELECT COUNT(1) FROM orders'),
-			'pending_orders'         => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status => 0'),
-			'completed_orders'       => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status => 1'),
-			'total_cancelled_orders' => $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE status => -1'),
+			'pending_orders'         => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status = 0'),
+			'completed_orders'       => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status = 1'),
+			'total_cancelled_orders' => $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE status = -1'),
 		]);
 	}
 
