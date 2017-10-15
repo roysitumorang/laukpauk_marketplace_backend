@@ -438,17 +438,15 @@ class User extends ModelBase {
 	}
 
 	function beforeSave() {
-		$random = new Random;
+		$this->delivery_hours = implode(',', array_filter($this->delivery_hours)) ?: null;
 		if ($this->new_avatar && !$this->avatar) {
+			$random = new Random;
 			do {
 				$this->avatar = $random->hex(16) . '.jpg';
 				if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
 					break;
 				}
 			} while (1);
-		}
-		if ($this->delivery_hours) {
-			$this->delivery_hours = join(',', $this->delivery_hours);
 		}
 		if ($this->role_id != Role::MERCHANT) {
 			$this->accumulation_divisor = 0;

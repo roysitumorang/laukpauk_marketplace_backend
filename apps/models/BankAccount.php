@@ -3,11 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Digit;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\StringLength;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{Digit, InclusionIn, PresenceOf, StringLength, Uniqueness};
 
 class BankAccount extends ModelBase {
 	const BANKS = ['BCA', 'BNI', 'BRI', 'Mandiri', 'Bank Sumut'];

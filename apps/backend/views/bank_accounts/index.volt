@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/bank_accounts{% if page.current > 1%}/index/page:{{ page.current }}{% endif %}"><h2>Daftar Rekening Bank</h2></a>
+				<a href="/admin/bank_accounts{% if pagination.current > 1%}/index/page:{{ pagination.current }}{% endif %}"><h2>Daftar Rekening Bank</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -43,14 +43,14 @@
 							<td>{{ bank_account.number }}</td>
 							<td>{{ bank_account.holder }}</td>
 							<td class="text-center">
-								<a href="javascript:void(0)" class="published" data-id="{{ bank_account.id }}" data-published="{{ bank_account.published }}">
+								<a href="javascript:void(0)" class="published" data-id="{{ bank_account.id }}">
 									{% if bank_account.published %}
-									<i class="fa fa-eye fa-2x"></i>
+										<i class="fa fa-eye fa-2x"></i>
 									{% else %}
-									<font color="#FF0000"><i class="fa fa-eye-slash fa-2x"></i></font>
+										<font color="#FF0000"><i class="fa fa-eye-slash fa-2x"></i></font>
 									{% endif %}
 								</a>
-								<a href="/admin/bank_accounts/update/{{ bank_account.id }}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+								<a href="/admin/bank_accounts/{{ bank_account.id }}/update" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 							</td>
 						</tr>
 					{% elsefor %}
@@ -60,15 +60,15 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if page.total_pages > 1 %}
+				{% if pagination.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
+							{% if i == pagination.current %}
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/bank_accounts{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/bank_accounts{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -83,12 +83,12 @@
 </section>
 <script>
 	document.querySelectorAll('.published').forEach(item => {
-		item.onclick = () => {
+		item.addEventListener('click', event => {
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/bank_accounts/' + item.dataset.id + '/' + (item.dataset.published == 1 ? 'unpublish' : 'publish') + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			form.action = '/admin/bank_accounts/' + item.dataset.id + '/toggle_status' + '?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
 			document.body.appendChild(form),
 			form.submit()
-		}
+		}, false)
 	})
 </script>

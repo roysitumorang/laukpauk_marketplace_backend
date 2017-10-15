@@ -24,7 +24,7 @@
 			</header>
 			<div class="panel-body">
 				<!-- Content //-->
-				{{ partial('partials/form_bank_account', ['action': '/admin/bank_accounts/update' ~ bank_account.id, 'bank_account': bank_account]) }}
+				{{ partial('partials/form_bank_account', ['action': '/admin/bank_accounts/' ~ bank_account.id ~ '/update', 'bank_account': bank_account]) }}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->
