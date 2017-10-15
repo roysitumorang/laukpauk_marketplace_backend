@@ -5,16 +5,7 @@ namespace Application\Models;
 use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Callback;
-use Phalcon\Validation\Validator\Between;
-use Phalcon\Validation\Validator\Confirmation;
-use Phalcon\Validation\Validator\Date;
-use Phalcon\Validation\Validator\Email;
-use Phalcon\Validation\Validator\File;
-use Phalcon\Validation\Validator\Numericality;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Regex;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{Callback, Between, Confirmation, Date, Email, File, Numericality, PresenceOf, Regex, Uniqueness};
 
 class User extends ModelBase {
 	const STATUS = [
@@ -82,8 +73,9 @@ class User extends ModelBase {
 	}
 
 	function onConstruct() {
-		$this->_upload_config = $this->getDI()->getConfig()->upload;
-		$this->_filter        = $this->getDI()->getFilter();
+		$di                   = $this->getDI();
+		$this->_upload_config = $di->getConfig()->upload;
+		$this->_filter        = $di->getFilter();
 	}
 
 	function initialize() {
@@ -470,21 +462,19 @@ class User extends ModelBase {
 			}
 			$this->thumbnails = [];
 		}
-		$this->thumbnails = $this->thumbnails ? json_encode($this->thumbnails) : null;
+		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
 	}
 
 	function afterSave() {
-		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
+		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
 		if ($this->new_avatar) {
 			$imagick = new Imagick($this->new_avatar['tmp_name']);
 			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 			$imagick->writeImage($this->_upload_config->path . $this->avatar);
 			unlink($this->new_avatar['tmp_name']);
 		}
-		if ($this->delivery_hours) {
-			$this->delivery_hours = explode(',', $this->delivery_hours);
-		}
-		if ($this->role->id == Role::MERCHANT) {
+		$this->delivery_hours = array_filter(explode(',', $this->delivery_hours));
+		if ($this->role_id == Role::MERCHANT) {
 			$this->getDI()->getDb()->execute("UPDATE users SET keywords = TO_TSVECTOR('simple', company) WHERE id = {$this->id}");
 		}
 	}
@@ -500,10 +490,8 @@ class User extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = $this->thumbnails ? json_decode($this->thumbnails) : [];
-		if ($this->delivery_hours) {
-			$this->delivery_hours = explode(',', $this->delivery_hours);
-		}
+		$this->thumbnails     = array_filter(explode(',', $this->thumbnails));
+		$this->delivery_hours = array_filter(explode(',', $this->delivery_hours));
 	}
 
 	function getThumbnail(int $width, int $height, string $default_avatar = null) {

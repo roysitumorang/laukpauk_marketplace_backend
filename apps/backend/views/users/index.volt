@@ -11,11 +11,7 @@
 				<a href="/admin/users"><h2>Daftar Member</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
-						<li>
-							<a href="/admin">
-								<i class="fa fa-home"></i>
-							</a>
-						</li>
+						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
 						<li><span>Daftar Member</span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
@@ -39,37 +35,28 @@
 								<strong>Suspended:</strong>&nbsp;{{ total_suspended_users }}
 							</font>
 						</div>
-						<form action="/admin/users" method="GET" id="search">
+						{{ form('/admin/users', 'method': 'GET', 'id': 'search') }}
 							<table class="table table-striped">
 								<tr>
 									<td><i class="fa fa-tag"></i> Status</td>
 									<td>
-										<select name="status">
-											{% for value, label in status %}
-											<option value="{{ value }}"{% if current_status == value %} selected{% endif %}>{{ label }}</option>
-											{% endfor %}
-										</select>
+										{{ select_static('status', user_status, 'value': current_status) }}
 									</td>
 									<td class="text-nowrap"><i class="fa fa-users"></i> Role</td>
 									<td>
-										<select name="role_id">
-											<option value="">Any Roles</option>
-											{% for role in roles %}
-											<option value="{{ role.id }}"{% if current_role == role.id %} selected{% endif %}>{{ role.name }}</option>
-											{% endfor %}
-										</select>
+										{{ select_static('role_id', roles, 'using': ['id', 'name'], 'value': current_role) }}
 									</td>
 								</tr>
 								<tr>
 									<td class="text-nowrap" colspan="4">
 										<i class="fa fa-user"></i> Nama / Toko / Nomor HP
-										<input type="text" name="keyword" value="{{ keyword }}" size="20" placeholder="Nama / Toko / Nomor HP">
+										{{ text_field('keyword', 'value': keyword, 'size': 20, 'placeholder': 'Nama / Toko / Nomor HP') }}
 										<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Cari</button>
 										<a type="button" href="/admin/users/excel" target="_blank" class="btn btn-success"><i class="fa fa-file-excel-o"></i> Excel</a>
 									</td>
 								</tr>
 							</table>
-						</form>
+						{{ endForm() }}
 						<table class="table table-striped">
 							<thead>
 								<tr>
@@ -134,15 +121,15 @@
 								{% endfor %}
 							</tbody>
 						</table>
-						{% if page.total_pages > 1 %}
+						{% if pagination.total_pages > 1 %}
 						<div class="weepaging">
 							<p>
 								<b>Halaman:</b>&nbsp;&nbsp;
 								{% for i in pages %}
-									{% if i == page.current %}
-									<b>{{ i }}</b>
+									{% if i == pagination.current %}
+										<b>{{ i }}</b>
 									{% else %}
-									<a href="/admin/users/index{% if current_status %}/status:{{ current_status }}{% endif %}{% if current_role %}/role_id:{{ current_role }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/index{% if current_status %}/status:{{ current_status }}{% endif %}{% if current_role %}/role_id:{{ current_role }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 									{% endif %}
 								{% endfor %}
 							</p>
@@ -158,20 +145,14 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let search = document.getElementById('search'), url = '/admin/users/index', replacement = {' ': '+', ':': '', '\/': ''};
-	search.addEventListener('submit', event => {
-		event.preventDefault();
-		if (search.status.value) {
-			url += '/status:' + search.status.value;
-		}
-		if (search.role_id.value) {
-			url += '/role_id:' + search.role_id.value;
-		}
-		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
-				return replacement[match];
-			});
-		}
-		location.href = url;
+	document.querySelector('#search').addEventListener('submit', event => {
+		let url = '/admin/users/index', replacement = {' ': '+', ':': '', '\/': ''};
+		event.preventDefault(),
+		event.target.status.value && (url += '/status:' + event.target.status.value),
+		event.target.role_id.value && (url += '/role_id:' + event.target.role_id.value),
+		event.target.keyword.value && (url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+			return replacement[match];
+		})),
+		location.href = url
 	}, false)
 </script>

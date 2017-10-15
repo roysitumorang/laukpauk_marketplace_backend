@@ -2,27 +2,21 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\LoginHistory;
-use Application\Models\Role;
-use Application\Models\User;
-use Application\Models\Village;
+use Application\Models\{City, LoginHistory, Province, Role, Subdistrict, User, Village};
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class UsersController extends ControllerBase {
 	function indexAction() {
 		$limit          = $this->config->per_page;
-		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page   = $this->dispatcher->getParam('page', 'int', 1);
 		$offset         = ($current_page - 1) * $limit;
-		$status         = User::STATUS;
-		$current_status = $this->dispatcher->getParam('status', 'int');
-		if ($current_status === null || !array_key_exists($current_status, $status)) {
-			$current_status = array_search('ACTIVE', $status);
-		}
-		$current_role = $this->dispatcher->getParam('role_id', 'int');
-		$keyword      = strtr($this->dispatcher->getParam('keyword', 'string'), [':' => '', '/' => '']);
-		$users        = [];
-		$builder      = $this->modelsManager->createBuilder()
+		$users          = [];
+		$user_status    = User::STATUS;
+		$keyword        = strtr($this->dispatcher->getParam('keyword', 'string'), [':' => '', '/' => '']);
+		$current_role   = $this->dispatcher->getParam('role_id', 'int', null);
+		$current_status = $this->dispatcher->getParam('status', 'int', array_search('ACTIVE', $user_status));
+		$builder        = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
 				'a.api_key',
@@ -65,59 +59,56 @@ class UsersController extends ControllerBase {
 				'province'                 => 'f.name',
 				'last_login'               => 'g.sign_in_at',
 			])
-			->from(['a' => 'Application\Models\User'])
-			->join('Application\Models\Role', 'a.role_id = b.id', 'b')
-			->leftJoin('Application\Models\Village', 'a.village_id = c.id', 'c')
-			->leftJoin('Application\Models\Subdistrict', 'c.subdistrict_id = d.id', 'd')
-			->leftJoin('Application\Models\City', 'd.city_id = e.id', 'e')
-			->leftJoin('Application\Models\Province', 'e.province_id = f.id', 'f')
-			->leftJoin('Application\Models\LoginHistory', 'a.id = g.user_id', 'g')
+			->from(['a' => User::class])
+			->join(Role::class, 'a.role_id = b.id', 'b')
+			->leftJoin(Village::class, 'a.village_id = c.id', 'c')
+			->leftJoin(Subdistrict::class, 'c.subdistrict_id = d.id', 'd')
+			->leftJoin(City::class, 'd.city_id = e.id', 'e')
+			->leftJoin(Province::class, 'e.province_id = f.id', 'f')
+			->leftJoin(LoginHistory::class, 'a.id = g.user_id', 'g')
 			->orderBy('a.id DESC')
-			->where('a.status = ' . $current_status)
+			->where('a.status = :status:', ['status' => $current_status])
 			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory h WHERE g.user_id = h.user_id AND h.id > g.id)');
 		if ($current_role) {
-			$builder->andWhere('a.role_id = ' . $current_role);
+			$builder->andWhere('a.role_id = :role_id:', ['role_id' => $current_role]);
 		}
 		if ($keyword) {
-			$keyword_placeholder = "%{$keyword}%";
-			$builder->andWhere('a.name ILIKE ?0 OR a.company ILIKE ?1 OR a.mobile_phone ILIKE ?2', [
-				$keyword_placeholder,
-				$keyword_placeholder,
-				$keyword_placeholder,
+			$builder->andWhere('a.name ILIKE :keyword: OR a.company ILIKE :keyword: OR a.mobile_phone ILIKE :keyword:', [
+				'keyword' => "%{$keyword}%",
 			]);
 		}
-		$paginator = new QueryBuilder([
+		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]);
-		$page  = $paginator->getPaginate();
-		$pages = $this->_setPaginationRange($page);
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$item->writeAttribute('status', $status[$item->status]);
+			$item->writeAttribute('status', $user_status[$item->status]);
 			$users[] = $item;
 		}
-		$this->view->menu                     = $this->_menu('Members');
-		$this->view->users                    = $users;
-		$this->view->pages                    = $pages;
-		$this->view->page                     = $page;
-		$this->view->status                   = $status;
-		$this->view->current_status           = $current_status;
-		$this->view->roles                    = Role::find(['id > 1', 'order' => 'name']);
-		$this->view->current_role             = $current_role;
-		$this->view->keyword                  = $keyword;
-		$this->view->total_users              = $this->db->fetchColumn('SELECT COUNT(1) FROM users');
-		$this->view->total_pending_users      = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 0');
-		$this->view->total_active_users       = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = 1');
-		$this->view->total_suspended_users    = $this->db->fetchColumn('SELECT COUNT(1) FROM users WHERE status = -1');
+		$this->view->setVars([
+			'menu'                  => $this->_menu('Members'),
+			'users'                 => $users,
+			'pages'                 => $this->_setPaginationRange($pagination),
+			'pagination'            => $pagination,
+			'user_status'           => $user_status,
+			'current_status'        => $current_status,
+			'roles'                 => Role::find(['id > 1', 'order' => 'name']),
+			'current_role'          => $current_role,
+			'keyword'               => $keyword,
+			'total_users'           => User::count(),
+			'total_pending_users'   => User::count('status = 0'),
+			'total_active_users'    => User::count('status = 1'),
+			'total_suspended_users' => User::count('status = -1'),
+		]);
 	}
 
 	function createAction() {
 		$user          = new User;
 		$user->deposit = 0;
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($user);
+			$this->_assignModelAttributes($user);
 			if ($user->validation() && $user->create()) {
 				$this->flashSession->success('Penambahan member berhasil.');
 				return $this->response->redirect('/admin/users?status=0');
@@ -127,14 +118,14 @@ class UsersController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_form_datas($user);
+		$this->_prepareFormDatas($user);
 	}
 
 	function showAction($id) {
 		$user = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
-		if ($user->role->name == 'Buyer') {
+		if ($user->role_id == Role::BUYER) {
 			$column = 'buyer_id';
-		} else if ($user->role->name == 'Merchant') {
+		} else if ($user->role_id == Role::MERCHANT) {
 			$column                           = 'merchant_id';
 			$this->view->total_products       = $user->countProducts();
 			$this->view->total_coverage_areas = $user->countCoverageAreas();
@@ -171,7 +162,7 @@ class UsersController extends ControllerBase {
 			return $this->response->redirect('/admin/users');
 		}
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($user);
+			$this->_assignModelAttributes($user);
 			if ($user->validation() && $user->update()) {
 				$this->flashSession->success('Update member berhasil.');
 				return $this->response->redirect("/admin/users/{$user->id}");
@@ -183,7 +174,7 @@ class UsersController extends ControllerBase {
 			$user->province_id = $this->request->getPost('province_id', 'int');
 			$user->city_id     = $this->request->getPost('city_id', 'int');
 		}
-		$this->_prepare_form_datas($user);
+		$this->_prepareFormDatas($user);
 	}
 
 	function deleteAvatarAction($id) {
@@ -328,7 +319,7 @@ QUERY
 		return $this->response;
 	}
 
-	private function _prepare_form_datas(User $user) {
+	private function _prepareFormDatas(User $user) {
 		$provinces      = [];
 		$cities         = [];
 		$subdistricts   = [];
@@ -349,9 +340,9 @@ QUERY
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			$provinces[] = $row;
+			$provinces[$row->id] = $row->name;
 		}
-		if ($province_id = $user->village->subdistrict->city->province_id ?: $this->request->getPost('province_id', 'int')) {
+		if ($province_id = $this->request->getPost('province_id', 'int', $user->village->subdistrict->city->province_id)) {
 			$result = $this->db->query(<<<QUERY
 				SELECT
 					a.id,
@@ -367,10 +358,10 @@ QUERY
 			);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($row = $result->fetch()) {
-				$cities[] = $row;
+				$cities[$row->id] = $row->name;
 			}
 		}
-		if ($city_id = $user->village->subdistrict->city_id ?: $this->request->getPost('city_id', 'int')) {
+		if ($city_id = $this->request->getPost('city_id', 'int', $user->village->subdistrict->city_id)) {
 			$result  = $this->db->query(<<<QUERY
 				SELECT
 					a.id,
@@ -385,10 +376,10 @@ QUERY
 			);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($row = $result->fetch()) {
-				$subdistricts[] = $row;
+				$subdistricts[$row->id] = $row->name;
 			}
 		}
-		if ($subdistrict_id = $user->village->subdistrict_id ?: $this->request->getPost('subdistrict_id', 'int')) {
+		if ($subdistrict_id = $this->request->getPost('subdistrict_id', 'int', $user->village->subdistrict_id)) {
 			$result = $this->db->query(<<<QUERY
 				SELECT
 					id,
@@ -401,7 +392,7 @@ QUERY
 			);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($row = $result->fetch()) {
-				$villages[] = $row;
+				$villages[$row->id] = $row->name;
 			}
 		}
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
@@ -426,43 +417,46 @@ QUERY
 		$this->view->subdistrict_id = $subdistrict_id;
 	}
 
-	private function _set_model_attributes(&$user) {
-		$village_id = $this->request->getPost('village_id', 'int');
-		if ($village_id) {
-			$user->village_id = Village::findFirst($village_id)->id;
+	private function _assignModelAttributes(&$user) {
+		if (($village_id = $this->request->getPost('village_id', 'int')) && Village::count(['id = ?0', 'bind' => [$village_id]])) {
+			$user->village_id = $village_id;
 		}
-		if ($user->role->name == 'Merchant') {
-			$user->setDeposit($this->request->getPost('deposit'));
+		if (($role_id = $this->request->getPost('role_id', 'int')) && Role::count(['id = ?0', 'bind' => [$role_id]])) {
+			$user->role_id = $role_id;
 		}
-		$user->setMinimumPurchase($this->request->getPost('minimum_purchase'));
-		$user->setAdminFee($this->request->getPost('admin_fee'));
-		$user->setAccumulationDivisor($this->request->getPost('accumulation_divisor'));
-		$user->setName($this->request->getPost('name'));
-		$user->setEmail($this->request->getPost('email'));
-		$user->setNewPassword($this->request->getPost('new_password'));
-		$user->setNewPasswordConfirmation($this->request->getPost('new_password_confirmation'));
-		$user->setAddress($this->request->getPost('address'));
-		$user->setMobilePhone($this->request->getPost('mobile_phone'));
-		$user->setCompany($this->request->getPost('company'));
-		$user->setGender($this->request->getPost('gender'));
-		$user->setDateOfBirth($this->request->getPost('date_of_birth'));
-		$user->setNewAvatar($_FILES['new_avatar']);
-		$user->setOpenOnSunday($this->request->getPost('open_on_sunday'));
-		$user->setOpenOnMonday($this->request->getPost('open_on_monday'));
-		$user->setOpenOnTuesday($this->request->getPost('open_on_tuesday'));
-		$user->setOpenOnWednesday($this->request->getPost('open_on_wednesday'));
-		$user->setOpenOnThursday($this->request->getPost('open_on_thursday'));
-		$user->setOpenOnFriday($this->request->getPost('open_on_friday'));
-		$user->setOpenOnSaturday($this->request->getPost('open_on_saturday'));
-		$user->setBusinessOpeningHour($this->request->getPost('business_opening_hour'));
-		$user->setBusinessClosingHour($this->request->getPost('business_closing_hour'));
-		$user->setMerchantNote($this->request->getPost('merchant_note'));
-		$user->role_id = Role::findFirst(['id > 1 AND id = ?0', 'bind' => [$this->request->getPost('role_id', 'int')]])->id;
 		if ($user->role_id == Role::MERCHANT) {
-			$user->setDeliveryHours($this->request->getPost('delivery_hours'));
-			$user->setMaxDeliveryDistance($this->request->getPost('max_delivery_distance'));
-			$user->setFreeDeliveryDistance($this->request->getPost('free_delivery_distance'));
-			$user->setDeliveryRate($this->request->getPost('delivery_rate'));
+			$user->assign($_POST, null, [
+				'deposit',
+				'delivery_hours',
+				'max_delivery_distance',
+				'free_delivery_distance',
+				'delivery_rate',
+			]);
 		}
+		$user->assign(array_merge($_POST, $_FILES), null, [
+			'minimum_purchase',
+			'admin_fee',
+			'accumulation_divisor',
+			'name',
+			'email',
+			'new_password',
+			'new_password_confirmation',
+			'address',
+			'mobile_phone',
+			'company',
+			'gender',
+			'date_of_birth',
+			'new_avatar',
+			'open_on_sunday',
+			'open_on_monday',
+			'open_on_tuesday',
+			'open_on_wednesday',
+			'open_on_thursday',
+			'open_on_friday',
+			'open_on_saturday',
+			'business_opening_hour',
+			'business_closing_hour',
+			'merchant_note',
+		]);
 	}
 }
