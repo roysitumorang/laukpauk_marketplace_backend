@@ -5,11 +5,7 @@ namespace Application\Models;
 use Imagick;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\File;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\StringLength;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{File, InclusionIn, PresenceOf, StringLength, Uniqueness};
 
 class Product extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
@@ -160,10 +156,11 @@ class Product extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = explode(',', $this->thumbnails);
+		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
 	}
 
 	function afterSave() {
+		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
 		$this->getDI()->getDb()->execute("UPDATE products a SET keywords = TO_TSVECTOR('simple', b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND a.id = {$this->id}");
 	}
 

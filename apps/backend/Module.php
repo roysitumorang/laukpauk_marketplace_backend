@@ -93,7 +93,7 @@ class Module implements ModuleDefinitionInterface {
 						'compiledSeparator' => '_',
 					]);
 					$volt->getCompiler()
-						->addFunction('is_int', 'is_int')
+						->addFunction('ctype_digit', 'ctype_digit')
 						->addFunction('in_array', 'in_array')
 						->addFunction('count', 'count')
 						->addFilter('count', function($resolvedArgs, $exprArgs) {

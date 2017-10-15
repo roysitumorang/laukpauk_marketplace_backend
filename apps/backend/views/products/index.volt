@@ -24,32 +24,23 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form action="/admin/products" method="GET" id="search">
+				{{ form('/admin/products/index', 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<b>Kategori :</b>
 								<br>
-								<select name="category_id" id="category_id">
-									<option value="">Semua</option>
-									{% for category in categories %}
-									<option value="{{ category.id}}"{% if category.id == category_id %} selected{% endif %}>{{ category.name }} ({{ category.total_products }})</option>
-									{% endfor %}
-								</select>
+								{{ select('category_id', categories, 'value': category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '') }}
 							</td>
 							<td>
 								<b>Status :</b>
 								<br>
-								<select name="published">
-									<option value="">Semua</option>
-									<option value="1"{% if published %} selected{% endif %}>Tampil</option>
-									<option value="0"{% if published === 0 %} selected{% endif %}>Tersembunyi</option>
-								</select>
+								{{ select('published', ['Tersembunyi', 'Tampil'], 'value': published, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
 							</td>
 							<td>
 								<b>ID / Nama :</b>
 								<br>
-								<input type="text" name="keyword" value="{{ keyword }}" placeholder="ID / Nama">&nbsp;
+								{{ text_field('keyword', 'value': keyword, 'placeholder': 'ID / Nama') }}
 							</td>
 							<td>
 								<br>
@@ -58,9 +49,9 @@
 							</td>
 						</tr>
 					</table>
-				</form>
-				{% if page.total_items %}
-				<span style="float:right"><strong>Total : {{ page.total_items }} produk</strong></span>
+				{{ endForm() }}
+				{% if pagination.total_items %}
+				<span style="float:right"><strong>Total : {{ pagination.total_items }} produk</strong></span>
 				{% endif %}
 				<table class="table table-striped">
 					<thead>
@@ -94,11 +85,7 @@
 							<td{{ background }} class="text-center">
 								<a href="/admin/products/{{ product.id}}/update?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 								<a href="javascript:void(0)" class="published" data-id="{{ product.id }}" data-published="{{ product.published }}">
-									{% if product.published %}
-									<i class="fa fa-eye fa-2x"></i>
-									{% else %}
-									<font color="#FF0000"><i class="fa fa-eye-slash fa-2x"></i></font>
-									{% endif %}
+									<i class="fa fa-eye{% if !product.published %}-slash{% endif %} fa-2x"></i>
 								</a>
 								<a href="javascript:void(0)" data-id="{{ product.id }}" class="delete" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 							</td>
@@ -110,15 +97,15 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if page.total_pages > 1 %}
+				{% if pagination.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
+							{% if i == pagination.current %}
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/products/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if is_int(published) %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/products/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if ctype_digit(published) %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -132,35 +119,35 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), category_id = document.getElementById('category_id'), url = '/admin/products/index', replacement = {' ': '+', ':': '', '\/': ''};
-	search.addEventListener('submit', event => {
-		event.preventDefault();
-		if (search.category_id.value) {
-			url += '/category_id:' + search.category_id.value;
-		}
-		if (search.published.value) {
-			url += '/published:' + search.published.value;
-		}
-		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
-				return replacement[match];
-			});
-		}
-		location.href = url;
-	}, false);
-	for ( ; i--; ) {
-		let item = items[i];
-		item.onclick = () => {
-			if ('delete' === item.className && !confirm('Anda yakin ingin menghapus produk ini ?')) {
-				return !1
+	document.querySelector('#search').addEventListener('submit', event => {
+		let url = event.target.action, replacement = {' ': '+', ':': '', '\/': ''};
+		event.preventDefault(),
+		event.target.category_id.value && (url += '/category_id:' + event.target.category_id.value),
+		event.target.published.value && (url += '/published:' + event.target.published.value),
+		event.target.keyword.value && (url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+			return replacement[match]
+		})),
+		location.href = url
+	}, false),
+	document.querySelectorAll('.published').forEach(item => {
+		item.addEventListener('click', event => {
+			let form = document.createElement('form');
+			form.method = 'POST',
+			form.action = '/admin/products/' + event.target.parentNode.dataset.id + '/toggle_status?next=' + window.location.href.split('#')[0] + '#' + event.target.parentNode.dataset.id,
+			document.body.appendChild(form),
+			form.submit()
+		}, false)
+	}),
+	document.querySelectorAll('.delete').forEach(item => {
+		item.addEventListener('click', event => {
+			if (!confirm('Anda yakin ingin menghapus produk ini ?')) {
+				return false
 			}
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = 'delete' === item.className
-			? '/admin/products/' + item.dataset.id + '/delete'
-			: '/admin/products/' + item.dataset.id + '/toggle_status?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			form.action = '/admin/products/' + event.target.parentNode.dataset.id + '/delete',
 			document.body.appendChild(form),
 			form.submit()
-		}
-	}
+		}, false)
+	})
 </script>

@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/products/merchants/{{ product.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"><h2>Daftar Merchant</h2></a>
+				<a href="/admin/products/merchants/{{ product.id }}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}"><h2>Daftar Merchant</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -50,15 +50,15 @@
 								{% endfor %}
 								</tbody>
 							</table>
-							{% if page.total_pages > 1 %}
+							{% if pagination.total_pages > 1 %}
 							<div class="weepaging">
 								<p>
 									<b>Halaman:</b>&nbsp;&nbsp;
 									{% for i in pages %}
-										{% if i == page.current %}
-										<b>{{ i }}</b>
+										{% if i == pagination.current %}
+											<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/products/merchants/{{ product.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+											<a href="/admin/products/merchants/{{ product.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>

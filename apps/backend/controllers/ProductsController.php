@@ -2,37 +2,39 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Product;
-use Application\Models\ProductCategory;
-use Ds\Set;
-use Exception;
+use Application\Models\{Product, ProductCategory, User, UserProduct};
 use Phalcon\Db;
-use Phalcon\Paginator\Adapter\Model;
-use Phalcon\Paginator\Adapter\QueryBuilder;
+use Phalcon\Paginator\Adapter\{Model, QueryBuilder};
 
 class ProductsController extends ControllerBase {
+	function beforeExecuteRoute() {
+		parent::beforeExecuteRoute();
+		$this->view->menu = $this->_menu('Products');
+	}
+
 	function indexAction() {
+		$products     = [];
 		$limit        = $this->config->per_page;
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page = $this->dispatcher->getParam('page', 'int', 1);
 		$offset       = ($current_page - 1) * $limit;
 		$category_id  = $this->dispatcher->getParam('category_id', 'int');
-		$published    = filter_var($this->dispatcher->getParam('published'), FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+		$published    = $this->dispatcher->getParam('published', 'int');
 		$keyword      = $this->dispatcher->getParam('keyword', 'string');
 		$next         = '/admin/products/index';
 		$conditions   = ['', 'bind' => [], 'order' => 'id DESC'];
-		$this->_prepare_datas();
+		$this->_prepareDatas();
 		if ($category_id) {
 			$conditions[0]                    .= ($conditions[0] ? ' AND' : '') . ' product_category_id = :category_id:';
 			$conditions['bind']['category_id'] = $category_id;
 			$next                             .= "/category_id:{$category_id}";
 		}
-		if (is_int($published)) {
+		if (ctype_digit($published)) {
 			$conditions[0]                  .= ($conditions[0] ? ' AND' : '') . ' published = :published:';
 			$conditions['bind']['published'] = $published;
 			$next                           .= "/published:{$published}";
 		}
 		if ($keyword) {
-			if (filter_var($keyword, FILTER_VALIDATE_INT)) {
+			if (ctype_digit($keyword)) {
 				$conditions[0]           .= ($conditions[0] ? ' AND' : '') . ' id = :id:';
 				$conditions['bind']['id'] = $keyword;
 			} else if ($keyword) {
@@ -41,32 +43,30 @@ class ProductsController extends ControllerBase {
 			}
 			$next .= "/keyword:{$keyword}";
 		}
-		$paginator = new Model([
+		$pagination = (new Model([
 			'data'  => Product::find($conditions),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]);
-		$page     = $paginator->getPaginate();
-		$pages    = $this->_setPaginationRange($page);
-		$products = new Set;
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$products->add($item);
+			$products[] = $item;
 		}
-		$this->view->menu        = $this->_menu('Products');
-		$this->view->page        = $page;
-		$this->view->pages       = $pages;
-		$this->view->products    = $products;
-		$this->view->keyword     = $keyword;
-		$this->view->category_id = $category_id;
-		$this->view->published   = $published;
-		$this->view->next        = $next;
+		$this->view->setVars([
+			'pagination'  => $pagination,
+			'pages'       => $this->_setPaginationRange($pagination),
+			'products'    => $products,
+			'keyword'     => $keyword,
+			'category_id' => $category_id,
+			'published'   => $published,
+			'next'        => $next,
+		]);
 	}
 
 	function createAction() {
 		$product = new Product;
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($product);
+			$this->_assignModelAttributes($product);
 			if ($product->validation() && $product->create()) {
 				$this->flashSession->success('Penambahan produk berhasil.');
 				return $this->response->redirect('/admin/products');
@@ -76,10 +76,11 @@ class ProductsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_datas();
-		$this->view->menu     = $this->_menu('Products');
-		$this->view->product  = $product;
-		$this->view->pictures = [];
+		$this->_prepareDatas();
+		$this->view->setVars([
+			'product'  => $product,
+			'pictures' => [],
+		]);
 	}
 
 	function updateAction($id) {
@@ -89,7 +90,7 @@ class ProductsController extends ControllerBase {
 		}
 		$next = $this->request->get('next');
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($product);
+			$this->_assignModelAttributes($product);
 			if ($product->validation() && $product->update()) {
 				$this->flashSession->success('Update produk berhasil.');
 				return $this->response->redirect($next);
@@ -99,11 +100,12 @@ class ProductsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_datas();
-		$this->view->menu       = $this->_menu('Products');
-		$this->view->product    = $product;
-		$this->view->active_tab = 'product';
-		$this->view->next       = $next;
+		$this->_prepareDatas();
+		$this->view->setVars([
+			'product'    => $product,
+			'active_tab' => 'product',
+			'next'       => $next,
+		]);
 	}
 
 	function toggleStatusAction($id) {
@@ -120,10 +122,11 @@ class ProductsController extends ControllerBase {
 	function deletePictureAction($id) {
 		if ($this->request->isPost()) {
 			if (!$product = Product::findFirst(['id = ?0 AND picture IS NOT NULL', 'bind' => [$id]])) {
-				throw new Exception('Produk tidak ditemukan.');
+				$this->flashSession->error('Produk tidak ditemukan.');
+			} else {
+				$product->deletePicture();
+				$this->flashSession->success('Gambar berhasil dihapus');
 			}
-			$product->deletePicture();
-			$this->flashSession->success('Gambar berhasil dihapus');
 		}
 		return $this->response->redirect("/admin/products/{$product->id}/update?next=" . $this->request->get('next'));
 	}
@@ -145,55 +148,58 @@ class ProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan.');
 			return $this->dispatcher->forward('products');
 		}
+		$users        = [];
 		$limit        = $this->config->per_page;
-		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page = $this->dispatcher->getParam('page', 'int', 1);
 		$offset       = ($current_page - 1) * $limit;
 		$keyword      = $this->dispatcher->getParam('keyword', 'string');
 		$builder      = $this->modelsManager->createBuilder()
 			->columns(['c.company'])
-			->from(['a' => 'Application\Models\Product'])
-			->join('Application\Models\UserProduct', 'a.id = b.product_id', 'b')
-			->join('Application\Models\User', 'b.user_id = c.id', 'c')
+			->from(['a' => Product::class])
+			->join(UserProduct::class, 'a.id = b.product_id', 'b')
+			->join(User::class, 'b.user_id = c.id', 'c')
 			->where('a.id = ' . $product->id)
 			->andWhere('c.status = 1')
 			->orderBy('c.company');
-		$paginator = new QueryBuilder([
+		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]);
-		$page  = $paginator->getPaginate();
-		$pages = $this->_setPaginationRange($page);
-		$users = new Set;
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
-			$users->add($item);
+			$users[] = $item;
 		}
-		$this->view->menu       = $this->_menu('Products');
-		$this->view->page       = $page;
-		$this->view->pages      = $pages;
-		$this->view->product    = $product;
-		$this->view->users      = $users;
-		$this->view->keyword    = $keyword;
-		$this->view->active_tab = 'merchants';
+		$this->view->setVars([
+			'pagination' => $pagination,
+			'pages'      => $this->_setPaginationRange($pagination),
+			'product'    => $product,
+			'users'      => $users,
+			'keyword'    => $keyword,
+			'active_tab' => 'merchants',
+		]);
 	}
 
-	private function _prepare_datas() {
-		$categories = new Set;
+	private function _prepareDatas() {
+		$categories = [];
 		$result     = $this->db->query('SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id GROUP BY a.id ORDER BY a.user_id NULLS FIRST, a.name ASC');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			$categories->add($row);
+			$categories[$row->id] = $row->name . ' (' . $row->total_products . ')';
 		}
 		$this->view->categories = $categories;
 	}
 
-	private function _set_model_attributes(&$product) {
-		$product->category = ProductCategory::findFirst($this->request->getPost('product_category_id'));
-		$product->setName($this->request->getPost('name'));
-		$product->setStockUnit($this->request->getPost('stock_unit'));
-		$product->setDescription($this->request->getPost('description'));
-		$product->setNewPicture($_FILES['picture']);
-		$product->setPublished($this->request->getPost('published'));
+	private function _assignModelAttributes(&$product) {
+		if ($product_category_id = $this->request->getPost('product_category_id')) {
+			$product->category = ProductCategory::findFirst($product_category_id);
+		}
+		$product->assign(array_merge($_POST, $_FILES), null, [
+			'name',
+			'stock_unit',
+			'description',
+			'published',
+			'new_picture',
+		]);
 	}
 }
