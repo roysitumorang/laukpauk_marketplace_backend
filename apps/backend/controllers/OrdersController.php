@@ -2,18 +2,12 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Order;
-use Application\Models\OrderProduct;
-use Application\Models\Role;
-use Application\Models\Setting;
-use Application\Models\User;
-use Application\Models\Village;
+use Application\Models\{CoverageArea, Order, OrderProduct, Product, Role, Setting, User, UserProduct, Village};
 use DateInterval;
 use DatePeriod;
 use DateTime;
 use DateTimeImmutable;
 use Ds\Map;
-use Exception;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
@@ -24,18 +18,19 @@ class OrdersController extends ControllerBase {
 	}
 
 	function indexAction() {
+		$orders         = [];
 		$limit          = $this->config->per_page;
-		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page   = $this->dispatcher->getParam('page', 'int', 1);
 		$offset         = ($current_page - 1) * $limit;
 		$parameters     = [];
 		$conditions     = [];
-		$status         = Order::STATUS;
+		$order_status   = Order::STATUS;
 		$current_status = filter_var($this->dispatcher->getParam('status'), FILTER_VALIDATE_INT);
 		if ($date = $this->dispatcher->getParam('from')) {
 			try {
 				$from         = (new DateTimeImmutable($date))->format('Y-m-d');
 				$conditions[] = "DATE(a.created_at) >= '{$from}'";
-			} catch (Exception $e) {
+			} catch (\Exception $e) {
 				unset($from);
 			}
 		}
@@ -43,14 +38,14 @@ class OrdersController extends ControllerBase {
 			try {
 				$to           = (new DateTimeImmutable($date))->format('Y-m-d');
 				$conditions[] = "DATE(a.created_at) <= '{$to}'";
-			} catch (Exception $e) {
+			} catch (\Exception $e) {
 				unset($to);
 			}
 		}
 		if ($code = $this->dispatcher->getParam('code', 'int')) {
 			$conditions[] = "a.code = '{$code}'";
 		}
-		if (array_key_exists($current_status, $status)) {
+		if (array_key_exists($current_status, $order_status)) {
 			$conditions[] = "a.status = {$current_status}";
 		}
 		if ($conditions) {
@@ -85,39 +80,38 @@ class OrdersController extends ControllerBase {
 				'a.note',
 				'a.created_at',
 			])
-			->addFrom('Application\Models\Order', 'a')
-			->join('Application\Models\User', 'a.merchant_id = b.id', 'b');
+			->addFrom(Order::class, 'a')
+			->join(User::class, 'a.merchant_id = b.id', 'b')
+			->orderBy($parameters['order']);
 		if ($conditions) {
 			$builder->where(implode(' AND ', $conditions));
 		}
-		$builder->orderBy($parameters['order']);
-		$paginator = new QueryBuilder([
+		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]);
-		$page   = $paginator->getPaginate();
-		$pages  = $this->_setPaginationRange($page);
-		$orders = [];
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$orders[] = $item;
 		}
-		$this->view->orders                 = $orders;
-		$this->view->pages                  = $pages;
-		$this->view->page                   = $page;
-		$this->view->from                   = $from;
-		$this->view->to                     = $to;
-		$this->view->status                 = $status;
-		$this->view->current_status         = $current_status;
-		$this->view->code                   = $code;
-		$this->view->mobile_phone           = $mobile_phone;
-		$this->view->total_final_bill       = $this->db->fetchColumn('SELECT SUM(a.final_bill) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0;
-		$this->view->total_admin_fee        = $this->db->fetchColumn('SELECT SUM(a.admin_fee) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0;
-		$this->view->total_orders           = $this->db->fetchColumn('SELECT COUNT(1) FROM orders');
-		$this->view->pending_orders         = $this->db->fetchOne("SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status = 0");
-		$this->view->completed_orders       = $this->db->fetchOne("SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status = 1");
-		$this->view->total_cancelled_orders = $this->db->fetchColumn("SELECT COUNT(1) FROM orders WHERE status = -1");
+		$this->view->setVars([
+			'orders'                 => $orders,
+			'pages'                  => $this->_setPaginationRange($pagination),
+			'pagination'             => $pagination,
+			'from'                   => $from,
+			'to'                     => $to,
+			'order_status'           => $order_status,
+			'current_status'         => $current_status,
+			'code'                   => $code,
+			'mobile_phone'           => $mobile_phone,
+			'total_final_bill'       => $this->db->fetchColumn('SELECT SUM(a.final_bill) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0,
+			'total_admin_fee'        => $this->db->fetchColumn('SELECT SUM(a.admin_fee) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0,
+			'total_orders'           => $this->db->fetchColumn('SELECT COUNT(1) FROM orders'),
+			'pending_orders'         => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status => 0'),
+			'completed_orders'       => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status => 1'),
+			'total_cancelled_orders' => $this->db->fetchColumn('SELECT COUNT(1) FROM orders WHERE status => -1'),
+		]);
 	}
 
 	function showAction($id) {
@@ -126,8 +120,10 @@ class OrdersController extends ControllerBase {
 			return $this->dispatcher->forward('orders');
 		}
 		$order->writeAttribute('status', Order::STATUS[$order->status]);
-		$this->view->order   = $order;
-		$this->view->village = Village::findFirst($order->village_id);
+		$this->view->setVars([
+			'order'   => $order,
+			'village' => Village::findFirst($order->village_id),
+		]);
 	}
 
 	function completeAction($id) {
@@ -180,7 +176,7 @@ class OrdersController extends ControllerBase {
 		if ($this->request->isPost()) {
 			try {
 				if ($new_order->get('cart')->isEmpty()) {
-					throw new Exception('Keranjang belanja masih kosong!');
+					throw new \Exception('Keranjang belanja masih kosong!');
 				}
 				$orders           = [];
 				$total            = 0;
@@ -189,8 +185,8 @@ class OrdersController extends ControllerBase {
 				$minimum_purchase = Setting::findFirstByName('minimum_purchase')->value;
 				try {
 					$scheduled_delivery = new DateTime($new_order->get('scheduled_delivery'), $this->currentDatetime->getTimezone());
-				} catch (Exception $ex) {
-					throw new Exception('Tanggal/jam pengantaran tidak valid!');
+				} catch (\Exception $ex) {
+					throw new \Exception('Tanggal/jam pengantaran tidak valid!');
 				}
 				if ($new_order->hasKey('coupon_id')) {
 					$params = [<<<QUERY
@@ -225,11 +221,11 @@ QUERY
 					];
 					$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 					if (!$coupon) {
-						throw new Exception('Voucher tidak valid!');
+						throw new \Exception('Voucher tidak valid!');
 					} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
-						throw new Exception('Pemakaian voucher udah melebihi batas maksimal!');
+						throw new \Exception('Pemakaian voucher udah melebihi batas maksimal!');
 					} else if (!$coupon->multiple_use && $coupon->personal_usage >= 1) {
-						throw new Exception('Voucher cuma berlaku untuk sekali pemakaian!');
+						throw new \Exception('Voucher cuma berlaku untuk sekali pemakaian!');
 					}
 				}
 				foreach ($new_order->get('cart') as $merchant_id => $items) {
@@ -251,7 +247,7 @@ QUERY
 						, Role::MERCHANT, $merchant_id, $buyer->village_id];
 					$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 					if (!$merchant) {
-						throw new Exception('Merchant tidak valid!');
+						throw new \Exception('Merchant tidak valid!');
 					}
 					$order                     = new Order;
 					$order_products            = [];
@@ -269,7 +265,7 @@ QUERY
 					foreach ($items as $user_product_id => $quantity) {
 						$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $user_product_id]);
 						if (!$product) {
-							throw new Exception('Produk tidak valid!');
+							throw new \Exception('Produk tidak valid!');
 						}
 						$order_product             = new OrderProduct;
 						$order_product->product_id = $product->id;
@@ -282,7 +278,7 @@ QUERY
 						$order_products[]          = $order_product;
 					}
 					if ($order->original_bill < $merchant->minimum_purchase) {
-						throw new Exception('Belanja di ' . $merchant->company . ' minimal Rp. ' . number_format($merchant->minimum_purchase) . ' untuk dapat diproses!');
+						throw new \Exception('Belanja di ' . $merchant->company . ' minimal Rp. ' . number_format($merchant->minimum_purchase) . ' untuk dapat diproses!');
 					}
 					$order->final_bill    = $order->original_bill;
 					$order->discount      = 0;
@@ -292,17 +288,17 @@ QUERY
 						foreach ($order->getMessages() as $error) {
 							$this->flashSession->error($error);
 						}
-						throw new Exception('Order tidak valid!');
+						throw new \Exception('Order tidak valid!');
 					}
 					$total   += $order->final_bill;
 					$orders[] = $order;
 				}
 				if ($total < $minimum_purchase) {
-					throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
+					throw new \Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 				}
 				if ($coupon) {
 					if ($total < $coupon->minimum_purchase) {
-						throw new Exception('Voucher ' . $coupon->code . ' berlaku untuk belanja minimal Rp. ' . number_format($coupon->minimum_purchase) . '!');
+						throw new \Exception('Voucher ' . $coupon->code . ' berlaku untuk belanja minimal Rp. ' . number_format($coupon->minimum_purchase) . '!');
 					}
 					$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100);
 				}
@@ -327,7 +323,7 @@ QUERY
 				}
 				$this->flashSession->success('Order berhasil ditambah!');
 				return $this->response->redirect('/admin/orders');
-			} catch (Exception $e) {
+			} catch (\Exception $e) {
 				$this->flashSession->error($e->getMessage());
 			}
 		}
@@ -342,10 +338,10 @@ QUERY
 		$product_categories   = [];
 		$product_category_id  = $this->dispatcher->getParam('product_category_id', 'int');
 		$keyword              = $this->dispatcher->getParam('keyword');
-		$current_page         = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page         = $this->dispatcher->getParam('page', 'int', 1);
 		$limit                = 15;
 		$products             = [];
-		$result               = $this->db->query('SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id GROUP BY a.id ORDER BY a.name');
+		$result               = $this->db->query("SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id GROUP BY a.id ORDER BY a.name");
 		$builder             = $this->modelsManager->createBuilder()
 			->columns([
 				'b.id',
@@ -359,10 +355,10 @@ QUERY
 				'c.mobile_phone',
 				'c.address',
 			])
-			->from(['a' => 'Application\Models\Product'])
-			->join('Application\Models\UserProduct', 'a.id = b.product_id', 'b')
-			->join('Application\Models\User', 'b.user_id = c.id', 'c')
-			->join('Application\Models\CoverageArea', 'c.id = d.user_id', 'd')
+			->from(['a' => Product::class])
+			->join(UserProduct::class, 'a.id = b.product_id', 'b')
+			->join(User::class, 'b.user_id = c.id', 'c')
+			->join(CoverageArea::class, 'c.id = d.user_id', 'd')
 			->where("d.village_id = {$buyer->village_id}")
 			->andWhere('a.published = 1')
 			->andWhere('b.published = 1')
@@ -372,7 +368,7 @@ QUERY
 			->orderBy('a.name ASC, a.stock_unit ASC');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
-			$product_categories[] = $row;
+			$product_categories[$row->id] = $row->name . ' (' . $row->total_products . ')';
 		}
 		if ($product_category_id) {
 			$builder->andWhere("a.product_category_id = {$product_category_id}");
@@ -416,6 +412,8 @@ QUERY
 QUERY
 						, Db::FETCH_OBJ
 					);
+					$range                 = range(1, min($product->stock, 10));
+					$product->quantities   = array_combine($range, $range);
 					$product->quantity     = min($quantity, $product->stock);
 					$order->original_bill += $product->price * $product->quantity;
 					$order_products[]      = $product;
@@ -459,7 +457,7 @@ QUERY
 				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if ($coupon &&
 					(($coupon->maximum_usage && $coupon->total_usage < $coupon->maximum_usage) &&
-					(!$coupon->multiple_use && $coupon->personal_usage < 1) &&
+					($coupon->multiple_use || !$coupon->personal_usage < 1) &&
 					($coupon->minimum_purchase && $order->original_bill >= $coupon->minimum_purchase))) {
 					$order->coupon_id   = $coupon->id;
 					$order->discount   += $coupon->discount_type ? $coupon->price_discount : ceil($coupon->price_discount * $order->original_bill / 100.0);
@@ -508,7 +506,8 @@ QUERY
 							continue;
 						}
 						$date->setTime($hour, 0);
-						$delivery_datetimes[$item->id][] = $date->format('Y-m-d H:i:s');
+						$datetime = $date->format('Y-m-d H:i:s');
+						$delivery_datetimes[$item->id][$datetime] = $datetime;
 					}
 				}
 			}
@@ -558,32 +557,34 @@ QUERY
 				(!$row->multiple_use && $row->personal_usage >= 1)) {
 				continue;
 			}
-			$coupons[] = $row;
+			$coupons[$row->id] = $row->code . ' / diskon ' . ($row->discount_type ? number_format($row->price_discount) : $row->price_discount . ' %') . ($row->minimum_purchase ? ' / min. order ' . number_format($row->minimum_purchase) : '');
 		}
-		$paginator = new QueryBuilder([
+		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]);
-		$page  = $paginator->getPaginate();
-		$pages = $this->_setPaginationRange($page);
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			if ($item->picture) {
-				$item->thumbnails = explode(',', $item->thumbnails);
+				$item->thumbnails = array_filter(explode(',', $item->thumbnails));
 			}
-			$products[] = $item;
+			$range            = range(1, min($item->stock, 10));
+			$item->quantities = array_combine($range, $range);
+			$products[]       = $item;
 		}
-		$this->view->order               = $order;
-		$this->view->order_products      = $order_products;
-		$this->view->buyer               = $buyer;
-		$this->view->product_categories  = $product_categories;
-		$this->view->delivery_datetimes  = $delivery_datetimes;
-		$this->view->coupons             = $coupons;
-		$this->view->products            = $products;
-		$this->view->product_category_id = $product_category_id;
-		$this->view->keyword             = $keyword;
-		$this->view->page                = $page;
-		$this->view->pages               = $pages;
+		$this->view->setVars([
+			'order'               => $order,
+			'order_products'      => $order_products,
+			'buyer'               => $buyer,
+			'product_categories'  => $product_categories,
+			'delivery_datetimes'  => $delivery_datetimes,
+			'coupons'             => $coupons,
+			'products'            => $products,
+			'product_category_id' => $product_category_id,
+			'keyword'             => $keyword,
+			'pagination'          => $pagination,
+			'pages'               => $this->_setPaginationRange($pagination),
+		]);
 	}
 
 	function addProductAction() {
@@ -597,52 +598,54 @@ QUERY
 			$page                = $this->dispatcher->getParam('page', 'int');
 			$user_product_id     = $this->request->getPost('user_product_id', 'int');
 			$quantity            = max($this->request->getPost('quantity', 'int'), 0);
-			$query               = <<<QUERY
-				SELECT
-					b.user_id,
-					b.price,
-					b.stock
-				FROM
-					products a
-					JOIN user_product b ON a.id = b.product_id
-					JOIN users c ON b.user_id = c.id
-					JOIN coverage_area d ON c.id = d.user_id
-				WHERE
-					d.village_id = {$buyer->village_id}
-					AND a.published = 1
-					AND b.published = 1
-					AND b.price > 0
-					AND b.stock > 0
-					AND c.status = 1
-					AND b.id = {$user_product_id}
+			if ($user_product_id && $quantity) {
+				$query = <<<QUERY
+					SELECT
+						b.user_id,
+						b.price,
+						b.stock
+					FROM
+						products a
+						JOIN user_product b ON a.id = b.product_id
+						JOIN users c ON b.user_id = c.id
+						JOIN coverage_area d ON c.id = d.user_id
+					WHERE
+						d.village_id = {$buyer->village_id}
+						AND a.published = 1
+						AND b.published = 1
+						AND b.price > 0
+						AND b.stock > 0
+						AND c.status = 1
+						AND b.id = {$user_product_id}
 QUERY;
-			if ($product_category_id) {
-				$query .= " AND a.product_category_id = {$product_category_id}";
-			}
-			if ($keyword) {
-				$query .= " AND a.name ILIKE '%{$keyword}%'";
-			}
-			$query .= ' LIMIT 1 OFFSET 0';
-			if (!$user_product = $this->db->fetchOne($query, Db::FETCH_OBJ)) {
-				throw new Exception('Produk tidak ditemukan.');
-			}
-			if ($this->session->has('order')) {
-				$new_order = unserialize($this->session->get('order'));
-				if ($new_order->hasKey('buyer_id') && $new_order->get('buyer_id') != $buyer->id) {
-					$new_order->get('cart')->clear();
+				if ($product_category_id) {
+					$query .= " AND a.product_category_id = {$product_category_id}";
 				}
-			} else {
-				$new_order = new Map;
-				$new_order->put('cart', new Map);
+				if ($keyword) {
+					$query .= " AND a.name ILIKE '%{$keyword}%'";
+				}
+				$query .= ' LIMIT 1 OFFSET 0';
+				if (!$user_product = $this->db->fetchOne($query, Db::FETCH_OBJ)) {
+					throw new \Exception('Produk tidak ditemukan.');
+				}
+				if ($this->session->has('order')) {
+					$new_order = unserialize($this->session->get('order'));
+					if ($new_order->hasKey('buyer_id') && $new_order->get('buyer_id') != $buyer->id) {
+						$new_order->get('cart')->clear();
+					}
+				} else {
+					$new_order = new Map;
+					$new_order->put('cart', new Map);
+				}
+				if (!$new_order->get('cart')->hasKey($user_product->user_id)) {
+					$new_order->get('cart')->put($user_product->user_id, new Map);
+				}
+				$new_order->get('cart')->get($user_product->user_id)->put($user_product_id, min($quantity, $user_product->stock));
+				$new_order->put('buyer_id', $buyer->id);
+				$this->session->set('order', serialize($new_order));
+				$this->flashSession->success('Produk berhasil ditambahkan.');
 			}
-			if (!$new_order->get('cart')->hasKey($user_product->user_id)) {
-				$new_order->get('cart')->put($user_product->user_id, new Map);
-			}
-			$new_order->get('cart')->get($user_product->user_id)->put($user_product_id, min($quantity, $user_product->stock));
-			$new_order->put('buyer_id', $buyer->id);
-			$this->session->set('order', serialize($new_order));
-			$this->flashSession->success('Produk berhasil ditambahkan.');
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
 			return $this->response->redirect("/admin/orders/create/buyer_id:{$buyer->id}" . ($product_category_id ? "/product_category_id:{$product_category_id}" : '') . ($keyword ? "/keyword:{$keyword}" : '') . ($page && $page > 1 ? "/page:{$page}" : ''));
@@ -658,7 +661,7 @@ QUERY;
 		$keyword             = $this->dispatcher->getParam('keyword');
 		$page                = $this->dispatcher->getParam('page', 'int');
 		$user_product_id     = $this->request->getPost('user_product_id', 'int');
-		if ($this->session->has('order')) {
+		if ($this->session->has('order') && $user_product_id) {
 			$new_order = unserialize($this->session->get('order'));
 			$query     = <<<QUERY
 				SELECT
@@ -755,7 +758,7 @@ QUERY
 				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if ($coupon &&
 					(($coupon->maximum_usage && $coupon->total_usage < $coupon->maximum_usage) &&
-					(!$coupon->multiple_use && $coupon->personal_usage < 1))) {
+					($coupon->multiple_use || $coupon->personal_usage < 1))) {
 					$new_order->put('coupon_id', $coupon->id);
 				}
 			}

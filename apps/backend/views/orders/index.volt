@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"><h2>Order List</h2></a>
+				<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}"><h2>Order List</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}"">Order List</a></span></li>
+						<li><span><a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}"">Order List</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -24,33 +24,28 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="GET" action="/admin/orders" id="search">
+				{{ form('/admin/orders/index', 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<i class="fa fa-calendar"></i> Dari Tanggal :<br>
-								<input type="text" name="from" value="{{ from }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Dari Tanggal">
+								{{ text_field('from', 'value': from, 'data-plugin-datepicker': true, 'data-date-format': 'yyyy-mm-dd', 'class': 'form form-control text-center date', 'size': '10', 'placeholder': 'Dari Tanggal') }}
 							</td>
 							<td>
 								<i class="fa fa-calendar"></i> Sampai Tanggal :<br>
-								<input type="text" name="to" value="{{ to }}" data-plugin-datepicker data-date-format="yyyy-mm-dd" class="form form-control text-center date" size="10" placeholder="Sampai Tanggal">
+								{{ text_field('to', 'value': to, 'data-plugin-datepicker': true, 'data-date-format': 'yyyy-mm-dd', 'class': 'form form-control text-center date', 'size': '10', 'placeholder': 'Sampai Tanggal') }}
 							</td>
 							<td>
 								<i class="fa fa-id-badge"></i> Nomor Order :<br>
-								<input type="text" name="code" value="{{ code }}" class="form form-control text-center" size="6" placeholder="Nomor Order">
+								{{ text_field('code', 'value': code, 'class': 'form form-control text-center', 'size': 6, 'placeholder': 'Nomor Order') }}
 							</td>
 							<td>
 								<i class="fa fa-tag"></i> Status :<br>
-								<select name="status" class="form form-control">
-									<option value="">Any Status</option>
-									{% for value, label in status %}
-									<option value="{{ value }}"{% if current_status === value %} selected{% endif %}>{{ label }}</option>
-									{% endfor %}
-								</select>
+								{{ select_static('status', order_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- Semua -', 'emptyValue': '') }}
 							</td>
 							<td>
 								<i class="fa fa-mobile"></i> HP Merchant :<br>
-								<input type="text" name="mobile_phone" value="{{ mobile_phone }}" class="form form-control text-center" size="6" placeholder="HP Merchant">
+								{{ text_field('mobile_phone', 'value': mobile_phone, 'class': 'form form-control text-center', 'size': 6, 'placeholder': 'HP Merchant') }}
 							</td>
 							<td>
 								<br>
@@ -58,10 +53,10 @@
 							</td>
 						</tr>
 					</table>
-				</form>
+				{{ endForm() }}
 				<table class="table table-striped">
 					<tr>
-						<td class="text-center"><b>Total Order : {{ page.total_items }}</b></td>
+						<td class="text-center"><b>Total Order : {{ pagination.total_items }}</b></td>
 						<td class="text-center"><b>Total Tagihan : Rp. {{ total_final_bill | number_format }}</b></td>
 						<td class="text-center"><b>Total Biaya Admin : Rp. {{ total_admin_fee | number_format }}</b></td>
 					</tr>
@@ -129,15 +124,15 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if page.total_pages > 1 %}
+				{% if pagination.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
+							{% if i == pagination.current %}
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/orders/index{% if from %}/from:{{ from }}{% endif %}{% if to %}/to:{{ to }}{% endif %}{% if code %}/code:{{ code }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if mobile_phone %}/mobile_phone:{{ mobile_phone }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -151,16 +146,14 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let search = document.getElementById('search'), url = '/admin/orders/index', replacement = {' ': '+', ':': '', '\/': ''};
-	search.addEventListener('submit', event => {
-		event.preventDefault();
+	document.querySelector('#search').addEventListener('submit', event => {
+		let url = event.target.action, replacement = {' ': '+', ':': '', '\/': ''};
+		event.preventDefault(),
 		['from', 'to', 'code', 'status', 'mobile_phone'].forEach(function(attribute) {
-			if (search[attribute].value) {
-				url += '/' + attribute + ':' + search[attribute].value.trim().replace(/ |:|\//g, match => {
-					return replacement[match];
-				});
-			}
-			location.href = url;
-		}, false);
-	});
+			event.target[attribute].value && (url += '/' + attribute + ':' + event.target[attribute].value.trim().replace(/ |:|\//g, match => {
+				return replacement[match]
+			}));
+		}),
+		location.href = url
+	}, false)
 </script>

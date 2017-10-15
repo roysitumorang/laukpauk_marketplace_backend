@@ -25,14 +25,14 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="POST" action="/admin/orders/create/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+				{{ form('/admin/orders/create/buyer_id:' ~ buyer.id ~ (product_category_id ? '/product_category_id:' ~ product_category_id : '') ~ (keyword ? '/keyword:' ~ keyword : '') ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<b><font color="#000099"><i class="fa fa-user"></i> Pembeli :</font></b>
 							</td>
 							<td>
-								<input type="text" name="name" value="{{ buyer.name }}" placeholder="Nama" class="form-control">
+								{{ text_field('name', 'value': buyer.name, 'placeholder': 'Nama', 'class': 'form-control') }}
 							</td>
 							<td>
 								<b><font color="#000099"><i class="fa fa-mobile"></i> Nomor HP :</font></b>
@@ -46,7 +46,7 @@
 								<b><font color="#000099"><i class="fa fa-map-marker"></i> Alamat :</font></b>
 							</td>
 							<td colspan="3">
-								<input type="text" name="address" value="{{ buyer.address }}" placeholder="Alamat" class="form-control">
+								{{ text_field('address', 'value': buyer.address, 'placeholder': 'Alamat', 'class': 'form-control') }}
 							</td>
 						</tr>
 						<tr>
@@ -69,11 +69,7 @@
 								<b><font color="#000099"><i class="fa fa-calendar"></i> Pengantaran :</font></b>
 							</td>
 							<td>
-								<select name="scheduled_delivery" id="scheduled_delivery">
-									{% for delivery_datetime in delivery_datetimes %}
-										<option value="{{ delivery_datetime }}"{% if delivery_datetime == order.scheduled_delivery %} selected{% endif %}>{{ delivery_datetime }}</option>
-									{% endfor %}
-								</select>
+								{{ select_static('scheduled_delivery', delivery_datetimes, 'value': order.scheduled_delivery) }}
 							</td>
 							<td>
 								{% if coupons %}
@@ -82,12 +78,7 @@
 							</td>
 							<td>
 								{% if coupons %}
-									<select name="coupon_id" id="coupon_id">
-										<option value=""></option>
-										{% for coupon in coupons %}
-											<option value="{{ coupon.id }}"{% if coupon.id == order.coupon_id %} selected{% endif %}>{{ coupon.code }} / diskon {% if coupon.discount_type == 1 %}{{ coupon.price_discount | number_format }}{% else %}{{ coupon.price_discount }} %{% endif %}{% if coupon.minimum_purchase %} / min. order {{ coupon.minimum_purchase | number_format }}{% endif %})</option>
-										{% endfor %}
-									</select>
+									{{ select_static('coupon_id', coupons, 'value': order.coupon_id, 'useEmpty': true, 'emptyText': '-', 'emptyValue': '') }}
 								{% endif %}
 							</td>
 						</tr>
@@ -113,14 +104,7 @@
 								{% endif %}
 							</td>
 							<td class="text-nowrap">
-								<select name="quantity[{{ item.id }}]" class="quantity" data-id="{{ item.id }}">
-								{% for i in 1..10 %}
-									{% if i > item.stock %}
-										{% break %}
-									{% endif %}
-									<option value="{{ i }}"{% if i == item.quantity%} selected{% endif %}>{{ i }}</option>
-								{% endfor %}
-								</select>
+								{{ select_static('quantity[' ~ item.id ~ ']', item.quantities, 'value': item.quantity, 'id': 'quantity_' ~ item.id, 'class': 'quantity', 'data-id': item.id) }}
 								x Rp. {{ item.price | number_format }} @ {{ item.stock_unit }}
 							</td>
 							<td><b>Rp. {{ (item.quantity * item.price) | number_format }}</b></td>
@@ -172,31 +156,26 @@
 						</tr>
 						{% endif %}
 					</table>
-				</form>
-				<form method="GET" action="/admin/orders/create/buyer_id:{{ buyer.id }}" id="search">
+				{{ endForm() }}
+				{{ form('/admin/orders/create/buyer_id:' ~ buyer.id, 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td bgcolor="#e0ebeb">
 								<strong>Kategori Produk</strong>
-								<select name="product_category_id">
-									<option value="">Semua Kategori</option>
-									{% for item in product_categories %}
-										<option value="{{ item.id }}"{% if item.id == product_category_id %} selected{% endif %}>{{ item.name }} ({{ item.total_products }})</option>
-									{% endfor %}
-								</select>
+								{{ select('product_category_id', product_categories, 'using': ['id', 'name'], 'value': product_category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '') }}
 								<strong>Nama Produk</strong>
-								<input type="text" name="keyword" value="{{ keyword }}" placeholder="Nama produk">
+								{{ text_field('keyword', 'value': keyword, 'placeholder': 'Nama produk') }}
 								<button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i> Cari</button>
 							</td>
 						</tr>
 					</table>
-				</form>
+				{{ endForm() }}
 				{% if products %}
 					<div class="row">
 					{% for product in products %}
 						<div class="col-md-4 panel">
 							<div class="panel-body panel-featured text-center">
-								<form method="POST" action="/admin/orders/add_product/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+								{{ form('/admin/orders/add_product/buyer_id:' ~ buyer.id ~ (product_category_id ? '/product_category_id:' ~ product_category_id : '') ~ (keyword ? '/keyword:' ~ keyword : '') ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
 									<img src="/assets/image/{% if product.picture %}{{ product.thumbnails[0] }}{% else %}no_picture_120.png{% endif %}" border="0" width="150" height="150">
 									<br>
 									<strong>{{ product.name }}</strong>
@@ -209,17 +188,10 @@
 									<br>
 									<strong><i class="fa fa-map-marker"></i> {{ product.address }}</strong>
 									<br>
-									<input type="hidden" name="user_product_id" value="{{ product.id }}">
-									<select name="quantity">
-									{% for i in 1..10 %}
-										{% if i > product.stock %}
-											{% break %}
-										{% endif %}
-										<option value="{{ i }}">{{ i }}</option>
-									{% endfor %}
-									</select>
+									{{ hidden_field('user_product_id', 'value': product.id) }}
+									{{ select_static('quantity', product.quantities) }}
 									<button type="submit" class="btn btn-primary"><i class="fa fa-cart-plus"></i></button>
-								</form>
+								{{ endForm() }}
 							</div>
 						</div>
 					{% endfor %}
@@ -229,15 +201,15 @@
 						<div class="panel-body">Belum ada produk</div>
 					</div>
 				{% endif %}
-				{% if page.total_pages > 1 %}
+				{% if pagination.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
+							{% if i == pagination.current %}
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/orders/create/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
+								<a href="/admin/orders/create/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -251,77 +223,69 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let search = document.getElementById('search'), coupon_id = document.getElementById('coupon_id'), replacement = {' ': '+', ':': '', '\/': ''};
-	search.addEventListener('submit', event => {
-		let url = search.action;
-		if (search.product_category_id.value) {
-			url += '/product_category_id:' + search.product_category_id.value;
-		}
-		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
-				return replacement[match];
-			});
-		}
+	let coupon = document.querySelector('#coupon_id'), scheduled_delivery = document.querySelector('#scheduled_delivery');
+	document.querySelector('#search').addEventListener('submit', event => {
+		let url = event.target.action, replacement = {' ': '+', ':': '', '\/': ''};
 		event.preventDefault(),
+		event.target.product_category_id.value && (url += '/product_category_id:' + event.target.product_category_id.value),
+		event.target.keyword.value && (url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+			return replacement[match]
+		})),
 		location.href = url
-	}, false)
-	if (coupon_id) {
-		coupon_id.onchange = () => {
-			let form = document.createElement('form'), input = document.createElement('input');
-			form.method = 'POST',
-			form.action = '/admin/orders/apply_coupon/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
-			input.type = 'hidden',
-			input.name = 'coupon_id',
-			input.value = coupon_id.value,
-			form.appendChild(input),
-			document.body.appendChild(form),
-			form.submit()
-		}
-	}
-	if (scheduled_delivery) {
-		scheduled_delivery.onchange = () => {
-			let form = document.createElement('form'), input = document.createElement('input');
-			form.method = 'POST',
-			form.action = '/admin/orders/set_delivery/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
-			input.type = 'hidden',
-			input.name = 'scheduled_delivery',
-			input.value = scheduled_delivery.value,
-			form.appendChild(input),
-			document.body.appendChild(form),
-			form.submit()
-		}
-	}
+	}, false),
+	coupon && (coupon.addEventListener('change', event => {
+		let form = document.createElement('form'), input = document.createElement('input');
+		form.method = 'POST',
+		form.action = '/admin/orders/apply_coupon/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}',
+		input.type = 'hidden',
+		input.name = event.target.name,
+		input.value = event.target.value,
+		form.appendChild(input),
+		document.body.appendChild(form),
+		form.submit()
+	}, false)),
+	scheduled_delivery && (scheduled_delivery.addEventListener('change', event => {
+		let form = document.createElement('form'), input = document.createElement('input');
+		form.method = 'POST',
+		form.action = '/admin/orders/set_delivery/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}',
+		input.type = 'hidden',
+		input.name = event.target.name,
+		input.value = event.target.value,
+		form.appendChild(input),
+		document.body.appendChild(form),
+		form.submit()
+	}, false)),
 	document.querySelectorAll('.remove').forEach(product => {
-		product.onclick = () => {
+		product.addEventListener('click', event => {
 			if (!confirm('Anda yakin ingin menghapus produk ini ?')) {
 				return !1
 			}
 			let form = document.createElement('form'), input = document.createElement('input');
 			form.method = 'POST',
-			form.action = '/admin/orders/remove_product/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
+			form.action = '/admin/orders/remove_product/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}',
 			input.type = 'hidden',
 			input.name = 'user_product_id',
-			input.value = product.dataset.id,
+			input.value = event.target.parentNode.dataset.id,
 			form.appendChild(input),
 			document.body.appendChild(form),
 			form.submit()
-		}
+		}, false)
 	}),
 	document.querySelectorAll('.quantity').forEach(product => {
-		product.onchange = () => {
+		product.addEventListener('click', event => {
 			let form = document.createElement('form'), input_id = document.createElement('input'), input_quantity = document.createElement('input');
 			form.method = 'POST',
-			form.action = '/admin/orders/add_product/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}',
+			form.action = '/admin/orders/add_product/buyer_id:{{ buyer.id }}{% if product_category_id %}/product_category_id:{{ product_category_id }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}',
 			input_id.type = 'hidden',
 			input_id.name = 'user_product_id',
-			input_id.value = product.dataset.id,
+			input_id.value = event.target.parentNode.dataset.id,
 			input_quantity.type = 'hidden',
 			input_quantity.name = 'quantity',
-			input_quantity.value = product.value,
+			input_quantity.value = event.target.parentNode.value,
 			form.appendChild(input_id),
 			form.appendChild(input_quantity),
 			document.body.appendChild(form),
 			form.submit()
-		}
+		}, false)
 	})
 </script>
