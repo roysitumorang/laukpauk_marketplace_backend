@@ -24,25 +24,20 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="GET" action="/admin/coupons/index" id="search">
+				{{ form('/admin/coupons/index', 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<b>Cari berdasarkan :</b>
-								<input type="text" name="keyword" value="{{ keyword }}" size="30" placeholder="Kode Kupon">
+								{{ text_field('keyword', 'value': keyword, 'size': 30, 'placeholder': 'Kode Kupon') }}
 								<b>Status :</b>
-								<select name="status">
-									<option value="">All</option>
-									{% for key, value in status %}
-									<option value="{{ key }}"{% if current_status == key %} selected{% endif %}>{{ value }}</option>
-									{% endfor %}
-								</select>
+								{{ select('status', coupon_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
 								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
 								<a type="button" href="/admin/coupons/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah Kupon</a>
 							</td>
 						</tr>
 					</table>
-				</form>
+				{{ endForm() }}
 				<table class="table table-striped">
 					<thead>
 						<tr>
@@ -96,15 +91,15 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if page.total_pages > 1 %}
+				{% if pagination.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;
 						{% for i in pages %}
-							{% if i == page.current %}
-							<b>{{ i }}</b>
+							{% if i == pagination.current %}
+								<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/coupons/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if i > 1%}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/coupons/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if i > 1%}/page:{{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -118,26 +113,23 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
 	document.querySelectorAll('.status').forEach(link => {
-		link.onclick = () => {
+		link.addEventListener('click', event => {
 			let form = document.createElement('form'), input = document.createElement('input');
+			event.preventDefault(),
 			form.method = 'POST',
-			form.action = '/admin/coupons/' + link.dataset.id + '/toggle_status',
+			form.action = '/admin/coupons/' + event.target.parentNode.dataset.id + '/toggle_status',
 			document.body.appendChild(form),
 			form.submit()
-		}
+		}, false)
 	}),
-	search.addEventListener('submit', event => {
-		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
-				return replacement[match]
-			})
-		}
-		if (search.status.value) {
-			url += '/status:' + search.status.value
-		}
+	document.querySelector('#search').addEventListener('submit', event => {
+		let url = event.target.action, replacement = {' ': '+', ':': '', '\/': ''};
 		event.preventDefault(),
+		event.target.keyword.value && (url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+			return replacement[match]
+		})),
+		event.target.status.value && (url += '/status:' + event.target.status.value),
 		location.href = url
 	}, false)
 </script>

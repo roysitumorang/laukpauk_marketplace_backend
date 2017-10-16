@@ -2,8 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Coupon;
-use Application\Models\Release;
+use Application\Models\{Coupon, Order, Release};
 use DateTime;
 use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\QueryBuilder;
@@ -25,8 +24,9 @@ class CouponsController extends ControllerBase {
 	}
 
 	function indexAction() {
+		$coupons        = [];
 		$limit          = $this->config->per_page;
-		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page   = $this->dispatcher->getParam('page', 'int', 1);
 		$offset         = ($current_page - 1) * $limit;
 		$keyword        = $this->dispatcher->getParam('keyword', 'string');
 		$current_status = $this->dispatcher->getParam('status', 'int');
@@ -46,9 +46,9 @@ class CouponsController extends ControllerBase {
 				'minimum_version' => "STRING_AGG(DISTINCT b.version, '')",
 				'total_usage'     => 'SUM(c.discount) / a.price_discount',
 			])
-			->from(['a' => 'Application\Models\Coupon'])
-			->leftJoin('Application\Models\Release', 'a.release_id = b.id', 'b')
-			->leftJoin('Application\Models\Order', 'a.id = c.coupon_id AND c.status = 1', 'c')
+			->from(['a' => Coupon::class])
+			->leftJoin(Release::class, 'a.release_id = b.id', 'b')
+			->leftJoin(Order::class, 'a.id = c.coupon_id AND c.status = 1', 'c')
 			->groupBy('a.id')
 			->orderBy('a.id DESC');
 		if ($keyword) {
@@ -57,33 +57,31 @@ class CouponsController extends ControllerBase {
 		if (ctype_digit($current_status)) {
 			$builder->andWhere("a.status = :status:", ['status' => $current_status]);
 		}
-		$paginator = new QueryBuilder([
+		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]);
-		$page    = $paginator->getPaginate();
-		$pages   = $this->_setPaginationRange($page);
-		$coupons = [];
-		foreach ($page->items as $item) {
+		]))->getPaginate();
+		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('multiple_use', Coupon::USAGE_TYPES[$item->multiple_use]);
 			$item->writeAttribute('effective_date_start', $this->_date_formatter->format(new DateTime($item->effective_date, $this->currentDatetime->getTimezone())));
 			$item->writeAttribute('effective_date_end', $this->_date_formatter->format((new DateTime($item->expiry_date, $this->currentDatetime->getTimezone()))->modify('-1 day')));
 			$coupons[] = $item;
 		}
-		$this->view->coupons        = $coupons;
-		$this->view->page           = $page;
-		$this->view->pages          = $pages;
-		$this->view->status         = Coupon::STATUS;
-		$this->view->keyword        = $keyword;
-		$this->view->current_status = $current_status;
-		$this->view->current_date   = $this->currentDatetime->format('Y-m-d');
+		$this->view->setVars([
+			'coupons'        => $coupons,
+			'pagination'     => $pagination,
+			'pages'          => $this->_setPaginationRange($pagination),
+			'coupon_status'  => Coupon::STATUS,
+			'keyword'        => $keyword,
+			'current_status' => $current_status,
+			'current_date'   => $this->currentDatetime->format('Y-m-d'),
+		]);
 	}
 
 	function showAction($id) {
-		$coupon = Coupon::findFirst($id);
-		if (!$coupon) {
+		if (!$coupon = Coupon::findFirst($id)) {
 			$this->flashSession->error('Kupon tidak ditemukan.');
 			return $this->response->redirect('/admin/coupons');
 		}
@@ -96,7 +94,7 @@ class CouponsController extends ControllerBase {
 	function createAction() {
 		$coupon = new Coupon;
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($coupon);
+			$this->_assignModelAttributes($coupon);
 			if ($coupon->validation() && $coupon->create()) {
 				$this->flashSession->success('Penambahan kupon berhasil.');
 				return $this->response->redirect('/admin/coupons');
@@ -106,16 +104,16 @@ class CouponsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_form($coupon);
+		$this->_prepareForm($coupon);
 	}
 
 	function updateAction($id) {
-		if (!filter_var($id, FILTER_VALIDATE_INT) || !($coupon = Coupon::findFirst($id))) {
+		if (!$coupon = Coupon::findFirst($id)) {
 			$this->flashSession->error('Kupon tidak ditemukan.');
 			return $this->dispatcher->forward('coupons');
 		}
 		if ($this->request->isPost()) {
-			$this->_set_model_attributes($coupon);
+			$this->_assignModelAttributes($coupon);
 			if ($coupon->validation() && $coupon->update()) {
 				$this->flashSession->success('Update kupon berhasil.');
 				return $this->response->redirect('/admin/coupons');
@@ -125,45 +123,46 @@ class CouponsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->_prepare_form($coupon);
+		$this->_prepareForm($coupon);
 	}
 
 	function toggleStatusAction($id) {
 		$keyword = $this->dispatcher->getParam('keyword');
 		$status  = $this->dispatcher->getParam('status', 'int');
-		$page    = $this->dispatcher->getParam('page', 'int');
+		$page    = $this->dispatcher->getParam('page', 'int', 1);
 		if (!$this->request->isPost() || !($coupon = Coupon::findFirst(['id = ?0 AND expiry_date > ?1', 'bind' => [$id, $this->currentDatetime->format('Y-m-d')]]))) {
 			$this->flashSession->error('Kupon tidak ditemukan.');
 		} else {
 			$coupon->update(['status' => $coupon->status ? 0 : 1]);
 		}
-		return $this->response->redirect("/admin/coupons/index" . ($keyword ? "/keyword:{$keyword}" : '') . ($status ? "/status:{$status}" : '') . ($page ? "/page:{$page}" : ''));
+		return $this->response->redirect("/admin/coupons/index" . ($keyword ? "/keyword:{$keyword}" : '') . ($status ? "/status:{$status}" : '') . ($page > 1 ? "/page:{$page}" : ''));
 	}
 
-	private function _prepare_form(Coupon &$coupon) {
-		$this->view->coupon         = $coupon;
-		$this->view->discount_types = Coupon::DISCOUNT_TYPES;
-		$this->view->status         = Coupon::STATUS;
-		$this->view->usage_types    = Coupon::USAGE_TYPES;
-		$this->view->releases       = Release::find(["user_type = 'buyer'", 'columns' => 'id, version', 'order' => 'version DESC']);
+	private function _prepareForm(Coupon &$coupon) {
+		$this->view->setVars([
+			'coupon'         => $coupon,
+			'discount_types' => Coupon::DISCOUNT_TYPES,
+			'coupon_status'  => Coupon::STATUS,
+			'usage_types'    => Coupon::USAGE_TYPES,
+			'releases'       => Release::find(["user_type = 'buyer'", 'columns' => 'id, version', 'order' => 'version DESC']),
+		]);
 	}
 
-	private function _set_model_attributes(Coupon &$coupon) {
+	private function _assignModelAttributes(Coupon &$coupon) {
 		if (!$coupon->id) {
 			$coupon->code = $this->request->getPost('code');
 		}
-		$release_id = $this->request->getPost('release_id', 'int');
-		$coupon->assign([
-			'price_discount'   => $this->request->getPost('price_discount'),
-			'discount_type'    => $this->request->getPost('discount_type'),
-			'effective_date'   => $this->request->getPost('effective_date'),
-			'expiry_date'      => $this->request->getPost('expiry_date'),
-			'minimum_purchase' => $this->request->getPost('minimum_purchase'),
-			'status'           => $this->request->getPost('status'),
-			'multiple_use'     => $this->request->getPost('multiple_use'),
-			'release_id'       => $release_id ? Release::findFirst(['user_type = ?0 AND id = ?1', 'bind' => ['buyer', $release_id]])->id : null,
-			'maximum_usage'    => $this->request->getPost('maximum_usage'),
-			'description'      => $this->request->getPost('description'),
+		$coupon->assign($_POST, null, [
+			'price_discount',
+			'discount_type',
+			'effective_date',
+			'expiry_date',
+			'minimum_purchase',
+			'status',
+			'multiple_use',
+			'release_id',
+			'maximum_usage',
+			'description',
 		]);
 	}
 }

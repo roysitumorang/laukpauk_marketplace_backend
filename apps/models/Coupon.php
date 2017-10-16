@@ -3,10 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Date;
-use Phalcon\Validation\Validator\Digit;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\{Date, Digit, InclusionIn, PresenceOf};
 
 class Coupon extends ModelBase {
 	const DISCOUNT_TYPES = ['%', 'Rp'];
@@ -101,5 +98,9 @@ class Coupon extends ModelBase {
 			],
 		]));
 		return $this->validate($validator);
+	}
+
+	function beforeSave() {
+		$this->release_id = $this->release_id ?: null;
 	}
 }
