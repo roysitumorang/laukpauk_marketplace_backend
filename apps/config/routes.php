@@ -89,9 +89,9 @@ $di->set('router', function() {
 	$apiV3Buyer->add('(/merchants/:int)?(/categories/:int)?/products/index/:params', [
 		'controller'  => 'products',
 		'action'      => 'index',
-		'merchant_id' => 1,
-		'category_id' => 2,
-		'params'      => 3,
+		'merchant_id' => 2,
+		'category_id' => 4,
+		'params'      => 5,
 	]);
 
 	$apiV3Buyer->add('/:controller', [
@@ -134,14 +134,6 @@ $di->set('router', function() {
 		'controller' => 'posts',
 		'action'     => 'show',
 		'params'     => 1,
-	]);
-
-	$apiV3Merchant->add('(/merchants/:int)?(/categories/:int)?/products/index/:params', [
-		'controller'     => 'products',
-		'action'         => 'index',
-		'merchant_id'    => 1,
-		'category_id'    => 2,
-		'params'         => 3,
 	]);
 
 	$apiV3Merchant->add('/:controller', [
