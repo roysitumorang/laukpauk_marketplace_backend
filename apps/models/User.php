@@ -446,16 +446,24 @@ class User extends ModelBase {
 
 	function beforeSave() {
 		$this->delivery_hours = implode(',', array_filter($this->delivery_hours)) ?: null;
-		$this->thumbnails     = implode(',', array_filter($this->thumbnails)) ?: null;
-		if ($this->new_avatar && !$this->avatar) {
-			$random = new Random;
-			do {
-				$this->avatar = $random->hex(16) . '.jpg';
-				if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
-					break;
-				}
-			} while (1);
+		if ($this->new_avatar) {
+			if (!$this->avatar) {
+				$random = new Random;
+				do {
+					$this->avatar = $random->hex(16) . '.jpg';
+					if (!is_readable($this->_upload_config->path . $this->avatar) && !static::findFirstByAvatar($this->avatar)) {
+						break;
+					}
+				} while (1);
+			} else {
+				unlink($this->_upload_config->path . $this->avatar);
+			}
+			foreach ($this->thumbnails as $thumbnail) {
+				unlink($this->_upload_config->path . $thumbnail);
+			}
+			$this->thumbnails = [];
 		}
+		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
 		if ($this->role_id != Role::MERCHANT) {
 			$this->accumulation_divisor = 0;
 		}
@@ -499,7 +507,7 @@ class User extends ModelBase {
 		$thumbnail = strtr($avatar, ['.jpg' => $width . $height . '.jpg']);
 		if (!in_array($thumbnail, $this->thumbnails)) {
 			$imagick = new Imagick($this->_upload_config->path . $avatar);
-			$imagick->resizeImage($width, $height, Imagick::FILTER_LANCZOS, 1);
+			$imagick->cropThumbnailImage($width, $height);
 			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 			$imagick->writeImage($this->_upload_config->path . $thumbnail);
 			if ($this->avatar) {

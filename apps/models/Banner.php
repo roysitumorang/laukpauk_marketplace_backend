@@ -81,7 +81,7 @@ class Banner extends ModelBase {
 		$random = new Random;
 		do {
 			$this->file = $random->hex(16) . '.jpg';
-			if (!static::findFirstByFile($this->file)) {
+			if (!is_readable($this->_upload_config->path . $this->file) && !static::findFirstByFile($this->file)) {
 				break;
 			}
 		} while (1);
@@ -125,7 +125,7 @@ class Banner extends ModelBase {
 		$thumbnail = strtr($this->file, ['.jpg' => $width . $height . '.jpg']);
 		if (!in_array($thumbnail, $this->thumbnails)) {
 			$image = new Imagick($this->_upload_config->path . $this->file);
-			$image->thumbnailImage($width, $height);
+			$image->cropThumbnailImage($width, $height);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 			$image->writeImage($this->_upload_config->path . $thumbnail);
 			$this->thumbnails[] = $thumbnail;

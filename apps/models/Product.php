@@ -130,7 +130,7 @@ class Product extends ModelBase {
 				$random = new Random;
 				do {
 					$this->picture = $random->hex(16) . '.jpg';
-					if (!static::findFirstByPicture($this->picture)) {
+					if (!is_readable($this->_upload_config->path . $this->picture) && !static::findFirstByPicture($this->picture)) {
 						break;
 					}
 				} while (1);
