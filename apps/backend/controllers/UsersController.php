@@ -87,6 +87,7 @@ class UsersController extends ControllerBase {
 			$item->writeAttribute('status', $user_status[$item->status]);
 			$users[] = $item;
 		}
+		asort($user_status);
 		$this->view->setVars([
 			'menu'                  => $this->_menu('Members'),
 			'users'                 => $users,

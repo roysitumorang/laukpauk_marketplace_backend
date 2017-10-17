@@ -44,7 +44,7 @@
 									</td>
 									<td class="text-nowrap"><i class="fa fa-users"></i> Role</td>
 									<td>
-										{{ select_static('role_id', roles, 'using': ['id', 'name'], 'value': current_role) }}
+										{{ select_static('role_id', roles, 'using': ['id', 'name'], 'value': current_role, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
 									</td>
 								</tr>
 								<tr>
