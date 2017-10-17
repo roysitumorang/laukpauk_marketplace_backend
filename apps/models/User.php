@@ -3,9 +3,10 @@
 namespace Application\Models;
 
 use Imagick;
+use Phalcon\Http\Request\File;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Callback, Between, Confirmation, Date, Email, File, Numericality, PresenceOf, Regex, Uniqueness};
+use Phalcon\Validation\Validator\{Callback, Between, Confirmation, Date, Email, Numericality, PresenceOf, Regex, Uniqueness};
 
 class User extends ModelBase {
 	const STATUS = [
@@ -208,14 +209,14 @@ class User extends ModelBase {
 		}
 	}
 
-	function setNewAvatar(array $new_avatar) {
-		if ($new_avatar['tmp_name'] && $new_avatar['size'] && !$new_avatar['error']) {
+	function setNewAvatar(File $new_avatar) {
+		if ($new_avatar->getTempName() && $new_avatar->getSize() && !$new_avatar->getError()) {
 			$this->new_avatar = $new_avatar;
 		}
 	}
 
 	function setThumbnails(array $thumbnails = null) {
-		$this->thumbnails = array_filter($thumbnails ?? []);
+		$this->thumbnails = $thumbnails;
 	}
 
 	function setOpenOnSunday($open_on_sunday) {
@@ -427,11 +428,17 @@ class User extends ModelBase {
 			'message' => 'deposit harus dalam bentuk angka',
 		]));
 		if ($this->new_avatar) {
-			$validator->add('new_avatar', new File([
-				'maxSize'      => $max_size,
-				'messageSize'  => 'ukuran file maksimal ' . $max_size,
-				'allowedTypes' => ['image/jpeg', 'image/png'],
-				'messageType'  => 'format gambar harus JPG atau PNG',
+			$validator->add('new_avatar', new Callback([
+				'callback' => function($data) use($max_size) {
+					return $data->new_avatar->getSize() <= intval($max_size) * pow(1024, 2);
+				},
+				'message' => 'ukuran gambar maksimal ' . $max_size,
+			]));
+			$validator->add('new_avatar', new Callback([
+				'callback' => function($data) {
+					return in_array($data->new_avatar->getRealType(), ['image/jpeg', 'image/png']);
+				},
+				'message' => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		return $this->validate($validator);
@@ -439,6 +446,7 @@ class User extends ModelBase {
 
 	function beforeSave() {
 		$this->delivery_hours = implode(',', array_filter($this->delivery_hours)) ?: null;
+		$this->thumbnails     = implode(',', array_filter($this->thumbnails)) ?: null;
 		if ($this->new_avatar && !$this->avatar) {
 			$random = new Random;
 			do {
@@ -453,25 +461,16 @@ class User extends ModelBase {
 		}
 	}
 
-	function beforeUpdate() {
-		if ($this->new_avatar) {
-			foreach ($this->thumbnails as $thumbnail) {
-				unlink($this->_upload_config->path . $thumbnail);
-			}
-			$this->thumbnails = [];
-		}
-		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
-	}
-
 	function afterSave() {
-		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
-		if ($this->new_avatar) {
-			$imagick = new Imagick($this->new_avatar['tmp_name']);
-			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
-			$imagick->writeImage($this->_upload_config->path . $this->avatar);
-			unlink($this->new_avatar['tmp_name']);
-		}
+		$this->thumbnails     = array_filter(explode(',', $this->thumbnails));
 		$this->delivery_hours = array_filter(explode(',', $this->delivery_hours));
+		if ($this->new_avatar) {
+			$avatar = $this->_upload_config->path . $this->avatar;
+			$this->new_avatar->moveTo($avatar);
+			$imagick = new Imagick($avatar);
+			$imagick->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$imagick->writeImage($avatar);
+		}
 		if ($this->role_id == Role::MERCHANT) {
 			$this->getDI()->getDb()->execute("UPDATE users SET keywords = TO_TSVECTOR('simple', company) WHERE id = {$this->id}");
 		}
@@ -505,7 +504,6 @@ class User extends ModelBase {
 			$imagick->writeImage($this->_upload_config->path . $thumbnail);
 			if ($this->avatar) {
 				$this->thumbnails[] = $thumbnail;
-				$this->setThumbnails($this->thumbnails);
 				$this->skipAttributes(['updated_by', 'updated_at']);
 				$this->update();
 			}
@@ -515,9 +513,7 @@ class User extends ModelBase {
 
 	function deleteAvatar() {
 		$this->beforeDelete();
-		$this->avatar = null;
-		$this->setThumbnails([]);
-		$this->save();
+		$this->update(['avatar' => null, 'thumbnails' => null]);
 	}
 
 	function activate() {

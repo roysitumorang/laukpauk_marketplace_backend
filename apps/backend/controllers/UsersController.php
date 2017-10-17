@@ -418,7 +418,7 @@ QUERY
 		$this->view->subdistrict_id = $subdistrict_id;
 	}
 
-	private function _assignModelAttributes(&$user) {
+	private function _assignModelAttributes(User &$user) {
 		if (($village_id = $this->request->getPost('village_id', 'int')) && Village::count(['id = ?0', 'bind' => [$village_id]])) {
 			$user->village_id = $village_id;
 		}
@@ -426,7 +426,7 @@ QUERY
 			$user->role_id = $role_id;
 		}
 		if ($user->role_id == Role::MERCHANT) {
-			$user->assign($_POST, null, [
+			$user->assign($this->request->getPost(), null, [
 				'deposit',
 				'delivery_hours',
 				'max_delivery_distance',
@@ -434,7 +434,7 @@ QUERY
 				'delivery_rate',
 			]);
 		}
-		$user->assign(array_merge($_POST, $_FILES), null, [
+		$user->assign($this->request->getPost(), null, [
 			'minimum_purchase',
 			'admin_fee',
 			'accumulation_divisor',
@@ -447,7 +447,6 @@ QUERY
 			'company',
 			'gender',
 			'date_of_birth',
-			'new_avatar',
 			'open_on_sunday',
 			'open_on_monday',
 			'open_on_tuesday',
@@ -459,5 +458,10 @@ QUERY
 			'business_closing_hour',
 			'merchant_note',
 		]);
+		if ($this->request->hasFiles()) {
+			$user->setNewAvatar(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
+				return $v->getKey() == 'new_avatar';
+			}, ARRAY_FILTER_USE_BOTH)));
+		}
 	}
 }
