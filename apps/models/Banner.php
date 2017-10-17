@@ -3,6 +3,7 @@
 namespace Application\Models;
 
 Use Imagick;
+use Phalcon\Http\Request\File;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\Callback;
@@ -40,8 +41,8 @@ class Banner extends ModelBase {
 		$this->published = $published;
 	}
 
-	function setNewFile(array $new_file) {
-		if ($new_file['tmp_name'] && $new_file['size'] && !$new_file['error']) {
+	function setNewFile(File $new_file) {
+		if ($new_file->getTempName() && $new_file->getSize() && !$new_file->getError()) {
 			$this->new_file = $new_file;
 		}
 	}
@@ -56,19 +57,19 @@ class Banner extends ModelBase {
 		if (!$this->id || $this->new_file) {
 			$validator->add('new_file', new Callback([
 				'callback' => function($data) {
-					return $data->new_file['tmp_name'] && is_uploaded_file($data->new_file['tmp_name']);
+					return $data->new_file instanceof File && $data->new_file->getTempName() && is_uploaded_file($data->new_file->getTempName());
 				},
 				'message' => 'gambar harus diisi',
 			]));
 			$validator->add('new_file', new Callback([
 				'callback' => function($data) use($max_size) {
-					return filesize($data->new_file['tmp_name']) <= intval($max_size) * pow(1024, 2);
+					return $data->new_file instanceof File && $data->new_file->getSize() <= intval($max_size) * pow(1024, 2);
 				},
 				'message' => 'ukuran gambar maksimal ' . $max_size,
 			]));
 			$validator->add('new_file', new Callback([
 				'callback' => function($data) {
-					return in_array(mime_content_type($data->new_file['tmp_name']), ['image/jpeg', 'image/png']);
+					return $data->new_file instanceof File && in_array($data->new_file->getRealType(), ['image/jpeg', 'image/png']);
 				},
 				'message' => 'format gambar harus JPG atau PNG',
 			]));
@@ -102,11 +103,11 @@ class Banner extends ModelBase {
 		if (!$this->new_file) {
 			return true;
 		}
-		$file  = $this->_upload_config->path . $this->file;
-		$image = new Imagick($this->new_file['tmp_name']);
+		$file = $this->_upload_config->path . $this->file;
+		$this->new_file->moveTo($file);
+		$image = new Imagick($file);
 		$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 		$image->writeImage($file);
-		unlink($this->new_file['tmp_name']);
 	}
 
 	function beforeDelete() {
@@ -129,7 +130,7 @@ class Banner extends ModelBase {
 			$image->writeImage($this->_upload_config->path . $thumbnail);
 			$this->thumbnails[] = $thumbnail;
 			$this->skipAttributes(['updated_by', 'updated_at']);
-			$this->update(['thumbnails' => $this->thumbnails]);
+			$this->update();
 		}
 		return $thumbnail;
 	}

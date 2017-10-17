@@ -29,7 +29,12 @@ class BannersController extends ControllerBase {
 	function createAction() {
 		$banner = new Banner;
 		if ($this->request->isPost()) {
-			$banner->assign(array_merge($_POST, $_FILES), null, ['published', 'new_file']);
+			$banner->assign($this->request->getPost(), null, ['published']);
+			if ($this->request->hasFiles()) {
+				$banner->setNewFile(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
+					return $v->getKey() == 'new_file';
+				}, ARRAY_FILTER_USE_BOTH)));
+			}
 			if ($banner->validation() && $banner->create()) {
 				$this->flashSession->success('Penambahan banner berhasil.');
 				return $this->response->redirect('/admin/banners');
