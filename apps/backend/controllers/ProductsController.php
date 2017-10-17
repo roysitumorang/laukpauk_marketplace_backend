@@ -190,16 +190,20 @@ class ProductsController extends ControllerBase {
 		$this->view->categories = $categories;
 	}
 
-	private function _assignModelAttributes(&$product) {
+	private function _assignModelAttributes(Product &$product) {
 		if ($product_category_id = $this->request->getPost('product_category_id')) {
 			$product->category = ProductCategory::findFirst($product_category_id);
 		}
-		$product->assign(array_merge($_POST, $_FILES), null, [
+		$product->assign($this->request->getPost(), null, [
 			'name',
 			'stock_unit',
 			'description',
 			'published',
-			'new_picture',
 		]);
+		if ($this->request->hasFiles()) {
+			$product->setNewPicture(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
+				return $v->getKey() == 'new_picture';
+			}, ARRAY_FILTER_USE_BOTH)));
+		}
 	}
 }

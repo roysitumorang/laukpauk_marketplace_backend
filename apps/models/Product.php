@@ -3,9 +3,10 @@
 namespace Application\Models;
 
 use Imagick;
+use Phalcon\Http\Request\File;
 use Phalcon\Security\Random;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\{File, InclusionIn, PresenceOf, StringLength, Uniqueness};
+use Phalcon\Validation\Validator\{Callback, InclusionIn, PresenceOf, StringLength, Uniqueness};
 
 class Product extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
@@ -66,8 +67,8 @@ class Product extends ModelBase {
 		$this->stock_unit = $this->_filter->sanitize($stock_unit, ['string', 'trim']);
 	}
 
-	function setNewPicture($new_picture) {
-		if (is_array($new_picture) && $new_picture['tmp_name'] && $new_picture['size'] && !$new_picture['error']) {
+	function setNewPicture(File $new_picture) {
+		if ($new_picture->getTempName() && $new_picture->getSize() && !$new_picture->getError()) {
 			$this->new_picture = $new_picture;
 		}
 	}
@@ -103,11 +104,17 @@ class Product extends ModelBase {
 		]));
 		if ($this->new_picture) {
 			$max_size = $this->_upload_config->max_size;
-			$validator->add('new_picture', new File([
-				'maxSize'      => $max_size,
-				'messageSize'  => 'ukuran file maksimal ' . $max_size,
-				'allowedTypes' => ['image/jpeg', 'image/png'],
-				'messageType'  => 'format gambar harus JPG atau PNG',
+			$validator->add('new_picture', new Callback([
+				'callback' => function($data) use($max_size) {
+					return $data->new_picture->getSize() <= intval($max_size) * pow(1024, 2);
+				},
+				'message' => 'ukuran gambar maksimal ' . $max_size,
+			]));
+			$validator->add('new_picture', new Callback([
+				'callback' => function($data) {
+					return in_array($data->new_picture->getRealType(), ['image/jpeg', 'image/png']);
+				},
+				'message' => 'format gambar harus JPG atau PNG',
 			]));
 		}
 		$validator->add('published', new InclusionIn([
@@ -128,7 +135,9 @@ class Product extends ModelBase {
 					}
 				} while (1);
 			}
-			$image = new Imagick($this->new_picture['tmp_name']);
+			$picture = $this->_upload_config->path . $this->picture;
+			$this->new_picture->moveTo($picture);
+			$image = new Imagick($picture);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
 				$file = strtr($this->picture, ['.jpg' => $width . '.jpg']);
@@ -138,8 +147,7 @@ class Product extends ModelBase {
 				$thumbnail->writeImage($this->_upload_config->path . $file);
 			}
 			$image->thumbnailImage(512, 0);
-			$image->writeImage($this->_upload_config->path . $this->picture);
-			unlink($this->new_picture['tmp_name']);
+			$image->writeImage($picture);
 		}
 		$this->thumbnails  = implode(',', array_filter($this->thumbnails)) ?: null;
 		$this->description = $this->description ?: null;
@@ -172,8 +180,6 @@ class Product extends ModelBase {
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
 		}
-		$this->picture = null;
-		$this->thumbnails = null;
-		$this->save();
+		$this->save(['picture' => null, 'thumbnails' => null]);
 	}
 }
