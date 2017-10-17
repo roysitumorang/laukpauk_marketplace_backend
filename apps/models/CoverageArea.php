@@ -3,9 +3,7 @@
 namespace Application\Models;
 
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\Callback;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Validation\Validator\{Callback, PresenceOf, Uniqueness};
 
 class CoverageArea extends ModelBase {
 	public $id;
@@ -34,7 +32,7 @@ class CoverageArea extends ModelBase {
 	}
 
 	function setShippingCost($shipping_cost) {
-		$this->shipping_cost = $this->getDI()->getFilter()->sanitize($shipping_cost, 'int');
+		$this->shipping_cost = $this->getDI()->getFilter()->sanitize($shipping_cost, 'int', 0);
 	}
 
 	function validation() {
