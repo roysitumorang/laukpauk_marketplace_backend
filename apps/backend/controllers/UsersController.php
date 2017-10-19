@@ -112,7 +112,7 @@ class UsersController extends ControllerBase {
 			$this->_assignModelAttributes($user);
 			if ($user->validation() && $user->create()) {
 				$this->flashSession->success('Penambahan member berhasil.');
-				return $this->response->redirect('/admin/users?status=0');
+				return $this->response->redirect('/admin/users/index/status:0');
 			}
 			$this->flashSession->error('Penambahan member tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($user->getMessages() as $error) {
@@ -127,9 +127,11 @@ class UsersController extends ControllerBase {
 		if ($user->role_id == Role::BUYER) {
 			$column = 'buyer_id';
 		} else if ($user->role_id == Role::MERCHANT) {
-			$column                           = 'merchant_id';
-			$this->view->total_products       = $user->countProducts();
-			$this->view->total_coverage_areas = $user->countCoverageAreas();
+			$column = 'merchant_id';
+			$this->view->setVars([
+				'total_products'       => $user->countProducts(),
+				'total_coverage_areas' => $user->countCoverageAreas(),
+			]);
 		}
 		if ($column) {
 			$total = $this->db->fetchOne("
@@ -150,10 +152,12 @@ class UsersController extends ControllerBase {
 		if ($user->avatar) {
 			$user->thumbnail = $user->getThumbnail(300, 300);
 		}
-		$this->view->menu       = $this->_menu('Members');
-		$this->view->user       = $user;
-		$this->view->status     = User::STATUS;
-		$this->view->last_login = LoginHistory::maximum(['user_id = ?0', 'bind' => [$user->id], 'column' => 'sign_in_at']);
+		$this->view->setVars([
+			'menu'       => $this->_menu('Members'),
+			'user'       => $user,
+			'status'     => User::STATUS,
+			'last_login' => LoginHistory::maximum(['user_id = ?0', 'bind' => [$user->id], 'column' => 'sign_in_at']),
+		]);
 	}
 
 	function updateAction($id) {
@@ -399,23 +403,25 @@ QUERY
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 			$business_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 		}
-		$this->view->menu  = $this->_menu('Members');
-		$this->view->roles = Role::find([
-			'id IN ({ids:array})',
-			'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT, Role::BUYER]],
-			'order' => 'name',
+		$this->view->setVars([
+			'menu'           => $this->_menu('Members'),
+			'user'           => $user,
+			'status'         => User::STATUS,
+			'genders'        => User::GENDERS,
+			'business_hours' => $business_hours,
+			'provinces'      => $provinces,
+			'cities'         => $cities,
+			'subdistricts'   => $subdistricts,
+			'villages'       => $villages,
+			'province_id'    => $province_id,
+			'city_id'        => $city_id,
+			'subdistrict_id' => $subdistrict_id,
+			'roles'          => Role::find([
+				'id IN ({ids:array})',
+				'bind'  => ['ids' => [Role::ADMIN, Role::MERCHANT, Role::BUYER]],
+				'order' => 'name',
+			]),
 		]);
-		$this->view->user           = $user;
-		$this->view->status         = User::STATUS;
-		$this->view->genders        = User::GENDERS;
-		$this->view->business_hours = $business_hours;
-		$this->view->provinces      = $provinces;
-		$this->view->cities         = $cities;
-		$this->view->subdistricts   = $subdistricts;
-		$this->view->villages       = $villages;
-		$this->view->province_id    = $province_id;
-		$this->view->city_id        = $city_id;
-		$this->view->subdistrict_id = $subdistrict_id;
 	}
 
 	private function _assignModelAttributes(User &$user) {
@@ -425,23 +431,12 @@ QUERY
 		if (($role_id = $this->request->getPost('role_id', 'int')) && Role::count(['id = ?0', 'bind' => [$role_id]])) {
 			$user->role_id = $role_id;
 		}
-		if ($user->role_id == Role::MERCHANT) {
-			$user->assign($this->request->getPost(), null, [
-				'deposit',
-				'delivery_hours',
-				'max_delivery_distance',
-				'free_delivery_distance',
-				'delivery_rate',
-			]);
-		}
 		$user->assign($this->request->getPost(), null, [
 			'minimum_purchase',
 			'admin_fee',
 			'accumulation_divisor',
 			'name',
 			'email',
-			'new_password',
-			'new_password_confirmation',
 			'address',
 			'mobile_phone',
 			'company',
@@ -458,6 +453,17 @@ QUERY
 			'business_closing_hour',
 			'merchant_note',
 		]);
+		if ($user->role_id == Role::MERCHANT) {
+			$user->assign($this->request->getPost(), null, [
+				'deposit',
+				'delivery_hours',
+				'max_delivery_distance',
+				'free_delivery_distance',
+				'delivery_rate',
+			]);
+		}
+		$user->setNewPassword($this->request->getPost('new_password'));
+		$user->setNewPasswordConfirmation($this->request->getPost('new_password_confirmation'));
 		if ($this->request->hasFiles()) {
 			$user->setNewAvatar(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
 				return $v->getKey() == 'new_avatar';

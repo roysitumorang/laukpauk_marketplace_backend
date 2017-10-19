@@ -124,19 +124,19 @@
 		<tr>
 			<td>
 				Propinsi (*) :<br>
-				{{ select('province_id', provinces, 'using': ['id', 'name'], 'value': province.id, 'useEmpty': true, 'emptyText': '- propinsi -', 'emptyValue': '') }}
+				{{ select('province_id', provinces, 'using': ['id', 'name'], 'value': province_id, 'useEmpty': true, 'emptyText': '- propinsi -', 'emptyValue': '') }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Kabupaten / Kota (*) :<br>
-				{{ select_static('city_id', cities, 'using': ['id', 'name'], 'value': city.id, 'useEmpty': true, 'emptyText': '- kabupaten / kota -', 'emptyValue': '') }}
+				{{ select_static('city_id', cities, 'using': ['id', 'name'], 'value': city_id, 'useEmpty': true, 'emptyText': '- kabupaten / kota -', 'emptyValue': '') }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Kecamatan (*) :<br>
-				{{ select('subdistrict_id', subdistricts, 'using': ['id', 'name'], 'value': subdistrict.id, 'useEmpty': true, 'emptyText': '- kecamatan -', 'emptyValue': '') }}
+				{{ select('subdistrict_id', subdistricts, 'using': ['id', 'name'], 'value': subdistrict_id, 'useEmpty': true, 'emptyText': '- kecamatan -', 'emptyValue': '') }}
 			</td>
 		</tr>
 		<tr>
