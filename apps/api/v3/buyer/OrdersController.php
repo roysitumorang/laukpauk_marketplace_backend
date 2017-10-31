@@ -2,16 +2,8 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\Device;
-use Application\Models\Order;
-use Application\Models\OrderProduct;
-use Application\Models\Release;
-use Application\Models\Role;
-use Application\Models\User;
-use Application\Models\Setting;
-use Application\Models\Village;
+use Application\Models\{Device, Order, OrderProduct, Release, Role, User, Setting, Village};
 use DateTime;
-use Exception;
 use Phalcon\Db;
 
 class OrdersController extends ControllerBase {
@@ -70,10 +62,10 @@ QUERY
 	function checkAction() {
 		try {
 			if (!$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
+				throw new \Exception('Request tidak valid!');
 			}
 			if (!$this->_post->orders) {
-				throw new Exception('Order item kosong!');
+				throw new \Exception('Order item kosong!');
 			}
 			$total            = 0;
 			$minimum_purchase = Setting::findFirstByName('minimum_purchase')->value;
@@ -95,33 +87,33 @@ QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
 				$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				}
 				$purchase = 0;
 				foreach ($cart->products as $item) {
 					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
-						throw new Exception('Order Anda tidak valid');
+						throw new \Exception('Order Anda tidak valid');
 					}
 					$purchase += min(max($item->quantity, 0), $product->stock) * $product->price;
 				}
 				foreach ($cart->sale_packages as $item) {
 					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$sale_package) {
-						throw new Exception('Order Anda tidak valid');
+						throw new \Exception('Order Anda tidak valid');
 					}
 					$purchase += min(max($item->quantity, 0), $sale_package->stock) * $sale_package->price;
 				}
 				if ($purchase < $merchant->minimum_purchase) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				}
 				$total += $purchase;
 			}
 			if ($total < $minimum_purchase) {
-				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
+				throw new \Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			$this->_response['status'] = 1;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
@@ -132,10 +124,10 @@ QUERY
 	function createAction() {
 		try {
 			if (!$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
+				throw new \Exception('Request tidak valid!');
 			}
 			if (!$this->_post->orders) {
-				throw new Exception('Order item kosong!');
+				throw new \Exception('Order item kosong!');
 			}
 			$orders           = [];
 			$total            = 0;
@@ -145,11 +137,11 @@ QUERY
 			$minimum_purchase = Setting::findFirstByName('minimum_purchase')->value;
 			try {
 				$delivery_date = new DateTime($this->_post->delivery->date, $this->currentDatetime->getTimezone());
-			} catch (Exception $ex) {
-				throw new Exception('Order Anda tidak valid!');
+			} catch (\Exception $ex) {
+				throw new \Exception('Order Anda tidak valid!');
 			}
 			if (!filter_var($this->_post->delivery->hour, FILTER_VALIDATE_INT)) {
-				throw new Exception('Order Anda tidak valid!');
+				throw new \Exception('Order Anda tidak valid!');
 			}
 			if ($this->_post->device_token) {
 				if (strlen($this->_post->device_token) === 36 && !$this->_current_user->device_token) {
@@ -207,13 +199,13 @@ QUERY
 				];
 				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$coupon) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
-					throw new Exception('Pemakaian voucher udah melebihi batas maksimal!');
+					throw new \Exception('Pemakaian voucher udah melebihi batas maksimal!');
 				} else if ($coupon->minimum_version && (!$this->_post->app_version || !Release::findFirst(['user_type = ?0 AND version = ?1', 'bind' => ['buyer', $this->_post->app_version]]) || $this->_post->app_version < $coupon->minimum_version)) {
-					throw new Exception('Voucher berlaku untuk versi minimal ' . $coupon->minimum_version . '! Silahkan upgrade aplikasi Anda.');
+					throw new \Exception('Voucher berlaku untuk versi minimal ' . $coupon->minimum_version . '! Silahkan upgrade aplikasi Anda.');
 				} else if (!$coupon->multiple_use && $coupon->personal_usage >= 1) {
-					throw new Exception('Voucher cuma berlaku untuk sekali pemakaian!');
+					throw new \Exception('Voucher cuma berlaku untuk sekali pemakaian!');
 				}
 			}
 			foreach ($this->_post->orders as $cart) {
@@ -234,7 +226,7 @@ QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
 				$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
 				if (!$merchant) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				}
 				$order                     = new Order;
 				$order_products            = [];
@@ -252,7 +244,7 @@ QUERY
 				foreach ($cart->products as $item) {
 					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
-						throw new Exception('Order Anda tidak valid');
+						throw new \Exception('Order Anda tidak valid');
 					}
 					$order_product             = new OrderProduct;
 					$order_product->product_id = $product->id;
@@ -267,7 +259,7 @@ QUERY
 				foreach ($cart->sale_packages as $item) {
 					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$sale_package) {
-						throw new Exception('Order Anda tidak valid');
+						throw new \Exception('Order Anda tidak valid');
 					}
 					$order_product                  = new OrderProduct;
 					$order_product->sale_package_id = $sale_package->id;
@@ -280,24 +272,24 @@ QUERY
 					$order_products[]               = $order_product;
 				}
 				if ($order->original_bill < $merchant->minimum_purchase) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				}
 				$order->final_bill    = $order->original_bill;
 				$order->discount      = 0;
 				$order->shipping_cost = $merchant->shipping_cost;
 				$order->orderProducts = $order_products;
 				if (!$order->validation()) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				}
 				$total   += $order->final_bill;
 				$orders[] = $order;
 			}
 			if ($total < $minimum_purchase) {
-				throw new Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
+				throw new \Exception('Belanja minimal Rp. ' . number_format($minimum_purchase) . ' untuk dapat diproses!');
 			}
 			if ($coupon) {
 				if ($total < $coupon->minimum_purchase) {
-					throw new Exception('Order Anda tidak valid!');
+					throw new \Exception('Order Anda tidak valid!');
 				}
 				$discount = $coupon->discount_type == 1 ? $coupon->price_discount : ceil($coupon->price_discount * $total / 100);
 			}
@@ -322,8 +314,8 @@ QUERY
 				$this->_current_user->update($params);
 			}
 			$this->_response['status'] = 1;
-			throw new Exception('Terima kasih, order Anda segera kami proses.');
-		} catch (Exception $e) {
+			throw new \Exception('Terima kasih, order Anda segera kami proses.');
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
@@ -335,7 +327,7 @@ QUERY
 		try {
 			$order = $this->_current_user->getRelated('buyerOrders', ['Application\Models\Order.id = ?0 OR Application\Models\Order.code = ?1', 'bind' => [$id, $id]])->getFirst();
 			if (!$order) {
-				throw new Exception('Pesanan tidak ditemukan!');
+				throw new \Exception('Pesanan tidak ditemukan!');
 			}
 			$items    = [];
 			$village  = Village::findFirst($order->village_id);
@@ -388,7 +380,7 @@ QUERY
 			$this->_response['status']                          = 1;
 			$this->_response['data']['order']                   = $payload;
 			$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);

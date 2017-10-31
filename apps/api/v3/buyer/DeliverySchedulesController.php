@@ -5,10 +5,8 @@ namespace Application\Api\V3\Buyer;
 use DateInterval;
 use DatePeriod;
 use DateTime;
-use Exception;
 use IntlDateFormatter;
 use Phalcon\Db;
-use stdClass;
 
 class DeliverySchedulesController extends ControllerBase {
 	private $_day_formatter;
@@ -29,7 +27,7 @@ class DeliverySchedulesController extends ControllerBase {
 		$merchant_ids   = $this->_server->merchant_ids;
 		$delivery_dates = [];
 		$current_hour   = $this->currentDatetime->format('G');
-		$minimum_hour   = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
+		$minimum_hour   = $current_hour + ($current_hour < 16 && $this->currentDatetime->format('i') > 29 ? 2 : 1);
 		$days_of_week   = [];
 		foreach (new DatePeriod($this->currentDatetime, new DateInterval('P1D'), 1) as $i => $date) {
 			if (!$i) {
@@ -83,7 +81,7 @@ QUERY
 				}
 				$current_date = $day->format('Y-m-d');
 				if (!isset($delivery_dates[$current_date])) {
-					$delivery_dates[$current_date]        = new stdClass;
+					$delivery_dates[$current_date]        = new \stdClass;
 					$delivery_dates[$current_date]->label = $label;
 					$delivery_dates[$current_date]->hours = [];
 				}
@@ -117,7 +115,7 @@ QUERY
 		$delivery_date = $this->_server->delivery->date;
 		$delivery_hour = filter_var($this->_server->delivery->hour, FILTER_VALIDATE_INT);
 		$current_hour  = $this->currentDatetime->format('G');
-		$minimum_hour  = $current_hour + ($this->currentDatetime->format('i') > 29 ? 2 : 1);
+		$minimum_hour  = $current_hour + ($current_hour < 16 && $this->currentDatetime->format('i') > 29 ? 2 : 1);
 		$days_of_week  = [];
 		try {
 			$valid_date = false;
@@ -138,10 +136,10 @@ QUERY
 				}
 			}
 			if (!$valid_date) {
-				throw new Exception('Tanggal tidak valid!');
+				throw new \Exception('Tanggal tidak valid!');
 			}
 			if (!$delivery_hour) {
-				throw new Exception('Jam tidak valid!');
+				throw new \Exception('Jam tidak valid!');
 			}
 			$delivery_schedule = new DateTime($delivery_date, $this->currentDatetime->getTimezone());
 			$delivery_day      = $delivery_schedule->format('l');
@@ -183,18 +181,18 @@ QUERY
 					($delivery_day == 'Thursday' && !$item->open_on_thursday) ||
 					($delivery_day == 'Friday' && !$item->open_on_friday) ||
 					($delivery_day == 'Saturday' && !$item->open_on_saturday)) {
-					throw new Exception("{$item->company} tutup pada tanggal tersebut, silahkan ganti tanggal atau hapus pesanan dari supplier tersebut!");
+					throw new \Exception("{$item->company} tutup pada tanggal tersebut, silahkan ganti tanggal atau hapus pesanan dari supplier tersebut!");
 				}
 				$delivery_hours = $item->delivery_hours
 						? explode(',', $item->delivery_hours)
 						: range($item->business_opening_hour, $item->business_closing_hour);
 				if (($delivery_schedule->format('Y-m-d') === $this->currentDatetime->format('Y-m-d') && ($current_hour >= max($delivery_hours) || $delivery_hour < $minimum_hour))
 					|| !in_array($delivery_hour, $delivery_hours)) {
-					throw new Exception("{$item->company} tidak melayani pengantaran pada jam tersebut, silahkan ganti jam atau hapus pesanan dari supplier tersebut!");
+					throw new \Exception("{$item->company} tidak melayani pengantaran pada jam tersebut, silahkan ganti jam atau hapus pesanan dari supplier tersebut!");
 				}
 			}
 			$this->_response['status'] = 1;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
