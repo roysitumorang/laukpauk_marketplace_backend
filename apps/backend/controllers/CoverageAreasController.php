@@ -4,7 +4,6 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\{City, CoverageArea, Province, Role, Subdistrict, User, Village};
 use Phalcon\Db;
-use Phalcon\Mvc\View;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CoverageAreasController extends ControllerBase {
@@ -76,7 +75,7 @@ class CoverageAreasController extends ControllerBase {
 
 	function villagesAction($subdistrictId) {
 		$villages = [];
-		$result   = $this->db->query('SELECT a.id, a.name FROM villages a WHERE a.subdistrict_id = ? AND EXISTS(SELECT 1 FROM subdistricts b WHERE a.subdistrict_id = b.id AND b.city_id = ?) AND NOT EXISTS(SELECT 1 FROM coverage_area c WHERE c.village_id = a.id AND c.user_id = ?) ORDER BY name', [
+		$result   = $this->db->query('SELECT a.id, a.name FROM villages a JOIN subdistricts b ON a.subdistrict_id = b.id WHERE a.subdistrict_id = ? AND b.city_id = ? AND NOT EXISTS(SELECT 1 FROM coverage_area c WHERE c.village_id = a.id AND c.user_id = ?) ORDER BY name', [
 			$subdistrictId,
 			$this->_user->village->subdistrict->city_id,
 			$this->_user->id,
@@ -104,8 +103,8 @@ class CoverageAreasController extends ControllerBase {
 		while ($row = $result->fetch()) {
 			$subdistricts[$row->id] = $row->name;
 		}
-		$result = $this->db->query('SELECT a.id, a.name FROM villages a WHERE a.subdistrict_id = ? AND NOT EXISTS(SELECT 1 FROM coverage_area b WHERE b.village_id = a.id AND b.user_id = ?) ORDER BY name', [
-			$this->_user->village->subdistrict_id,
+		$result = $this->db->query('SELECT a.id, a.name FROM villages a JOIN subdistricts b ON a.subdistrict_id = b.id WHERE b.city_id = ? AND NOT EXISTS(SELECT 1 FROM coverage_area c WHERE c.village_id = a.id AND c.user_id = ?) ORDER BY name', [
+			$this->_user->village->subdistrict->city_id,
 			$this->_user->id,
 		]);
 		$result->setFetchMode(Db::FETCH_OBJ);
