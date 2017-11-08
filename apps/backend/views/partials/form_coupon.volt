@@ -17,13 +17,13 @@
 		<tr>
 			<td>
 				<b>Tanggal Berlaku :</b><br>
-				{{ text_field('effective_date', 'value': coupon.effective_date, 'size': 10, 'maxlength': 10, 'placeholder': 'YYYY-mm-dd', 'data-plugin-datepicker': true, 'data-plugin-options': "{format:'yyyy-mm-dd'}", 'class': 'form form-control form-30') }}
+				{{ text_field('effective_date', 'value': coupon.effective_date, 'size': 10, 'maxlength': 10, 'placeholder': 'YYYY-mm-dd', 'data-plugin-datepicker': true, 'data-date-format': 'yyyy-mm-dd', 'class': 'form form-control form-30') }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<b>Tanggal Expired :</b><br>
-				{{ text_field('expiry_date', 'value': coupon.expiry_date, 'size': 10, 'maxlength': 10, 'placeholder': 'YYYY-mm-dd', 'data-plugin-datepicker': true, 'data-plugin-options': "{format:'yyyy-mm-dd'}", 'class': 'form form-control form-30') }}
+				{{ text_field('expiry_date', 'value': coupon.expiry_date, 'size': 10, 'maxlength': 10, 'placeholder': 'YYYY-mm-dd', 'data-plugin-datepicker': true, 'data-date-format': 'yyyy-mm-dd', 'class': 'form form-control form-30') }}
 			</td>
 		</tr>
 		<tr>
