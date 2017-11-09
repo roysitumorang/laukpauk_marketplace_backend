@@ -2,10 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\Device;
-use Application\Models\Role;
-use Application\Models\User;
-use Exception;
+use Application\Models\{Device, Role, User};
 use Phalcon\Crypt;
 
 class PasswordController extends ControllerBase {
@@ -18,13 +15,13 @@ class PasswordController extends ControllerBase {
 	function saveAction() {
 		try {
 			if (!$this->_post->old_password) {
-				throw new Exception('Password Lama harus diisi.');
+				throw new \Exception('Password Lama harus diisi.');
 			}
 			if (!$this->security->checkHash($this->_post->old_password, $this->_current_user->password)) {
-				throw new Exception('Password Lama salah.');
+				throw new \Exception('Password Lama salah.');
 			}
 			if (!$this->_post->new_password) {
-				throw new Exception('Password Baru harus diisi.');
+				throw new \Exception('Password Baru harus diisi.');
 			}
 			$this->_current_user->setNewPassword($this->_post->new_password);
 			$this->_current_user->setNewPasswordConfirmation($this->_post->new_password);
@@ -53,10 +50,10 @@ class PasswordController extends ControllerBase {
 					}
 				}
 				$this->_response['status'] = 1;
-				throw new Exception('Ganti password berhasil!');
+				throw new \Exception('Ganti password berhasil!');
 			}
-			throw new Exception('Ganti password tidak berhasil!');
-		} catch (Exception $e) {
+			throw new \Exception('Ganti password tidak berhasil!');
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -67,15 +64,15 @@ class PasswordController extends ControllerBase {
 	function sendResetTokenAction() {
 		try {
 			if (!$this->_post->mobile_phone || !($user = User::findFirst(['role_id = ?0 AND mobile_phone = ?1', 'bind' => [Role::BUYER, $this->_post->mobile_phone]]))) {
-				throw new Exception('No HP tidak terdaftar!');
+				throw new \Exception('No HP tidak terdaftar!');
 			}
 			if ($user->status == -1) {
-				throw new Exception('Akun Anda telah dinonaktifkan!');
+				throw new \Exception('Akun Anda telah dinonaktifkan!');
 			}
 			$user->sendPasswordResetToken();
 			$this->_response['status'] = 1;
-			throw new Exception('Token password telah dikirim via sms!');
-		} catch (Exception $e) {
+			throw new \Exception('Token password telah dikirim via sms!');
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -86,10 +83,10 @@ class PasswordController extends ControllerBase {
 	function resetAction() {
 		try {
 			if (!$this->_post->password_reset_token || !($user = User::findFirst(['status = 1 AND role_id = ?0 AND password_reset_token = ?1', 'bind' => [Role::BUYER, $this->_post->password_reset_token]]))) {
-				throw new Exception('Token reset password tidak valid!.');
+				throw new \Exception('Token reset password tidak valid!.');
 			}
 			if (!$this->_post->new_password) {
-				throw new Exception('Password baru harus diisi.');
+				throw new \Exception('Password baru harus diisi.');
 			}
 			if ($user->resetPassword($this->_post->new_password)) {
 				if ($this->_post->device_token) {
@@ -151,10 +148,10 @@ class PasswordController extends ControllerBase {
 					'=' => ',',
 				]);
 				$this->_response['data']['current_user'] = $current_user;
-				throw new Exception('Reset password berhasil!');
+				throw new \Exception('Reset password berhasil!');
 			}
-			throw new Exception('Reset password tidak berhasil!');
-		} catch (Exception $e) {
+			throw new \Exception('Reset password tidak berhasil!');
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);

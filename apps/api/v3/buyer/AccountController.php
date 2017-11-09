@@ -2,15 +2,9 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\Device;
-use Application\Models\LoginHistory;
-use Application\Models\Role;
-use Application\Models\User;
-use Application\Models\Village;
+use Application\Models\{Device, LoginHistory, Role, User, Village};
 use Ds\Set;
-use Exception;
-use Phalcon\Crypt;
-use Phalcon\Db;
+use Phalcon\{Crypt, Db};
 
 class AccountController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -22,7 +16,7 @@ class AccountController extends ControllerBase {
 	function createAction() {
 		try {
 			if (!$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
+				throw new \Exception('Request tidak valid!');
 			}
 			$village_id    = filter_var($this->_post->village_id, FILTER_VALIDATE_INT);
 			$user          = new User;
@@ -47,7 +41,7 @@ class AccountController extends ControllerBase {
 						$errors->add($error->getMessage());
 					}
 				}
-				throw new Exception($errors->join('<br>'));
+				throw new \Exception($errors->join('<br>'));
 			}
 			if ($this->_post->device_token && strlen($this->_post->device_token) === 36 && !$user->device_token) {
 				$device = Device::findFirstByToken($this->_post->device_token);
@@ -65,7 +59,7 @@ class AccountController extends ControllerBase {
 			}
 			$this->_response['status']                   = 1;
 			$this->_response['data']['activation_token'] = $user->activation_token;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -76,10 +70,10 @@ class AccountController extends ControllerBase {
 	function activateAction($activation_token) {
 		try {
 			if (!$this->request->isPost()) {
-				throw new Exception('Request tidak valid!');
+				throw new \Exception('Request tidak valid!');
 			}
 			if (!$user = User::findFirst(['status = 0 AND role_id = ?0 AND activation_token = ?1', 'bind' => [Role::BUYER, $activation_token]])) {
-				throw new Exception('Token aktivasi tidak valid!');
+				throw new \Exception('Token aktivasi tidak valid!');
 			}
 			$user->activate();
 			$crypt        = new Crypt;
@@ -115,7 +109,7 @@ class AccountController extends ControllerBase {
 				'=' => ',',
 			]);
 			$this->_response['data']['current_user'] = $current_user;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -208,7 +202,7 @@ QUERY
 				$this->_response['data']['cities']       = $cities;
 				$this->_response['data']['subdistricts'] = $subdistricts;
 				$this->_response['data']['villages']     = $villages;
-				throw new Exception;
+				throw new \Exception;
 			}
 			$this->_current_user->setName($this->_post->name);
 			$this->_current_user->setMobilePhone($this->_post->mobile_phone);
@@ -219,7 +213,7 @@ QUERY
 				foreach ($this->_current_user->getMessages() as $error) {
 					$errors->add($error->getMessage());
 				}
-				throw new Exception($errors->join('<br>'));
+				throw new \Exception($errors->join('<br>'));
 			}
 			if ($this->_post->device_token) {
 				if (strlen($this->_post->device_token) === 36 && !$this->_current_user->device_token) {
@@ -270,7 +264,7 @@ QUERY
 			$this->_response['status']               = 1;
 			$this->_response['message']              = 'Update profil berhasil!';
 			$this->_response['data']['current_user'] = $current_user;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
@@ -288,11 +282,11 @@ QUERY
 				$errors->add('password harus diisi');
 			}
 			if (!$errors->isEmpty()) {
-				throw new Exception($errors->join('<br>'));
+				throw new \Exception($errors->join('<br>'));
 			}
 			$user = User::findFirst(['status = 1 AND role_id = ?0 AND mobile_phone = ?1', 'bind' => [Role::BUYER, $this->_post->mobile_phone]]);
 			if (!$user || !$this->security->checkHash($this->_post->password, $user->password)) {
-				throw new Exception('Nomor HP dan/atau password salah!');
+				throw new \Exception('Nomor HP dan/atau password salah!');
 			}
 			if ($this->_post->device_token) {
 				if (strlen($this->_post->device_token) === 36 && !$user->device_token) {
@@ -352,7 +346,7 @@ QUERY
 				'=' => ',',
 			]);
 			$this->_response['data']['current_user'] = $current_user;
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
 			$this->response->setJsonContent($this->_response);
