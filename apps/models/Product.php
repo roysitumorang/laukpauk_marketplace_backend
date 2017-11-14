@@ -95,9 +95,9 @@ class Product extends ModelBase {
 		]));
 		$validator->add('stock_unit', new StringLength([
 			'min'            => 1,
-			'max'            => 10,
+			'max'            => 20,
 			'messageMinimum' => 'satuan minimal 1 karakter',
-			'messageMaximum' => 'satuan maksimal 10 karakter',
+			'messageMaximum' => 'satuan maksimal 20 karakter',
 		]));
 		$validator->add(['product_category_id', 'name', 'stock_unit'], new Uniqueness([
 			'message' => 'nama, satuan dan kategori sudah ada',
