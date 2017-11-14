@@ -271,7 +271,7 @@ QUERY
 					$order->original_bill          += $order_product->quantity * $sale_package->price;
 					$order_products[]               = $order_product;
 				}
-				if ($order->original_bill < $merchant->minimum_purchase) {
+				if ($order->original_bill < $merchant->minimum_purchase || !$order_products) {
 					throw new \Exception('Order Anda tidak valid!');
 				}
 				$order->final_bill    = $order->original_bill;
