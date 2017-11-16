@@ -28,7 +28,7 @@
 					{{ partial('partials/tabs_product_group', ['expand': 'group']) }}
 					<div class="tab-content">
 						<div id="group" class="tab-pane active">
-							{{ partial('partials/form_product_group', ['action': '/admin/product_groups/update/' ~ product_group.id, 'expand': group]) }}
+							{{ partial('partials/form_product_group', ['action': '/admin/product_groups/update/' ~ product_group.id ~ '?next=' ~ next, 'expand': group]) }}
 						</div>
 					</div>
 				</div>

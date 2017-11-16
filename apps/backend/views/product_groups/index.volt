@@ -61,7 +61,7 @@
 											<a href="javascript:void(0)" class="published" data-id="{{ product_group.id }}" data-published="{{ product_group.published }}">
 												<i class="fa fa-eye{% if !product_group.published %}-slash{% endif %} fa-2x"></i>
 											</a>
-											<a href="/admin/product_groups/update/{{ product_group.id }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
+											<a href="/admin/product_groups/update/{{ product_group.id }}?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 											{% if !product_group.total_products %}
 											<a href="javascript:void(0)" class="delete" data-id="{{ product_group.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 											{% endif %}

@@ -49,6 +49,7 @@ class ProductGroupsController extends ControllerBase {
 			'product_groups' => $product_groups,
 			'page'           => $page,
 			'pages'          => $pages,
+			'next'           => $this->request->get('_url'),
 		]);
 	}
 
@@ -65,7 +66,10 @@ class ProductGroupsController extends ControllerBase {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->product_group = $product_group;
+		$this->view->setVars([
+			'product_group' => $product_group,
+			'next'          => $this->request->get('next'),
+		]);
 	}
 
 	function updateAction($id) {
@@ -73,18 +77,22 @@ class ProductGroupsController extends ControllerBase {
 			$this->flashSession->error('Grup produk tidak ditemukan.');
 			return $this->response->redirect('/admin/product_groups');
 		}
+		$next = $this->request->get('next');
 		if ($this->request->isPost()) {
 			$product_group->assign($_POST, null, ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->update()) {
 				$this->flashSession->success('Update group produk berhasil.');
-				return $this->response->redirect('/admin/product_groups');
+				return $this->response->redirect($next);
 			}
 			$this->flashSession->error('Update group produk tidak berhasil, silahkan cek form dan coba lagi.');
 			foreach ($product_group->getMessages() as $error) {
 				$this->flashSession->error($error);
 			}
 		}
-		$this->view->product_group = $product_group;
+		$this->view->setVars([
+			'product_group' => $product_group,
+			'next'          => $next,
+		]);
 	}
 
 	function toggleStatusAction($id) {
