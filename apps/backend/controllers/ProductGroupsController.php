@@ -2,10 +2,8 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\ProductGroup;
-use Application\Models\ProductGroupMember;
+use Application\Models\{ProductGroup, ProductGroupMember};
 use Ds\Set;
-use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductGroupsController extends ControllerBase {
@@ -23,6 +21,7 @@ class ProductGroupsController extends ControllerBase {
 			->columns([
 				'a.id',
 				'a.name',
+				'a.url',
 				'a.published',
 				'total_products' => 'COUNT(b.product_id)',
 			])
@@ -45,17 +44,18 @@ class ProductGroupsController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$product_groups->add($item);
 		}
-		$this->view->keyword        = $keyword;
-		$this->view->product_groups = $product_groups;
-		$this->view->page           = $page;
-		$this->view->pages          = $pages;
+		$this->view->setVars([
+			'keyword'        => $keyword,
+			'product_groups' => $product_groups,
+			'page'           => $page,
+			'pages'          => $pages,
+		]);
 	}
 
 	function createAction() {
 		$product_group = new ProductGroup;
 		if ($this->request->isPost()) {
-			$product_group->name      = $this->request->getPost('name');
-			$product_group->published = $this->request->getPost('published');
+			$product_group->assign($_POST, null, ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->create()) {
 				$this->flashSession->success('Penambahan group produk berhasil.');
 				return $this->response->redirect('/admin/product_groups');
@@ -74,8 +74,7 @@ class ProductGroupsController extends ControllerBase {
 			return $this->response->redirect('/admin/product_groups');
 		}
 		if ($this->request->isPost()) {
-			$product_group->name      = $this->request->getPost('name');
-			$product_group->published = $this->request->getPost('published');
+			$product_group->assign($_POST, null, ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->update()) {
 				$this->flashSession->success('Update group produk berhasil.');
 				return $this->response->redirect('/admin/product_groups');
@@ -102,14 +101,14 @@ class ProductGroupsController extends ControllerBase {
 	function deleteAction($id) {
 		try {
 			if (!$product_group = ProductGroup::findFirst($id)) {
-				throw new Error('Grup produk tidak ditemukan.');
+				throw new \Exception('Grup produk tidak ditemukan.');
 			}
 			if (ProductGroupMember::findFirstByProductGroupId($product_group->id)) {
-				throw new Error('Grup produk tidak dapat dihapus.');
+				throw new \Exception('Grup produk tidak dapat dihapus.');
 			}
 			$product_group->delete();
 			$this->flashSession->success('Grup produk berhasil dihapus');
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
 			return $this->response->redirect('/admin/product_groups');

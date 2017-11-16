@@ -6,6 +6,10 @@
 			<td><input type="text" name="name" value="{{ product_group.name }}" size="50" placeholder="Nama"></td>
 		</tr>
 		<tr>
+			<td><strong>Link:</strong></td>
+			<td><input type="text" name="url" value="{{ product_group.url }}" size="50" placeholder="Link"></td>
+		</tr>
+		<tr>
 			<td><strong>Tampilkan:</strong></td>
 			<td>
 				<input type="radio" name="published" value="1"{% if product_group.published %} checked{% endif %}> Ya

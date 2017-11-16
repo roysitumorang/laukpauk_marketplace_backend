@@ -44,6 +44,7 @@
 									<tr>
 										<th width="1%">No</th>
 										<th>Nama</th>
+										<th>Link</th>
 										<th>Jumlah Produk</th>
 										<th>#</th>
 									</tr>
@@ -53,6 +54,7 @@
 									<tr id="{{ product_group.id }}">
 										<td>{{ product_group.rank }}</td>
 										<td>{{ product_group.name }}</td>
+										<td>{{ product_group.url | default('-') }}</td>
 										<td>{{ product_group.total_products }}</td>
 										<td>
 											<a href="/admin/product_group_members/index/product_group_id:{{ product_group.id }}"><i class="fa fa-info-circle fa-2x"></i></a>
@@ -67,7 +69,7 @@
 									</tr>
 								{% elsefor %}
 									<tr>
-										<td colspan="4"><i>Belum ada group produk</i></td>
+										<td colspan="5"><i>Belum ada group produk</i></td>
 									</tr>
 								{% endfor %}
 								</tbody>
@@ -78,9 +80,9 @@
 									<b>Halaman:</b>&nbsp;&nbsp;
 									{% for i in pages %}
 										{% if i == page.current %}
-										<b>{{ i }}</b>
+											<b>{{ i }}</b>
 										{% else %}
-										<a href="/admin/product_groups/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+											<a href="/admin/product_groups/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
