@@ -83,8 +83,7 @@ $di->set('request', function() {
 });
 
 $di->set('currentDatetime', function() {
-	$current_datetime = DateTimeImmutable::createFromFormat('U.u', number_format(microtime(true), 6, '.', ''));
-	return $current_datetime->setTimezone(new DateTimeZone($this->getConfig()->timezone));
+	return new DateTimeImmutable('now', new DateTimeZone($this->getConfig()->timezone));
 });
 
 $di->set('jsonWebToken', function() use($di) {
