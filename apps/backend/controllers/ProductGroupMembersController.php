@@ -2,10 +2,8 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\ProductGroup;
-use Application\Models\ProductGroupMember;
+use Application\Models\{ProductGroup, ProductGroupMember};
 use Ds\Set;
-use Exception;
 use Phalcon\Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
@@ -39,10 +37,12 @@ class ProductGroupMembersController extends ControllerBase {
 		while ($item = $result->fetch()) {
 			$product_categories->add($item);
 		}
-		$this->view->menu               = $this->_menu('Products');
-		$this->view->product_group      = $this->_product_group;
-		$this->view->product_groups     = $product_groups;
-		$this->view->product_categories = $product_categories;
+		$this->view->setVars([
+			'menu'               => $this->_menu('Products'),
+			'product_group'      => $this->_product_group,
+			'product_groups'     => $product_groups,
+			'product_categories' => $product_categories,
+		]);
 	}
 
 	function indexAction() {
@@ -86,11 +86,13 @@ class ProductGroupMembersController extends ControllerBase {
 			}
 			$products->add($item);
 		}
-		$this->view->products            = $products;
-		$this->view->product_category_id = $product_category_id;
-		$this->view->keyword             = $keyword;
-		$this->view->page                = $page;
-		$this->view->pages               = $pages;
+		$this->view->setVars([
+			'products'            => $products,
+			'product_category_id' => $product_category_id,
+			'keyword'             => $keyword,
+			'page'                => $page,
+			'pages'               => $pages,
+		]);
 	}
 
 	function createAction() {
@@ -151,23 +153,25 @@ class ProductGroupMembersController extends ControllerBase {
 			}
 			$products->add($item);
 		}
-		$this->view->products            = $products;
-		$this->view->product_category_id = $product_category_id;
-		$this->view->product_ids         = $product_ids;
-		$this->view->keyword             = $keyword;
-		$this->view->page                = $page;
-		$this->view->pages               = $pages;
+		$this->view->setVars([
+			'products'            => $products,
+			'product_category_id' => $product_category_id,
+			'product_ids'         => $product_ids,
+			'keyword'             => $keyword,
+			'page'                => $page,
+			'pages'               => $pages,
+		]);
 	}
 
 	function deleteAction() {
 		try {
 			$product_id = $this->dispatcher->getParam('product_id', 'int');
 			if (!$product_id || !($link = ProductGroupMember::findFirst(['product_group_id = ?0 AND product_id = ?1', 'bind' => [$this->_product_group->id, $product_id]]))) {
-				throw new Exception('Produk tidak ditemukan.');
+				throw new \Exception('Produk tidak ditemukan.');
 			}
 			$link->delete();
 			$this->flashSession->success('Produk berhasil dihapus');
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
 			return $this->response->redirect("/admin/product_group_members/index/product_group_id:{$this->_product_group->id}");

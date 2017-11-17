@@ -63,7 +63,7 @@
 											</a>
 											<a href="/admin/product_groups/update/{{ product_group.id }}?next={{ next }}" title="Ubah"><i class="fa fa-pencil-square fa-2x"></i></a>
 											{% if !product_group.total_products %}
-											<a href="javascript:void(0)" class="delete" data-id="{{ product_group.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
+												<a href="javascript:void(0)" class="delete" data-id="{{ product_group.id }}" title="Hapus"><i class="fa fa-trash-o fa-2x"></i></a>
 											{% endif %}
 										</td>
 									</tr>
@@ -99,29 +99,34 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let items = document.querySelectorAll('.published,.delete'), i = items.length, search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
-	for ( ; i--; ) {
-		let item = items[i];
-		items[i].onclick = () => {
-			if ('delete' === item.className && !confirm('Anda yakin ingin menghapus group produk ini ?')) {
-				return !1
-			}
+	let url = search.action;
+	document.querySelectorAll('.published').forEach(item => {
+		item.addEventListener('click', event => {
 			let form = document.createElement('form');
+			event.preventDefault(),
 			form.method = 'POST',
-			form.action = 'delete' === item.className
-			? '/admin/product_groups/delete/' + item.dataset.id
-			: '/admin/product_groups/' + item.dataset.id + '/toggle_status?next=' + window.location.href.split('#')[0] + '#' + item.dataset.id,
+			form.action = '/admin/product_groups/' + item.dataset.id + '/toggle_status?next={{ next }}',
 			document.body.appendChild(form),
 			form.submit()
-		}
-	}
-	search.addEventListener('submit', event => {
+		}, false)
+	}),
+	document.querySelectorAll('.delete').forEach(item => {
+		item.addEventListener('click', event => {
+			let form = document.createElement('form');
+			event.preventDefault(),
+			form.method = 'POST',
+			form.action = '/admin/product_groups/delete/' + item.dataset.id + '?next={{ next }}',
+			document.body.appendChild(form),
+			form.submit()
+		}, false)
+	}),
+	document.querySelector('#search').addEventListener('submit', event => {
 		event.preventDefault();
-		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
-				return replacement[match];
-			});
+		if (event.target.keyword.value) {
+			url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+				return {' ': '+', ':': '', '\/': ''}[match];
+			})
 		}
-		location.href = url;
+		location.href = url
 	}, false)
 </script>

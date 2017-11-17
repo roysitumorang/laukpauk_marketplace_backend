@@ -78,6 +78,9 @@ class ProductGroupsController extends ControllerBase {
 			return $this->response->redirect('/admin/product_groups');
 		}
 		$next = $this->request->get('next');
+		if (!preg_match('#^/admin/product_groups(/index)?#', $next)) {
+			$next = '/admin/product_groups';
+		}
 		if ($this->request->isPost()) {
 			$product_group->assign($_POST, null, ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->update()) {
@@ -107,6 +110,10 @@ class ProductGroupsController extends ControllerBase {
 	}
 
 	function deleteAction($id) {
+		$next = $this->request->get('next');
+		if (!preg_match('#^/admin/product_groups(/index)?#', $next)) {
+			$next = '/admin/product_groups';
+		}
 		try {
 			if (!$product_group = ProductGroup::findFirst($id)) {
 				throw new \Exception('Grup produk tidak ditemukan.');
@@ -119,7 +126,7 @@ class ProductGroupsController extends ControllerBase {
 		} catch (\Exception $e) {
 			$this->flashSession->error($e->getMessage());
 		} finally {
-			return $this->response->redirect('/admin/product_groups');
+			return $this->response->redirect($next);
 		}
 	}
 }
