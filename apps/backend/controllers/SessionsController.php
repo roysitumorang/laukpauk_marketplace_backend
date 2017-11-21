@@ -2,18 +2,9 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\LoginHistory;
-use Application\Models\Role;
-use Application\Models\User;
+use Application\Models\{LoginHistory, Role, User};
 
 class SessionsController extends ControllerBase {
-	function index() {
-		$this->dispatcher->forward([
-			'controller' => 'sessions',
-			'action'     => 'create',
-		]);
-	}
-
 	function createAction() {
 		if ($this->session->get('user_id')) {
 			return $this->response->redirect('/admin/home');
@@ -51,14 +42,16 @@ class SessionsController extends ControllerBase {
 			}
 			$this->view->email = $email;
 		}
-		$this->view->token_key = $this->security->getTokenKey();
-		$this->view->token     = $this->security->getToken();
-		$this->view->next_url  = $next_url;
+		$this->view->setVars([
+			'token_key' => $this->security->getTokenKey(),
+			'token'     => $this->security->getToken(),
+			'next_url'  => $next_url,
+		]);
 	}
 
 	function deleteAction() {
 		if ($this->session->get('user_id')) {
-			$this->session->remove('user_id');
+			$this->session->destroy();
 			$this->flashSession->success('Anda sudah logout dari IP: ' . $this->request->getClientAddress());
 		}
 		return $this->response->redirect('/admin/sessions/create');
