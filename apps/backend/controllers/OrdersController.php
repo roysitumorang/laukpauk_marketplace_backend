@@ -723,11 +723,31 @@ QUERY;
 			if ($new_order->get('buyer_id') != $buyer->id) {
 				$new_order->put('buyer_id', $buyer->id);
 				$new_order->get('cart')->clear();
-			}
-			if (!$coupon_id) {
-				$new_order->remove('coupon_id');
 			} else {
-				$params = [<<<QUERY
+				$total = 0;
+				foreach ($new_order->get('cart') as $merchant_id => $items) {
+					if ($this->db->fetchColumn(<<<QUERY
+						SELECT
+							COUNT(1)
+						FROM
+							users a
+							JOIN coverage_area b ON a.id = b.user_id
+						WHERE
+							a.status = 1 AND
+							a.role_id = ? AND
+							a.id = ? AND
+							b.village_id = ?
+QUERY
+						, [Role::MERCHANT, $merchant_id, $buyer->village_id])) {
+						foreach ($items as $user_product_id => $quantity) {
+							$product = $this->db->fetchOne('SELECT a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant_id, $user_product_id]);
+							if ($product) {
+								$total += min(max($quantity, 0), $product->stock) * $product->price;
+							}
+						}
+					}
+				}
+				if ($coupon_id && ($coupon = $this->db->fetchOne(<<<QUERY
 					SELECT
 						a.id,
 						a.code,
@@ -750,16 +770,18 @@ QUERY;
 					GROUP BY a.id
 QUERY
 					,
-					$buyer->id,
-					$this->currentDatetime->format('Y-m-d'),
-					$this->currentDatetime->format('Y-m-d'),
-					$coupon_id,
-				];
-				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
-				if ($coupon &&
+					Db::FETCH_OBJ, [
+						$buyer->id,
+						$this->currentDatetime->format('Y-m-d'),
+						$this->currentDatetime->format('Y-m-d'),
+						$coupon_id,
+					])) &&
 					(($coupon->maximum_usage && $coupon->total_usage < $coupon->maximum_usage) &&
-					($coupon->multiple_use || $coupon->personal_usage < 1))) {
+					($coupon->multiple_use || $coupon->personal_usage < 1) &&
+					$total >= $coupon->minimum_purchase)) {
 					$new_order->put('coupon_id', $coupon->id);
+				} else if ($new_order->hasKey('coupon_id')) {
+					$new_order->remove('coupon_id');
 				}
 			}
 			$this->session->set('order', serialize($new_order));
