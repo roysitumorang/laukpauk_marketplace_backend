@@ -365,7 +365,7 @@ QUERY
 			->andWhere('b.price > 0')
 			->andWhere('b.stock > 0')
 			->andWhere('c.status = 1')
-			->orderBy('a.name ASC, a.stock_unit ASC');
+			->orderBy('a.name, a.stock_unit, c.company');
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$product_categories[$row->id] = $row->name . ' (' . $row->total_products . ')';
