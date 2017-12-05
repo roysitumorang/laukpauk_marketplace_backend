@@ -536,8 +536,8 @@ QUERY
 				COUNT(DISTINCT c.id) AS total_usage
 			FROM
 				coupons a
-				LEFT JOIN orders b ON a.id = b.coupon_id AND b.status != '-1' AND b.buyer_id = ?
-				LEFT JOIN orders c ON a.id = c.coupon_id AND c.status != '-1'
+				LEFT JOIN orders b ON a.id = b.coupon_id AND b.status != '1' AND b.buyer_id = ?
+				LEFT JOIN orders c ON a.id = c.coupon_id AND c.status != '1'
 			WHERE
 				a.status = '1' AND
 				a.effective_date <= ? AND
