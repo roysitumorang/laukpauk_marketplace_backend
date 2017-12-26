@@ -107,6 +107,12 @@ class Module implements ModuleDefinitionInterface {
 						})
 						->addFilter('strtr', function($resolvedArgs, $exprArgs) {
 							return 'strtr(' . $resolvedArgs . ')';
+						})
+						->addFilter('orElse', function($resolvedArgs, $exprArgs) use($volt) {
+							$compiler       = $volt->getCompiler();
+							$firstArgument  = $compiler->expression($exprArgs[0]['expr']);
+							$secondArgument = $compiler->expression($exprArgs[1]['expr']);
+							return $firstArgument . '?:' . $secondArgument;
 						});
 					return $volt;
 				},

@@ -57,7 +57,7 @@
 										<td class="text-right">{{ sale_package.rank }}</td>
 										<td>{{ sale_package.name }}</td>
 										<td>Rp. {{ sale_package.price | number_format(0, ',', '.') }}</td>
-										<td>{{ sale_package.stock | default('-') }}</td>
+										<td>{{ sale_package.stock | orElse('-') }}</td>
 										<td class="text-center">
 											<a href="javascript:void(0)" data-user-id="{{ sale_package.user_id }}" data-id="{{ sale_package.id }}" class="publish">
 												<i class="fa fa-eye{% if !sale_package.published %}-slash{% endif %} fa-2x"></i>

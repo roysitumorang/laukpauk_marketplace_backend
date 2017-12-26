@@ -43,7 +43,7 @@
 										<td>
 											<font size="5">{{ user.name }}{% if user.company %} ({{ user.company }}){% endif %}</font>
 										</td>
-										<td>{{ last_login | default('No login yet') }}</td>
+										<td>{{ last_login | orElse('No login yet') }}</td>
 										<td>{{ status[user.status] }}</td>
 										<td>{% if user.deposit %}Rp. {{ user.deposit | number_format }}{% else %}-{% endif %}</td>
 									</tr>
@@ -78,11 +78,11 @@
 								{% endif %}
 								<tr>
 									<td><i class="fa fa-calendar-o"></i> Tanggal Lahir</td>
-									<td>{{ user.date_of_birth | default('Belum ada data') }}</td>
+									<td>{{ user.date_of_birth | orElse('Belum ada data') }}</td>
 								</tr>
 								<tr>
 									<td><i class="fa fa-venus-mars"></i> Jenis Kelamin</td>
-									<td>{{ user.gender | default('Belum ada data') }}</td>
+									<td>{{ user.gender | orElse('Belum ada data') }}</td>
 								</tr>
 								{% if user.role.name == 'Merchant' %}
 								<tr>
@@ -98,11 +98,11 @@
 							<table class="table table-striped">
 								<tr>
 									<td><i class="fa fa-map-marker"></i> Alamat</td>
-									<td>{{ user.address | default('-') }}, {{ user.village.name }}, {{ user.village.subdistrict.name }}, {{ user.village.subdistrict.city.name }}, {{ user.village.subdistrict.city.province.name }}</td>
+									<td>{{ user.address | orElse('-') }}, {{ user.village.name }}, {{ user.village.subdistrict.name }}, {{ user.village.subdistrict.city.name }}, {{ user.village.subdistrict.city.province.name }}</td>
 								</tr>
 								<tr>
 									<td><i class="fa fa-check-circle-o"></i> Tanggal / IP Pendaftaran / Aktivasi </td>
-									<td>{{ user.created_at }} /{{ user.registration_ip }} / {{ user.activated_at | default('Belum aktif') }}
+									<td>{{ user.created_at }} /{{ user.registration_ip }} / {{ user.activated_at | orElse('Belum aktif') }}
 								</tr>
 								<tr>
 									<td><i class="fa fa-shopping-bag"></i> Total Order / Pending / Completed / Cancelled</td>

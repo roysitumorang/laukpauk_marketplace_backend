@@ -54,7 +54,7 @@
 									<tr id="{{ product_group.id }}">
 										<td>{{ product_group.rank }}</td>
 										<td>{{ product_group.name }}</td>
-										<td>{{ product_group.url | default('-') }}</td>
+										<td>{{ product_group.url | orElse('-') }}</td>
 										<td>{{ product_group.total_products }}</td>
 										<td>
 											<a href="/admin/product_group_members/index/product_group_id:{{ product_group.id }}"><i class="fa fa-info-circle fa-2x"></i></a>

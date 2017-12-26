@@ -105,7 +105,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td>{{ coupon.description | default('-') }}</td>
+							<td>{{ coupon.description | orElse('-') }}</td>
 						</tr>
 					</tbody>
 				</table>

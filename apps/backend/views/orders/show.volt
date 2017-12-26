@@ -141,7 +141,7 @@
 					<tr>
 						<td colspan="4">
 							<b><font color="#000099"><i class="fa fa-comment"></i> Catatan Tambahan</font></b><br>
-							{{ order.note | default('-') }}
+							{{ order.note | orElse('-') }}
 						</td>
 					</tr>
 					<tr>

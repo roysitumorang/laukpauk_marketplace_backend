@@ -77,7 +77,7 @@
 										{% if user.email %}
 										<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
 										{% endif %}
-										<i class="fa fa-key"></i>&nbsp;&nbsp;{{ user.api_key | default('-') }}<br>
+										<i class="fa fa-key"></i>&nbsp;&nbsp;{{ user.api_key | orElse('-') }}<br>
 										<i class="fa fa-mobile"></i>&nbsp;&nbsp;{{ user.mobile_phone }}<br>
 										<i class="fa fa-sign-in"></i>&nbsp;
 										{% if user.last_login %}
