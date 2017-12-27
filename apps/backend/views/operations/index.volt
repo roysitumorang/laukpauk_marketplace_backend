@@ -35,9 +35,23 @@
 						</tr>
 					</table>
 				</form>
-				{% if merchants %}
+				<form method="POST" action="/admin/operations/update_all{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+					<table class="table table-striped">
+						<tr>
+							<td>
+								<input type="checkbox" name="open_on_sunday" value="1"{% if merchant.open_on_sunday %} checked{% endif %}> Minggu
+								<input type="checkbox" name="open_on_monday" value="1"{% if merchant.open_on_monday %} checked{% endif %}> Senin
+								<input type="checkbox" name="open_on_tuesday" value="1"{% if merchant.open_on_tuesday %} checked{% endif %}> Selasa
+								<input type="checkbox" name="open_on_wednesday" value="1"{% if merchant.open_on_wednesday %} checked{% endif %}> Rabu
+								<input type="checkbox" name="open_on_thursday" value="1"{% if merchant.open_on_thursday %} checked{% endif %}> Kamis
+								<input type="checkbox" name="open_on_friday" value="1"{% if merchant.open_on_friday %} checked{% endif %}> Jumat
+								<input type="checkbox" name="open_on_saturday" value="1"{% if merchant.open_on_saturday %} checked{% endif %}> Sabtu
+								<button type="submit" class="btn btn-danger"><i class="fa fa-exclamation-triangle"></i> SIMPAN UNTUK SEMUA MERCHANT</button>
+							</td>
+						</tr>
+					</table>
+				</form>
 				<form method="POST" action="/admin/operations/update{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
-				{% endif %}
 					<table class="table table-striped">
 						<thead>
 							<tr>
@@ -101,10 +115,8 @@
 						{% endfor %}
 						</tbody>
 					</table>
-				{% if merchants %}
 					<button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> SIMPAN</button>
 				</form>
-				{% endif %}
 				{% if page.total_pages > 1 %}
 				<div class="weepaging">
 					<p>
