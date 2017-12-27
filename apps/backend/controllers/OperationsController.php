@@ -2,17 +2,17 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Role;
-use Application\Models\User;
+use Application\Models\{Role, User};
 use Phalcon\Paginator\Adapter\Model;
 
 class OperationsController extends ControllerBase {
 	function indexAction() {
 		$limit          = $this->config->per_page;
-		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
+		$current_page   = $this->dispatcher->getParam('page', 'int!', 1);
 		$offset         = ($current_page - 1) * $limit;
 		$search_query   = $this->dispatcher->getParam('keyword', 'string');
 		$business_hours = [];
+		$merchants      = [];
 		$conditions     = [
 			'status = 1 AND role_id = ?0',
 			'bind'  => [Role::MERCHANT],
@@ -30,9 +30,8 @@ class OperationsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
-		$pages     = $this->_setPaginationRange($page);
-		$merchants = [];
+		$page  = $paginator->getPaginate();
+		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$merchants[] = $item;
@@ -40,33 +39,36 @@ class OperationsController extends ControllerBase {
 		foreach (range(User::BUSINESS_HOURS['opening'], User::BUSINESS_HOURS['closing']) as $hour) {
 			$business_hours[$hour] = ($hour < 10 ? '0' . $hour : $hour) . ':00';
 		}
-		$this->view->menu           = $this->_menu('Products');
-		$this->view->page           = $page;
-		$this->view->pages          = $pages;
-		$this->view->keyword        = $search_query;
-		$this->view->merchants      = $merchants;
-		$this->view->business_hours = $business_hours;
+		$this->view->setVars([
+			'menu'           => $this->_menu('Products'),
+			'page'           => $page,
+			'pages'          => $pages,
+			'keyword'        => $search_query,
+			'merchants'      => $merchants,
+			'business_hours' => $business_hours,
+		]);
 	}
 
 	function updateAction() {
-		$merchants = $this->request->getPost('merchants');
-		if ($this->request->isPost()) {
-			foreach ($merchants as $id => $operation) {
-				if ($user = User::findFirst(['status = 1 AND role_id = ?0 AND id = ?1', 'bind' => [Role::MERCHANT, $id]])) {
-					$user->setOpenOnSunday($operation['open_on_sunday']);
-					$user->setOpenOnMonday($operation['open_on_monday']);
-					$user->setOpenOnTuesday($operation['open_on_tuesday']);
-					$user->setOpenOnWednesday($operation['open_on_wednesday']);
-					$user->setOpenOnThursday($operation['open_on_thursday']);
-					$user->setOpenOnFriday($operation['open_on_friday']);
-					$user->setOpenOnSaturday($operation['open_on_saturday']);
-					$user->setBusinessOpeningHour($operation['business_opening_hour']);
-					$user->setBusinessClosingHour($operation['business_closing_hour']);
-					$user->setDeliveryHours($operation['delivery_hours']);
-					$user->setMinimumPurchase($operation['minimum_purchase']);
-					$user->setAddress($operation['address']);
-					$user->update();
-				}
+		if ($this->request->isPost() && ($merchants = $this->request->getPost('merchants'))) {
+			$users = User::find(['status = 1 AND role_id = ?0 AND id IN({ids:array})', 'bind' => [Role::MERCHANT, 'ids' => array_keys($merchants)], 'limit' => $this->config->per_page]);
+			foreach ($users as $user) {
+				$operation = $merchants[$user->id];
+				$user->assign($operation, null, [
+					'business_opening_hour',
+					'business_closing_hour',
+					'delivery_hours',
+					'minimum_purchase',
+					'address',
+				]);
+				$user->setOpenOnSunday($operation['open_on_sunday']);
+				$user->setOpenOnMonday($operation['open_on_monday']);
+				$user->setOpenOnTuesday($operation['open_on_tuesday']);
+				$user->setOpenOnWednesday($operation['open_on_wednesday']);
+				$user->setOpenOnThursday($operation['open_on_thursday']);
+				$user->setOpenOnFriday($operation['open_on_friday']);
+				$user->setOpenOnSaturday($operation['open_on_saturday']);
+				$user->update();
 			}
 			$this->flashSession->success('Update hari jam operasional berhasil.');
 		}

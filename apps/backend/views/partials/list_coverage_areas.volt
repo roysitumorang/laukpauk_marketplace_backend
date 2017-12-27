@@ -39,7 +39,7 @@
 												{% if coverage_area.id %}
 													{{ coverage_area.village.subdistrict.name }}
 												{% else %}
-													{{ select_static('subdistrict_id', subdistricts, 'value': coverage_area.village.subdistrict_id) }}
+													{{ select_static('subdistrict_id', subdistricts, 'using': ['id', 'name'], 'value': subdistrict_id) }}
 												{% endif %}
 											</td>
 											<td>
@@ -124,7 +124,8 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	document.querySelector('#subdistrict_id').addEventListener('change', event => {
+	let subdistrict_id = document.querySelector('#subdistrict_id');
+	subdistrict_id && subdistrict_id.addEventListener('change', event => {
 		let village = document.querySelector('#village_id');
 		village.options.length = 0,
 		event.target.value && fetch('/admin/users/{{ user.id }}/coverage_areas/villages/' + event.target.value, { credentials: 'include' }).then(response => response.json()).then(items => {
