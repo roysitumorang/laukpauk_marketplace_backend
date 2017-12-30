@@ -106,7 +106,7 @@
 								</tr>
 								<tr>
 									<td><i class="fa fa-shopping-bag"></i> Total Order / Pending / Completed / Cancelled</td>
-									<td>{{ total.orders }} / {{ total.pending_orders }} / {{ total.completed_orders }} / {{ total.cancelled_orders }}</td>
+									<td>{{ total['orders'] }} / {{ total['pending_orders'] }} / {{ total['completed_orders'] }} / {{ total['cancelled_orders'] }}</td>
 								</tr>
 								{% if user.role.name == 'Merchant' %}
 								<tr>

@@ -125,29 +125,23 @@ class UsersController extends ControllerBase {
 	function showAction($id) {
 		$user = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
 		if ($user->role_id == Role::BUYER) {
-			$column = 'buyer_id';
+			$total = [
+				'orders'           => $user->countBuyerOrders(),
+				'pending_orders'   => $user->countBuyerOrders('status = 0'),
+				'completed_orders' => $user->countBuyerOrders('status = 1'),
+				'cancelled_orders' => $user->countBuyerOrders('status = -1'),
+			];
 		} else if ($user->role_id == Role::MERCHANT) {
-			$column = 'merchant_id';
+			$total = [
+				'orders'           => $user->countMerchantOrders(),
+				'pending_orders'   => $user->countMerchantOrders('status = 0'),
+				'completed_orders' => $user->countMerchantOrders('status = 1'),
+				'cancelled_orders' => $user->countMerchantOrders('status = -1'),
+			];
 			$this->view->setVars([
 				'total_products'       => $user->countProducts(),
 				'total_coverage_areas' => $user->countCoverageAreas(),
 			]);
-		}
-		if ($column) {
-			$total = $this->db->fetchOne("
-				SELECT
-					COUNT(DISTINCT a.id) AS orders,
-					COUNT(DISTINCT b.id) AS pending_orders,
-					COUNT(DISTINCT c.id) AS completed_orders,
-					COUNT(DISTINCT d.id) AS cancelled_orders
-				FROM
-					orders a
-					LEFT JOIN orders b ON a.{$column} = b.{$column} AND b.status = 0
-					LEFT JOIN orders c ON a.{$column} = c.{$column} AND c.status = 1
-					LEFT JOIN orders d ON a.{$column} = d.{$column} AND d.status = -1
-				WHERE
-					a.{$column} = ?", Db::FETCH_OBJ, [$user->id]);
-			$this->view->total = $total;
 		}
 		if ($user->avatar) {
 			$user->thumbnail = $user->getThumbnail(300, 300);
@@ -157,6 +151,7 @@ class UsersController extends ControllerBase {
 			'user'       => $user,
 			'status'     => User::STATUS,
 			'last_login' => LoginHistory::maximum(['user_id = ?0', 'bind' => [$user->id], 'column' => 'sign_in_at']),
+			'total'      => $total,
 		]);
 	}
 
