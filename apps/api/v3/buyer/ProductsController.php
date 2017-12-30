@@ -7,9 +7,9 @@ use Phalcon\Db;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
-		$merchant_id  = $this->dispatcher->getParam('merchant_id', 'int');
-		$category_id  = $this->dispatcher->getParam('category_id', 'int');
-		$page         = $this->dispatcher->getParam('page', 'int');
+		$merchant_id  = $this->dispatcher->getParam('merchant_id', 'int!');
+		$category_id  = $this->dispatcher->getParam('category_id', 'int!');
+		$current_page = $this->dispatcher->getParam('page', 'int!', 1);
 		$search_query = $this->dispatcher->getParam('keyword', 'string') ?: null;
 		$limit        = 10;
 		$params       = [];
@@ -62,7 +62,6 @@ QUERY;
 		}
 		$total_products = $this->db->fetchColumn($query, $params);
 		$total_pages    = ceil($total_products / $limit);
-		$current_page   = $page > 0 ? $page : 1;
 		$offset         = ($current_page - 1) * $limit;
 		$result         = $this->db->query(strtr($query, ['COUNT(DISTINCT d.id)' => <<<QUERY
 			DISTINCT
@@ -76,7 +75,7 @@ QUERY;
 			TS_RANK(e.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(a.keywords, TO_TSQUERY('{$keywords}')) AS relevancy
 QUERY
 		]) . " ORDER BY relevancy DESC, e.name LIMIT {$limit} OFFSET {$offset}", $params);
-		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
+		$picture_root_url = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/';
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			unset($row->relevancy);
@@ -92,21 +91,16 @@ QUERY
 			$products[] = $row;
 		}
 		if (!$merchant_ids->isEmpty()) {
-			$today    = $this->currentDatetime->format('N');
-			$tomorrow = $this->currentDatetime->modify('+1 day')->format('N');
+			$today    = lcfirst($this->currentDatetime->format('l'));
+			$tomorrow = lcfirst($this->currentDatetime->modify('+1 day')->format('l'));
 			$query    = sprintf(<<<QUERY
 				SELECT
 					DISTINCT
 					a.id,
 					a.company,
 					a.address,
-					a.open_on_sunday,
-					a.open_on_monday,
-					a.open_on_tuesday,
-					a.open_on_wednesday,
-					a.open_on_thursday,
-					a.open_on_friday,
-					a.open_on_saturday,
+					a.open_on_{$today} AS open_today,
+					a.open_on_{$tomorrow} AS open_tomorrow,
 					a.business_opening_hour,
 					a.business_closing_hour,
 					a.delivery_hours,
@@ -132,39 +126,17 @@ QUERY
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$availability = 'Hari ini ';
-				if ((($today == 1 && $item->open_on_monday) ||
-					($today == 2 && $item->open_on_tuesday) ||
-					($today == 3 && $item->open_on_wednesday) ||
-					($today == 4 && $item->open_on_thursday) ||
-					($today == 5 && $item->open_on_friday) ||
-					($today == 6 && $item->open_on_saturday) ||
-					($today == 7 && $item->open_on_sunday)) &&
-					$item->business_closing_hour > $this->currentDatetime->format('G')) {
+				if ($item->open_today && $item->business_closing_hour > $this->currentDatetime->format('G')) {
 					$availability .= 'buka';
 				} else {
 					$availability .= 'tutup';
 				}
 				$availability .= ', besok ';
-				if (($tomorrow == 1 && $item->open_on_monday) ||
-					($tomorrow == 2 && $item->open_on_tuesday) ||
-					($tomorrow == 3 && $item->open_on_wednesday) ||
-					($tomorrow == 4 && $item->open_on_thursday) ||
-					($tomorrow == 5 && $item->open_on_friday) ||
-					($tomorrow == 6 && $item->open_on_saturday) ||
-					($tomorrow == 7 && $item->open_on_sunday)) {
+				if ($item->open_tomorrow) {
 					$availability .= 'buka';
 				} else {
 					$availability .= 'tutup';
 				}
-				$business_days = [
-					$item->open_on_monday    ? 'Senin'  : ',',
-					$item->open_on_tuesday   ? 'Selasa' : ',',
-					$item->open_on_wednesday ? 'Rabu'   : ',',
-					$item->open_on_thursday  ? 'Kamis'  : ',',
-					$item->open_on_friday    ? 'Jumat'  : ',',
-					$item->open_on_saturday  ? 'Sabtu'  : ',',
-					$item->open_on_sunday    ? 'Minggu' : ',',
-				];
 				$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
 				$hours          = explode(',', $item->delivery_hours);
 				if ($hours) {
@@ -182,8 +154,6 @@ QUERY
 					'company'          => $item->company,
 					'address'          => $item->address,
 					'availability'     => $availability,
-					'business_days'    => trim(preg_replace(['/\,+/', '/([a-z])([A-Z])/', '/([A-Za-z]+)(-[A-Za-z]+)+(-[A-Za-z]+)/'], [',', '\1-\2', '\1\3'], implode('', $business_days)), ',') ?: '-',
-					'business_hours'   => $item->business_opening_hour . '.00 - ' . $item->business_closing_hour . '.00 WIB',
 					'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
 					'minimum_purchase' => $item->minimum_purchase,
 					'shipping_cost'    => $item->shipping_cost,
