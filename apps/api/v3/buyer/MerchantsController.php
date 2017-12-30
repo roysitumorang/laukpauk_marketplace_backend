@@ -77,13 +77,14 @@ QUERY
 		while ($item = $result->fetch()) {
 			unset($item->relevancy);
 			$availability = 'Hari ini ';
-			if (($today == 1 && $item->open_on_monday) ||
+			if ((($today == 1 && $item->open_on_monday) ||
 				($today == 2 && $item->open_on_tuesday) ||
 				($today == 3 && $item->open_on_wednesday) ||
 				($today == 4 && $item->open_on_thursday) ||
 				($today == 5 && $item->open_on_friday) ||
 				($today == 6 && $item->open_on_saturday) ||
-				($today == 7 && $item->open_on_sunday)) {
+				($today == 7 && $item->open_on_sunday)) &&
+				$item->business_closing_hour > $this->currentDatetime->format('G')) {
 				$availability .= 'buka';
 			} else {
 				$availability .= 'tutup';
