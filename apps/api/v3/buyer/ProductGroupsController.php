@@ -6,7 +6,7 @@ use Phalcon\Db;
 
 class ProductGroupsController extends ControllerBase {
 	function indexAction() {
-		$page           = $this->dispatcher->getParam('page', 'int');
+		$current_page   = $this->dispatcher->getParam('page', 'int!', 1);
 		$search_query   = $this->dispatcher->getParam('keyword', 'string') ?: null;
 		$limit          = 10;
 		$product_groups = [];
@@ -21,11 +21,10 @@ class ProductGroupsController extends ControllerBase {
 				$query .= " AND keywords @@ TO_TSQUERY('{$keywords}')";
 			}
 		}
-		$total_rows   = $this->db->fetchColumn($query);
-		$total_pages  = ceil($total_rows / $limit);
-		$current_page = $page > 0 ? $page : 1;
-		$offset       = ($current_page - 1) * $limit;
-		$result       = $this->db->query(strtr($query, ['COUNT(1)' => 'name' . ($keywords ? ", TS_RANK(keywords, TO_TSQUERY('{$keywords}')) AS relevancy" : '')]) . ' ORDER BY ' . ($keywords ? 'relevancy DESC,' : '') . "name LIMIT {$limit} OFFSET {$offset}");
+		$total_rows  = $this->db->fetchColumn($query);
+		$total_pages = ceil($total_rows / $limit);
+		$offset      = ($current_page - 1) * $limit;
+		$result      = $this->db->query(strtr($query, ['COUNT(1)' => 'name, url' . ($keywords ? ", TS_RANK(keywords, TO_TSQUERY('{$keywords}')) AS relevancy" : '')]) . ' ORDER BY ' . ($keywords ? 'relevancy DESC,' : '') . "name LIMIT {$limit} OFFSET {$offset}");
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			unset($row->relevancy);
