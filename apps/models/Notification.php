@@ -41,7 +41,7 @@ class Notification extends ModelBase {
 	}
 
 	function setMessage($message) {
-		$this->message = $this->_filter->sanitize($message, ['string', 'trim']);
+		$this->message = $this->_filter->sanitize($message, 'trim');
 	}
 
 	function setAdminTargetUrl($admin_target_url) {
