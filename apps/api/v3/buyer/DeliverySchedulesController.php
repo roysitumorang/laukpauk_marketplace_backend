@@ -40,7 +40,6 @@ class DeliverySchedulesController extends ControllerBase {
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
 					a.id IN(%s)
-				GROUP BY a.id
 QUERY
 			, implode(',', $merchant_ids));
 			if (!$merchant_ids || count($merchant_ids) != $this->db->fetchColumn($query)) {
@@ -59,7 +58,7 @@ QUERY
 				$available_days[$day] = $date;
 				$delivery_hours[$day] = [];
 			}
-			$result = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => "a.id, a.open_on_{$today} AS open_today, a.open_on_{$tomorrow} AS open_tomorrow, a.business_opening_hour, a.business_closing_hour, a.delivery_hours"]));
+			$result = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => "a.id, a.open_on_{$today} AS open_today, a.open_on_{$tomorrow} AS open_tomorrow, a.business_opening_hour, a.business_closing_hour, a.delivery_hours"]) . ' GROUP BY a.id');
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($merchant = $result->fetch()) {
 				$merchant_delivery_dates = [];
@@ -86,7 +85,7 @@ QUERY
 			} else if (count($all_delivery_dates) === 1) {
 				$filtered_delivery_dates = $all_delivery_dates[0];
 			} else {
-				$filtered_delivery_dates = array_values(array_intersect($all_delivery_dates));
+				$filtered_delivery_dates = array_values(call_user_func_array('array_intersect', $all_delivery_dates));
 			}
 			if (!$filtered_delivery_dates) {
 				throw new \Exception('Maaf, Supplier tutup.');
@@ -98,7 +97,7 @@ QUERY
 					$current_delivery_hours                = $delivery_hours[$label];
 					$delivery_dates[$day->format('Y-m-d')] = [
 						'label' => $label,
-						'hours' => count($current_delivery_hours) > 1 ? array_values(array_intersect($current_delivery_hours)) : $current_delivery_hours[0],
+						'hours' => count($current_delivery_hours) > 1 ? array_values(call_user_func_array('array_intersect', $current_delivery_hours)) : $current_delivery_hours[0],
 					];
 				}
 				$this->_response['status']                 = 1;
@@ -129,7 +128,6 @@ QUERY
 					b.name = 'Merchant' AND
 					c.village_id = {$this->_current_user->village->id} AND
 					a.id IN(%s)
-				GROUP BY a.id
 QUERY
 			, implode(',', $merchant_ids));
 			if (!$merchant_ids || count($merchant_ids) != $this->db->fetchColumn($query)) {
@@ -152,7 +150,8 @@ QUERY
 			$minimum_hour = $current_hour + ($current_hour < 16 && $this->currentDatetime->format('i') > 29 ? 2 : 1);
 			$today        = lcfirst($this->currentDatetime->format('l'));
 			$tomorrow     = lcfirst($this->currentDatetime->modify('+1 day')->format('l'));
-			$result       = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => "a.id, a.company, a.open_on_{$today} AS open_today, a.open_on_{$tomorrow} AS open_tomorrow, a.business_opening_hour, a.business_closing_hour, a.delivery_hours"]));
+			$result       = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => "a.id, a.company, a.open_on_{$today} AS open_today, a.open_on_{$tomorrow} AS open_tomorrow, a.business_opening_hour, a.business_closing_hour, a.delivery_hours"]) . ' GROUP BY a.id');
+
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				if (($delivery_schedule->format('Y-m-d') === $this->currentDatetime->format('Y-m-d') && !$item->open_today) ||
