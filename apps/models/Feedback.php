@@ -17,7 +17,7 @@ class Feedback extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('created_by', 'Application\Models\User', 'id', [
+		$this->belongsTo('created_by', User::class, 'id', [
 			'alias'    => 'user',
 			'reusable' => true,
 		]);

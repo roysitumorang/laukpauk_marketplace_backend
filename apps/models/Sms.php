@@ -27,11 +27,11 @@ class Sms extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',
 			'reusable' => true,
 		]);
-		$this->hasManyToMany('id', 'Application\Models\SmsRecipient', 'sms_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'recipients']);
+		$this->hasManyToMany('id', SmsRecipient::class, 'sms_id', 'user_id', User::class, 'id', ['alias' => 'recipients']);
 	}
 
 	function setBody(string $body) {

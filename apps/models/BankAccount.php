@@ -20,7 +20,7 @@ class BankAccount extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\Payment', 'bank_account_id', ['alias' => 'payments']);
+		$this->hasMany('id', Payment::class, 'bank_account_id', ['alias' => 'payments']);
 	}
 
 	function getSource() {

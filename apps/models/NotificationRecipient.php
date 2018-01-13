@@ -14,10 +14,10 @@ class NotificationRecipient extends Model {
 	}
 
 	function initialize() {
-		$this->belongsTo('notification_id', 'Application\Models\Notification', 'id', [
+		$this->belongsTo('notification_id', Notification::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
 	}

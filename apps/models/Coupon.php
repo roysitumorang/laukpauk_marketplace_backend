@@ -36,8 +36,8 @@ class Coupon extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\Order', 'coupon_id', ['alias' => 'orders']);
-		$this->belongsTo('release_id', 'Application\Models\Release', 'id', [
+		$this->hasMany('id', Order::class, 'coupon_id', ['alias' => 'orders']);
+		$this->belongsTo('release_id', Release::class, 'id', [
 			'alias'    => 'release',
 			'reusable' => true,
 		]);

@@ -21,12 +21,12 @@ class Village extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('subdistrict_id', 'Application\Models\Subdistrict', 'id', [
+		$this->belongsTo('subdistrict_id', Subdistrict::class, 'id', [
 			'alias'    => 'subdistrict',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\User', 'village_id', ['alias' => 'users']);
-		$this->hasManyToMany('id', 'Application\Models\CoverageArea', 'village_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
+		$this->hasMany('id', User::class, 'village_id', ['alias' => 'users']);
+		$this->hasManyToMany('id', CoverageArea::class, 'village_id', 'user_id', User::class, 'id', ['alias' => 'merchants']);
 	}
 
 	function setName($name) {

@@ -2,8 +2,6 @@
 
 namespace Application\Models;
 
-use Application\Models\ModelBase;
-
 class ProductGroupMember extends ModelBase {
 	public $product_group_id;
 	public $product_id;
@@ -16,10 +14,10 @@ class ProductGroupMember extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('product_group_id', 'Application\Models\ProductGroup', 'id', [
+		$this->belongsTo('product_group_id', ProductGroup::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
-		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
+		$this->belongsTo('product_id', Product::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
 	}

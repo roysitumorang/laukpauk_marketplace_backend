@@ -22,7 +22,7 @@ class SalePackageProduct extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('sale_package_id', 'Application\Models\SalePackage', 'id', [
+		$this->belongsTo('sale_package_id', SalePackage::class, 'id', [
 			'alias'      => 'salePackage',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -30,7 +30,7 @@ class SalePackageProduct extends ModelBase {
 				'message'    => 'paket penjualan harus diisi',
 			],
 		]);
-		$this->belongsTo('user_product_id', 'Application\Models\UserProduct', 'id', [
+		$this->belongsTo('user_product_id', UserProduct::class, 'id', [
 			'alias'      => 'userProduct',
 			'reusable'   => true,
 			'foreignKey' => [

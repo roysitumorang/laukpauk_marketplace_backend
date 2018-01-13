@@ -22,7 +22,7 @@ class PostCategory extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->hasMany('id', 'Application\Models\Post', 'post_category_id', [
+		$this->hasMany('id', Post::class, 'post_category_id', [
 			'alias'      => 'posts',
 			'foreignKey' => [
 				'message' => 'kategori tidak dapat dihapus karena memiliki konten',

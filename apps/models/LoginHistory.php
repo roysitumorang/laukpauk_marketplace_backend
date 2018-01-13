@@ -12,7 +12,7 @@ class LoginHistory extends Model {
 	public $user_agent;
 
 	function initialize() {
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',
 			'reusable' => true,
 		]);

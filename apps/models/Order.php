@@ -48,7 +48,7 @@ class Order extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('merchant_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('merchant_id', User::class, 'id', [
 			'alias'      => 'merchant',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -56,7 +56,7 @@ class Order extends ModelBase {
 				'message'    => 'merchant harus diisi',
 			],
 		]);
-		$this->belongsTo('buyer_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('buyer_id', User::class, 'id', [
 			'alias'      => 'buyer',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -64,15 +64,15 @@ class Order extends ModelBase {
 				'message'    => 'pembeli harus diisi',
 			],
 		]);
-		$this->belongsTo('coupon_id', 'Application\Models\Coupon', 'id', [
+		$this->belongsTo('coupon_id', Coupon::class, 'id', [
 			'alias'      => 'coupon',
 			'reusable'   => true,
 			'foreignKey' => ['allowNulls' => true],
 		]);
-		$this->hasMany('id', 'Application\Models\OrderProduct', 'order_id', [
+		$this->hasMany('id', OrderProduct::class, 'order_id', [
 			'alias' => 'orderProducts',
 		]);
-		$this->hasManyToMany('id', 'Application\Models\OrderProduct', 'order_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
+		$this->hasManyToMany('id', OrderProduct::class, 'order_id', 'product_id', Product::class, 'id', ['alias' => 'products']);
 	}
 
 	function beforeValidationOnCreate() {

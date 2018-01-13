@@ -40,7 +40,7 @@ class Product extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('product_category_id', 'Application\Models\ProductCategory', 'id', [
+		$this->belongsTo('product_category_id', ProductCategory::class, 'id', [
 			'alias'      => 'category',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -48,9 +48,9 @@ class Product extends ModelBase {
 				'message'    => 'kategori harus diisi',
 			],
 		]);
-		$this->hasManyToMany('id', 'Application\Models\ProductGroupMember', 'product_id', 'product_group_id', 'Application\Models\ProductGroup', 'id', ['alias' => 'groups']);
-		$this->hasManyToMany('id', 'Application\Models\UserProduct', 'product_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'merchants']);
-		$this->hasManyToMany('id', 'Application\Models\OrderProduct', 'product_id', 'order_id', 'Application\Models\Order', 'id', ['alias' => 'orders']);
+		$this->hasManyToMany('id', ProductGroupMember::class, 'product_id', 'product_group_id', ProductGroup::class, 'id', ['alias' => 'groups']);
+		$this->hasManyToMany('id', UserProduct::class, 'product_id', 'user_id', User::class, 'id', ['alias' => 'merchants']);
+		$this->hasManyToMany('id', OrderProduct::class, 'product_id', 'order_id', Order::class, 'id', ['alias' => 'orders']);
 	}
 
 	function setName($name) {

@@ -25,7 +25,7 @@ class Post extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('post_category_id', 'Application\Models\PostCategory', 'id', [
+		$this->belongsTo('post_category_id', PostCategory::class, 'id', [
 			'alias'    => 'category',
 			'reusable' => true,
 		]);

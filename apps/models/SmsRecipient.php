@@ -2,8 +2,6 @@
 
 namespace Application\Models;
 
-use Application\Models\ModelBase;
-
 class SmsRecipient extends ModelBase {
 	public $sms_id;
 	public $user_id;
@@ -16,10 +14,10 @@ class SmsRecipient extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('sms_id', 'Application\Models\Sms', 'id', [
+		$this->belongsTo('sms_id', Sms::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);
 	}

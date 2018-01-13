@@ -26,7 +26,7 @@ class Release extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->hasMany('id', 'Application\Models\Coupon', 'release_id', ['alias' => 'releases']);
+		$this->hasMany('id', Coupon::class, 'release_id', ['alias' => 'releases']);
 	}
 
 	function setUserType($user_type) {

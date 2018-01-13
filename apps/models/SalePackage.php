@@ -31,7 +31,7 @@ class SalePackage extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'      => 'user',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -39,8 +39,8 @@ class SalePackage extends ModelBase {
 				'message'    => 'penjual harus diisi',
 			],
 		]);
-		$this->hasManyToMany('id', 'Application\Models\SalePackageProduct', 'sale_package_id', 'user_product_id', 'Application\Models\UserProduct', 'id', ['alias' => 'userProducts']);
-		$this->hasManyToMany('id', 'Application\Models\OrderProduct', 'sale_package_id', 'order_id', 'Application\Models\Order', 'id', ['alias' => 'orders']);
+		$this->hasManyToMany('id', SalePackageProduct::class, 'sale_package_id', 'user_product_id', UserProduct::class, 'id', ['alias' => 'userProducts']);
+		$this->hasManyToMany('id', OrderProduct::class, 'sale_package_id', 'order_id', Order::class, 'id', ['alias' => 'orders']);
 	}
 
 	function setName(string $name) {

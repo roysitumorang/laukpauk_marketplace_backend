@@ -22,7 +22,7 @@ class ProductGroup extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasManyToMany('id', 'Application\Models\ProductGroupMember', 'product_group_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
+		$this->hasManyToMany('id', ProductGroupMember::class, 'product_group_id', 'product_id', Product::class, 'id', ['alias' => 'products']);
 	}
 
 	function setName(string $name) {

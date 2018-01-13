@@ -2,8 +2,6 @@
 
 namespace Application\Models;
 
-use Application\Models\ModelBase;
-
 class Role extends ModelBase {
 	const ANONYMOUS   = 0;
 	const SUPER_ADMIN = 1;
@@ -25,6 +23,6 @@ class Role extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\User', 'role_id', ['alias' => 'users']);
+		$this->hasMany('id', User::class, 'role_id', ['alias' => 'users']);
 	}
 }

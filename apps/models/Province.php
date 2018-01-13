@@ -20,7 +20,7 @@ class Province extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->hasMany('id', 'Application\Models\City', 'province_id', [
+		$this->hasMany('id', City::class, 'province_id', [
 			'alias'      => 'cities',
 			'foreignKey' => [
 				'message' => 'propinsi tidak dapat dihapus karena memiliki kota / kabupaten',

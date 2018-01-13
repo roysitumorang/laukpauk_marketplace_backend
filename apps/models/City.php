@@ -25,11 +25,11 @@ class City extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('province_id', 'Application\Models\Province', 'id', [
+		$this->belongsTo('province_id', Province::class, 'id', [
 			'alias'    => 'province',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\Subdistrict', 'city_id', [
+		$this->hasMany('id', Subdistrict::class, 'city_id', [
 			'alias'      => 'subdistricts',
 			'foreignKey' => [
 				'message' => 'kota / kabupaten tidak dapat dihapus karena memiliki kecamatan',

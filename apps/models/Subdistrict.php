@@ -21,11 +21,11 @@ class Subdistrict extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('city_id', 'Application\Models\City', 'id', [
+		$this->belongsTo('city_id', City::class, 'id', [
 			'alias'    => 'city',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\Village', 'subdistrict_id', [
+		$this->hasMany('id', Village::class, 'subdistrict_id', [
 			'alias'      => 'villages',
 			'foreignKey' => [
 				'message' => 'kecamatan tidak dapat dihapus karena memiliki kelurahan / desa',

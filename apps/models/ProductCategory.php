@@ -45,7 +45,7 @@ class ProductCategory extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->hasMany('id', 'Application\Models\Product', 'product_category_id', ['alias' => 'products']);
+		$this->hasMany('id', Product::class, 'product_category_id', ['alias' => 'products']);
 	}
 
 	function setName(string $name) {

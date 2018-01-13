@@ -82,7 +82,7 @@ class User extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('role_id', 'Application\Models\Role', 'id', [
+		$this->belongsTo('role_id', Role::class, 'id', [
 			'alias'      => 'role',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -90,7 +90,7 @@ class User extends ModelBase {
 				'message'    => 'role harus diisi',
 			],
 		]);
-		$this->belongsTo('village_id', 'Application\Models\Village', 'id', [
+		$this->belongsTo('village_id', Village::class, 'id', [
 			'alias'      => 'village',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -98,19 +98,19 @@ class User extends ModelBase {
 				'message'    => 'kelurahan harus diisi',
 			],
 		]);
-		$this->hasMany('id', 'Application\Models\LoginHistory', 'user_id', ['alias' => 'loginHistory']);
-		$this->hasMany('id', 'Application\Models\Order', 'buyer_id', ['alias' => 'buyerOrders']);
-		$this->hasMany('id', 'Application\Models\Order', 'merchant_id', ['alias' => 'merchantOrders']);
-		$this->hasManyToMany('id', 'Application\Models\UserProduct', 'user_id', 'product_id', 'Application\Models\Product', 'id', ['alias' => 'products']);
-		$this->hasManyToMany('id', 'Application\Models\CoverageArea', 'user_id', 'village_id', 'Application\Models\Village', 'id', ['alias' => 'coverageAreas']);
-		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'user_id', 'message_id', 'Application\Models\Message', 'id', ['alias' => 'messages']);
-		$this->hasManyToMany('id', 'Application\Models\NotificationRecipient', 'user_id', 'notification_id', 'Application\Models\Notification', 'id', ['alias' => 'notifications']);
-		$this->hasMany('id', 'Application\Models\Device', 'user_id', ['alias' => 'devices']);
-		$this->hasManyToMany('id', 'Application\Models\SmsRecipient', 'user_id', 'sms_id', 'Application\Models\Sms', 'id', ['alias' => 'sms']);
-		$this->hasMany('id', 'Application\Models\Notification', 'user_id', ['alias' => 'ownNotifications']);
-		$this->hasMany('id', 'Application\Models\Sms', 'user_id', ['alias' => 'ownSms']);
-		$this->hasMany('id', 'Application\Models\Payment', 'user_id', ['alias' => 'payments']);
-		$this->hasMany('id', 'Application\Models\SalePackage', 'user_id', ['alias' => 'salePackages']);
+		$this->hasMany('id', LoginHistory::class, 'user_id', ['alias' => 'loginHistory']);
+		$this->hasMany('id', Order::class, 'buyer_id', ['alias' => 'buyerOrders']);
+		$this->hasMany('id', Order::class, 'merchant_id', ['alias' => 'merchantOrders']);
+		$this->hasManyToMany('id', UserProduct::class, 'user_id', 'product_id', Product::class, 'id', ['alias' => 'products']);
+		$this->hasManyToMany('id', CoverageArea::class, 'user_id', 'village_id', Village::class, 'id', ['alias' => 'coverageAreas']);
+		$this->hasManyToMany('id', MessageRecipient::class, 'user_id', 'message_id', Message::class, 'id', ['alias' => 'messages']);
+		$this->hasManyToMany('id', NotificationRecipient::class, 'user_id', 'notification_id', Notification::class, 'id', ['alias' => 'notifications']);
+		$this->hasMany('id', Device::class, 'user_id', ['alias' => 'devices']);
+		$this->hasManyToMany('id', SmsRecipient::class, 'user_id', 'sms_id', Sms::class, 'id', ['alias' => 'sms']);
+		$this->hasMany('id', Notification::class, 'user_id', ['alias' => 'ownNotifications']);
+		$this->hasMany('id', Sms::class, 'user_id', ['alias' => 'ownSms']);
+		$this->hasMany('id', Payment::class, 'user_id', ['alias' => 'payments']);
+		$this->hasMany('id', SalePackage::class, 'user_id', ['alias' => 'salePackages']);
 	}
 
 	function setMerchantNote($merchant_note) {

@@ -32,7 +32,7 @@ class UserProduct extends ModelBase {
 	function initialize() {
 		parent::initialize();
 		$this->keepSnapshots(true);
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'      => 'user',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -40,7 +40,7 @@ class UserProduct extends ModelBase {
 				'message'    => 'merchant harus diisi',
 			],
 		]);
-		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
+		$this->belongsTo('product_id', Product::class, 'id', [
 			'alias'      => 'product',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -48,7 +48,7 @@ class UserProduct extends ModelBase {
 				'message'    => 'produk harus diisi',
 			],
 		]);
-		$this->hasManyToMany('id', 'Application\Models\SalePackageProduct', 'user_product_id', 'sale_package_id', 'Application\Models\SalePackage', 'id', ['alias' => 'salePackages']);
+		$this->hasManyToMany('id', SalePackageProduct::class, 'user_product_id', 'sale_package_id', SalePackage::class, 'id', ['alias' => 'salePackages']);
 	}
 
 	function setPrice($price) {

@@ -2,7 +2,6 @@
 
 namespace Application\Models;
 
-use Application\Models\ModelBase;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\PresenceOf;
 
@@ -25,7 +24,7 @@ class Message extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('created_by', 'Application\Models\User', 'id', [
+		$this->belongsTo('created_by', User::class, 'id', [
 			'alias'      => 'sender',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -33,7 +32,7 @@ class Message extends ModelBase {
 				'message'    => 'kategori harus diisi',
 			],
 		]);
-		$this->hasManyToMany('id', 'Application\Models\MessageRecipient', 'message_id', 'user_id', 'Application\Models\User', 'id', ['alias' => 'users']);
+		$this->hasManyToMany('id', MessageRecipient::class, 'message_id', 'user_id', User::class, 'id', ['alias' => 'users']);
 	}
 
 	function setSubject($subject) {

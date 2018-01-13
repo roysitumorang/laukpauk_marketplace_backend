@@ -30,11 +30,11 @@ class Payment extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('user_id', 'Application\Models\User', 'id', [
+		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',
 			'reusable' => true,
 		]);
-		$this->belongsTo('bank_account_id', 'Application\Models\BankAccount', 'id', [
+		$this->belongsTo('bank_account_id', BankAccount::class, 'id', [
 			'alias'    => 'bankAccount',
 			'reusable' => true,
 		]);

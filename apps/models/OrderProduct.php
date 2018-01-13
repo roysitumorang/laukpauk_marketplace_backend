@@ -25,7 +25,7 @@ class OrderProduct extends ModelBase {
 
 	function initialize() {
 		parent::initialize();
-		$this->belongsTo('order_id', 'Application\Models\Order', 'id', [
+		$this->belongsTo('order_id', Order::class, 'id', [
 			'alias'      => 'order',
 			'reusable'   => true,
 			'foreignKey' => [
@@ -33,18 +33,18 @@ class OrderProduct extends ModelBase {
 				'message'    => 'order tidak ditemukan',
 			],
 		]);
-		$this->belongsTo('parent_id', 'Application\Models\OrderProduct', 'id', [
+		$this->belongsTo('parent_id', OrderProduct::class, 'id', [
 			'alias'    => 'parent',
 			'reusable' => true,
 		]);
-		$this->hasMany('id', 'Application\Models\OrderProduct', 'parent_id', [
+		$this->hasMany('id', OrderProduct::class, 'parent_id', [
 			'alias' => 'children',
 		]);
-		$this->belongsTo('sale_package_id', 'Application\Models\SalePackage', 'id', [
+		$this->belongsTo('sale_package_id', SalePackage::class, 'id', [
 			'alias'    => 'salePackage',
 			'reusable' => true,
 		]);
-		$this->belongsTo('product_id', 'Application\Models\Product', 'id', [
+		$this->belongsTo('product_id', Product::class, 'id', [
 			'alias'    => 'product',
 			'reusable' => true,
 		]);
