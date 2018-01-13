@@ -78,6 +78,6 @@ class BankAccountsController extends ControllerBase {
 	}
 
 	private function _assignModelAttributes(BankAccount &$bank_account) {
-		$bank_account->assign($_POST, null, ['bank', 'number', 'holder', 'published']);
+		$bank_account->assign($this->request->getPost(), null, ['bank', 'number', 'holder', 'published']);
 	}
 }

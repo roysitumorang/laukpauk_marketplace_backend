@@ -58,7 +58,7 @@ class SalePackagesController extends ControllerBase {
 		$sale_package          = new SalePackage;
 		$sale_package->user_id = $this->_user->id;
 		if ($this->request->isPost()) {
-			$sale_package->assign($_POST, null, ['name', 'price', 'stock']);
+			$sale_package->assign($this->request->getPost(), null, ['name', 'price', 'stock']);
 			$sale_package->setPublished(0);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->create()) {
@@ -79,7 +79,7 @@ class SalePackagesController extends ControllerBase {
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
 		if ($this->request->isPost()) {
-			$sale_package->assign($_POST, null, ['name', 'price', 'stock']);
+			$sale_package->assign($this->request->getPost(), null, ['name', 'price', 'stock']);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->update()) {
 				$this->flashSession->success('Update paket belanja berhasil!');

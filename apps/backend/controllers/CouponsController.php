@@ -152,7 +152,7 @@ class CouponsController extends ControllerBase {
 		if (!$coupon->id) {
 			$coupon->code = $this->request->getPost('code');
 		}
-		$coupon->assign($_POST, null, [
+		$coupon->assign($this->request->getPost(), null, [
 			'price_discount',
 			'discount_type',
 			'effective_date',

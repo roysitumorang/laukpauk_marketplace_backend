@@ -56,7 +56,7 @@ class ProductGroupsController extends ControllerBase {
 	function createAction() {
 		$product_group = new ProductGroup;
 		if ($this->request->isPost()) {
-			$product_group->assign($_POST, null, ['name', 'url', 'published']);
+			$product_group->assign($this->request->getPost(), null, ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->create()) {
 				$this->flashSession->success('Penambahan group produk berhasil.');
 				return $this->response->redirect('/admin/product_groups');
@@ -82,7 +82,7 @@ class ProductGroupsController extends ControllerBase {
 			$next = '/admin/product_groups';
 		}
 		if ($this->request->isPost()) {
-			$product_group->assign($_POST, null, ['name', 'url', 'published']);
+			$product_group->assign($this->request->getPost(), null, ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->update()) {
 				$this->flashSession->success('Update group produk berhasil.');
 				return $this->response->redirect($next);

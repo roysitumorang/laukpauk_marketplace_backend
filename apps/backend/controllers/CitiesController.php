@@ -25,7 +25,7 @@ class CitiesController extends ControllerBase {
 		$city           = new City;
 		$city->province = $this->_province;
 		if ($this->request->isPost()) {
-			$city->assign($_POST, null, ['type', 'name']);
+			$city->assign($this->request->getPost(), null, ['type', 'name']);
 			if ($city->validation() && $city->create()) {
 				$page = $this->dispatcher->getParam('page', 'int', 1);
 				$this->flashSession->success('Penambahan kabupaten / kota berhasil!');
@@ -46,7 +46,7 @@ class CitiesController extends ControllerBase {
 			return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
 		}
 		if ($this->request->isPost()) {
-			$city->assign($_POST, null, ['type', 'name']);
+			$city->assign($this->request->getPost(), null, ['type', 'name']);
 			if ($city->validation() && $city->update()) {
 				$this->flashSession->success('Update kabupaten / kota berhasil!');
 				return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
