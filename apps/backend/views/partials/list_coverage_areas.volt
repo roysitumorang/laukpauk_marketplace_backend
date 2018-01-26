@@ -30,24 +30,38 @@
 					<div class="tab-content">
 						<div id="areas" class="tab-pane active">
 							{{ flashSession.output() }}
-							{% if villages %}
+							{% if provinces %}
 								{{ form('/admin/users/' ~ user.id ~ '/coverage_areas/create') }}
 									<table class="table table-striped">
 										<tr>
 											<td>
+												<b>Propinsi :</b><br>
+												{% if coverage_area.id %}
+													{{ coverage_area.village.subdistrict.city.province.name }}
+												{% else %}
+													{{ select_static('province_id', provinces, 'using': ['id', 'name'], 'useEmpty': true, 'emptyText': '- pilih -', 'value': province_id) }}
+												{% endif %}
+												<br>
 												<b>Kecamatan :</b><br>
 												{% if coverage_area.id %}
 													{{ coverage_area.village.subdistrict.name }}
 												{% else %}
-													{{ select_static('subdistrict_id', subdistricts, 'using': ['id', 'name'], 'value': subdistrict_id) }}
+													{{ select_static('subdistrict_id', subdistricts, 'useEmpty': true, 'emptyText': '- pilih -', 'value': subdistrict_id) }}
 												{% endif %}
 											</td>
 											<td>
+												<b>Kab/Kota :</b><br>
+												{% if coverage_area.id %}
+													{{ coverage_area.village.subdistrict.city.name }}
+												{% else %}
+													{{ select_static('city_id', cities, 'useEmpty': true, 'emptyText': '- pilih -', 'value': city_id) }}
+												{% endif %}
+												<br>
 												<b>Kelurahan :</b><br>
 												{% if coverage_area.id %}
 													{{ coverage_area.village.name }}
 												{% else %}
-													{{ select_static('village_id', villages, 'using': ['id', 'name'], 'value': coverage_area.village_id) }}
+													{{ select_static('village_id', villages, 'value': coverage_area.village_id) }}
 												{% endif %}
 											</td>
 											<td>
@@ -124,28 +138,57 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let subdistrict_id = document.querySelector('#subdistrict_id');
-	subdistrict_id && subdistrict_id.addEventListener('change', event => {
-		let village = document.querySelector('#village_id');
-		village.options.length = 0,
-		event.target.value && fetch('/admin/users/{{ user.id }}/coverage_areas/villages/' + event.target.value, { credentials: 'include' }).then(response => response.json()).then(items => {
-			items.forEach(item => {
-				let option = document.createElement('option');
-				option.value = item.id,
-				option.appendChild(document.createTextNode(item.name)),
-				village.appendChild(option)
+	let province = document.querySelector('#province_id'), city = document.querySelector('#city_id'), subdistrict = document.querySelector('#subdistrict_id'), village = document.querySelector('#village_id');
+	if (province) {
+		province.onchange = event => {
+			let value = event.target.value;
+			city.options.length = 1,
+			subdistrict.options.length = 1,
+			village.options.length = 0,
+			value && fetch('/admin/users/{{ user.id }}/coverage_areas/cities/' + value, { credentials: 'include' }).then(response => response.json()).then(items => {
+				items.forEach(item => {
+					let option = document.createElement('option');
+					option.value = item.id,
+					option.appendChild(document.createTextNode(item.name)),
+					city.appendChild(option)
+				})
 			})
-		})
-	}, false),
+		},
+		city.onchange = event => {
+			let value = event.target.value;
+			subdistrict.options.length = 1,
+			village.options.length = 0,
+			value && fetch('/admin/users/{{ user.id }}/coverage_areas/subdistricts/' + value, { credentials: 'include' }).then(response => response.json()).then(items => {
+				items.forEach(item => {
+					let option = document.createElement('option');
+					option.value = item.id,
+					option.appendChild(document.createTextNode(item.name)),
+					subdistrict.appendChild(option)
+				})
+			})
+		},
+		subdistrict.onchange = event => {
+			let value = event.target.value;
+			village.options.length = 0,
+			value && fetch('/admin/users/{{ user.id }}/coverage_areas/villages/' + value, { credentials: 'include' }).then(response => response.json()).then(items => {
+				items.forEach(item => {
+					let option = document.createElement('option');
+					option.value = item.id,
+					option.appendChild(document.createTextNode(item.name)),
+					village.appendChild(option)
+				})
+			})
+		}
+	}
 	document.querySelectorAll('.delete').forEach(item => {
-		item.addEventListener('click', event => {
+		item.onclick = event => {
 			if (confirm('Anda yakin menghapus data ini ?')) {
-				let form = document.createElement('form');
+				let form = document.createElement('form'), dataset = event.target.parentNode.dataset;
 				form.method = 'POST',
-				form.action = '/admin/users/' + event.target.parentNode.dataset.userId + '/coverage_areas/' + event.target.parentNode.dataset.id + '/delete{% if pagination.current > 1%}?page={{ pagination.current }}{% endif %}',
+				form.action = '/admin/coverage_areas/' + dataset.id + '/delete/user_id:' + dataset.userId + '?next={{ request.get('_url') }}',
 				document.body.appendChild(form),
 				form.submit()
 			}
-		}, false)
+		}
 	})
 </script>
