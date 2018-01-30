@@ -64,9 +64,11 @@ QUERY
 			if ($row->picture) {
 				$row->thumbnail = $picture_root_url . strtr($row->picture, ['.jpg' => '120.jpg']);
 				$row->picture   = $picture_root_url . strtr($row->picture, ['.jpg' => '300.jpg']);
+			} else {
+				unset($row->picture);
 			}
 			$row->products = explode(',', $row->products);
-			unset($row->picture, $row->relevancy);
+			unset($row->relevancy);
 			$sale_packages[] = $row;
 		}
 		if (!$merchant_ids->isEmpty()) {
