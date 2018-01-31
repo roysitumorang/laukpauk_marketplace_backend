@@ -8,6 +8,7 @@ use Phalcon\Db;
 
 class CategoriesController extends ControllerBase {
 	function indexAction() {
+		$limit            = $this->request->getServer('HTTP_APP_VERSION') > '2.0.21' ? 8 : 2;
 		$categories       = [];
 		$sale_packages    = [];
 		$merchant_ids     = new Set;
@@ -39,7 +40,7 @@ QUERY;
 				if (!$total_products) {
 					continue;
 				}
-				$sub_result = $this->db->query('SELECT e.* FROM (' . strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ') e ORDER BY RANDOM() LIMIT 2 OFFSET 0');
+				$sub_result = $this->db->query(sprintf('SELECT e.* FROM (' . strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ') e ORDER BY RANDOM() LIMIT %d OFFSET 0', $limit));
 				$sub_result->setFetchMode(Db::FETCH_OBJ);
 				while ($product = $sub_result->fetch()) {
 					$merchant_ids->contains($product->user_id) || $merchant_ids->add($product->user_id);
@@ -55,7 +56,7 @@ QUERY;
 				$categories[]       = $category;
 			}
 		}
-		$result = $this->db->query(<<<QUERY
+		$result = $this->db->query(sprintf(<<<QUERY
 			SELECT
 				a.id,
 				a.user_id,
@@ -75,9 +76,10 @@ QUERY;
 				a.published = '1'
 			GROUP BY a.id
 			ORDER BY RANDOM()
-			LIMIT 2 OFFSET 0
+			LIMIT %d OFFSET 0
 QUERY
-		);
+			, $limit
+		));
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$merchant_ids->contains($item->user_id) || $merchant_ids->add($item->user_id);
