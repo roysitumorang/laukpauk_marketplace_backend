@@ -35,6 +35,7 @@ class User extends ModelBase {
 	public $change_password;
 	public $address;
 	public $village_id;
+	public $subdistrict_id;
 	public $mobile_phone;
 	public $device_token;
 	public $status;
@@ -61,8 +62,8 @@ class User extends ModelBase {
 	public $delivery_hours;
 	public $latitude;
 	public $longitude;
-	public $max_delivery_distance;
-	public $free_delivery_distance;
+	public $delivery_max_distance;
+	public $delivery_free_distance;
 	public $delivery_rate;
 	public $created_by;
 	public $created_at;
@@ -96,6 +97,14 @@ class User extends ModelBase {
 			'foreignKey' => [
 				'allowNulls' => false,
 				'message'    => 'kelurahan harus diisi',
+			],
+		]);
+		$this->belongsTo('subdistrict_id', Subdistrict::class, 'id', [
+			'alias'      => 'subdistrict',
+			'reusable'   => true,
+			'foreignKey' => [
+				'allowNulls' => false,
+				'message'    => 'kecamatan harus diisi',
 			],
 		]);
 		$this->hasMany('id', LoginHistory::class, 'user_id', ['alias' => 'loginHistory']);
@@ -275,12 +284,12 @@ class User extends ModelBase {
 		$this->longitude = $this->_filter->sanitize($longitude, 'float') ?: null;
 	}
 
-	function setMaxDeliveryDistance($max_delivery_distance) {
-		$this->max_delivery_distance = $this->_filter->sanitize($max_delivery_distance, 'int') ?: 0;
+	function setDeliveryMaxDistance($delivery_max_distance) {
+		$this->delivery_max_distance = $this->_filter->sanitize($delivery_max_distance, 'int') ?: 0;
 	}
 
-	function setFreeDeliveryDistance($free_delivery_distance) {
-		$this->free_delivery_distance = $this->_filter->sanitize($free_delivery_distance, 'int') ?: 0;
+	function setDeliveryFreeDistance($delivery_free_distance) {
+		$this->delivery_free_distance = $this->_filter->sanitize($delivery_free_distance, 'int') ?: 0;
 	}
 
 	function setDeliveryRate($delivery_rate) {

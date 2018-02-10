@@ -131,7 +131,10 @@ QUERY
 				];
 				throw new Exception;
 			}
-			$this->currentUser->village = Village::findFirst($this->post->village_id);
+			if (($village_id = filter_var($this->post->village_id, FILTER_VALIDATE_INT)) && ($village = Village::findFirst($village_id))) {
+				$this->currentUser->village_id     = $village->id;
+				$this->currentUser->subdistrict_id = $village->subdistrict_id;
+			}
 			$this->currentUser->setName($this->post->name);
 			$this->currentUser->setMobilePhone($this->post->mobile_phone);
 			$this->currentUser->setAddress($this->post->address);

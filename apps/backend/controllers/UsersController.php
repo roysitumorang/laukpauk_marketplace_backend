@@ -420,8 +420,9 @@ QUERY
 	}
 
 	private function _assignModelAttributes(User &$user) {
-		if (($village_id = $this->request->getPost('village_id', 'int')) && Village::count(['id = ?0', 'bind' => [$village_id]])) {
-			$user->village_id = $village_id;
+		if (($village_id = $this->request->getPost('village_id', 'int')) && ($village = Village::findFirst($village_id))) {
+			$user->village_id     = $village->id;
+			$user->subdistrict_id = $village->subdistrict_id;
 		}
 		if (($role_id = $this->request->getPost('role_id', 'int')) && Role::count(['id = ?0', 'bind' => [$role_id]])) {
 			$user->role_id = $role_id;
@@ -452,8 +453,8 @@ QUERY
 			$user->assign($this->request->getPost(), null, [
 				'deposit',
 				'delivery_hours',
-				'max_delivery_distance',
-				'free_delivery_distance',
+				'delivery_max_distance',
+				'delivery_free_distance',
 				'delivery_rate',
 			]);
 		}

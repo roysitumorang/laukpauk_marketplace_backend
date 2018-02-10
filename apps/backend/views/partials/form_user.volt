@@ -72,13 +72,13 @@
 		<tr>
 			<td>
 				Jarak pengiriman maksimal (untuk merchant) :<br>
-				{{ text_field('max_delivery_distance', 'value': user.max_delivery_distance, 'size': 20, 'placeholder': 'Jarak pengiriman maksimal') }}
+				{{ text_field('delivery_max_distance', 'value': user.delivery_max_distance, 'size': 20, 'placeholder': 'Jarak pengiriman maksimal') }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Jarak pengiriman gratis (untuk merchant) :<br>
-				{{ text_field('free_delivery_distance', 'value': user.free_delivery_distance, 'size': 20, 'placeholder': 'Jarak pengiriman gratis') }}
+				{{ text_field('delivery_free_distance', 'value': user.delivery_free_distance, 'size': 20, 'placeholder': 'Jarak pengiriman gratis') }}
 			</td>
 		</tr>
 		<tr>

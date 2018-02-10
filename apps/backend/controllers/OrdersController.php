@@ -256,6 +256,7 @@ QUERY
 					$order->mobile_phone       = $buyer->mobile_phone;
 					$order->address            = $this->request->getPost('address');
 					$order->village_id         = $buyer->village_id;
+					$order->subdistrict_id     = $buyer->subdistrict_id;
 					$order->original_bill      = 0;
 					$order->scheduled_delivery = $scheduled_delivery->format('Y-m-d H:i:s');
 					$order->note               = null;

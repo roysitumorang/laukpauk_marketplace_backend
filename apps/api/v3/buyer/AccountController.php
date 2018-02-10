@@ -18,9 +18,11 @@ class AccountController extends ControllerBase {
 			if (!$this->request->isPost()) {
 				throw new \Exception('Request tidak valid!');
 			}
-			$village_id    = filter_var($this->_post->village_id, FILTER_VALIDATE_INT);
-			$user          = new User;
-			$user->village = Village::findFirst($village_id);
+			$user = new User;
+			if (($village_id = filter_var($this->_post->village_id, FILTER_VALIDATE_INT)) && ($village = Village::findFirst($village_id))) {
+				$user->village_id     = $village->id;
+				$user->subdistrict_id = $village->subdistrict_id;
+			}
 			$user->setName($this->_post->name);
 			$user->setNewPassword($this->_post->new_password);
 			$user->setNewPasswordConfirmation($this->_post->new_password);
@@ -204,10 +206,13 @@ QUERY
 				$this->_response['data']['villages']     = $villages;
 				throw new \Exception;
 			}
+			if (($village_id = filter_var($this->_post->village_id, FILTER_VALIDATE_INT)) && ($village = Village::findFirst($village_id))) {
+				$this->_current_user->village_id     = $village->id;
+				$this->_current_user->subdistrict_id = $village->subdistrict_id;
+			}
 			$this->_current_user->setName($this->_post->name);
 			$this->_current_user->setMobilePhone($this->_post->mobile_phone);
 			$this->_current_user->setAddress($this->_post->address);
-			$this->_current_user->village = Village::findFirst($this->_post->village_id);
 			if (!$this->_current_user->validation() || !$this->_current_user->update()) {
 				$errors = new Set;
 				foreach ($this->_current_user->getMessages() as $error) {

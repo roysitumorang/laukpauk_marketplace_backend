@@ -235,6 +235,7 @@ QUERY
 				$order->mobile_phone       = $this->_current_user->mobile_phone;
 				$order->address            = $this->_post->delivery->address;
 				$order->village_id         = $this->_current_user->village_id;
+				$order->subdistrict_id     = $this->_current_user->subdistrict_id;
 				$order->original_bill      = 0;
 				$order->scheduled_delivery = $delivery_date->format('Y-m-d H:i:s');
 				$order->note               = property_exists($cart, 'note') ? $cart->note : null;
