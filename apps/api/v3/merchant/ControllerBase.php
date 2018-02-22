@@ -19,18 +19,6 @@ abstract class ControllerBase extends Controller {
 	function onConstruct() {
 		try {
 			$current_user = $this->currentUser;
-			register_shutdown_function(function() use($current_user) {
-				$this->db->insertAsDict('api_calls', [
-					'user_id'        => $current_user ? $current_user->id : null,
-					'url'            => $this->request->getServer('REQUEST_URI'),
-					'request_method' => $this->request->getMethod(),
-					'ip_address'     => $this->request->getServer('REMOTE_ADDR'),
-					'user_agent'     => $this->request->getServer('HTTP_USER_AGENT'),
-					'execution_time' => (microtime(true) - $this->request->getServer('REQUEST_TIME_FLOAT')) * 1000,
-					'memory_usage'   => memory_get_peak_usage(true) / 1048576,
-					'created_at'     => $this->currentDatetime->format('Y-m-d H:i:s'),
-				]);
-			});
 			if ($current_user && $current_user->role_id != Role::MERCHANT) {
 				throw new Exception(static::INVALID_API_ENDPOINT_MESSAGE);
 			}
