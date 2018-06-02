@@ -2,7 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Application\Models\{Device, Order, OrderProduct, Release, Role, User, Setting, Village};
+use Application\Models\{CoverageArea, Device, Order, OrderProduct, Release, Role, Setting, User, UserProduct, Village};
 use DateTime;
 use Phalcon\Db;
 
@@ -330,9 +330,13 @@ QUERY
 			if (!$order) {
 				throw new \Exception('Pesanan tidak ditemukan!');
 			}
-			$items    = [];
-			$village  = Village::findFirst($order->village_id);
-			$merchant = $order->merchant;
+			$items       = [];
+			$village     = Village::findFirst($order->village_id);
+			$merchant    = $order->merchant;
+			$reorderable = true;
+			if ($merchant->status != 1 || !CoverageArea::count(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village_id]])) {
+				$reorderable = false;
+			}
 			foreach ($order->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
 				$items[$item->id] = [
 					'name'       => $item->name,
@@ -340,6 +344,13 @@ QUERY
 					'unit_price' => $item->price,
 					'quantity'   => $item->quantity,
 				];
+				if (!$reorderable) {
+					continue;
+				}
+				$userProduct = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1 AND published = 1', 'bind' => [$merchant->id, $item->product_id]]);
+				if (!$userProduct || $userProduct->stock < $item->quantity) {
+					$reorderable = false;
+				}
 			}
 			$scheduled_delivery = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$payload            = [
@@ -374,6 +385,7 @@ QUERY
 					'company' => $merchant->company,
 					'address' => $merchant->address,
 				],
+				'reorderable' => $reorderable,
 			];
 			if ($order->status == -1) {
 				$payload['cancellation_reason'] = $order->cancellation_reason;
@@ -381,6 +393,90 @@ QUERY
 			$this->_response['status']                          = 1;
 			$this->_response['data']['order']                   = $payload;
 			$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
+		} catch (\Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_UNESCAPED_SLASHES);
+			return $this->response;
+		}
+	}
+
+	function reorderAction($id) {
+		try {
+			$order = $this->_current_user->getRelated('buyerOrders', ['Application\Models\Order.id = ?0 OR Application\Models\Order.code = ?1', 'bind' => [$id, $id]])->getFirst();
+			if (!$order) {
+				throw new \Exception('Pesanan tidak ditemukan!');
+			}
+			$products         = [];
+			$merchant         = $order->merchant;
+			$picture_root_url = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/';
+			$coverageArea     = CoverageArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$merchant->id, $this->_current_user->village_id]]);
+			$today            = lcfirst($this->currentDatetime->format('l'));
+			$tomorrow         = lcfirst($this->currentDatetime->modify('+1 day')->format('l'));
+			if ($merchant->status == -1 || !$coverageArea) {
+				throw new \Exception('Pemesanan tidak dapat diproses!');
+			}
+			foreach ($order->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
+				$userProduct = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1 AND published = 1', 'bind' => [$merchant->id, $item->product_id]]);
+				if (!$userProduct || $userProduct->stock < $item->quantity) {
+					throw new \Exception('Pemesanan tidak dapat diproses!');
+				}
+				$product   = $userProduct->product;
+				$thumbnail = null;
+				$picture   = null;
+				if ($product->picture) {
+					$thumbnail = $picture_root_url . strtr($product->picture, ['.jpg' => '120.jpg']);
+					$picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
+				}
+				$products[] = [
+					'id'         => $product->id,
+					'name'       => $product->name,
+					'price'      => $userProduct->price,
+					'stock'      => $userProduct->stock,
+					'stock_unit' => $product->stock_unit,
+					'picture'    => $picture,
+					'thumbnail'  => $thumbnail,
+					'user_id'    => $userProduct->user_id,
+					'quantity'   => $item->quantity,
+				];
+			}
+			$availability = 'Hari ini ';
+			if ($merchant->{"open_on_{$today}"} && $merchant->business_closing_hour > $this->currentDatetime->format('G')) {
+				$availability .= 'buka';
+			} else {
+				$availability .= 'tutup';
+			}
+			$availability .= ', besok ';
+			if ($merchant->{"open_on_{$tomorrow}"}) {
+				$availability .= 'buka';
+			} else {
+				$availability .= 'tutup';
+			}
+			$business_hours = range($merchant->business_opening_hour, $merchant->business_closing_hour);
+			$hours          = $merchant->delivery_hours;
+			if ($hours) {
+				foreach ($business_hours as &$hour) {
+					if (!in_array($hour, $hours)) {
+						$hour = ',';
+					} else {
+						$hour .= '.00';
+					}
+				}
+			}
+			$delivery_hours                                     = trim(preg_replace(['/\,+/', '/(0)([1-9])/', '/([1-2]?[0-9]\.00)(-[1-2]?[0-9]\.00)+(-[1-2]?[0-9]\.00)/'], [',', '\1-\2', '\1\3'], implode('', $business_hours)), ',');
+			$this->_response['status']                          = 1;
+			$this->_response['data']['total_new_notifications'] = $this->_current_user->totalNewNotifications();
+			$this->_response['data']['products']                = $products;
+			$this->_response['data']['merchant']                = [
+				'id'               => $merchant->id,
+				'company'          => $merchant->company,
+				'address'          => $merchant->address,
+				'availability'     => $availability,
+				'delivery_hours'   => $delivery_hours ? $delivery_hours . ' WIB' : '-',
+				'minimum_purchase' => $merchant->minimum_purchase,
+				'shipping_cost'    => $coverageArea->shipping_cost,
+				'merchant_note'    => $merchant->merchant_note,
+			];
 		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();
 		} finally {
