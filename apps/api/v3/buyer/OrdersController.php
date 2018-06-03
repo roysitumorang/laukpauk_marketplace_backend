@@ -428,7 +428,7 @@ QUERY
 					$picture   = $picture_root_url . strtr($product->picture, ['.jpg' => '300.jpg']);
 				}
 				$products[] = [
-					'id'         => $product->id,
+					'id'         => $userProduct->id,
 					'name'       => $product->name,
 					'price'      => $userProduct->price,
 					'stock'      => $userProduct->stock,
