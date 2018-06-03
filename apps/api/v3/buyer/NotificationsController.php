@@ -10,6 +10,7 @@ class NotificationsController extends ControllerBase {
 		$result        = $this->_current_user->getRelated('notifications', [
 			"Application\Models\Notification.new_mobile_target_url = 'tab.notification' OR Application\Models\NotificationRecipient.read_at IS NULL",
 			'order' => 'id DESC',
+			'page'  => $this->dispatcher->getParam('page', 'int!') ?: 1,
 		]);
 		foreach ($result as $notification) {
 			$notifications[] = [
