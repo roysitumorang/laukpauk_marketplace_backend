@@ -25,7 +25,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				<form method="POST" action="/admin/push_notifications/create">
+				{{ form('/admin/push_notifications/create', 'method': 'POST', 'enctype': 'multipart/form-data') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -44,18 +44,19 @@
 									{% endfor %}
 								</select>
 								Member
-								<select name="user_id" id="user_id">
-									<option value="">Semua Member</option>
-									{% for user in users %}
-										<option value="{{ user.id }}"{% if user.id == user_id %} selected{% endif %}>{{ user.mobile_phone }} / {{ user.name }}</option>
-									{% endfor %}
-								</select>
+								{{ select('user_id', recipients, 'using': ['id', 'label'], 'value': user_id, 'useEmpty': true, 'emptyText': '- Semua Member -') }}
 							</td>
 						</tr>
 						<tr>
 							<td>
 								<b>Judul :</b><br>
 								<input type="text" name="title" value="{{ notification.title }}" size="50" maxlength="200">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Gambar :</b><br>
+								{{ file_field('new_image') }}
 							</td>
 						</tr>
 						<tr>
@@ -71,7 +72,7 @@
 							</td>
 						</tr>
 					</table>
-				</form>
+				{{ endForm() }}
 				<!-- eof Content //-->
 			</div>
 			<!-- end: page -->
@@ -80,16 +81,16 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let role_id = document.getElementById('role_id');
-	role_id.onchange = () => {
-		fetch('/admin/push_notifications/recipients' + (role_id.value ? '/role_id:' + role_id.value : ''), { credentials: 'include' }).then(response => {
-			return response.text()
-		}).then(payload => {
-			let result = JSON.parse(payload), new_options = '<option value="">Semua Member</option>'
-			result.forEach(item => {
-				new_options += '<option value="' + item.id + '">' + item.mobile_phone + ' / ' + item.name + '</option>'
+	document.querySelector('#role_id').onchange = event => {
+		let value = event.target.value, target = document.querySelector('#user_id');
+		target.options.length = 1,
+		fetch('/admin/push_notifications/recipients' + (value ? '/role_id:' + value : ''), { credentials: 'include' }).then(response => response.json()).then(payload => {
+			payload.forEach(function(item) {
+				let option = document.createElement('option');
+				option.value = item.id,
+				option.appendChild(document.createTextNode(item.label)),
+				target.appendChild(option)
 			})
-			document.getElementById('user_id').innerHTML = new_options
 		})
 	}
 </script>

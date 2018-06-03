@@ -6,6 +6,7 @@ use Application\Models\Notification;
 use Application\Models\Role;
 use Application\Models\User;
 use DateTime;
+use Ds\Vector;
 use IntlDateFormatter;
 use Phalcon\Paginator\Adapter\Model;
 
@@ -49,39 +50,40 @@ class PushNotificationsController extends ControllerBase {
 
 	function createAction() {
 		$notification = new Notification;
-		$roles        = [];
-		$recipients   = [];
+		$roles        = Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'LOWER(name) DESC']);
+		$recipients   = new Vector;
 		$role_id      = '';
 		$user_id      = '';
 		$condition    = 'status = 1 AND (device_token IS NOT NULL OR EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id))';
-		foreach (Role::find(["name IN('Merchant', 'Buyer')", 'column' => 'id, name', 'order' => 'LOWER(name) DESC']) as $item) {
-			$roles[] = $item;
-		}
 		if ($this->request->isPost()) {
-			if ($role_id = $this->request->getPost('role_id', 'int')) {
+			if ($role_id = $this->request->getPost('role_id', 'int!')) {
 				$condition .= " AND role_id = {$role_id}";
 			}
-			if ($user_id = $this->request->getPost('user_id')) {
+			if ($user_id = $this->request->getPost('user_id', 'int!')) {
 				$condition .= " AND id = {$user_id}";
 			}
 			foreach (User::find($condition) as $user) {
-				$recipients[] = $user;
+				$recipients->push($user);
 			}
 			if (!$recipients) {
 				$this->flashSession->error('Penerima notifikasi belum ada.');
 			} else {
-				$notification->setTitle($this->request->getPost('title'));
-				$notification->setMessage($this->request->getPost('message'));
-				$notification->setAdminTargetUrl('/admin/notifications/');
-				$notification->setMerchantTargetUrl('/notifications/');
-				$notification->setOldMobileTargetUrl('#/tabs/notification/');
-				$notification->setNewMobileTargetUrl('tab.notification');
-				$notification->user_id = $this->currentUser->id;
-				if ($notification->push($recipients)) {
-					$notification->setAdminTargetUrl($notification->admin_target_url . $notification->id);
-					$notification->setMerchantTargetUrl($notification->merchant_target_url . $notification->id);
-					$notification->setOldMobileTargetUrl($notification->old_mobile_target_url . $notification->id);
-					$notification->update();
+				$notification->assign($this->request->getPost(), null, [
+					'title',
+					'message',
+				])->assign([
+					'admin_target_url'      => '/admin/notifications/',
+					'merchant_target_url'   => '/notifications/',
+					'old_mobile_target_url' => '#/tabs/notification/',
+					'new_mobile_target_url' => 'tab.notification',
+					'user_id'               => $this->currentUser->id,
+				])->setNewImage($this->request->getUploadedFiles()[0]);
+				if ($notification->push($recipients->toArray())) {
+					$notification->update([
+						'admin_target_url'      => $notification->admin_target_url . $notification->id,
+						'merchant_target_url'   => $notification->merchant_target_url . $notification->id,
+						'old_mobile_target_url' => $notification->old_mobile_target_url . $notification->id,
+					]);
 					$this->flashSession->success('Notifikasi berhasil dikirim.');
 					return $this->response->redirect('/admin/push_notifications');
 				}
@@ -90,31 +92,37 @@ class PushNotificationsController extends ControllerBase {
 					$this->flashSession->error($error);
 				}
 			}
-		} else {
-			foreach (User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'LOWER(name)']) as $user) {
-				$recipients[] = $user;
-			}
 		}
-		$this->view->notification = $notification;
-		$this->view->roles        = $roles;
-		$this->view->users        = $recipients;
-		$this->view->role_id      = $role_id;
-		$this->view->user_id      = $user_id;
+		foreach (User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'LOWER(name)']) as $user) {
+			$recipients->push([
+				'id'    => $user->id,
+				'label' => $user->mobile_phone . ' / ' . $user->name,
+			]);
+		}
+		$this->view->setVars([
+			'notification' => $notification,
+			'roles'        => $roles,
+			'recipients'   => $recipients,
+			'role_id'      => $role_id,
+			'user_id'      => $user_id,
+		]);
 	}
 
 	function recipientsAction() {
 		$condition  = 'status = 1 AND (device_token IS NOT NULL OR EXISTS(SELECT 1 FROM Application\Models\Device WHERE Application\Models\Device.user_id = Application\Models\User.id))';
 		$recipients = [];
-		if ($role_id = $this->dispatcher->getParam('role_id', 'int')) {
+		if ($role_id = $this->dispatcher->getParam('role_id', 'int!')) {
 			$condition .= " AND role_id = {$role_id}";
 		}
-		$result = User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'LOWER(name)']);
-		foreach ($result as $item) {
-			$recipients[] = $item;
+		foreach (User::find([$condition, 'columns' => 'id, COALESCE(company, name) AS name, mobile_phone', 'order' => 'LOWER(name)']) as $user) {
+			$recipients[] = [
+				'id'    => $user->id,
+				'label' => $user->mobile_phone . ' / ' . $user->name,
+			];
 		}
-		$this->response->setContentType('application/json', 'UTF-8');
-		$this->response->setContent(json_encode($recipients));
-		$this->response->send();
+		$this->response->setContentType('application/json', 'UTF-8')
+				->setContent(json_encode($recipients))
+				->send();
 		exit;
 	}
 }

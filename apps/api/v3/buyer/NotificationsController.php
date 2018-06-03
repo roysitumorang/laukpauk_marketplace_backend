@@ -8,12 +8,18 @@ class NotificationsController extends ControllerBase {
 	function indexAction() {
 		$notifications = [];
 		$result        = $this->_current_user->getRelated('notifications', [
-			'Application\Models\NotificationRecipient.read_at IS NULL',
-			'order'   => 'id DESC',
-			'columns' => 'id, title',
+			"Application\Models\Notification.new_mobile_target_url = 'tab.notification' OR Application\Models\NotificationRecipient.read_at IS NULL",
+			'order' => 'id DESC',
 		]);
 		foreach ($result as $notification) {
-			$notifications[] = $notification;
+			$notifications[] = [
+				'id'                => $notification->id,
+				'title'             => $notification->title,
+				'message'           => $notification->message,
+				'target_url'        => $notification->new_mobile_target_url,
+				'target_parameters' => $notification->new_mobile_target_parameters,
+				'image_url'         => $notification->image ? $this->pictureRootUrl . $notification->image : null,
+			];
 		}
 		$this->_response['status']                          = 1;
 		$this->_response['data']['notifications']           = $notifications;
@@ -50,6 +56,8 @@ class NotificationsController extends ControllerBase {
 			if ($notification->new_mobile_target_url != 'tab.notification') {
 				$this->_response['data']['notification']['target_url']        = $notification->new_mobile_target_url;
 				$this->_response['data']['notification']['target_parameters'] = $notification->new_mobile_target_parameters;
+			} else if ($notification->image) {
+				$this->_response['data']['notification']['image_url'] = $this->pictureRootUrl . $notification->image;
 			}
 		} catch (\Exception $e) {
 			$this->_response['message'] = $e->getMessage();

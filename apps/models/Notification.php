@@ -2,14 +2,21 @@
 
 namespace Application\Models;
 
+use Imagick;
+use Phalcon\Http\Request\File;
 use Phalcon\Validation;
-use Phalcon\Validation\Validator\StringLength;
+use Phalcon\Validation\Validator\{
+	Callback,
+	StringLength,
+};
 
 class Notification extends ModelBase {
 	public $id;
 	public $user_id;
 	public $title;
 	public $message;
+	public $image;
+	public $new_image;
 	public $admin_target_url;
 	public $merchant_target_url;
 	public $old_mobile_target_url;
@@ -43,6 +50,18 @@ class Notification extends ModelBase {
 		$this->message = $this->_filter->sanitize($message, 'trim');
 	}
 
+	function setNewImage(File $new_image) {
+		if ($new_image->getTempName() && $new_image->getSize() && !$new_image->getError()) {
+			$this->new_image = $new_image;
+			do {
+				$this->image = bin2hex(random_bytes(16)) . '.jpg';
+				if (!is_readable($this->getDI()->getConfig()->upload->path . $this->image) && !static::count(['image = ?0', 'bind' => [$this->image]])) {
+					break;
+				}
+			} while (1);
+		}
+	}
+
 	function setAdminTargetUrl($admin_target_url) {
 		$this->admin_target_url = $this->_filter->sanitize($admin_target_url, ['string', 'trim']);
 	}
@@ -72,10 +91,9 @@ class Notification extends ModelBase {
 
 	function validation() {
 		$validator = new Validation;
-		$validator->add(['title', 'message', 'admin_target_url', 'merchant_target_url', 'old_mobile_target_url', 'new_mobile_target_url'], new StringLength([
+		$validator->add(['title', 'admin_target_url', 'merchant_target_url', 'old_mobile_target_url', 'new_mobile_target_url'], new StringLength([
 			'min' => [
 				'title'                 => 1,
-				'message'               => 1,
 				'admin_target_url'      => 1,
 				'merchant_target_url'   => 1,
 				'old_mobile_target_url' => 1,
@@ -83,7 +101,6 @@ class Notification extends ModelBase {
 			],
 			'max' => [
 				'title'                 => 200,
-				'message'               => 1024,
 				'admin_target_url'      => 200,
 				'merchant_target_url'   => 200,
 				'old_mobile_target_url' => 200,
@@ -91,22 +108,46 @@ class Notification extends ModelBase {
 			],
 			'messageMinimum' => [
 				'title'                 => 'judul harus diisi',
-				'message'               => 'pesan harus diisi',
 				'admin_target_url'      => 'link target admin harus diisi',
 				'merchant_target_url'   => 'link target merchant harus diisi',
 				'old_mobile_target_url' => 'link target mobile lama harus diisi',
 				'new_mobile_target_url' => 'link target mobile baru harus diisi',
 			],
 			'messageMaximum' => [
-				'title'      => 'judul maksimal 200 karakter',
-				'message'    => 'pesan maksimal 1024 karakter',
+				'title'                 => 'judul maksimal 200 karakter',
 				'admin_target_url'      => 'link target admin maksimal 200 karakter',
 				'merchant_target_url'   => 'link target merchant maksimal 200 karakter',
 				'old_mobile_target_url' => 'link target mobile lama maksimal 200 karakter',
 				'new_mobile_target_url' => 'link target mobile baru maksimal 200 karakter',
 			]
 		]));
+		$validator->add('message', new Callback([
+			'message'  => 'pesan maksimal 1024 karakter',
+			'callback' => function($data) {
+				return strlen($data->message) <= 1024;
+			},
+		]));
+		if (!$this->id && $this->new_image) {
+			$max_size = $this->getDI()->getConfig()->upload->max_size;
+			$validator->add('new_image', new Callback([
+				'message'  => 'gambar harus dalam format JPG/PNG dan ukuran gambar maksimal ' . $max_size,
+				'callback' => function($data) use($max_size) {
+					return $data->new_image->getSize() <= intval($max_size) * pow(1024, 2) &&
+						in_array($data->new_image->getRealType(), ['image/jpeg', 'image/png']);
+				},
+			]));
+		}
 		return $this->validate($validator);
+	}
+
+	function beforeCreate() {
+		if ($this->new_image) {
+			$image = $this->getDI()->getConfig()->upload->path . $this->image;
+			$this->new_image->moveTo($image);
+			$image = new Imagick($image);
+			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$image->writeImage();
+		}
 	}
 
 	function push(array $recipients) {
@@ -186,6 +227,10 @@ class Notification extends ModelBase {
 						'icon'         => 'fcm_push_icon'
 					],
 					'data'             => [
+						'id'                => $this->id,
+						'title'             => $this->title,
+						'message'           => $this->message,
+						'image_url'         => $this->image ? $this->getDI()->getPictureRootUrl() . $this->image : null,
 						'target_url'        => $this->new_mobile_target_url,
 						'target_parameters' => json_decode($this->new_mobile_target_parameters),
 					],

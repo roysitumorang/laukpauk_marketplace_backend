@@ -41,7 +41,10 @@
 							<td>
 								<p><strong>Judul :</strong><br>{% if notification.title %}{{ notification.title }}{% else %}{% endif %}</p>
 								<p><strong>Pesan :</strong><br>{{ notification.message }}</p>
-								<strong>Link:</strong>&nbsp;{{ notification.admin_target_url }}
+								<p><strong>Link:</strong>&nbsp;{{ notification.admin_target_url }}</p>
+								{% if notification.image %}
+									<img src="/assets/image/{{ notification.image }}" width="256px" height="256px">
+								{% endif %}
 							</td>
 							<td>{{ notification.recipients }}</td>
 							<td>{{ notification.created_at }}</td>
