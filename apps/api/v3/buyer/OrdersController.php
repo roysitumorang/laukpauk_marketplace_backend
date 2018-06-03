@@ -417,11 +417,10 @@ QUERY
 				throw new \Exception('Pemesanan tidak dapat diproses!');
 			}
 			foreach ($order->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
-				$userProduct = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1 AND published = 1', 'bind' => [$merchant->id, $item->product_id]]);
-				if (!$userProduct || $userProduct->stock < $item->quantity) {
+				$userProduct = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1 AND published = 1 AND price > 0 AND stock > 0', 'bind' => [$merchant->id, $item->product_id]]);
+				if (!$userProduct || !($product = $userProduct->product) || !$product->published || $userProduct->stock < $item->quantity) {
 					throw new \Exception('Pemesanan tidak dapat diproses!');
 				}
-				$product   = $userProduct->product;
 				$thumbnail = null;
 				$picture   = null;
 				if ($product->picture) {
