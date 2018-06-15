@@ -223,11 +223,11 @@
 {{ endForm() }}
 <script>
 	let city = document.querySelector('#city_id'), subdistrict = document.querySelector('#subdistrict_id'), village = document.querySelector('#village_id');
-	document.querySelector('#province_id').addEventListener('change', event => {
+	document.querySelector('#province_id').onchange = event => {
 		city.options.length = 1,
 		subdistrict.options.length = 1,
 		village.options.length = 1,
-		event.target.value && fetch('/admin/users/cities/' + event.target.value, { credentials: 'include' }).then(response => response.json()).then(items => {
+		event.target.value && fetch(`/admin/users/cities/${event.target.value}`, { credentials: 'include' }).then(response => response.json()).then(items => {
 			items.forEach(item => {
 				let option = document.createElement('option');
 				option.value = item.id,
@@ -235,11 +235,11 @@
 				city.appendChild(option)
 			})
 		})
-	}, false),
-	city.addEventListener('change', event => {
+	},
+	city.onchange = event => {
 		subdistrict.options.length = 1,
 		village.options.length = 1,
-		event.target.value && fetch('/admin/users/subdistricts/' + event.target.value, { credentials: 'include' }).then(response => response.json()).then(items => {
+		event.target.value && fetch(`/admin/users/subdistricts/${event.target.value}`, { credentials: 'include' }).then(response => response.json()).then(items => {
 			items.forEach(item => {
 				let option = document.createElement('option');
 				option.value = item.id,
@@ -247,10 +247,10 @@
 				subdistrict.appendChild(option)
 			})
 		})
-	}, false),
-	subdistrict.addEventListener('change', event => {
+	},
+	subdistrict.onchange = event => {
 		village.options.length = 1,
-		event.target.value && fetch('/admin/users/villages/' + event.target.value, { credentials: 'include' }).then(response => response.json()).then(items => {
+		event.target.value && fetch(`/admin/users/villages/${event.target.value}`, { credentials: 'include' }).then(response => response.json()).then(items => {
 			items.forEach(item => {
 				let option = document.createElement('option');
 				option.value = item.id,
@@ -258,14 +258,14 @@
 				village.appendChild(option)
 			})
 		})
-	}, false),
-	document.querySelector('.delete-avatar').addEventListener('click', event => {
+	},
+	document.querySelector('.delete-avatar').onclick = event => {
 		if (confirm('Anda yakin menghapus gambar ini ?')) {
 			let form = document.createElement('form');
 			form.method = 'POST',
-			form.action = '/admin/users/' + avatar.dataset.id + '/delete_avatar',
+			form.action = `/admin/users/${avatar.dataset.id}/delete_avatar`,
 			document.body.appendChild(form),
 			form.submit()
 		}
-	}, false)
+	}
 </script>
