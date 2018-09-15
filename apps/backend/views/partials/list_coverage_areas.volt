@@ -185,7 +185,7 @@
 			if (confirm('Anda yakin menghapus data ini ?')) {
 				let form = document.createElement('form'), dataset = event.target.parentNode.dataset;
 				form.method = 'POST',
-				form.action = '/admin/coverage_areas/' + dataset.id + '/delete/user_id:' + dataset.userId + '?next={{ request.get('_url') }}',
+				form.action = '/admin/users/' + dataset.userId + '/coverage_areas/' + dataset.id + '/delete?next={{ request.get('_url') }}',
 				document.body.appendChild(form),
 				form.submit()
 			}
