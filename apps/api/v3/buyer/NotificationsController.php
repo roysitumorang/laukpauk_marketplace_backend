@@ -68,4 +68,28 @@ class NotificationsController extends ControllerBase {
 			return $this->response;
 		}
 	}
+
+	function readAction($id) {
+		try {
+			if (!$this->request->isPost()) {
+				throw new \Exception('Request tidak valid!');
+			}
+			if (!$notification = $this->_current_user->getNotifications(['id = ?0', 'bind' => [$id]])->getFirst()) {
+				throw new Exception('Notifikasi tidak ditemukan!');
+			}
+			$notification_recipient = NotificationRecipient::findFirst([
+				'user_id = ?0 AND notification_id = ?1 AND read_at IS NULL',
+				'bind' => [$this->_current_user->id, $notification->id],
+			]);
+			if ($notification_recipient) {
+				$notification_recipient->read();
+			}
+			$this->_response['status'] = 1;
+		} catch (\Exception $e) {
+			$this->_response['message'] = $e->getMessage();
+		} finally {
+			$this->response->setJsonContent($this->_response, JSON_NUMERIC_CHECK);
+			return $this->response;
+		}
+	}
 }
