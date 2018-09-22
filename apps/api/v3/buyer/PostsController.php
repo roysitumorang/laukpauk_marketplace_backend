@@ -11,7 +11,10 @@ class PostsController extends ControllerBase {
 	function showAction($permalink) {
 		try {
 			$permalinks = new Map([
-				'hubungi-kami' => 'Hubungi Kami',
+				'hubungi-kami'      => 'Hubungi Kami',
+				'tentang-kami'      => 'Tentang Kami',
+				'syarat-ketentuan'  => 'Syarat dan Ketentuan',
+				'kebijakan-privasi' => 'Kebijakan Privasi',
 			]);
 			if (!$permalinks->hasKey($permalink)) {
 				throw new \Exception('Konten tidak ditemukan!');
