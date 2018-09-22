@@ -155,6 +155,7 @@ QUERY
 						JOIN villages d ON c.id = d.subdistrict_id
 						JOIN coverage_area e ON d.id = e.village_id
 						JOIN users f ON e.user_id = f.id
+					WHERE b.province_id = {$this->_current_user->village->subdistrict->city->province_id}
 					GROUP BY b.id
 					ORDER BY name
 QUERY
@@ -172,6 +173,7 @@ QUERY
 						JOIN villages d ON c.id = d.subdistrict_id
 						JOIN coverage_area e ON d.id = e.village_id
 						JOIN users f ON e.user_id = f.id
+					WHERE c.city_id = {$this->_current_user->village->subdistrict->city_id}
 					GROUP BY c.id
 					ORDER BY c.name
 QUERY
