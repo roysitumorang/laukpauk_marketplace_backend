@@ -109,7 +109,7 @@ class Module implements ModuleDefinitionInterface {
 		});
 
 		$di->set('currentUser', function() {
-			$access_token = strtr(filter_input(INPUT_SERVER, 'Authorization'), ['Bearer ' => '']);
+			$access_token = strtr(filter_input(INPUT_SERVER, 'HTTP_AUTHORIZATION'), ['Bearer ' => '']);
 			if (!$access_token) {
 				return null;
 			}

@@ -39,7 +39,7 @@ abstract class ControllerBase extends Controller {
 
 	function beforeExecuteRoute() {
 		try {
-			if (!$access_token = strtr(filter_input(INPUT_SERVER, 'Authorization'), ['Bearer ' => ''])) {
+			if (!$access_token = strtr(filter_input(INPUT_SERVER, 'HTTP_AUTHORIZATION'), ['Bearer ' => ''])) {
 				throw new \Exception(static::INVALID_API_KEY_MESSAGE);
 			}
 			$encrypted_data = strtr($access_token, ['-' => '+', '_' => '/', ',' => '=']);
