@@ -2,7 +2,7 @@
 
 namespace Application\Models;
 
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Validation;
 use Phalcon\Validation\Validator\{Digit, PresenceOf};
 
@@ -86,7 +86,7 @@ class OrderProduct extends ModelBase {
 				a.sale_package_id = {$this->sale_package_id}
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$order_product = new static;
 			$order_product->create([

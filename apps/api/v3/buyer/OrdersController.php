@@ -4,7 +4,7 @@ namespace Application\Api\V3\Buyer;
 
 use Application\Models\{CoverageArea, Device, Order, OrderProduct, Release, Role, Setting, User, UserProduct, Village};
 use DateTime;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
@@ -30,7 +30,7 @@ class OrdersController extends ControllerBase {
 			LIMIT {$limit} OFFSET {$offset}
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($order = $result->fetch()) {
 			$schedule        = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$order->delivery = [
@@ -85,20 +85,20 @@ QUERY
 						b.village_id = ?
 QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
-				$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				$merchant = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new \Exception('Order Anda tidak valid!');
 				}
 				$purchase = 0;
 				foreach ($cart->products as $item) {
-					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Enum::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
 						throw new \Exception('Order Anda tidak valid');
 					}
 					$purchase += min(max($item->quantity, 0), $product->stock) * $product->price;
 				}
 				foreach ($cart->sale_packages as $item) {
-					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Enum::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$sale_package) {
 						throw new \Exception('Order Anda tidak valid');
 					}
@@ -197,7 +197,7 @@ QUERY
 					$today,
 					$this->_post->coupon_code,
 				];
-				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				$coupon = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 				if (!$coupon) {
 					throw new \Exception('Order Anda tidak valid!');
 				} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
@@ -224,7 +224,7 @@ QUERY
 						b.village_id = ?
 QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
-				$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				$merchant = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new \Exception('Order Anda tidak valid!');
 				}
@@ -243,7 +243,7 @@ QUERY
 				$order->created_by         = $this->_current_user->id;
 				$order->setTransaction($this->transactionManager->get());
 				foreach ($cart->products as $item) {
-					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Enum::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
 						throw new \Exception('Order Anda tidak valid');
 					}
@@ -258,7 +258,7 @@ QUERY
 					$order_products[]          = $order_product;
 				}
 				foreach ($cart->sale_packages as $item) {
-					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Enum::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$sale_package) {
 						throw new \Exception('Order Anda tidak valid');
 					}

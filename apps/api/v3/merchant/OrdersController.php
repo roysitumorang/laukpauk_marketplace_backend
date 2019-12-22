@@ -5,7 +5,7 @@ namespace Application\Api\V3\Merchant;
 use Application\Models\Village;
 use DateTime;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use stdClass;
 
 class OrdersController extends ControllerBase {
@@ -30,7 +30,7 @@ class OrdersController extends ControllerBase {
 			LIMIT {$limit} OFFSET {$offset}
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($order = $result->fetch()) {
 			$schedule        = new DateTime($order->scheduled_delivery, $this->currentDatetime->getTimezone());
 			$order->delivery = new stdClass;

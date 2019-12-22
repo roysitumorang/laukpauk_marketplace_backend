@@ -2,7 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class ProductGroupsController extends ControllerBase {
 	function indexAction() {
@@ -25,7 +25,7 @@ class ProductGroupsController extends ControllerBase {
 		$total_pages = ceil($total_rows / $limit);
 		$offset      = ($current_page - 1) * $limit;
 		$result      = $this->db->query(strtr($query, ['COUNT(1)' => 'name, url' . ($keywords ? ", TS_RANK(keywords, TO_TSQUERY('{$keywords}')) AS relevancy" : '')]) . ' ORDER BY ' . ($keywords ? 'relevancy DESC,' : '') . "name LIMIT {$limit} OFFSET {$offset}");
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			unset($row->relevancy);
 			$product_groups[] = $row;

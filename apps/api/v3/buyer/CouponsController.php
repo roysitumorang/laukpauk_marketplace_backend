@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\{Release, Role};
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class CouponsController extends ControllerBase {
 	function checkAction() {
@@ -44,7 +44,7 @@ QUERY
 				$today,
 				$code,
 			];
-			$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+			$coupon = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 			if (!$coupon ||
 				($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) ||
 				($coupon->minimum_version && (!$app_version || !Release::findFirst(['user_type = ?0 AND version = ?1', 'bind' => ['buyer', $app_version]]) || $app_version < $coupon->minimum_version)) ||
@@ -68,20 +68,20 @@ QUERY
 						b.village_id = ?
 QUERY
 					, Role::MERCHANT, $cart->merchant_id, $this->_current_user->village->id];
-				$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				$merchant = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 				if (!$merchant) {
 					throw new \Exception("Kode voucher {$code} tidak valid! Silahkan cek lagi atau kosongkan untuk melanjutkan pemesanan.");
 				}
 				$purchase = 0;
 				foreach ($cart->products as $item) {
-					$product = $this->db->fetchOne('SELECT price, stock FROM user_product WHERE published = 1 AND price > 0 AND stock > 0 AND user_id = ? AND id = ?', Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					$product = $this->db->fetchOne('SELECT price, stock FROM user_product WHERE published = 1 AND price > 0 AND stock > 0 AND user_id = ? AND id = ?', Enum::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$product) {
 						throw new \Exception("Produk {$merchant->company} tidak valid! Silahkan cek pesanan Anda kembali atau hapus pesanan dari penjual tersebut untuk melanjutkan pemesanan!");
 					}
 					$purchase += min(max($item->quantity, 0), $product->stock) * $product->price;
 				}
 				foreach ($cart->sale_packages as $item) {
-					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Db::FETCH_OBJ, [$merchant->id, $item->id]);
+					$sale_package = $this->db->fetchOne("SELECT id, name, price, stock FROM sale_packages WHERE published = '1' AND price > 0 AND stock > 0 AND user_id = ? AND id = ?", Enum::FETCH_OBJ, [$merchant->id, $item->id]);
 					if (!$sale_package) {
 						throw new \Exception('Order Anda tidak valid');
 					}

@@ -6,7 +6,7 @@ use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class UsersController extends ControllerBase {
@@ -129,7 +129,7 @@ class UsersController extends ControllerBase {
 			WHERE
 				a.buyer_id = ?
 QUERY
-			, Db::FETCH_OBJ, [$user->id]
+			, Enum::FETCH_OBJ, [$user->id]
 		);
 		if ($user->avatar) {
 			$user->thumbnail = $user->getThumbnail(300, 300);
@@ -237,7 +237,7 @@ QUERY
 			ORDER BY province_name, city_name, subdistrict_name, village_name
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$provinces[$row->province_id] = $row->province_name;
 			if (!isset($cities[$row->province_id])) {

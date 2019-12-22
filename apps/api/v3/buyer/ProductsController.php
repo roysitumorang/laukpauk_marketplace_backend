@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Ds\Set;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -76,7 +76,7 @@ QUERY;
 QUERY
 		]) . " ORDER BY relevancy DESC, e.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/';
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			unset($row->relevancy);
 			if (!$merchant_ids->contains($row->user_id)) {
@@ -123,7 +123,7 @@ QUERY
 QUERY
 				, $merchant_ids->join(','));
 			$result = $this->db->query($query);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$availability = 'Hari ini ';
 				if ($item->open_today && $item->business_closing_hour > $this->currentDatetime->format('G')) {

@@ -4,7 +4,7 @@ namespace Application\Api\V3\Merchant;
 
 use Application\Models\CoverageArea;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class ShippingCostsController extends ControllerBase {
 	function indexAction() {
@@ -40,7 +40,7 @@ QUERY;
 			a.shipping_cost
 QUERY
 		]) . " ORDER BY b.name LIMIT {$limit} OFFSET {$offset}", $params);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$shipping_costs[] = $row;
 		}

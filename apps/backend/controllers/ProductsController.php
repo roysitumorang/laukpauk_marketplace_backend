@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{Product, ProductCategory, User, UserProduct};
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\{Model, QueryBuilder};
 
 class ProductsController extends ControllerBase {
@@ -183,7 +183,7 @@ class ProductsController extends ControllerBase {
 	private function _prepareDatas() {
 		$categories = [];
 		$result     = $this->db->query('SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id GROUP BY a.id ORDER BY a.user_id NULLS FIRST, a.name ASC');
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$categories[$row->id] = $row->name . ' (' . $row->total_products . ')';
 		}

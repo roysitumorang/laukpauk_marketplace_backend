@@ -4,7 +4,7 @@ namespace Application\Frontend\Controllers;
 
 use Application\Models\Village;
 use Application\Models\CoverageArea;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CoverageAreasController extends ControllerBase {
@@ -92,7 +92,7 @@ class CoverageAreasController extends ControllerBase {
 			ORDER BY province_name, city_name, subdistrict_name, village_name
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$provinces[$row->province_id] = $row->province_name;
 			if (!isset($cities[$row->province_id])) {

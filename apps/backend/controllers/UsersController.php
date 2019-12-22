@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{City, LoginHistory, Province, Role, Subdistrict, User, Village};
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class UsersController extends ControllerBase {
@@ -267,7 +267,7 @@ class UsersController extends ControllerBase {
 			ORDER BY name
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$cities[] = $row;
 		}
@@ -290,7 +290,7 @@ QUERY
 			ORDER BY a.name
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$subdistricts[] = $row;
 		}
@@ -311,7 +311,7 @@ QUERY
 			ORDER BY name
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$villages[] = $row;
 		}
@@ -338,7 +338,7 @@ QUERY
 			ORDER BY a.name
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$provinces[$row->id] = $row->name;
 		}
@@ -356,7 +356,7 @@ QUERY
 				ORDER BY name
 QUERY
 			);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($row = $result->fetch()) {
 				$cities[$row->id] = $row->name;
 			}
@@ -374,7 +374,7 @@ QUERY
 				ORDER BY a.name
 QUERY
 			);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($row = $result->fetch()) {
 				$subdistricts[$row->id] = $row->name;
 			}
@@ -390,7 +390,7 @@ QUERY
 				ORDER BY name
 QUERY
 			);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($row = $result->fetch()) {
 				$villages[$row->id] = $row->name;
 			}

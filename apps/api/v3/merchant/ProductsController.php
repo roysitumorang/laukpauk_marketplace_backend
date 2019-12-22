@@ -4,7 +4,7 @@ namespace Application\Api\V3\Merchant;
 
 use Application\Models\UserProduct;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -51,7 +51,7 @@ QUERY;
 QUERY
 		]) . " ORDER BY relevancy DESC, b.name LIMIT {$limit} OFFSET {$offset}", $params);
 		$picture_root_url = 'http' . ($this->request->getScheme() === 'https' ? 's' : '') . '://' . $this->request->getHttpHost() . '/assets/image/';
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			unset($row->relevancy);
 			$products[] = $row;

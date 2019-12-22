@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\Post;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class MerchantsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -67,7 +67,7 @@ QUERY;
 			SUM(TS_RANK(e.keywords, TO_TSQUERY('{$keywords}')) + TS_RANK(e.keywords, TO_TSQUERY('{$keywords}'))) AS relevancy
 QUERY
 			]) . " GROUP BY a.id ORDER BY a.company LIMIT {$limit} OFFSET {$offset}", $params);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			unset($item->relevancy);
 			$availability = 'Hari ini ';

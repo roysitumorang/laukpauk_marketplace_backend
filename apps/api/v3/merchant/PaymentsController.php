@@ -6,7 +6,7 @@ use Application\Models\BankAccount;
 use Application\Models\Payment;
 use Ds\Set;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class PaymentsController extends ControllerBase {
 	function indexAction() {
@@ -34,7 +34,7 @@ class PaymentsController extends ControllerBase {
 			LIMIT {$limit} OFFSET {$offset}
 QUERY
 		);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($payment = $result->fetch()) {
 			if ($payment->status == 1) {
 				$payment->status = 'Diterima';

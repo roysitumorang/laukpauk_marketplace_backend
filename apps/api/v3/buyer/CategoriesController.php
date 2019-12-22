@@ -4,7 +4,7 @@ namespace Application\Api\V3\Buyer;
 
 use Application\Models\Banner;
 use Ds\Set;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class CategoriesController extends ControllerBase {
 	function indexAction() {
@@ -17,7 +17,7 @@ class CategoriesController extends ControllerBase {
 		$picture_root_url = $this->request->getScheme() . '://' . $this->request->getHttpHost() . '/assets/image/';
 		foreach (['!', ''] as $condition) {
 			$result = $this->db->query("SELECT id, name FROM product_categories WHERE published = 1 AND name {$condition}= 'Lain-Lain' ORDER BY name");
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($category = $result->fetch()) {
 				$products = [];
 				$query    = <<<QUERY
@@ -41,7 +41,7 @@ QUERY;
 					continue;
 				}
 				$sub_result = $this->db->query(sprintf('SELECT e.* FROM (' . strtr($query, ['COUNT(DISTINCT c.id)' => 'DISTINCT ON (c.id) c.id, c.user_id, d.product_category_id, d.name, c.price, c.stock, d.stock_unit, d.picture']) . ') e ORDER BY RANDOM() LIMIT %d OFFSET 0', $limit));
-				$sub_result->setFetchMode(Db::FETCH_OBJ);
+				$sub_result->setFetchMode(Enum::FETCH_OBJ);
 				while ($product = $sub_result->fetch()) {
 					$merchant_ids->contains($product->user_id) || $merchant_ids->add($product->user_id);
 					if ($product->picture) {
@@ -80,7 +80,7 @@ QUERY;
 QUERY
 			, $limit
 		));
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$merchant_ids->contains($item->user_id) || $merchant_ids->add($item->user_id);
 			if ($item->picture) {
@@ -123,7 +123,7 @@ QUERY
 QUERY
 				, $merchant_ids->join(','));
 			$result = $this->db->query($query);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$availability = 'Hari ini ';
 				if ($item->open_today && $item->business_closing_hour > $this->currentDatetime->format('G')) {

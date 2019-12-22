@@ -6,7 +6,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 
 class DeliverySchedulesController extends ControllerBase {
 	private $_day_formatter;
@@ -59,7 +59,7 @@ QUERY
 				$delivery_hours[$day] = [];
 			}
 			$result = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => "a.id, a.open_on_{$today} AS open_today, a.open_on_{$tomorrow} AS open_tomorrow, a.business_opening_hour, a.business_closing_hour, a.delivery_hours"]) . ' GROUP BY a.id');
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($merchant = $result->fetch()) {
 				$merchant_delivery_dates = [];
 				$merchant_delivery_hours = $merchant->delivery_hours
@@ -152,7 +152,7 @@ QUERY
 			$tomorrow     = lcfirst($this->currentDatetime->modify('+1 day')->format('l'));
 			$result       = $this->db->query(strtr($query, ['COUNT(DISTINCT a.id)' => "a.id, a.company, a.open_on_{$today} AS open_today, a.open_on_{$tomorrow} AS open_tomorrow, a.business_opening_hour, a.business_closing_hour, a.delivery_hours"]) . ' GROUP BY a.id');
 
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				if (($delivery_schedule->format('Y-m-d') === $this->currentDatetime->format('Y-m-d') && !$item->open_today) ||
 					($delivery_schedule > $this->currentDatetime && !$item->open_tomorrow)) {

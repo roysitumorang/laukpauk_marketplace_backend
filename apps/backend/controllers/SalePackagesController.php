@@ -4,7 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\{Role, SalePackage, User};
 use Ds\Vector;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\Model;
 
 class SalePackagesController extends ControllerBase {
@@ -137,7 +137,7 @@ class SalePackagesController extends ControllerBase {
 					stock_unit
 QUERY
 			);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			$i = 0;
 			while ($item = $result->fetch()) {
 				if ($this->request->isPost()) {
@@ -163,7 +163,7 @@ QUERY
 					stock_unit
 QUERY
 			);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$new_products->push($item);
 			}

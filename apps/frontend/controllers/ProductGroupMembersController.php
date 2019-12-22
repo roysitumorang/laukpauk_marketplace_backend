@@ -5,7 +5,7 @@ namespace Application\Frontend\Controllers;
 use Application\Models\ProductGroup;
 use Application\Models\ProductGroupMember;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductGroupMembersController extends ControllerBase {
@@ -17,7 +17,7 @@ class ProductGroupMembersController extends ControllerBase {
 		$product_groups     = [];
 		if ($this->request->isGet()) {
 			$result = $this->db->query("SELECT a.id, a.name, COUNT(b.product_id) AS total_products FROM product_groups a LEFT JOIN product_group_member b ON a.id = b.product_group_id WHERE a.user_id = {$this->currentUser->id} GROUP BY a.id ORDER BY a.name");
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$product_groups[] = $item;
 			}
@@ -34,7 +34,7 @@ class ProductGroupMembersController extends ControllerBase {
 			$this->_product_group = ProductGroup::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $product_groups[0]->id]]);
 		}
 		$result = $this->db->query("SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.user_id = {$this->currentUser->id} GROUP BY a.id ORDER BY a.name");
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$product_categories[] = $item;
 		}
@@ -104,7 +104,7 @@ class ProductGroupMembersController extends ControllerBase {
 			}
 			$product_groups = [];
 			$result         = $this->db->query("SELECT a.id, a.name, COUNT(b.product_id) AS total_products FROM product_groups a LEFT JOIN product_group_member b ON a.id = b.product_group_id WHERE a.user_id = {$this->currentUser->id} GROUP BY a.id ORDER BY a.name");
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$product_groups[] = $item;
 			}

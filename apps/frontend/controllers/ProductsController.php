@@ -5,7 +5,7 @@ namespace Application\Frontend\Controllers;
 use Application\Models\Product;
 use Application\Models\ProductCategory;
 use Application\Models\UserProduct;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Exception;
 use Phalcon\Paginator\Adapter\Model;
 
@@ -169,7 +169,7 @@ class ProductsController extends ControllerBase {
 	private function _prepare_datas() {
 		$categories = [];
 		$result     = $this->db->query("SELECT a.id, a.name, COUNT(b.id) AS total_products FROM product_categories a LEFT JOIN products b ON a.id = b.product_category_id WHERE a.user_id = {$this->currentUser->id} GROUP BY a.id ORDER BY a.user_id NULLS FIRST, a.name ASC");
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$categories[] = $row;
 		}

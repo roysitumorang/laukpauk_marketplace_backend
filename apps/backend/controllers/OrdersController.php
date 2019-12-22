@@ -8,7 +8,7 @@ use DatePeriod;
 use DateTime;
 use DateTimeImmutable;
 use Ds\Map;
-use Phalcon\Db;
+use Phalcon\Db\Enum;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class OrdersController extends ControllerBase {
@@ -219,7 +219,7 @@ QUERY
 						$this->currentDatetime->format('Y-m-d'),
 						$new_order->get('coupon_id'),
 					];
-					$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+					$coupon = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 					if (!$coupon) {
 						throw new \Exception('Voucher tidak valid!');
 					} else if ($coupon->maximum_usage && $coupon->total_usage >= $coupon->maximum_usage) {
@@ -245,7 +245,7 @@ QUERY
 							b.village_id = ?
 QUERY
 						, Role::MERCHANT, $merchant_id, $buyer->village_id];
-					$merchant = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+					$merchant = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 					if (!$merchant) {
 						throw new \Exception('Merchant tidak valid!');
 					}
@@ -264,7 +264,7 @@ QUERY
 					$order->created_by         = $this->currentUser->id;
 					$order->setTransaction($this->transactionManager->get());
 					foreach ($items as $user_product_id => $quantity) {
-						$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant->id, $user_product_id]);
+						$product = $this->db->fetchOne('SELECT b.id, b.name, b.stock_unit, a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Enum::FETCH_OBJ, [$merchant->id, $user_product_id]);
 						if (!$product) {
 							throw new \Exception('Produk tidak valid!');
 						}
@@ -367,7 +367,7 @@ QUERY
 			->andWhere('b.stock > 0')
 			->andWhere('c.status = 1')
 			->orderBy('a.name, a.stock_unit, c.company');
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			$product_categories[$row->id] = $row->name . ' (' . $row->total_products . ')';
 		}
@@ -411,7 +411,7 @@ QUERY
 							AND b.user_id = {$merchant_id}
 							AND b.id = {$user_product_id}
 QUERY
-						, Db::FETCH_OBJ
+						, Enum::FETCH_OBJ
 					);
 					$range                 = range(1, min($product->stock, 10));
 					$product->quantities   = array_combine($range, $range);
@@ -455,7 +455,7 @@ QUERY
 					$this->currentDatetime->format('Y-m-d'),
 					$new_order->get('coupon_id'),
 				];
-				$coupon = $this->db->fetchOne(array_shift($params), Db::FETCH_OBJ, $params);
+				$coupon = $this->db->fetchOne(array_shift($params), Enum::FETCH_OBJ, $params);
 				if ($coupon &&
 					(($coupon->maximum_usage && $coupon->total_usage < $coupon->maximum_usage) &&
 					($coupon->multiple_use || !$coupon->personal_usage < 1) &&
@@ -491,7 +491,7 @@ QUERY
 QUERY
 					. ' AND a.id IN(' . $new_order->get('cart')->keys()->join(',') . ') GROUP BY a.id';
 			$result = $this->db->query($query);
-			$result->setFetchMode(Db::FETCH_OBJ);
+			$result->setFetchMode(Enum::FETCH_OBJ);
 			while ($item = $result->fetch()) {
 				$delivery_hours = preg_split('/,/', $item->delivery_hours, -1, PREG_SPLIT_NO_EMPTY);
 				if (!$delivery_hours) {
@@ -552,7 +552,7 @@ QUERY
 			$this->currentDatetime->format('Y-m-d'),
 		];
 		$result = $this->db->query(array_shift($params), $params);
-		$result->setFetchMode(Db::FETCH_OBJ);
+		$result->setFetchMode(Enum::FETCH_OBJ);
 		while ($row = $result->fetch()) {
 			if (($row->maximum_usage && $row->total_usage >= $row->maximum_usage) ||
 				(!$row->multiple_use && $row->personal_usage >= 1)) {
@@ -626,7 +626,7 @@ QUERY;
 					$query .= " AND a.name ILIKE '%{$keyword}%'";
 				}
 				$query .= ' LIMIT 1 OFFSET 0';
-				if (!$user_product = $this->db->fetchOne($query, Db::FETCH_OBJ)) {
+				if (!$user_product = $this->db->fetchOne($query, Enum::FETCH_OBJ)) {
 					throw new \Exception('Produk tidak ditemukan.');
 				}
 				if ($this->session->has('order')) {
@@ -691,7 +691,7 @@ QUERY;
 				$query .= " AND a.name ILIKE '%{$keyword}%'";
 			}
 			$query .= ' LIMIT 1 OFFSET 0';
-			if ($user_product = $this->db->fetchOne($query, Db::FETCH_OBJ)) {
+			if ($user_product = $this->db->fetchOne($query, Enum::FETCH_OBJ)) {
 				if ($new_order->get('buyer_id') != $buyer->id) {
 					$new_order->put('buyer_id', $buyer->id);
 					$new_order->get('cart')->clear();
@@ -741,7 +741,7 @@ QUERY;
 QUERY
 						, [Role::MERCHANT, $merchant_id, $buyer->village_id])) {
 						foreach ($items as $user_product_id => $quantity) {
-							$product = $this->db->fetchOne('SELECT a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Db::FETCH_OBJ, [$merchant_id, $user_product_id]);
+							$product = $this->db->fetchOne('SELECT a.price, a.stock FROM user_product a JOIN products b ON a.product_id = b.id WHERE a.published = 1 AND b.published = 1 AND a.price > 0 AND a.stock > 0 AND a.user_id = ? AND a.id = ?', Enum::FETCH_OBJ, [$merchant_id, $user_product_id]);
 							if ($product) {
 								$total += min(max($quantity, 0), $product->stock) * $product->price;
 							}
@@ -771,7 +771,7 @@ QUERY
 					GROUP BY a.id
 QUERY
 					,
-					Db::FETCH_OBJ, [
+					Enum::FETCH_OBJ, [
 						$buyer->id,
 						$this->currentDatetime->format('Y-m-d'),
 						$this->currentDatetime->format('Y-m-d'),
