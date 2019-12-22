@@ -44,7 +44,7 @@ class OrdersController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page   = $paginator->getPaginate();
+		$page   = $paginator->paginate();
 		$pages  = $this->_setPaginationRange($page);
 		$orders = [];
 		foreach ($page->items as $item) {
@@ -54,7 +54,7 @@ class OrdersController extends ControllerBase {
 		$this->view->menu                   = $this->_menu('Order');
 		$this->view->orders                 = $orders;
 		$this->view->pages                  = $pages;
-		$this->view->page                   = $paginator->getPaginate();
+		$this->view->page                   = $paginator->paginate();
 		$this->view->from                   = $from;
 		$this->view->to                     = $to;
 		$this->view->status                 = $status;

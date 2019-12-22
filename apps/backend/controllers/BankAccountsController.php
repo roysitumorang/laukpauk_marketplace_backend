@@ -20,7 +20,7 @@ class BankAccountsController extends ControllerBase {
 			'data'  => BankAccount::find(['order' => 'bank']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$bank_accounts[] = $item;

@@ -55,7 +55,7 @@ class ProvincesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
+		$page      = $paginator->paginate();
 		$pages     = $this->_setPaginationRange($page);
 		$provinces = [];
 		foreach ($page->items as $item) {

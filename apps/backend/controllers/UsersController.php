@@ -81,7 +81,7 @@ class UsersController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('status', $user_status[$item->status]);

@@ -132,7 +132,7 @@ class CoverageAreasController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $this->persistent->page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$coverage_areas[] = $item;

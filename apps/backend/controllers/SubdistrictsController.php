@@ -68,7 +68,7 @@ class SubdistrictsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page         = $paginator->getPaginate();
+		$page         = $paginator->paginate();
 		$pages        = $this->_setPaginationRange($page);
 		$subdistricts = [];
 		foreach ($page->items as $item) {

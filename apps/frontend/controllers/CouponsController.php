@@ -43,7 +43,7 @@ class CouponsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page    = $paginator->getPaginate();
+		$page    = $paginator->paginate();
 		$pages   = $this->_setPaginationRange($page);
 		$coupons = [];
 		foreach ($page->items as $item) {

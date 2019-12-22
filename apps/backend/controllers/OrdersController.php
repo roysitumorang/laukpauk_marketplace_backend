@@ -90,7 +90,7 @@ class OrdersController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$orders[] = $item;
@@ -564,7 +564,7 @@ QUERY
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			if ($item->picture) {
 				$item->thumbnails = array_filter(explode(',', $item->thumbnails));

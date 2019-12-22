@@ -47,7 +47,7 @@ class ProductCategoriesController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page       = $paginator->getPaginate();
+		$page       = $paginator->paginate();
 		$pages      = $this->_setPaginationRange($page);
 		$categories = [];
 		foreach ($page->items as $item) {
@@ -58,7 +58,7 @@ class ProductCategoriesController extends ControllerBase {
 		}
 		$this->view->keyword    = $keyword;
 		$this->view->categories = $categories;
-		$this->view->page       = $paginator->getPaginate();
+		$this->view->page       = $paginator->paginate();
 		$this->view->pages      = $pages;
 		$this->_prepare_datas();
 	}

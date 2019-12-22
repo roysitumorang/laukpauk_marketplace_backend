@@ -20,7 +20,7 @@ class NotificationTemplatesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page                   = $paginator->getPaginate();
+		$page                   = $paginator->paginate();
 		$pages                  = $this->_setPaginationRange($page);
 		$notification_templates = [];
 		foreach ($page->items as $item) {

@@ -28,7 +28,7 @@ class WebNotificationsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page          = $paginator->getPaginate();
+		$page          = $paginator->paginate();
 		$pages         = $this->_setPaginationRange($page);
 		$notifications = [];
 		foreach ($page->items as $item) {
@@ -39,7 +39,7 @@ class WebNotificationsController extends ControllerBase {
 		$this->view->menu          = $this->_menu('Options');
 		$this->view->notifications = $notifications;
 		$this->view->pages         = $pages;
-		$this->view->page          = $paginator->getPaginate();
+		$this->view->page          = $paginator->paginate();
 	}
 
 	function updateAction($id) {

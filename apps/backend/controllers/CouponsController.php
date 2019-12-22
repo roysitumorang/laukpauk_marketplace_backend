@@ -61,7 +61,7 @@ class CouponsController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('multiple_use', Coupon::USAGE_TYPES[$item->multiple_use]);

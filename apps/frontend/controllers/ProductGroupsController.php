@@ -38,7 +38,7 @@ class ProductGroupsController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page           = $paginator->getPaginate();
+		$page           = $paginator->paginate();
 		$pages          = $this->_setPaginationRange($page);
 		$product_groups = [];
 		foreach ($page->items as $item) {
@@ -47,7 +47,7 @@ class ProductGroupsController extends ControllerBase {
 		}
 		$this->view->keyword        = $keyword;
 		$this->view->product_groups = $product_groups;
-		$this->view->page           = $paginator->getPaginate();
+		$this->view->page           = $paginator->paginate();
 		$this->view->pages          = $pages;
 	}
 

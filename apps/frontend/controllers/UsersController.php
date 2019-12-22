@@ -69,7 +69,7 @@ class UsersController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		$users = [];
 		foreach ($page->items as $item) {
@@ -80,7 +80,7 @@ class UsersController extends ControllerBase {
 		$this->view->menu                  = $this->_menu('Members');
 		$this->view->users                 = $users;
 		$this->view->pages                 = $pages;
-		$this->view->page                  = $paginator->getPaginate();
+		$this->view->page                  = $paginator->paginate();
 		$this->view->status                = $status;
 		$this->view->current_status        = $current_status;
 		$this->view->keyword               = $keyword;

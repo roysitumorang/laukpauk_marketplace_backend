@@ -15,7 +15,7 @@ class BannersController extends ControllerBase {
 			'data'  => Banner::find(['order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$banners[] = $item;

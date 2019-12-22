@@ -18,7 +18,7 @@ class MessagesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
+		$page      = $paginator->paginate();
 		$pages     = $this->_setPaginationRange($page);
 		$messages  = [];
 		foreach ($page->items as $item) {

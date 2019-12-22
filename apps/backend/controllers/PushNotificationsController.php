@@ -33,7 +33,7 @@ class PushNotificationsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page          = $paginator->getPaginate();
+		$page          = $paginator->paginate();
 		$pages         = $this->_setPaginationRange($page);
 		$notifications = [];
 		foreach ($page->items as $item) {

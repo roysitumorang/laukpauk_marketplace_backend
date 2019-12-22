@@ -67,7 +67,7 @@ class CitiesController extends ControllerBase {
 			'data'  => $this->_province->getRelated('cities', ['order' => 'type, name']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$cities[] = $item;
