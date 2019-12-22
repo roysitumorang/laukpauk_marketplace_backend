@@ -19,11 +19,8 @@ class OrderProduct extends ModelBase {
 	public $created_by;
 	public $created_at;
 
-	function getSource() {
-		return 'order_product';
-	}
-
 	function initialize() {
+		$this->setSource('order_product');
 		parent::initialize();
 		$this->belongsTo('order_id', Order::class, 'id', [
 			'alias'      => 'order',

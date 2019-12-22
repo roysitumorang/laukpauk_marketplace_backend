@@ -1,14 +1,15 @@
 <?php
 
+use Phalcon\Escaper;
 use Phalcon\Logger;
 use Phalcon\Logger\Adapter\File;
 use Phalcon\Assets\Manager as AssetsManager;
-use Phalcon\Db\Adapter\Pdo\Factory;
+use Phalcon\Db\Adapter\Pdo\Postgresql;
 use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
 use Phalcon\Mvc\Model\Metadata\Memory;
-use Phalcon\Mvc\Url;
 use Phalcon\Flash\{Direct, Session};
 use Phalcon\Http\Request;
+use Phalcon\Url;
 
 /**
  * Application logger
@@ -19,9 +20,7 @@ $di->set('logger', function() {
 	return $logger;
 });
 
-$di->set('config', function() use($config) {
-	return $config;
-});
+$di->set('config', fn() => $config);
 
 /**
  * A component that allows manage static resources such as css stylesheets or javascript libraries in a web application
@@ -42,49 +41,45 @@ $di->set('url', function() {
 /**
  * Database connection is created based in the parameters defined in the configuration file
  */
-$di->set('db', function() {
-	return Factory::load($this->getConfig()->database);
-});
+$di->set('db', fn() => new Postgresql($this->getConfig()->database->toArray()));
 
-$di->set('transactionManager', function() {
-	return new TransactionManager;
-});
+$di->set('transactionManager', fn() => new TransactionManager);
 
 /**
  * If the configuration specify the use of metadata adapter use it or use memory otherwise
  */
-$di->set('modelsMetadata', function() {
-	return new Memory;
-});
+$di->set('modelsMetadata', fn() => new Memory);
 
 /**
  * Register the flash service with custom CSS classes
  */
 $di->set('flash', function() {
-	return new Direct([
+	$escaper = new Escaper;
+	$flash = new Direct($escaper);
+	$flash->setCssClasses([
 		'error'   => 'alert alert-danger',
 		'success' => 'alert alert-success',
 		'notice'  => 'alert alert-info',
 		'warning' => 'alert alert-warning',
 	]);
+	return $flash;
 });
 
 $di->set('flashSession', function() {
-	return new Session([
+	$escaper = new Escaper;
+	$flashSession = new Session($escaper, $this->getSession());
+	$flashSession->setCssClasses([
 		'error'   => 'alert alert-danger',
 		'success' => 'alert alert-success',
 		'notice'  => 'alert alert-info',
 		'warning' => 'alert alert-warning',
 	]);
+	return $flashSession;
 });
 
-$di->set('request', function() {
-	return new Request;
-});
+$di->set('request', fn() => new Request);
 
-$di->set('currentDatetime', function() {
-	return new DateTimeImmutable('now', new DateTimeZone($this->getConfig()->timezone));
-});
+$di->set('currentDatetime', fn() => new DateTimeImmutable('now', new DateTimeZone($this->getConfig()->timezone)));
 
 $di->set('jsonWebToken', function() use($di) {
 	return new class($di) {
@@ -160,6 +155,4 @@ $di->set('jsonWebToken', function() use($di) {
 	};
 });
 
-$di->set('pictureRootUrl', function() {
-	return $this->getRequest()->getScheme() . '://' . $this->getRequest()->getHttpHost() . '/assets/image/';
-});
+$di->set('pictureRootUrl', fn() => $this->getRequest()->getScheme() . '://' . $this->getRequest()->getHttpHost() . '/assets/image/');

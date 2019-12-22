@@ -93,9 +93,7 @@ try {
 	]);
 
 	// Handle the request
-	$response = $application->handle();
-
-	$response->send();
+	$application->handle($request_uri)->send();
 } catch (Exception $e) {
 	echo $e->getMessage() . ' @file: ' . $e->getFile() . ', line: ' . $e->getLine();
 }

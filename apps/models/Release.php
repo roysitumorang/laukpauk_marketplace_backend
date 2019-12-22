@@ -19,11 +19,8 @@ class Release extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'releases';
-	}
-
 	function initialize() {
+		$this->setSource('releases');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->hasMany('id', Coupon::class, 'release_id', ['alias' => 'releases']);

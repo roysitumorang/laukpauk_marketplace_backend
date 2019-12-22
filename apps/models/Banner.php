@@ -22,10 +22,6 @@ class Banner extends ModelBase {
 	private $_filter;
 	private $_upload_config;
 
-	function getSource() {
-		return 'banners';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_filter        = $di->getFilter();
@@ -33,6 +29,7 @@ class Banner extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('banners');
 		parent::initialize();
 		$this->keepSnapshots(true);
 	}

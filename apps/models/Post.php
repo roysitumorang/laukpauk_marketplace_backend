@@ -18,11 +18,8 @@ class Post extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'posts';
-	}
-
 	function initialize() {
+		$this->setSource('posts');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('post_category_id', PostCategory::class, 'id', [

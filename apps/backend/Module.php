@@ -4,7 +4,7 @@ namespace Application\Backend;
 
 use Application\Models\User;
 use Phalcon\Dispatcher;
-use Phalcon\DiInterface;
+use Phalcon\Di\DiInterface;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Loader;
@@ -13,13 +13,16 @@ use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt;
-use Phalcon\Session\Adapter\Database;
+use Phalcon\Session\Adapter\Redis;
+use Phalcon\Session\Manager;
+use Phalcon\Storage\AdapterFactory;
+use Phalcon\Storage\SerializerFactory;
 
 class Module implements ModuleDefinitionInterface {
 	/**
 	 * Register a specific autoloader for the module.
 	 */
-	function registerAutoloaders(DiInterface $di = null) {
+	function registerAutoloaders(?DiInterface $di = null) {
 		$application = $di->getConfig()->application;
 		$loader      = new Loader;
 		$loader->registerNamespaces([
@@ -40,10 +43,16 @@ class Module implements ModuleDefinitionInterface {
 		 * Start the session the first time some component request the session service
 		 */
 		$di->setShared('session', function() {
-			$session = new Database([
-				'db'    => $this->getDb(),
-				'table' => 'sessions',
-			]);
+			$options = [
+				'host' => '127.0.0.1',
+				'port' => 6379,
+				'index' => '1',
+			];
+			$session = new Manager;
+			$serializer = new SerializerFactory;
+			$adapter = new AdapterFactory($serializer);
+			$redis = new Redis($adapter, $options);
+			$session->setAdapter($redis);
 			$session->start();
 			return $session;
 		});
@@ -86,8 +95,8 @@ class Module implements ModuleDefinitionInterface {
 			$view = new View;
 			$view->setViewsDir(APP_PATH . 'apps/backend/views/');
 			$view->registerEngines([
-				'.volt' => function($view, $di) {
-					$volt = new Volt($view, $di);
+				'.volt' => function($view) {
+					$volt = new Volt($view, $this);
 					$volt->setOptions([
 						'compiledPath'      => APP_PATH . 'apps/backend/cache/',
 						'compiledSeparator' => '_',
@@ -120,8 +129,6 @@ class Module implements ModuleDefinitionInterface {
 			return $view;
 		});
 
-		$di->set('currentUser', function() {
-			return User::findFirstById($this->getSession()->get('user_id'));
-		});
+		$di->set('currentUser', fn() => User::findFirstById($this->getSession()->get('user_id')));
 	}
 }

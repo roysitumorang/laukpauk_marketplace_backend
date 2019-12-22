@@ -32,10 +32,6 @@ class ProductCategory extends ModelBase {
 	private $_upload_config;
 	private $_filter;
 
-	function getSource() {
-		return 'product_categories';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -43,6 +39,7 @@ class ProductCategory extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('product_categories');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->hasMany('id', Product::class, 'product_category_id', ['alias' => 'products']);

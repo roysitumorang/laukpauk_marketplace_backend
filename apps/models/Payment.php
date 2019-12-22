@@ -24,11 +24,8 @@ class Payment extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'payments';
-	}
-
 	function initialize() {
+		$this->setSource('payments');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',

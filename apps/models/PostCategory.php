@@ -15,11 +15,8 @@ class PostCategory extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'post_categories';
-	}
-
 	function initialize() {
+		$this->setSource('post_categories');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->hasMany('id', Post::class, 'post_category_id', [

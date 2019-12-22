@@ -2,7 +2,7 @@
 
 use Phalcon\Config;
 
-return new Config([
+return (new Config)->merge([
 	'application' => [
 		'modelsDir'  => APP_PATH . 'apps/models/',
 		'pluginsDir' => APP_PATH . 'apps/plugins/',
@@ -10,12 +10,10 @@ return new Config([
 		'baseUri'    => '/',
 	],
 	'database' => [
-		'adapter'    => 'Postgresql',
 		'host'       => 'localhost',
 		'username'   => 'postgres',
 		'password'   => 'tR1adpass#',
 		'dbname'     => 'laukpauk_marketplace',
-		'persistent' => true,
 		'options'    => [
 			PDO::ATTR_EMULATE_PREPARES => false,
 			PDO::ATTR_ERRMODE          => PDO::ERRMODE_EXCEPTION,

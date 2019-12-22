@@ -25,15 +25,12 @@ class Notification extends ModelBase {
 	public $created_by;
 	public $created_at;
 
-	function getSource() {
-		return 'notifications';
-	}
-
 	function onConstruct() {
 		$this->_filter = $this->getDI()->getFilter();
 	}
 
 	function initialize() {
+		$this->setSource('notifications');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',

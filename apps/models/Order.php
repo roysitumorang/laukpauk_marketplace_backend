@@ -43,11 +43,8 @@ class Order extends ModelBase {
 		1  => 'COMPLETED',
 	];
 
-	function getSource() {
-		return 'orders';
-	}
-
 	function initialize() {
+		$this->setSource('orders');
 		parent::initialize();
 		$this->belongsTo('merchant_id', User::class, 'id', [
 			'alias'      => 'merchant',

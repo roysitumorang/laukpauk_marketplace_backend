@@ -19,8 +19,9 @@ class NotificationTemplate extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'notification_templates';
+	function initialize() {
+		$this->setSource('notification_templates');
+		parent::initialize();
 	}
 
 	function onConstruct() {

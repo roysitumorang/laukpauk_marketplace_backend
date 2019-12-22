@@ -19,12 +19,9 @@ class BankAccount extends ModelBase {
 	public $updated_at;
 
 	function initialize() {
+		$this->setSource('bank_accounts');
 		parent::initialize();
 		$this->hasMany('id', Payment::class, 'bank_account_id', ['alias' => 'payments']);
-	}
-
-	function getSource() {
-		return 'bank_accounts';
 	}
 
 	function setBank($bank) {

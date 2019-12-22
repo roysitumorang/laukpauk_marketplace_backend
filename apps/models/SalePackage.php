@@ -25,11 +25,8 @@ class SalePackage extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'sale_packages';
-	}
-
 	function initialize() {
+		$this->setSource('sale_packages');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'      => 'user',

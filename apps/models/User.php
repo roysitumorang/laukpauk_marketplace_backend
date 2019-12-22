@@ -70,10 +70,6 @@ class User extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'users';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -81,6 +77,7 @@ class User extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('users');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('role_id', Role::class, 'id', [

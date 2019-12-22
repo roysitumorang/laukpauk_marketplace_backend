@@ -14,11 +14,8 @@ class Province extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'provinces';
-	}
-
 	function initialize() {
+		$this->setSource('provinces');
 		parent::initialize();
 		$this->hasMany('id', City::class, 'province_id', [
 			'alias'      => 'cities',

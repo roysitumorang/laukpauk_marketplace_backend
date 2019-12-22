@@ -17,15 +17,12 @@ class Sms extends ModelBase {
 
 	private $_config;
 
-	function getSource() {
-		return 'sms';
-	}
-
 	function onConstruct() {
 		$this->_config = $this->getDI()->getConfig()->sms;
 	}
 
 	function initialize() {
+		$this->setSource('sms');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',

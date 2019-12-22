@@ -9,11 +9,8 @@ class NotificationRecipient extends Model {
 	public $user_id;
 	public $read_at;
 
-	function getSource() {
-		return 'notification_recipient';
-	}
-
 	function initialize() {
+		$this->setSource('notification_recipient');
 		$this->belongsTo('notification_id', Notification::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],
 		]);

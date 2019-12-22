@@ -15,11 +15,8 @@ class Device extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'devices';
-	}
-
 	function initialize() {
+		$this->setSource('devices');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',

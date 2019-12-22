@@ -19,10 +19,6 @@ class UserProduct extends ModelBase {
 
 	private $_filter;
 
-	function getSource() {
-		return 'user_product';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -30,6 +26,7 @@ class UserProduct extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('user_product');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('user_id', User::class, 'id', [

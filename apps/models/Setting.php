@@ -21,8 +21,9 @@ class Setting extends ModelBase {
 		$this->_filter = $this->getDI()->getFilter();
 	}
 
-	function getSource() {
-		return 'settings';
+	function initialize() {
+		$this->setSource('settings');
+		parent::initialize();
 	}
 
 	function setName(string $name) {

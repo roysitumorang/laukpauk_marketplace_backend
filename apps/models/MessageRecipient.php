@@ -8,11 +8,8 @@ class MessageRecipient extends ModelBase {
 	public $user_id;
 	public $read_at;
 
-	function getSource() {
-		return 'message_recipients';
-	}
-
 	function initialize() {
+		$this->setSource('message_recipients');
 		parent::initialize();
 		$this->belongsTo('message_id', Message::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],

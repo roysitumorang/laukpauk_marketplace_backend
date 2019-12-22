@@ -8,11 +8,8 @@ class SmsRecipient extends ModelBase {
 	public $mobile_phone;
 	public $status;
 
-	function getSource() {
-		return 'sms_recipient';
-	}
-
 	function initialize() {
+		$this->setSource('sms_recipient');
 		parent::initialize();
 		$this->belongsTo('sms_id', Sms::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],

@@ -14,15 +14,12 @@ class Message extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'messages';
-	}
-
 	function onConstruct() {
 		$this->_filter = $this->getDI()->getFilter();
 	}
 
 	function initialize() {
+		$this->setSource('messages');
 		parent::initialize();
 		$this->belongsTo('created_by', User::class, 'id', [
 			'alias'      => 'sender',

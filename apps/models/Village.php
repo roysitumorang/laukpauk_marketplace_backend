@@ -15,11 +15,8 @@ class Village extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'villages';
-	}
-
 	function initialize() {
+		$this->setSource('villages');
 		parent::initialize();
 		$this->belongsTo('subdistrict_id', Subdistrict::class, 'id', [
 			'alias'    => 'subdistrict',

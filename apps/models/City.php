@@ -19,11 +19,8 @@ class City extends ModelBase {
 
 	private $_filter;
 
-	function getSource() {
-		return 'cities';
-	}
-
 	function initialize() {
+		$this->setSource('cities');
 		parent::initialize();
 		$this->belongsTo('province_id', Province::class, 'id', [
 			'alias'    => 'province',
