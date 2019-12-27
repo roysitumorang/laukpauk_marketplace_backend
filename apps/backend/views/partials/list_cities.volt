@@ -10,9 +10,9 @@
 	{% for city in cities %}
 		<tr>
 			<td class="text-right">{{ city.rank }}</td>
-			<td><a href="/admin/subdistricts/index/city_id:{{ city.id }}">{{ city.type }} {{ city.name }}</a></td>
+			<td><a href="/admin/subdistricts/index/city_id={{ city.id }}">{{ city.type }} {{ city.name }}</a></td>
 			<td class="text-center">
-				<a href="/admin/cities/update/{{ city.id }}/province_id:{{ province.id }}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+				<a href="/admin/cities/update/{{ city.id }}/province_id={{ province.id }}{% if pagination.current > 1 %}/page={{ pagination.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 			</td>
 		</tr>
 	{% elsefor %}
@@ -30,7 +30,7 @@
 			{% if i == pagination.current %}
 				<b>{{ i }}</b>
 			{% else %}
-				<a href="/admin/cities/index/province_id:{{ province.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+				<a href="/admin/cities/index/province_id={{ province.id }}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 			{% endif %}
 		{% endfor %}
 	</p>

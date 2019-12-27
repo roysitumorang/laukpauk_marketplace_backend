@@ -99,7 +99,7 @@
 							{% if i == pagination.current %}
 								<b>{{ i }}</b>
 							{% else %}
-								<a href="/admin/coupons/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if current_status %}/status:{{ current_status }}{% endif %}{% if i > 1%}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/coupons/index{% if keyword %}/keyword={{ keyword }}{% endif %}{% if current_status %}/status={{ current_status }}{% endif %}{% if i > 1%}/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -124,12 +124,12 @@
 		}, false)
 	}),
 	document.querySelector('#search').addEventListener('submit', event => {
-		let url = event.target.action, replacement = {' ': '+', ':': '', '\/': ''};
+		let url = event.target.action, replacement = {' ': '+', '=': '', '\/': ''};
 		event.preventDefault(),
-		event.target.keyword.value && (url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+		event.target.keyword.value && (url += '/keyword=' + event.target.keyword.value.trim().replace(/ |=|\//g, match => {
 			return replacement[match]
 		})),
-		event.target.status.value && (url += '/status:' + event.target.status.value),
+		event.target.status.value && (url += '/status=' + event.target.status.value),
 		location.href = url
 	}, false)
 </script>

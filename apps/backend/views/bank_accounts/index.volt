@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/bank_accounts{% if pagination.current > 1%}/index/page:{{ pagination.current }}{% endif %}"><h2>Daftar Rekening Bank</h2></a>
+				<a href="/admin/bank_accounts{% if pagination.current > 1%}/index/page={{ pagination.current }}{% endif %}"><h2>Daftar Rekening Bank</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -68,7 +68,7 @@
 							{% if i == pagination.current %}
 								<b>{{ i }}</b>
 							{% else %}
-								<a href="/admin/bank_accounts{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/bank_accounts{% if i > 1 %}/index/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

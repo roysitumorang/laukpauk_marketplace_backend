@@ -55,7 +55,7 @@
 									</a>
 									<br>
 								{% endif %}
-								<a href="/admin/products/index/category_id:{{ category.id }}" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a>
+								<a href="/admin/products/index/category_id={{ category.id }}" title="{{ category.name }}" target="_blank">{{ category.name }} ({{ category.total_products }})</a>
 							</td>
 							<td>
 								<i>{{ category.permalink }}</i>
@@ -85,7 +85,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/product_categories/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+							<a href="/admin/product_categories/index{% if keyword %}/keyword={{ keyword }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -119,7 +119,7 @@
 		event.preventDefault();
 		url += 'index';
 		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+			url += '/keyword=' + search.keyword.value.trim().replace(/ |=|\//g, match => {
 				return replacement[match];
 			});
 		}

@@ -36,7 +36,7 @@
 					</table>
 				</form>
 				{% if products %}
-				<form method="POST" action="/admin/prices/update{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+				<form method="POST" action="/admin/prices/update{% if keyword %}/keyword={{ keyword }}{% endif %}{% if page.current > 1 %}/page={{ page.current }}{% endif %}">
 				{% endif %}
 					<table class="table table-striped">
 						<thead>
@@ -74,7 +74,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/prices/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+							<a href="/admin/prices/index{% if keyword %}/keyword={{ keyword }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -88,11 +88,11 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
+	let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', '=': '', '\/': ''};
 	search.addEventListener('submit', event => {
 		event.preventDefault();
 		if (search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+			url += '/keyword=' + search.keyword.value.trim().replace(/ |=|\//g, match => {
 				return replacement[match];
 			});
 		}

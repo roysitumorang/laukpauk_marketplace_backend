@@ -75,7 +75,7 @@
 										<br>
 										<i class="fa fa-users"></i>&nbsp;&nbsp;{{ user.role }}<br>
 										{% if user.email %}
-										<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto:{{ user.email }}" target="_blank">{{ user.email }}</a><br>
+										<i class="fa fa-envelope"></i>&nbsp;&nbsp;<a href="mailto={{ user.email }}" target="_blank">{{ user.email }}</a><br>
 										{% endif %}
 										<i class="fa fa-key"></i>&nbsp;&nbsp;{{ user.api_key | orElse('-') }}<br>
 										<i class="fa fa-mobile"></i>&nbsp;&nbsp;{{ user.mobile_phone }}<br>
@@ -109,7 +109,7 @@
 										{% if user.status == 'ACTIVE' %}
 											<a href="/admin/users/{{ user.id }}" title="Detail"><i class="fa fa-external-link fa-2x"></i></a>
 											{% if user.role == 'Buyer' %}
-												<a href="/admin/orders/create/buyer_id:{{ user.id }}"><i class="fa fa-cart-plus fa-2x"></i></a>
+												<a href="/admin/orders/create/buyer_id={{ user.id }}"><i class="fa fa-cart-plus fa-2x"></i></a>
 											{% endif %}
 										{% endif %}
 									</td>
@@ -129,7 +129,7 @@
 									{% if i == pagination.current %}
 										<b>{{ i }}</b>
 									{% else %}
-										<a href="/admin/users/index{% if current_status %}/status:{{ current_status }}{% endif %}{% if current_role %}/role_id:{{ current_role }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+										<a href="/admin/users/index{% if current_status %}/status={{ current_status }}{% endif %}{% if current_role %}/role_id={{ current_role }}{% endif %}{% if keyword %}/keyword={{ keyword }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 									{% endif %}
 								{% endfor %}
 							</p>
@@ -146,11 +146,11 @@
 </section>
 <script>
 	document.querySelector('#search').addEventListener('submit', event => {
-		let url = '/admin/users/index', replacement = {' ': '+', ':': '', '\/': ''};
+		let url = '/admin/users/index', replacement = {' ': '+', '=': '', '\/': ''};
 		event.preventDefault(),
-		event.target.status.value && (url += '/status:' + event.target.status.value),
-		event.target.role_id.value && (url += '/role_id:' + event.target.role_id.value),
-		event.target.keyword.value && (url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+		event.target.status.value && (url += '/status=' + event.target.status.value),
+		event.target.role_id.value && (url += '/role_id=' + event.target.role_id.value),
+		event.target.keyword.value && (url += '/keyword=' + event.target.keyword.value.trim().replace(/ |=|\//g, match => {
 			return replacement[match];
 		})),
 		location.href = url

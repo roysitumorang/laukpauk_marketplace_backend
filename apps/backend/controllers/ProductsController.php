@@ -21,32 +21,30 @@ class ProductsController extends ControllerBase {
 		$published    = $this->dispatcher->getParam('published', 'int');
 		$keyword      = $this->dispatcher->getParam('keyword', 'string');
 		$next         = '/admin/products/index';
-		$conditions   = ['', 'bind' => [], 'order' => 'id DESC'];
+		$builder      = $this->modelsManager->createBuilder()
+				->from(Product::class)
+				->orderBy('id DESC');
 		$this->_prepareDatas();
 		if ($category_id) {
-			$conditions[0]                    .= ($conditions[0] ? ' AND' : '') . ' product_category_id = :category_id:';
-			$conditions['bind']['category_id'] = $category_id;
-			$next                             .= "/category_id:{$category_id}";
+			$builder->andWhere('product_category_id = :category_id:', ['category_id' => $category_id]);
+			$next .= "/category_id={$category_id}";
 		}
 		if (ctype_digit($published)) {
-			$conditions[0]                  .= ($conditions[0] ? ' AND' : '') . ' published = :published:';
-			$conditions['bind']['published'] = $published;
-			$next                           .= "/published:{$published}";
+			$builder->andWhere('published = :published:', ['published' => $published]);
+			$next .= "/published={$published}";
 		}
 		if ($keyword) {
 			if (ctype_digit($keyword)) {
-				$conditions[0]           .= ($conditions[0] ? ' AND' : '') . ' id = :id:';
-				$conditions['bind']['id'] = $keyword;
+				$builder->andWhere('id = :id:', ['id' => $keyword]);
 			} else if ($keyword) {
-				$conditions[0]             .= ($conditions[0] ? ' AND' : '') . ' name LIKE :name:';
-				$conditions['bind']['name'] = '%' . $keyword . '%';
+				$builder->andWhere('name LIKE :name:', ['name' => '%' . $keyword . '%']);
 			}
-			$next .= "/keyword:{$keyword}";
+			$next .= "/keyword={$keyword}";
 		}
-		$pagination = (new Model([
-			'data'  => Product::find($conditions),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$pagination = (new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);

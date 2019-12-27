@@ -35,7 +35,7 @@
 						</tr>
 					</table>
 				</form>
-				<form method="POST" action="/admin/operations/update_all{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+				<form method="POST" action="/admin/operations/update_all{% if keyword %}/keyword={{ keyword }}{% endif %}{% if page.current > 1 %}/page={{ page.current }}{% endif %}">
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -51,7 +51,7 @@
 						</tr>
 					</table>
 				</form>
-				<form method="POST" action="/admin/operations/update{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}">
+				<form method="POST" action="/admin/operations/update{% if keyword %}/keyword={{ keyword }}{% endif %}{% if page.current > 1 %}/page={{ page.current }}{% endif %}">
 					<table class="table table-striped">
 						<thead>
 							<tr>
@@ -125,7 +125,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/operations/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+							<a href="/admin/operations/index{% if keyword %}/keyword={{ keyword }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

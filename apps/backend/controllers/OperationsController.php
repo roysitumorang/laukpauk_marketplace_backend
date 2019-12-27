@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{Role, User};
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class OperationsController extends ControllerBase {
 	function indexAction() {
@@ -13,22 +13,20 @@ class OperationsController extends ControllerBase {
 		$search_query   = $this->dispatcher->getParam('keyword', 'string');
 		$business_hours = [];
 		$merchants      = [];
-		$conditions     = [
-			'status = 1 AND role_id = ?0',
-			'bind'  => [Role::MERCHANT],
-			'order' => 'company',
-		];
+		$builder        = $this->modelsManager->createBuilder()
+				->from(User::class)
+				->where('status = :status: AND role_id = :role_id:', ['status' => 1, 'role_id' => Role::MERCHANT])
+				->orderBy('company');
 		if ($search_query) {
 			$keywords = preg_split('/\s/', $search_query, -1, PREG_SPLIT_NO_EMPTY);
 			foreach ($keywords as $i => $keyword) {
-				$conditions[0]       .= ' AND company ILIKE ?' . ($i + 1);
-				$conditions['bind'][] = "%{$keyword}%";
+				$builder->andWhere('company ILIKE :company:', ['company' => "%{$keyword}%"]);
 			}
 		}
-		$paginator = new Model([
-			'data'  => User::find($conditions),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$paginator = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);

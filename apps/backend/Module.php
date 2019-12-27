@@ -67,11 +67,11 @@ class Module implements ModuleDefinitionInterface {
 				$oldParams = $dispatcher->getParams();
 				$newParams = [];
 				foreach ($oldParams as $key => $value) {
-					if (!strstr($value, ':')) {
+					if (strpos($value, '=') === false) {
 						$newParams[$key] = $value;
 						continue;
 					}
-					list($newKey, $newValue) = explode(':', $value);
+					list($newKey, $newValue) = explode('=', $value);
 					$newParams[$newKey]      = $newValue;
 				}
 				$dispatcher->setParams($newParams);

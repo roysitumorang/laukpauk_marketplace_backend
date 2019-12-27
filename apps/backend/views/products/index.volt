@@ -105,7 +105,7 @@
 							{% if i == pagination.current %}
 								<b>{{ i }}</b>
 							{% else %}
-								<a href="/admin/products/index{% if category_id %}/category_id:{{ category_id }}{% endif %}{% if ctype_digit(published) %}/published:{{ published }}{% endif %}{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/products/index{% if category_id %}/category_id={{ category_id }}{% endif %}{% if ctype_digit(published) %}/published={{ published }}{% endif %}{% if keyword %}/keyword={{ keyword }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>
@@ -120,11 +120,11 @@
 </section>
 <script>
 	document.querySelector('#search').addEventListener('submit', event => {
-		let url = event.target.action, replacement = {' ': '+', ':': '', '\/': ''};
+		let url = event.target.action, replacement = {' ': '+', '=': '', '\/': ''};
 		event.preventDefault(),
-		event.target.category_id.value && (url += '/category_id:' + event.target.category_id.value),
-		event.target.published.value && (url += '/published:' + event.target.published.value),
-		event.target.keyword.value && (url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+		event.target.category_id.value && (url += '/category_id=' + event.target.category_id.value),
+		event.target.published.value && (url += '/published=' + event.target.published.value),
+		event.target.keyword.value && (url += '/keyword=' + search.keyword.value.trim().replace(/ |=|\//g, match => {
 			return replacement[match]
 		})),
 		location.href = url

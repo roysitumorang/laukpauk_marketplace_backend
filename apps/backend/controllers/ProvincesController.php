@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Province;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProvincesController extends ControllerBase {
 	function indexAction() {
@@ -50,10 +50,13 @@ class ProvincesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
-			'data'  => Province::find(['order' => 'name']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(Province::class)
+				->orderBy('name');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page      = $paginator->paginate();
 		$pages     = $this->_setPaginationRange($page);

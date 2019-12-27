@@ -10,9 +10,9 @@
 	{% for province in provinces %}
 		<tr>
 			<td class="text-right">{{ province.rank }}</td>
-			<td><a href="/admin/cities/index/province_id:{{ province.id }}">{{ province.name }}</a></td>
+			<td><a href="/admin/cities/index/province_id={{ province.id }}">{{ province.name }}</a></td>
 			<td class="text-center">
-				<a href="/admin/provinces/update/{{ province.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+				<a href="/admin/provinces/update/{{ province.id }}{% if page.current > 1 %}/page={{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 			</td>
 		</tr>
 	{% elsefor %}
@@ -30,7 +30,7 @@
 			{% if i == page.current %}
 			<b>{{ i }}</b>
 			{% else %}
-			<a href="/admin/provinces{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+			<a href="/admin/provinces{% if i > 1 %}/index/page={{ i }}{% endif %}">{{ i }}</a>
 			{% endif %}
 		{% endfor %}
 	</p>

@@ -71,7 +71,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/messages/index/page:{{ i }}">{{ i }}</a>
+							<a href="/admin/messages/index/page={{ i }}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

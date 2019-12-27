@@ -2,21 +2,23 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Message;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Application\Models\{Message, MessageRecipient};
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class MessagesController extends ControllerBase {
 	function indexAction() {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new PaginatorModel([
-			'data'  => $this->currentUser->getRelated('messages', [
-				'conditions' => 'Application\Models\MessageRecipient.read_at IS NULL',
-				'order'      => 'Application\Models\Message.id DESC',
-			]),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(['a' => Message::class])
+				->join(MessageRecipient::class, 'a.id = b.message_id', 'b')
+				->where('b.user_id = :user_id: AND b.read_at IS NULL', ['user_id' => $this->currentUser->id])
+				->orderBy('a.id DESC');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page      = $paginator->paginate();
 		$pages     = $this->_setPaginationRange($page);

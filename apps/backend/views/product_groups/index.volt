@@ -57,7 +57,7 @@
 										<td>{{ product_group.url | orElse('-') }}</td>
 										<td>{{ product_group.total_products }}</td>
 										<td>
-											<a href="/admin/product_group_members/index/product_group_id:{{ product_group.id }}"><i class="fa fa-info-circle fa-2x"></i></a>
+											<a href="/admin/product_group_members/index/product_group_id={{ product_group.id }}"><i class="fa fa-info-circle fa-2x"></i></a>
 											<a href="javascript:void(0)" class="published" data-id="{{ product_group.id }}" data-published="{{ product_group.published }}">
 												<i class="fa fa-eye{% if !product_group.published %}-slash{% endif %} fa-2x"></i>
 											</a>
@@ -82,7 +82,7 @@
 										{% if i == page.current %}
 											<b>{{ i }}</b>
 										{% else %}
-											<a href="/admin/product_groups/index{% if keyword %}/keyword:{{ keyword }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+											<a href="/admin/product_groups/index{% if keyword %}/keyword={{ keyword }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -123,8 +123,8 @@
 	document.querySelector('#search').addEventListener('submit', event => {
 		event.preventDefault();
 		if (event.target.keyword.value) {
-			url += '/keyword:' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
-				return {' ': '+', ':': '', '\/': ''}[match];
+			url += '/keyword=' + event.target.keyword.value.trim().replace(/ |:|\//g, match => {
+				return {' ': '+', '=': '', '\/': ''}[match];
 			})
 		}
 		location.href = url

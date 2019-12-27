@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/banners{% if user_id %}/index/user_id:{{ user_id }}{% endif %}{% if pagination.current > 1 %}/page:{{ pagination.current }}{% endif %}"><h2>Banner</h2></a>
+				<a href="/admin/banners{% if user_id %}/index/user_id={{ user_id }}{% endif %}{% if pagination.current > 1 %}/page={{ pagination.current }}{% endif %}"><h2>Banner</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -79,7 +79,7 @@
 							{% if i == pagination.current %}
 								<b>{{ i }}</b>
 							{% else %}
-								<a href="/admin/banners/index{% if user_id %}/user_id:{{ user_id }}{% endif %}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/banners/index{% if user_id %}/user_id={{ user_id }}{% endif %}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

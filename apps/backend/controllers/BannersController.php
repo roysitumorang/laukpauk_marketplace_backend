@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Banner;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class BannersController extends ControllerBase {
 	function indexAction() {
@@ -11,10 +11,13 @@ class BannersController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int', 1);
 		$offset       = ($current_page - 1) * $limit;
-		$pagination   = (new Model([
-			'data'  => Banner::find(['order' => 'id DESC']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(Banner::class)
+				->orderBy('id DESC');
+		$pagination   = (new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);

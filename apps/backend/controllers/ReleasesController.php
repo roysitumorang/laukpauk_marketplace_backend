@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Release;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ReleasesController extends ControllerBase {
 	private $_date_formatter;
@@ -31,10 +31,13 @@ class ReleasesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
-			'data'  => Release::find(['order' => 'id DESC']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(Release::class)
+				->orderBy('id DESC');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);

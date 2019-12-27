@@ -10,9 +10,9 @@
 	{% for subdistrict in subdistricts %}
 		<tr>
 			<td class="text-right">{{ subdistrict.rank }}</td>
-			<td><a href="/admin/villages/index/subdistrict_id:{{ subdistrict.id }}">{{ subdistrict.name }}</a></td>
+			<td><a href="/admin/villages/index/subdistrict_id={{ subdistrict.id }}">{{ subdistrict.name }}</a></td>
 			<td class="text-center">
-				<a href="/admin/subdistricts/update/{{ subdistrict.id }}/city_id:{{ city.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+				<a href="/admin/subdistricts/update/{{ subdistrict.id }}/city_id={{ city.id }}{% if page.current > 1 %}/page={{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 			</td>
 		</tr>
 	{% elsefor %}
@@ -30,7 +30,7 @@
 			{% if i == page.current %}
 			<b>{{ i }}</b>
 			{% else %}
-			<a href="/admin/subdistricts/index/city_id:{{ city.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+			<a href="/admin/subdistricts/index/city_id={{ city.id }}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 			{% endif %}
 		{% endfor %}
 	</p>

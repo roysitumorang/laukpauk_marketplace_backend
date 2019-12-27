@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{City, Province};
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CitiesController extends ControllerBase {
 	private $_province;
@@ -63,10 +63,14 @@ class CitiesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int', 1);
 		$offset       = ($current_page - 1) * $limit;
-		$pagination   = (new Model([
-			'data'  => $this->_province->getRelated('cities', ['order' => 'type, name']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(City::class)
+				->where('province_id = :province_id:', ['province_id' => $this->_province->id])
+				->orderBy('type, name');
+		$pagination   = (new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);

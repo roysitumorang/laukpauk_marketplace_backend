@@ -12,7 +12,7 @@
 			<td class="text-right">{{ village.rank }}</td>
 			<td>{{ village.name }}</td>
 			<td class="text-center">
-				<a href="/admin/villages/update/{{ village.id }}/subdistrict_id:{{ subdistrict.id }}{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
+				<a href="/admin/villages/update/{{ village.id }}/subdistrict_id={{ subdistrict.id }}{% if page.current > 1 %}/page={{ page.current }}{% endif %}" title="Update"><i class="fa fa-pencil fa-2x"></i></a>
 			</td>
 		</tr>
 	{% elsefor %}
@@ -30,7 +30,7 @@
 			{% if i == page.current %}
 			<b>{{ i }}</b>
 			{% else %}
-			<a href="/admin/villages/index/subdistrict_id:{{ subdistrict.id }}{% if i > 1 %}/page:{{ i }}{% endif %}">{{ i }}</a>
+			<a href="/admin/villages/index/subdistrict_id={{ subdistrict.id }}{% if i > 1 %}/page={{ i }}{% endif %}">{{ i }}</a>
 			{% endif %}
 		{% endfor %}
 	</p>

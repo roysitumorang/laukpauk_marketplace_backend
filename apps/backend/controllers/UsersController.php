@@ -16,6 +16,7 @@ class UsersController extends ControllerBase {
 		$keyword        = strtr($this->dispatcher->getParam('keyword', 'string'), [':' => '', '/' => '']);
 		$current_role   = $this->dispatcher->getParam('role_id', 'int', null);
 		$current_status = $this->dispatcher->getParam('status', 'int', array_search('ACTIVE', $user_status));
+		$user_ids       = [];
 		$builder        = $this->modelsManager->createBuilder()
 			->columns([
 				'a.id',
@@ -57,7 +58,6 @@ class UsersController extends ControllerBase {
 				'subdistrict'              => 'd.name',
 				'city'                     => 'e.name',
 				'province'                 => 'f.name',
-				'last_login'               => 'g.sign_in_at',
 			])
 			->from(['a' => User::class])
 			->join(Role::class, 'a.role_id = b.id', 'b')
@@ -65,10 +65,8 @@ class UsersController extends ControllerBase {
 			->leftJoin(Subdistrict::class, 'c.subdistrict_id = d.id', 'd')
 			->leftJoin(City::class, 'd.city_id = e.id', 'e')
 			->leftJoin(Province::class, 'e.province_id = f.id', 'f')
-			->leftJoin(LoginHistory::class, 'a.id = g.user_id', 'g')
 			->orderBy('a.id DESC')
-			->where('a.status = :status:', ['status' => $current_status])
-			->andWhere('NOT EXISTS(SELECT 1 FROM Application\Models\LoginHistory h WHERE g.user_id = h.user_id AND h.id > g.id)');
+			->where('a.status = :status:', ['status' => $current_status]);
 		if ($current_role) {
 			$builder->andWhere('a.role_id = :role_id:', ['role_id' => $current_role]);
 		}
@@ -86,6 +84,23 @@ class UsersController extends ControllerBase {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('status', $user_status[$item->status]);
 			$users[] = $item;
+			$user_ids[] = $item->id;
+		}
+		if (count($user_ids) > 0) {
+			$last_logins = [];
+			$login_histories = $this->modelsManager->executeQuery(sprintf(
+				"SELECT id, MAX(sign_in_at) AS last_login FROM [Application\Models\LoginHistory] WHERE id IN (%s) GROUP BY id",
+				implode(",", $user_ids),
+			));
+			foreach ($login_histories as $item) {
+				$last_logins[$item->id] = $item->last_login;
+			}
+			foreach ($users as $i => $item) {
+				if (array_key_exists($item->id, $last_logins)) {
+					$item->last_login = $last_logins[$item->id];
+					$users[$i] = $item;
+				}
+			}
 		}
 		asort($user_status);
 		$this->view->setVars([

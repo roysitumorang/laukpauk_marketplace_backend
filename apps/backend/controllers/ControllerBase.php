@@ -62,8 +62,8 @@ class ControllerBase extends Controller {
 				'icon'      => 'envelope',
 				'expanded'  => $expanded == 'Mailbox',
 				'sub_items' => [
-					['label' => 'Inbox',             'link' => 'messages/index/unread:1'],
-					['label' => 'Outbox',            'link' => 'messages/index/read:1'],
+					['label' => 'Inbox',             'link' => 'messages/index/read=0'],
+					['label' => 'Outbox',            'link' => 'messages/index/read=1'],
 					['label' => 'Kirim Pesan',       'link' => 'messages/create'],
 					['label' => 'Semua Pesan',       'link' => 'messages'],
 					['label' => 'Feedbacks',         'link' => 'feedbacks'],

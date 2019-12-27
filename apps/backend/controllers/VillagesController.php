@@ -2,9 +2,8 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Subdistrict;
-use Application\Models\Village;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Models\{Subdistrict, Village};
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class VillagesController extends ControllerBase {
 	private $_subdistrict;
@@ -63,10 +62,14 @@ class VillagesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
-			'data'  => $this->_subdistrict->getRelated('villages', ['order' => 'name']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(Village::class)
+				->where('subdistrict_id = :subdistrict_id:', ['subdistrict_id' => $this->_subdistrict->id])
+				->orderBy('name');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);

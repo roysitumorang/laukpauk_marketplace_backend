@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/provinces{% if page.current > 1%}/index/page:{{ page.current }}{% endif %}"><h2>Daftar Propinsi</h2></a>
+				<a href="/admin/provinces{% if page.current > 1%}/index/page={{ page.current }}{% endif %}"><h2>Daftar Propinsi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -28,7 +28,7 @@
 					<div class="tab-content">
 						<div id="provinces" class="tab-pane active">
 							{{ flashSession.output() }}
-							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/provinces/create{% if page.current > 1 %}/page:{{ page.current }}{% endif %}" class="new">Tambah Propinsi</a></p>
+							<p style="margin-left:5px"><i class="fa fa-plus-square"></i>&nbsp;<a href="/admin/provinces/create{% if page.current > 1 %}/page={{ page.current }}{% endif %}" class="new">Tambah Propinsi</a></p>
 							{{ partial('partials/list_provinces', ['pages': pages, 'page': page, 'provinces': provinces]) }}
 						</div>
 					</div>

@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\NotificationTemplate;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class NotificationTemplatesController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -15,10 +15,13 @@ class NotificationTemplatesController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
-			'data'  => NotificationTemplate::find(),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->from(NotificationTemplate::class)
+				->orderBy('id DESC');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page                   = $paginator->paginate();
 		$pages                  = $this->_setPaginationRange($page);

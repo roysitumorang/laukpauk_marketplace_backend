@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/notification_templates{% if page.current > 1%}/index/page:{{ page.current }}{% endif %}"><h2>Daftar Template Notifikasi</h2></a>
+				<a href="/admin/notification_templates{% if page.current > 1%}/index/page={{ page.current }}{% endif %}"><h2>Daftar Template Notifikasi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -67,7 +67,7 @@
 							{% if i == page.current %}
 							<b>{{ i }}</b>
 							{% else %}
-							<a href="/admin/notification_templates{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+							<a href="/admin/notification_templates{% if i > 1 %}/index/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

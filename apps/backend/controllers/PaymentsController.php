@@ -2,10 +2,10 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Payment;
+use Application\Models\{Payment, User};
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class PaymentsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -29,20 +29,22 @@ class PaymentsController extends ControllerBase {
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset         = ($current_page - 1) * $limit;
 		$params         = ['1 = 1', 'bind' => [], 'order' => 'id DESC'];
+		$builder        = $this->modelsManager->createBuilder()
+				->from(['a' => Payment::class])
+				->join(User::class, 'a.user_id = b.id', 'b')
+				->where('1 = 1')
+				->orderBy('a.id DESC');
 		if (is_int($current_status) && in_array($current_status, $all_status)) {
-			$params[0] .= " AND status = {$current_status}";
+			$builder->andWhere('a.status = :status:', ['status' => $current_status]);
 		}
 		if ($keyword) {
 			$search_query = "%{$keyword}%";
-			$params[0]   .= ' AND (code ILIKE ?0 OR EXISTS(SELECT 1 FROM Application\Models\User WHERE user_id = Application\Models\User.id AND Application\Models\User.company ILIKE ?1))';
-			for ($i = 0; $i < 2; $i++) {
-				$params['bind'][] = $search_query;
-			}
+			$builder->andWhere('(a.code ILIKE :query: OR b.company ILIKE :query:)', ['query' => $search_query]);
 		}
-		$paginator = new Model([
-			'data'  => Payment::find($params),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$paginator = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);
