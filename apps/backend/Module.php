@@ -3,8 +3,8 @@
 namespace Application\Backend;
 
 use Application\Models\User;
-use Phalcon\Dispatcher;
 use Phalcon\Di\DiInterface;
+use Phalcon\Dispatcher\Exception as DispatcherException;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Loader;
@@ -77,7 +77,7 @@ class Module implements ModuleDefinitionInterface {
 				$dispatcher->setParams($newParams);
 			});
 			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, \Exception $exception) {
-				if ($exception instanceof DispatchException || in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
+				if ($exception instanceof DispatchException || in_array($exception->getCode(), [DispatcherException::EXCEPTION_HANDLER_NOT_FOUND, DispatcherException::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
 						'controller' => 'home',
 						'action'     => 'route404',
@@ -98,8 +98,8 @@ class Module implements ModuleDefinitionInterface {
 				'.volt' => function($view) {
 					$volt = new Volt($view, $this);
 					$volt->setOptions([
-						'compiledPath'      => APP_PATH . 'apps/backend/cache/',
-						'compiledSeparator' => '_',
+						'path'      => APP_PATH . 'apps/backend/cache/',
+						'separator' => '_',
 					]);
 					$volt->getCompiler()
 						->addFunction('ctype_digit', 'ctype_digit')
