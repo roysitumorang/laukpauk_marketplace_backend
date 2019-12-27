@@ -30,12 +30,12 @@
 							<td>
 								<b>Kategori :</b>
 								<br>
-								{{ select('category_id', categories, 'value': category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '') }}
+								{{ select({'category_id', categories, 'value': category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': ''}) }}
 							</td>
 							<td>
 								<b>Status :</b>
 								<br>
-								{{ select('published', ['Tersembunyi', 'Tampil'], 'value': published, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
+								{{ select({'published', ['Tersembunyi', 'Tampil'], 'value': published, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': ''}) }}
 							</td>
 							<td>
 								<b>ID / Nama :</b>

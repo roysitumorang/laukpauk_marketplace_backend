@@ -31,7 +31,7 @@
 								<b>Cari berdasarkan :</b>
 								{{ text_field('keyword', 'value': keyword, 'size': 30, 'placeholder': 'Kode Kupon') }}
 								<b>Status :</b>
-								{{ select('status', coupon_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
+								{{ select({'status', coupon_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': ''}) }}
 								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
 								<a type="button" href="/admin/coupons/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah Kupon</a>
 							</td>

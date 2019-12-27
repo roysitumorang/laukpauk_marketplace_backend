@@ -41,7 +41,7 @@
 							</td>
 							<td>
 								<i class="fa fa-tag"></i> Status :<br>
-								{{ select_static('status', order_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- Semua -', 'emptyValue': '') }}
+								{{ select_static({'status', order_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- Semua -', 'emptyValue': ''}) }}
 							</td>
 							<td>
 								<i class="fa fa-mobile"></i> HP Merchant :<br>

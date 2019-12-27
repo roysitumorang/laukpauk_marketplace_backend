@@ -6,7 +6,7 @@
 			<td>
 				<b><font color="#000099">Kategori</font> <font color="red">*</font></b>
 				<br>
-				{{ select('product_category_id', categories, 'value': product.product_category_id) }}
+				{{ select({'product_category_id', categories, 'value': product.product_category_id}) }}
 			</td>
 		</tr>
 		<tr>

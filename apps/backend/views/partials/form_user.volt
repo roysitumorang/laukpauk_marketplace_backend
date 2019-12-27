@@ -124,25 +124,25 @@
 		<tr>
 			<td>
 				Propinsi (*) :<br>
-				{{ select('province_id', provinces, 'using': ['id', 'name'], 'value': province_id, 'useEmpty': true, 'emptyText': '- propinsi -', 'emptyValue': '') }}
+				{{ select({'province_id', provinces, 'using': ['id', 'name'], 'value': province_id, 'useEmpty': true, 'emptyText': '- propinsi -', 'emptyValue': ''}) }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Kabupaten / Kota (*) :<br>
-				{{ select_static('city_id', cities, 'using': ['id', 'name'], 'value': city_id, 'useEmpty': true, 'emptyText': '- kabupaten / kota -', 'emptyValue': '') }}
+				{{ select_static({'city_id', cities, 'using': ['id', 'name'], 'value': city_id, 'useEmpty': true, 'emptyText': '- kabupaten / kota -', 'emptyValue': ''}) }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Kecamatan (*) :<br>
-				{{ select('subdistrict_id', subdistricts, 'using': ['id', 'name'], 'value': subdistrict_id, 'useEmpty': true, 'emptyText': '- kecamatan -', 'emptyValue': '') }}
+				{{ select({'subdistrict_id', subdistricts, 'using': ['id', 'name'], 'value': subdistrict_id, 'useEmpty': true, 'emptyText': '- kecamatan -', 'emptyValue': ''}) }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				Kelurahan (*) :<br>
-				{{ select_static('village_id', villages, 'using': ['id', 'name'], 'value': user.village_id, 'useEmpty': true, 'emptyText': '- kelurahan -', 'emptyValue': '') }}
+				{{ select_static({'village_id', villages, 'using': ['id', 'name'], 'value': user.village_id, 'useEmpty': true, 'emptyText': '- kelurahan -', 'emptyValue': ''}) }}
 			</td>
 		</tr>
 		<tr>
@@ -161,9 +161,9 @@
 			<td>
 				Jam Operasional (* untuk merchant) :<br>
 				Buka
-				{{ select('business_opening_hour', business_hours, 'value': user.business_opening_hour, 'useEmpty': true, 'emptyText': '', 'emptyValue': '') }}
+				{{ select({'business_opening_hour', business_hours, 'value': user.business_opening_hour, 'useEmpty': true, 'emptyText': '', 'emptyValue': ''}) }}
 				- Tutup
-				{{ select('business_closing_hour', business_hours, 'value': user.business_closing_hour, 'useEmpty': true, 'emptyText': '', 'emptyValue': '') }}
+				{{ select({'business_closing_hour', business_hours, 'value': user.business_closing_hour, 'useEmpty': true, 'emptyText': '', 'emptyValue': ''}) }}
 			</td>
 		</tr>
 		<tr>

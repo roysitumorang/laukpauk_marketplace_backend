@@ -11,7 +11,7 @@
 			<td>
 				<b>Diskon :</b><br>
 				{{ text_field('price_discount', 'value': coupon.price_discount, 'size': 40, 'class': 'form form-control form-30', 'placeholder': 'Diskon') }}
-				{{ select_static('discount_type', discount_types, 'value': coupon.discount_type, 'class': 'form form-control form-20') }}
+				{{ select_static({'discount_type', discount_types, 'value': coupon.discount_type, 'class': 'form form-control form-20'}) }}
 			</td>
 		</tr>
 		<tr>
@@ -36,13 +36,13 @@
 		<tr>
 			<td>
 				<b>Status :</b><br>
-				{{ select_static('status', coupon_status, 'value': coupon.status, 'class': 'form form-control form-30') }}
+				{{ select_static({'status', coupon_status, 'value': coupon.status, 'class': 'form form-control form-30'}) }}
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<b>Cara Penggunaan :</b><br>
-				{{ select_static('multiple_use', usage_types, 'value': coupon.multiple_use, 'class': 'form form-control form-30') }}
+				{{ select_static({'multiple_use', usage_types, 'value': coupon.multiple_use, 'class': 'form form-control form-30'}) }}
 			</td>
 		</tr>
 		<tr>
@@ -54,7 +54,7 @@
 		<tr>
 			<td>
 				<b>Berlaku untuk versi minimal :</b><br>
-				{{ select('release_id', releases, 'using': ['id', 'version'], 'value': coupon.release_id, 'useEmpty': true, 'emptyText': '- semua versi -', 'emptyValue': '') }}
+				{{ select({'release_id', releases, 'using': ['id', 'version'], 'value': coupon.release_id, 'useEmpty': true, 'emptyText': '- semua versi -', 'emptyValue': ''}) }}
 			</td>
 		</tr>
 		<tr>

@@ -44,7 +44,7 @@
 									{% endfor %}
 								</select>
 								Member
-								{{ select('user_id', recipients, 'using': ['id', 'label'], 'value': user_id, 'useEmpty': true, 'emptyText': '- Semua Member -') }}
+								{{ select({'user_id', recipients, 'using': ['id', 'label'], 'value': user_id, 'useEmpty': true, 'emptyText': '- Semua Member -'}) }}
 							</td>
 						</tr>
 						<tr>

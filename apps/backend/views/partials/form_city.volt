@@ -4,7 +4,7 @@
 		<tr>
 			<td>
 				<b>Tipe :</b>
-				{{ select_static('type', types, 'value': city.type) }}
+				{{ select_static({'type', types, 'value': city.type}) }}
 				<b>Nama :</b>
 				{{ text_field('name', 'value': city.name) }}
 				<button type="submit" class="btn btn-primary">SIMPAN</button>
