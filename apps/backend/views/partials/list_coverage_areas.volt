@@ -113,7 +113,7 @@
 								{% endfor %}
 								</tbody>
 							</table>
-							{% if pagination.total_pages > 1 %}
+							{% if pagination.last > 1 %}
 							<div class="weepaging">
 								<p>
 									<b>Halaman:</b>&nbsp;&nbsp;

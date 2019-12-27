@@ -77,7 +77,6 @@ class OrdersController extends ControllerBase {
 				'a.coupon_id',
 				'a.scheduled_delivery',
 				'a.actual_delivery',
-				'a.note',
 				'a.created_at',
 			])
 			->addFrom(Order::class, 'a')
