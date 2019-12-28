@@ -4,7 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\{Product, ProductCategory, User, UserProduct};
 use Phalcon\Db\Enum;
-use Phalcon\Paginator\Adapter\{Model, QueryBuilder};
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductsController extends ControllerBase {
 	function beforeExecuteRoute() {

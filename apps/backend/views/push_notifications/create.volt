@@ -84,7 +84,7 @@
 	document.querySelector('#role_id').onchange = event => {
 		let value = event.target.value, target = document.querySelector('#user_id');
 		target.options.length = 1,
-		fetch('/admin/push_notifications/recipients' + (value ? '/role_id:' + value : ''), { credentials: 'include' }).then(response => response.json()).then(payload => {
+		fetch('/admin/push_notifications/recipients' + (value ? '/role_id=' + value : ''), { credentials: 'include' }).then(response => response.json()).then(payload => {
 			payload.forEach(function(item) {
 				let option = document.createElement('option');
 				option.value = item.id,

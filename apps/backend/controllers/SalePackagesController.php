@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\{Role, SalePackage, User};
 use Ds\Vector;
 use Phalcon\Db\Enum;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class SalePackagesController extends ControllerBase {
 	private $_user;
@@ -28,18 +28,20 @@ class SalePackagesController extends ControllerBase {
 		$offset        = ($current_page - 1) * $limit;
 		$sale_packages = [];
 		$search_query  = $this->dispatcher->getParam('keyword', 'string') ?: null;
-		$conditions    = ['', 'bind' => []];
+		$builder       = $this->modelsManager->createBuilder()
+				->addFrom(SalePackage::class)
+				->where('user_id = :user_id:', ['user_id' => $this->_user->id])
+				->orderBy('id DESC');
 		if ($search_query) {
 			$keywords = preg_split('/ /', $search_query, -1, PREG_SPLIT_NO_EMPTY);
-			foreach ($keywords as $i => $keyword) {
-				$conditions[0]       .= ($i ? ' AND ' : '') . 'name ILIKE ?' . $i;
-				$conditions['bind'][] = "%{$keyword}%";
+			foreach ($keywords as $keyword) {
+				$builder->andWhere('name ILIKE :name:', ['name' => "%{$keyword}%"]);
 			}
 		}
-		$paginator = new Model([
-			'data'  => $this->_user->getRelated('salePackages'),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$paginator = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);

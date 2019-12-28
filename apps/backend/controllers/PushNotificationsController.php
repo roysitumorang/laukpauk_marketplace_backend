@@ -2,13 +2,11 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Notification;
-use Application\Models\Role;
-use Application\Models\User;
+use Application\Models\{Notification, Role, User};
 use DateTime;
 use Ds\Vector;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class PushNotificationsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -28,10 +26,14 @@ class PushNotificationsController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new Model([
-			'data'  => $this->currentUser->getRelated('ownNotifications', ['order' => 'id DESC']),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->addFrom(Notification::class)
+				->where('user_id = :user_id:', ['user_id' => $this->currentUser->id])
+				->orderBy('id DESC');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page          = $paginator->paginate();
 		$pages         = $this->_setPaginationRange($page);

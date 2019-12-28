@@ -8,11 +8,11 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}"><h2>Notifikasi</h2></a>
+				<a href="/admin/notifications{% if i > 1 %}/index/page={{ i }}{% endif %}"><h2>Notifikasi</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
-						<li><span><a href="/admin/notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}">Notifikasi</a></span></li>
+						<li><span><a href="/admin/notifications{% if i > 1 %}/index/page={{ i }}{% endif %}">Notifikasi</a></span></li>
 					</ol>
 					<a class="sidebar-right-toggle" data-open="sidebar-right"><i class="fa fa-chevron-left"></i></a>
 				</div>
@@ -56,7 +56,7 @@
 							{% if i == page.current %}
 								<b>{{ i }}</b>
 							{% else %}
-								<a href="/admin/notifications{% if i > 1 %}/index/page:{{ i }}{% endif %}">{{ i }}</a>
+								<a href="/admin/notifications{% if i > 1 %}/index/page={{ i }}{% endif %}">{{ i }}</a>
 							{% endif %}
 						{% endfor %}
 					</p>

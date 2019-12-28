@@ -2,10 +2,10 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\NotificationRecipient;
+use Application\Models\{Notification, NotificationRecipient};
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class NotificationsController extends ControllerBase {
 	function indexAction() {
@@ -20,13 +20,22 @@ class NotificationsController extends ControllerBase {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
-		$paginator    = new PaginatorModel([
-			'data'  => $this->currentUser->getRelated('notifications', [
-				'columns' => 'Application\Models\Notification.id, Application\Models\Notification.title, Application\Models\Notification.admin_target_url, Application\Models\Notification.created_at, Application\Models\NotificationRecipient.read_at',
-				'order'   => 'Application\Models\Notification.id DESC',
-			]),
-			'limit' => $limit,
-			'page'  => $current_page,
+		$builder      = $this->modelsManager->createBuilder()
+				->columns([
+					'a.id',
+					'a.title',
+					'a.admin_target_url',
+					'a.created_at',
+					'b.read_at',
+				])
+				->addFrom(Notification::class, 'a')
+				->join(NotificationRecipient::class, 'a.[id] = b.[notification_id]', 'b')
+				->where('b.user_id = :user_id:', ['user_id' => $this->currentUser->id])
+				->orderBy('a.id DESC');
+		$paginator    = new QueryBuilder([
+			'builder' => $builder,
+			'limit'   => $limit,
+			'page'    => $current_page,
 		]);
 		$page          = $paginator->paginate();
 		$pages         = $this->_setPaginationRange($page);

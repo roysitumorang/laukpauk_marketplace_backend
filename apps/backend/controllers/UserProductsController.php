@@ -2,11 +2,7 @@
 
 namespace Application\Backend\Controllers;
 
-use Application\Models\Product;
-use Application\Models\ProductCategory;
-use Application\Models\UserProduct;
-use Application\Models\Role;
-use Application\Models\User;
+use Application\Models\{Product, ProductCategory, UserProduct, Role, User};
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class UserProductsController extends ControllerBase {

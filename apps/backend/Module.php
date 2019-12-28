@@ -14,6 +14,7 @@ use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt;
 use Phalcon\Session\Adapter\Redis;
+use Phalcon\Session\Bag as SessionBag;
 use Phalcon\Session\Manager;
 use Phalcon\Storage\AdapterFactory;
 use Phalcon\Storage\SerializerFactory;
@@ -56,6 +57,8 @@ class Module implements ModuleDefinitionInterface {
 			$session->start();
 			return $session;
 		});
+
+		$di->setShared('sessionBag', fn() => new SessionBag('user'));
 
 		// Registering a dispatcher
 		$di->set('dispatcher', function() {

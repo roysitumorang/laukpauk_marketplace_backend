@@ -8,7 +8,7 @@
 		<!-- end: sidebar -->
 		<section role="main" class="content-body">
 			<header class="page-header">
-				<a href="/admin/users/{{ user.id }}/sale_packages{% if page.current > 1%}/index/page:{{ page.current }}{% endif %}"><h2>Daftar Paket Belanja</h2></a>
+				<a href="/admin/users/{{ user.id }}/sale_packages{% if page.current > 1%}/index/page={{ page.current }}{% endif %}"><h2>Daftar Paket Belanja</h2></a>
 				<div class="right-wrapper pull-right">
 					<ol class="breadcrumbs">
 						<li><a href="/admin"><i class="fa fa-home"></i></a></li>
@@ -82,7 +82,7 @@
 										{% if i == page.current %}
 											<b>{{ i }}</b>
 										{% else %}
-											<a href="/admin/users/{{ user.id }}/sale_packages{% if i > 1 %}/index{% if keyword %}/keyword:{{ keyword }}{% endif %}/page:{{ i }}{% endif %}">{{ i }}</a>
+											<a href="/admin/users/{{ user.id }}/sale_packages{% if i > 1 %}/index{% if keyword %}/keyword={{ keyword }}{% endif %}/page={{ i }}{% endif %}">{{ i }}</a>
 										{% endif %}
 									{% endfor %}
 								</p>
@@ -99,7 +99,7 @@
 	{{ partial('partials/right_side') }}
 </section>
 <script>
-        let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', ':': '', '\/': ''};
+        let search = document.getElementById('search'), url = search.action, replacement = {' ': '+', '=': '', '\/': ''};
 	document.querySelectorAll('.publish').forEach(item => {
 		item.addEventListener('click', event => {
 			let form = document.createElement('form');
@@ -112,7 +112,7 @@
 	}),
 	search.addEventListener('submit', event => {
 		if (event.preventDefault(), search.keyword.value) {
-			url += '/keyword:' + search.keyword.value.trim().replace(/ |:|\//g, match => {
+			url += '/keyword=' + search.keyword.value.trim().replace(/ |=|\//g, match => {
 				return replacement[match];
 			})
 		}
