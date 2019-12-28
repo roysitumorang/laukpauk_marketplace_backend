@@ -6,7 +6,6 @@ return (new Config)->merge([
 	'application' => [
 		'modelsDir'  => APP_PATH . 'apps/models/',
 		'pluginsDir' => APP_PATH . 'apps/plugins/',
-		'libraryDir' => APP_PATH . 'apps/library/Phalcon/',
 		'baseUri'    => '/',
 	],
 	'database' => [

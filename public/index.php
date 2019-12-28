@@ -78,10 +78,6 @@ try {
 
 	// Register the installed modules
 	$application->registerModules([
-		'frontend' => [
-			'className' => 'Application\Frontend\Module',
-			'path'      => APP_PATH . 'apps/frontend/Module.php',
-		],
 		'v3' => [
 			'className' => 'Application\Api\V3\Module',
 			'path'      => APP_PATH . 'apps/api/v3/Module.php',

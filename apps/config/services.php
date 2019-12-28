@@ -25,9 +25,7 @@ $di->set('config', fn() => $config);
 /**
  * A component that allows manage static resources such as css stylesheets or javascript libraries in a web application
  */
-$di->set('assets', function() {
-	return new AssetsManager;
-}, true);
+$di->set('assets', fn() => new AssetsManager, true);
 
 /**
  * The URL component is used to generate all kind of urls in the application

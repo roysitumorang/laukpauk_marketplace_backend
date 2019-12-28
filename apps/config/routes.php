@@ -6,7 +6,6 @@ use Phalcon\Mvc\Router\Group;
 
 $di->set('router', function() {
 	$router     = new Router(false);
-	$frontend   = new Group(['module' => 'frontend']);
 	$backend    = new Group(['module' => 'backend']);
 	$apiV3Buyer = new Group([
 		'module'    => 'v3',
@@ -21,38 +20,6 @@ $di->set('router', function() {
 	$backend->setPrefix('/admin');
 	$apiV3Buyer->setPrefix('/api/v3/buyer');
 	$apiV3Merchant->setPrefix('/api/v3/merchant');
-
-	$frontend->add('[/]?', [
-		'controller' => 'home',
-		'action'     => 'index',
-	]);
-
-	$frontend->add('/:controller', [
-		'controller' => 1,
-		'action'     => 'index'
-	]);
-
-	$frontend->add('/:controller/:action/:params', [
-		'controller' => 1,
-		'action'     => 2,
-		'params'     => 3
-	]);
-
-	$frontend->add('/:controller/:int/:action', [
-		'controller' => 1,
-		'params'     => 2,
-		'action'     => 3,
-	])->convert('action', function($action) {
-		return preg_replace_callback('/\_([a-z])/', function($matches) {
-			return strtoupper($matches[1]);
-		}, $action);
-	});
-
-	$frontend->add('/:controller/:int', [
-		'controller' => 1,
-		'params'     => 2,
-		'action'     => 'show',
-	]);
 
 	$apiV3Buyer->add('/:controller/:action/:params', [
 		'controller' => 1,
@@ -285,13 +252,12 @@ $di->set('router', function() {
 		'params'          => 3,
 	]);
 
-	$router->mount($frontend);
 	$router->mount($backend);
 	$router->mount($apiV3Buyer);
 	$router->mount($apiV3Merchant);
 
 	$router->notFound([
-		'module'     => 'frontend',
+		'module'     => 'backend',
 		'controller' => 'home',
 		'action'     => 'route404',
 	]);
