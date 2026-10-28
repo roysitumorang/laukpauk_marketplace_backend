@@ -5,7 +5,7 @@ namespace Application\Frontend\Controllers;
 use Application\Models\ProductGroup;
 use Application\Models\ProductGroupMember;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductGroupMembersController extends ControllerBase {
@@ -78,7 +78,7 @@ class ProductGroupMembersController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			if ($item->picture) {
@@ -99,7 +99,7 @@ class ProductGroupMembersController extends ControllerBase {
 			foreach ($product_ids as $product_id) {
 				if ($this->db->fetchColumn('SELECT COUNT(1) FROM products a JOIN user_product b ON a.id = b.product_id JOIN users c ON b.user_id = c.id WHERE a.id = ? AND c.id = ? AND c.premium_merchant = 1', [$product_id, $this->currentUser->id]) && !$this->db->fetchColumn('SELECT COUNT(1) FROM product_group_member WHERE product_group_id = ? AND product_id = ?', [$this->_product_group->id, $product_id])) {
 					$link = new ProductGroupMember;
-					$link->create(['product_group_id' => $this->_product_group->id, 'product_id' => $product_id]);
+					$link->assign(['product_group_id' => $this->_product_group->id, 'product_id' => $product_id])->create();
 				}
 			}
 			$product_groups = [];
@@ -145,7 +145,7 @@ class ProductGroupMembersController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			if ($item->picture) {

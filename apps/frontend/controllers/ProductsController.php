@@ -5,9 +5,9 @@ namespace Application\Frontend\Controllers;
 use Application\Models\Product;
 use Application\Models\ProductCategory;
 use Application\Models\UserProduct;
-use Phalcon\Db;
-use Phalcon\Exception;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Db\Enum as Db;
+use Exception;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -44,7 +44,7 @@ class ProductsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page     = $paginator->getPaginate();
+		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);
 		$products = [];
 		foreach ($page->items as $item) {
@@ -88,7 +88,7 @@ class ProductsController extends ControllerBase {
 	function updateAction($id) {
 		if (!$product = Product::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $id]])) {
 			$this->flashSession->error('Produk tidak ditemukan.');
-			return $this->dispatcher->forward('products');
+			return $this->dispatcher->forward(['controller' => 'products', 'action' => 'index']);
 		}
 		$user_product = UserProduct::findFirst(['user_id = ?0 AND product_id = ?1', 'bind' => [$this->currentUser->id, $id]]);
 		$next         = $this->request->get('next');
@@ -116,7 +116,7 @@ class ProductsController extends ControllerBase {
 			if (!$product = Product::findFirst(['user_id = ?0 AND id = ?1 AND published = 0', 'bind' => [$this->currentUser->id, $id]])) {
 				$this->flashSession->error('Produk tidak ditemukan.');
 			} else {
-				$product->update(['published' => 1]);
+				$product->assign(['published' => 1])->update();
 				$this->flashSession->success('Produk berhasil ditampilkan');
 			}
 		}
@@ -128,7 +128,7 @@ class ProductsController extends ControllerBase {
 			if (!$product = Product::findFirst(['user_id = ?0 AND id = ?1 AND published = 1', 'bind' => [$this->currentUser->id, $id]])) {
 				$this->flashSession->error('Produk tidak ditemukan.');
 			} else {
-				$product->update(['published' => 0]);
+				$product->assign(['published' => 0])->update();
 				$this->flashSession->success('Produk berhasil disembunyikan');
 			}
 		}

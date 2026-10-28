@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
 
 class Feedback extends ModelBase {
 	public $id;
@@ -11,11 +11,8 @@ class Feedback extends ModelBase {
 	public $created_by;
 	public $created_at;
 
-	function getSource() {
-		return 'feedbacks';
-	}
-
 	function initialize() {
+		$this->setSource('feedbacks');
 		parent::initialize();
 		$this->belongsTo('created_by', User::class, 'id', [
 			'alias'    => 'user',

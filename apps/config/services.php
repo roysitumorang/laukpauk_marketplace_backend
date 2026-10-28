@@ -1,20 +1,33 @@
 <?php
 
-use Phalcon\Logger;
-use Phalcon\Logger\Adapter\File;
+use Application\Library\Filter\Sanitize\LegacyString;
 use Phalcon\Assets\Manager as AssetsManager;
-use Phalcon\Db\Adapter\Pdo\Factory;
-use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
-use Phalcon\Mvc\Model\Metadata\Memory;
-use Phalcon\Mvc\Url;
+use Phalcon\Db\Adapter\Pdo\Postgresql;
+use Phalcon\Filter\FilterFactory;
 use Phalcon\Flash\{Direct, Session};
+use Phalcon\Html\Escaper;
+use Phalcon\Html\TagFactory;
 use Phalcon\Http\Request;
+use Phalcon\Logger\Adapter\Stream;
+use Phalcon\Logger\Logger;
+use Phalcon\Mvc\Model\MetaData\Memory;
+use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
+use Phalcon\Mvc\Url;
+
+/**
+ * Register the autoloader for the application library (classes ported from the Phalcon 3 incubator)
+ */
+(new Phalcon\Autoload\Loader)
+	->setNamespaces(['Application\Library' => $config->application->libraryDir])
+	->register();
 
 /**
  * Application logger
  */
 $di->set('logger', function() {
-	$logger = new File(APP_PATH . 'apps/logs/' . date('Y-m-d') . '.log');
+	$logger = new Logger('messages', [
+		'main' => new Stream(APP_PATH . 'apps/logs/' . date('Y-m-d') . '.log'),
+	]);
 	$logger->setLogLevel(Logger::CRITICAL);
 	return $logger;
 });
@@ -24,10 +37,35 @@ $di->set('config', function() use($config) {
 });
 
 /**
+ * Keep the Phalcon 3 behaviour of the sanitizers this application relies on.
+ * Phalcon 5 changed "string" (htmlspecialchars instead of FILTER_SANITIZE_STRING),
+ * "int"/"float" (now cast to int/float, so e.g. a leading zero of a phone number
+ * was lost) and removed "int!". Stored data (password hashes, phone numbers) was
+ * produced with the old behaviour, so the old definitions are registered here.
+ */
+$di->setShared('filter', function() {
+	$filter = (new FilterFactory)->newInstance();
+	$filter->set('string', new LegacyString);
+	$filter->set('int', function($input) {
+		return filter_var($input, FILTER_SANITIZE_NUMBER_INT);
+	});
+	$filter->set('int!', function($input) {
+		return intval($input);
+	});
+	$filter->set('float', function($input) {
+		return filter_var($input, FILTER_SANITIZE_NUMBER_FLOAT, ['flags' => FILTER_FLAG_ALLOW_FRACTION]);
+	});
+	$filter->set('trim', function($input) {
+		return trim((string) $input);
+	});
+	return $filter;
+});
+
+/**
  * A component that allows manage static resources such as css stylesheets or javascript libraries in a web application
  */
 $di->set('assets', function() {
-	return new AssetsManager;
+	return new AssetsManager(new TagFactory(new Escaper));
 }, true);
 
 /**
@@ -43,7 +81,9 @@ $di->set('url', function() {
  * Database connection is created based in the parameters defined in the configuration file
  */
 $di->set('db', function() {
-	return Factory::load($this->getConfig()->database);
+	$descriptor = $this->getConfig()->database->toArray();
+	unset($descriptor['adapter']);
+	return new Postgresql($descriptor);
 });
 
 $di->set('transactionManager', function() {
@@ -61,21 +101,25 @@ $di->set('modelsMetadata', function() {
  * Register the flash service with custom CSS classes
  */
 $di->set('flash', function() {
-	return new Direct([
+	$flash = new Direct;
+	$flash->setCssClasses([
 		'error'   => 'alert alert-danger',
 		'success' => 'alert alert-success',
 		'notice'  => 'alert alert-info',
 		'warning' => 'alert alert-warning',
 	]);
+	return $flash;
 });
 
 $di->set('flashSession', function() {
-	return new Session([
+	$flash = new Session;
+	$flash->setCssClasses([
 		'error'   => 'alert alert-danger',
 		'success' => 'alert alert-success',
 		'notice'  => 'alert alert-info',
 		'warning' => 'alert alert-warning',
 	]);
+	return $flash;
 });
 
 $di->set('request', function() {
@@ -109,7 +153,7 @@ $di->set('jsonWebToken', function() use($di) {
 		}
 
 		function decode($token) {
-			$segments = explode('.', $token);
+			$segments = explode('.', (string) $token);
 			if (count($segments) != 3) {
 				throw new \Exception('Wrong number of segments');
 			}

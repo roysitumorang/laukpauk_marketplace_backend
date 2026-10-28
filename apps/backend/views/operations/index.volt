@@ -117,7 +117,7 @@
 					</table>
 					<button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> SIMPAN</button>
 				</form>
-				{% if page.total_pages > 1 %}
+				{% if page.last > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;

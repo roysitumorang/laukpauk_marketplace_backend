@@ -4,7 +4,7 @@ namespace Application\Api\V3\Buyer;
 
 use Application\Models\Banner;
 use Ds\Set;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class CategoriesController extends ControllerBase {
 	function indexAction() {
@@ -86,7 +86,7 @@ QUERY
 			if ($item->picture) {
 				$item->thumbnail = $picture_root_url . strtr($item->picture, ['.jpg' => '120.jpg']);
 			}
-			$item->products = explode(',', $item->products);
+			$item->products = explode(',', (string) $item->products);
 			unset($item->picture);
 			$sale_packages[] = $item;
 		}
@@ -138,7 +138,7 @@ QUERY
 					$availability .= 'tutup';
 				}
 				$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
-				$hours          = explode(',', $item->delivery_hours);
+				$hours          = explode(',', (string) $item->delivery_hours);
 				if ($hours) {
 					foreach ($business_hours as &$hour) {
 						if (!in_array($hour, $hours)) {

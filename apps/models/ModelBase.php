@@ -4,7 +4,15 @@ namespace Application\Models;
 
 use Phalcon\Mvc\Model;
 
+/**
+ * Phalcon hydrates every table column onto the model and the application attaches
+ * ad-hoc attributes (rank, thumbnail, ...); PHP 8.2+ requires opting in to that.
+ */
+#[\AllowDynamicProperties]
 class ModelBase extends Model {
+	protected $_filter;
+	protected $_upload_config;
+
 	function initialize() {
 		if (property_exists($this, 'updated_by') && property_exists($this, 'updated_at')) {
 			$this->skipAttributesOnCreate([

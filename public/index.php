@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-use Phalcon\Debug;
 use Phalcon\Di\FactoryDefault;
-use Phalcon\Exception;
 use Phalcon\Mvc\Application;
+use Phalcon\Support\Debug;
 
-$request_uri = filter_input(INPUT_GET, '_url');
+$request_uri = (string) filter_input(INPUT_GET, '_url');
 
 if (preg_match('#^/api/v\d/(buyer|merchant)/[a-z\d]{32}#', $request_uri)) {
 	$curl = curl_init();
@@ -41,7 +40,6 @@ if (preg_match('#^/api/v\d/(buyer|merchant)/[a-z\d]{32}#', $request_uri)) {
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $custom_header);
 	}
 	curl_exec($curl);
-	curl_close($curl);
 	exit;
 }
 
@@ -69,7 +67,7 @@ $config = require APP_PATH . 'apps/config/config.php';
 require APP_PATH . 'apps/config/services.php';
 
 // Specify routes for modules
-// More information how to set the router up https://docs.phalconphp.com/en/latest/reference/routing.html
+// More information how to set the router up https://docs.phalcon.io/5.0/en/routing
 require APP_PATH . 'apps/config/routes.php';
 
 try {
@@ -92,8 +90,9 @@ try {
 		],
 	]);
 
-	// Handle the request
-	$response = $application->handle();
+	// Handle the request. Phalcon 5 no longer reads the _url parameter by itself,
+	// so pass the rewritten URI (see public/.htaccess) explicitly.
+	$response = $application->handle($request_uri !== '' ? $request_uri : '/');
 
 	$response->send();
 } catch (Exception $e) {

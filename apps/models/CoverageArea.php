@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Callback, PresenceOf, Uniqueness};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Callback, PresenceOf, Uniqueness};
 
 class CoverageArea extends ModelBase {
 	public $id;
@@ -15,11 +15,8 @@ class CoverageArea extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'coverage_area';
-	}
-
 	function initialize() {
+		$this->setSource('coverage_area');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'      => 'user',

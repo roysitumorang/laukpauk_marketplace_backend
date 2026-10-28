@@ -2,10 +2,10 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\InclusionIn;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class Release extends ModelBase {
 	const USER_TYPES = ['buyer', 'merchant'];
@@ -19,11 +19,8 @@ class Release extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'releases';
-	}
-
 	function initialize() {
+		$this->setSource('releases');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->hasMany('id', Coupon::class, 'release_id', ['alias' => 'releases']);

@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Ds\Set;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {
@@ -138,7 +138,7 @@ QUERY
 					$availability .= 'tutup';
 				}
 				$business_hours = range($item->business_opening_hour, $item->business_closing_hour);
-				$hours          = explode(',', $item->delivery_hours);
+				$hours          = explode(',', (string) $item->delivery_hours);
 				if ($hours) {
 					foreach ($business_hours as &$hour) {
 						if (!in_array($hour, $hours)) {

@@ -31,7 +31,7 @@
 						<div id="areas" class="tab-pane active">
 							{{ flashSession.output() }}
 							{% if coverage_areas %}
-								{{ form('/admin/users/' ~ user.id ~ '/coverage_areas/update' ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
+								{{ form_legacy('/admin/users/' ~ user.id ~ '/coverage_areas/update' ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
 							{% endif %}
 							<table class="table table-striped">
 								<thead>
@@ -79,7 +79,7 @@
 							{% if coverage_areas %}
 								{{ endForm() }}
 							{% endif %}
-							{% if pagination.total_pages > 1 %}
+							{% if pagination.last > 1 %}
 							<div class="weepaging">
 								<p>
 									<b>Halaman:</b>&nbsp;&nbsp;

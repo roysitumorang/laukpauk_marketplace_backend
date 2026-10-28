@@ -4,7 +4,7 @@ namespace Application\Frontend\Controllers;
 
 use Application\Models\Village;
 use Application\Models\CoverageArea;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CoverageAreasController extends ControllerBase {
@@ -47,7 +47,7 @@ class CoverageAreasController extends ControllerBase {
 			$this->flashSession->success('Update area operasional berhasil!');
 			return $this->response->redirect('/coverage_areas' . ($page > 1 ? '/index/page:' . $page : ''));
 		}
-		$this->_render($coverage_area);
+		$this->_render(null);
 	}
 
 
@@ -64,7 +64,7 @@ class CoverageAreasController extends ControllerBase {
 		return $this->response->redirect('/coverage_areas' . ($page > 1 ? '/index/page:' . $page : ''));
 	}
 
-	private function _render(CoverageArea $coverage_area = null) {
+	private function _render(?CoverageArea $coverage_area = null) {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -146,7 +146,7 @@ QUERY
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);

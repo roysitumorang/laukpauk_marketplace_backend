@@ -24,14 +24,14 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				{{ form('/admin/coupons/index', 'method': 'GET', 'id': 'search') }}
+				{{ form_legacy('/admin/coupons/index', 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<b>Cari berdasarkan :</b>
 								{{ text_field('keyword', 'value': keyword, 'size': 30, 'placeholder': 'Kode Kupon') }}
 								<b>Status :</b>
-								{{ select('status', coupon_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
+								{{ select(['status', coupon_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '']) }}
 								<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> CARI</button>
 								<a type="button" href="/admin/coupons/create" class="btn btn-primary"><i class="fa fa-plus-square"></i> Tambah Kupon</a>
 							</td>
@@ -91,7 +91,7 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if pagination.total_pages > 1 %}
+				{% if pagination.last > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;

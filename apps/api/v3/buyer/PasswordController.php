@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\{Device, Role, User};
-use Phalcon\Crypt;
+use Phalcon\Encryption\Crypt;
 
 class PasswordController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -43,9 +43,9 @@ class PasswordController extends ControllerBase {
 					} else if ($this->_post->device_token != $this->_current_user->device_token) {
 						$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
 						if ($old_owner) {
-							$old_owner->update(['device_token' => null]);
+							$old_owner->assign(['device_token' => null])->update();
 						}
-						$this->_current_user->update(['device_token' => $this->_post->device_token]);
+						$this->_current_user->assign(['device_token' => $this->_post->device_token])->update();
 						$this->_current_user->getDevices()->delete();
 					}
 				}
@@ -106,13 +106,13 @@ class PasswordController extends ControllerBase {
 					} else if ($this->_post->device_token != $user->device_token) {
 						$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
 						if ($old_owner) {
-							$old_owner->update(['device_token' => null]);
+							$old_owner->assign(['device_token' => null])->update();
 						}
-						$user->update(['device_token' => $this->_post->device_token]);
+						$user->assign(['device_token' => $this->_post->device_token])->update();
 						$user->getDevices()->delete();
 					}
 				}
-				$crypt        = new Crypt;
+				$crypt        = new Crypt('aes-256-cfb', false);
 				$current_user = [
 					'id'           => $user->id,
 					'name'         => $user->name,

@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class Province extends ModelBase {
 	public $id;
@@ -14,11 +14,8 @@ class Province extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'provinces';
-	}
-
 	function initialize() {
+		$this->setSource('provinces');
 		parent::initialize();
 		$this->hasMany('id', City::class, 'province_id', [
 			'alias'      => 'cities',

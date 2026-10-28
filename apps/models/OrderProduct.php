@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Db;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Digit, PresenceOf};
+use Phalcon\Db\Enum as Db;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Digit, PresenceOf};
 
 class OrderProduct extends ModelBase {
 	public $id;
@@ -19,11 +19,8 @@ class OrderProduct extends ModelBase {
 	public $created_by;
 	public $created_at;
 
-	function getSource() {
-		return 'order_product';
-	}
-
 	function initialize() {
+		$this->setSource('order_product');
 		parent::initialize();
 		$this->belongsTo('order_id', Order::class, 'id', [
 			'alias'      => 'order',
@@ -92,7 +89,7 @@ QUERY
 		$result->setFetchMode(Db::FETCH_OBJ);
 		while ($item = $result->fetch()) {
 			$order_product = new static;
-			$order_product->create([
+			$order_product->assign([
 				'parent_id'       => $this->id,
 				'order_id'        => $this->order_id,
 				'sale_package_id' => null,
@@ -103,7 +100,7 @@ QUERY
 				'quantity'        => $item->quantity * $this->quantity,
 				'created_by'      => $this->created_by,
 				'created_at'      => $this->created_at,
-			]);
+			])->create();
 		}
 	}
 }

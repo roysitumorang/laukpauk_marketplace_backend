@@ -3,7 +3,7 @@
 namespace Application\Api\V3\Buyer;
 
 use Application\Models\{Release, Role};
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class CouponsController extends ControllerBase {
 	function checkAction() {

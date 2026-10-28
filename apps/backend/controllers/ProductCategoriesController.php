@@ -47,7 +47,7 @@ class ProductCategoriesController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page       = $paginator->getPaginate();
+		$page       = $paginator->paginate();
 		$pages      = $this->_setPaginationRange($page);
 		$categories = new Set;
 		foreach ($page->items as $item) {
@@ -83,7 +83,7 @@ class ProductCategoriesController extends ControllerBase {
 		$category = ProductCategory::findFirst($id);
 		if (!$category) {
 			$this->flashSession->error('Kategori tidak ditemukan.');
-			return $this->dispatcher->forward('product_categories');
+			return $this->dispatcher->forward(['controller' => 'product_categories', 'action' => 'index']);
 		}
 		$old_name = $category->name;
 		$category->thumbnail = $category->thumbnail(120);
@@ -105,7 +105,7 @@ class ProductCategoriesController extends ControllerBase {
 	function toggleStatusAction($id) {
 		if ($this->request->isPost()) {
 			$category = ProductCategory::findFirst($id);
-			$category ? $category->update(['published' => $category->published ? 0 : 1]) : $this->flashSession->error('Kategori tidak ditemukan!');
+			$category ? $category->assign(['published' => $category->published ? 0 : 1])->update() : $this->flashSession->error('Kategori tidak ditemukan!');
 		}
 		return $this->response->redirect($this->request->get('next'));
 	}
@@ -136,7 +136,7 @@ class ProductCategoriesController extends ControllerBase {
 		}
 	}
 
-	private function _prepare_datas(ProductCategory $category = null) {
+	private function _prepare_datas(?ProductCategory $category = null) {
 		$this->view->category = $category;
 	}
 

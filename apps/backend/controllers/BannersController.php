@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Banner;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class BannersController extends ControllerBase {
 	function indexAction() {
@@ -15,7 +15,7 @@ class BannersController extends ControllerBase {
 			'data'  => Banner::find(['order' => 'id DESC']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$banners[] = $item;
@@ -29,9 +29,9 @@ class BannersController extends ControllerBase {
 	function createAction() {
 		$banner = new Banner;
 		if ($this->request->isPost()) {
-			$banner->assign($this->request->getPost(), null, ['published']);
+			$banner->assign($this->request->getPost(), ['published']);
 			if ($this->request->hasFiles()) {
-				$banner->setNewFile(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
+				$banner->setNewFile(current(array_filter($this->request->getUploadedFiles(), function($v, $k) {
 					return $v->getKey() == 'new_file';
 				}, ARRAY_FILTER_USE_BOTH)));
 			}
@@ -53,7 +53,7 @@ class BannersController extends ControllerBase {
 			if (!$banner = Banner::findFirst($id)) {
 				$this->flashSession->error('Banner tidak ditemukan.');
 			} else {
-				$banner->update(['published' => $banner->published ? 0 : 1]);
+				$banner->assign(['published' => $banner->published ? 0 : 1])->update();
 			}
 		}
 		return $this->response->redirect('/admin/banners');

@@ -4,9 +4,9 @@ namespace Application\Models;
 
 use Imagick;
 use Phalcon\Http\Request\File;
-use Phalcon\Security\Random;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Callback, Between, Confirmation, Date, Email, Numericality, PresenceOf, Regex, Uniqueness};
+use Phalcon\Encryption\Security\Random;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Callback, Between, Confirmation, Date, Email, Numericality, PresenceOf, Regex, Uniqueness};
 
 class User extends ModelBase {
 	const STATUS = [
@@ -70,10 +70,6 @@ class User extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'users';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -81,6 +77,7 @@ class User extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('users');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('role_id', Role::class, 'id', [
@@ -224,7 +221,7 @@ class User extends ModelBase {
 		}
 	}
 
-	function setThumbnails(array $thumbnails = null) {
+	function setThumbnails(?array $thumbnails = null) {
 		$this->thumbnails = $thumbnails;
 	}
 
@@ -270,9 +267,9 @@ class User extends ModelBase {
 
 	function setDeliveryHours($delivery_hours) {
 		if ($delivery_hours) {
-			$this->delivery_hours = array_filter($delivery_hours, function($v, $k) {
+			$this->delivery_hours = is_array($delivery_hours) ? array_filter($delivery_hours, function($v, $k) {
 				return $v >= $this->business_opening_hour && $v <= $this->business_closing_hour;
-			}, ARRAY_FILTER_USE_BOTH);
+			}, ARRAY_FILTER_USE_BOTH) : null;
 		}
 	}
 
@@ -325,7 +322,7 @@ class User extends ModelBase {
 	function beforeValidation() {
 		$this->role_id = $this->role->id;
 		if (!$this->id || $this->new_password) {
-			$this->password = password_hash($this->new_password, PASSWORD_DEFAULT);
+			$this->password = password_hash((string) $this->new_password, PASSWORD_DEFAULT);
 		}
 		if ($this->role_id != Role::MERCHANT) {
 			$this->minimum_purchase = 0;
@@ -398,7 +395,7 @@ class User extends ModelBase {
 				'message'  => 'biaya administrasi harus diisi angka, minimal 0',
 			]));
 		}
-		if ($this->getSnapshotData()['mobile_phone'] != $this->mobile_phone) {
+		if (($this->getSnapshotData()['mobile_phone'] ?? null) != $this->mobile_phone) {
 			$validator->add('mobile_phone', new Uniqueness([
 				'message' => 'nomor HP sudah terdaftar',
 			]));
@@ -454,7 +451,7 @@ class User extends ModelBase {
 	}
 
 	function beforeSave() {
-		$this->delivery_hours = implode(',', array_filter($this->delivery_hours)) ?: null;
+		$this->delivery_hours = is_array($this->delivery_hours) ? (implode(',', array_filter($this->delivery_hours)) ?: null) : null;
 		if ($this->new_avatar) {
 			if (!$this->avatar) {
 				$random = new Random;
@@ -467,20 +464,20 @@ class User extends ModelBase {
 			} else {
 				unlink($this->_upload_config->path . $this->avatar);
 			}
-			foreach ($this->thumbnails as $thumbnail) {
+			foreach ((array) $this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
 			$this->thumbnails = [];
 		}
-		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
+		$this->thumbnails = is_array($this->thumbnails) ? (implode(',', array_filter($this->thumbnails)) ?: null) : null;
 		if ($this->role_id != Role::MERCHANT) {
 			$this->accumulation_divisor = 0;
 		}
 	}
 
 	function afterSave() {
-		$this->thumbnails     = array_filter(explode(',', $this->thumbnails));
-		$this->delivery_hours = array_filter(explode(',', $this->delivery_hours));
+		$this->thumbnails     = array_filter(explode(',', (string) $this->thumbnails));
+		$this->delivery_hours = array_filter(explode(',', (string) $this->delivery_hours));
 		if ($this->new_avatar) {
 			$avatar = $this->_upload_config->path . $this->avatar;
 			$this->new_avatar->moveTo($avatar);
@@ -497,6 +494,7 @@ class User extends ModelBase {
 		if (!$this->avatar) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->avatar;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
@@ -504,11 +502,11 @@ class User extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails     = array_filter(explode(',', $this->thumbnails));
-		$this->delivery_hours = array_filter(explode(',', $this->delivery_hours));
+		$this->thumbnails     = array_filter(explode(',', (string) $this->thumbnails));
+		$this->delivery_hours = array_filter(explode(',', (string) $this->delivery_hours));
 	}
 
-	function getThumbnail(int $width, int $height, string $default_avatar = null) {
+	function getThumbnail(int $width, int $height, ?string $default_avatar = null) {
 		$avatar = $this->avatar ?? $default_avatar;
 		if (!$avatar) {
 			return null;
@@ -530,27 +528,27 @@ class User extends ModelBase {
 
 	function deleteAvatar() {
 		$this->beforeDelete();
-		$this->update(['avatar' => null, 'thumbnails' => null]);
+		$this->assign(['avatar' => null, 'thumbnails' => null])->update();
 	}
 
 	function activate() {
-		return $this->update([
+		return $this->assign([
 			'status'           => array_search('ACTIVE', static::STATUS),
 			'activation_token' => null,
 			'activated_at'     => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
-		]);
+		])->update();
 	}
 
 	function suspend() {
-		return $this->update([
+		return $this->assign([
 			'status' => array_search('SUSPENDED', static::STATUS),
-		]);
+		])->update();
 	}
 
 	function reactivate() {
-		return $this->update([
+		return $this->assign([
 			'status' => array_search('ACTIVE', static::STATUS),
-		]);
+		])->update();
 	}
 
 	function businessDays() {
@@ -569,7 +567,7 @@ class User extends ModelBase {
 	function deliveryHours() {
 		$business_hours = range($this->business_opening_hour, $this->business_closing_hour);
 		foreach ($business_hours as &$hour) {
-			if (!in_array($hour, $this->delivery_hours)) {
+			if (!in_array($hour, (array) $this->delivery_hours)) {
 				$hour = ',';
 			} else {
 				$hour .= '.00';

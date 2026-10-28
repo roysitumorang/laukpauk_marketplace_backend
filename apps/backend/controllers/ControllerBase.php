@@ -7,13 +7,12 @@ use DateTime;
 use Ds\Vector;
 use IntlDateFormatter;
 use Phalcon\Mvc\Controller;
-use Phalcon\Text;
 
 class ControllerBase extends Controller {
 	function beforeExecuteRoute() {
 		if (!$this->currentUser) {
 			$url = $this->request->getQuery('_url');
-			if (!Text::startsWith($url, '/admin/sessions/create')) {
+			if (!str_starts_with((string) $url, '/admin/sessions/create')) {
 				$this->response->redirect('/admin/sessions/create' . ($url != '/admin' ? "?next={$url}" : ''));
 				$this->response->send();
 			}
@@ -48,10 +47,10 @@ class ControllerBase extends Controller {
 			'columns'    => 'Application\Models\Message.id, Application\Models\Message.subject, Application\Models\Message.body',
 			'order'      => 'Application\Models\Message.id DESC',
 		]);
-		$this->currentUser->update(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')]);
+		$this->currentUser->assign(['last_seen' => $this->currentDatetime->format('Y-m-d H:i:s')])->update();
 	}
 
-	protected function _menu(string $expanded = null) : array {
+	protected function _menu(?string $expanded = null) : array {
 		return [[
 				'label'     => 'Dashboard',
 				'link'      => 'home',

@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{City, Province};
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class CitiesController extends ControllerBase {
 	private $_province;
@@ -25,7 +25,7 @@ class CitiesController extends ControllerBase {
 		$city           = new City;
 		$city->province = $this->_province;
 		if ($this->request->isPost()) {
-			$city->assign($this->request->getPost(), null, ['type', 'name']);
+			$city->assign($this->request->getPost(), ['type', 'name']);
 			if ($city->validation() && $city->create()) {
 				$page = $this->dispatcher->getParam('page', 'int', 1);
 				$this->flashSession->success('Penambahan kabupaten / kota berhasil!');
@@ -46,7 +46,7 @@ class CitiesController extends ControllerBase {
 			return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
 		}
 		if ($this->request->isPost()) {
-			$city->assign($this->request->getPost(), null, ['type', 'name']);
+			$city->assign($this->request->getPost(), ['type', 'name']);
 			if ($city->validation() && $city->update()) {
 				$this->flashSession->success('Update kabupaten / kota berhasil!');
 				return $this->response->redirect('/admin/cities/index/province_id:' . $this->_province->id . ($page > 1 ? '/page:' . $page : ''));
@@ -58,7 +58,7 @@ class CitiesController extends ControllerBase {
 		$this->_render($city);
 	}
 
-	private function _render(City $city = null) {
+	private function _render(?City $city = null) {
 		$cities       = [];
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int', 1);
@@ -67,7 +67,7 @@ class CitiesController extends ControllerBase {
 			'data'  => $this->_province->getRelated('cities', ['order' => 'type, name']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$cities[] = $item;

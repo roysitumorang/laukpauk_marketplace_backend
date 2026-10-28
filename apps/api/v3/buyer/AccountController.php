@@ -4,7 +4,8 @@ namespace Application\Api\V3\Buyer;
 
 use Application\Models\{Device, LoginHistory, Role, User, Village};
 use Ds\Set;
-use Phalcon\{Crypt, Db};
+use Phalcon\Db\Enum as Db;
+use Phalcon\Encryption\Crypt;
 
 class AccountController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -32,7 +33,7 @@ class AccountController extends ControllerBase {
 			if ($this->_post->device_token && strlen($this->_post->device_token) > 36) {
 				$old_owner = User::findFirstByDeviceToken($this->_post->device_token);
 				if ($old_owner) {
-					$old_owner->update(['device_token' => null]);
+					$old_owner->assign(['device_token' => null])->update();
 				}
 				$user->setDeviceToken($this->_post->device_token);
 			}
@@ -78,7 +79,7 @@ class AccountController extends ControllerBase {
 				throw new \Exception('Token aktivasi tidak valid!');
 			}
 			$user->activate();
-			$crypt        = new Crypt;
+			$crypt        = new Crypt('aes-256-cfb', false);
 			$current_user = [
 				'id'           => $user->id,
 				'name'         => $user->name,
@@ -237,9 +238,9 @@ QUERY
 				} else if ($this->_post->device_token != $this->_current_user->device_token) {
 					$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$this->_current_user->update(['device_token' => $this->_post->device_token]);
+					$this->_current_user->assign(['device_token' => $this->_post->device_token])->update();
 					$this->_current_user->getDevices()->delete();
 				}
 			}
@@ -310,13 +311,13 @@ QUERY
 				} else if ($this->_post->device_token != $user->device_token) {
 					$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$user->id, $this->_post->device_token]]);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$user->update(['device_token' => $this->_post->device_token]);
+					$user->assign(['device_token' => $this->_post->device_token])->update();
 					$user->getDevices()->delete();
 				}
 			}
-			$crypt                  = new Crypt;
+			$crypt                  = new Crypt('aes-256-cfb', false);
 			$login_history          = new LoginHistory;
 			$login_history->user_id = $user->id;
 			$login_history->create();

@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\StringLength;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\StringLength;
 
 class Notification extends ModelBase {
 	public $id;
@@ -18,15 +18,12 @@ class Notification extends ModelBase {
 	public $created_by;
 	public $created_at;
 
-	function getSource() {
-		return 'notifications';
-	}
-
 	function onConstruct() {
 		$this->_filter = $this->getDI()->getFilter();
 	}
 
 	function initialize() {
+		$this->setSource('notifications');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',
@@ -114,7 +111,7 @@ class Notification extends ModelBase {
 			return false;
 		}
 		if (!$this->new_mobile_target_parameters) {
-			$this->update(['new_mobile_target_parameters' => sprintf('{"notificationId":%d}', $this->id)]);
+			$this->assign(['new_mobile_target_parameters' => sprintf('{"notificationId":%d}', $this->id)])->update();
 		}
 		$onesignal_device_tokens = [];
 		$fcm_device_tokens       = [];
@@ -163,7 +160,6 @@ class Notification extends ModelBase {
 				]),
 			]);
 			curl_exec($ch);
-			curl_close($ch);
 		}
 		if ($fcm_device_tokens) {
 			$ch = curl_init('https://fcm.googleapis.com/fcm/send');
@@ -192,7 +188,6 @@ class Notification extends ModelBase {
 				]),
 			]);
 			curl_exec($ch);
-			curl_close($ch);
 		}
 		return true;
 	}

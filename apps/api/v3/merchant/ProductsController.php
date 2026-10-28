@@ -4,7 +4,7 @@ namespace Application\Api\V3\Merchant;
 
 use Application\Models\UserProduct;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class ProductsController extends ControllerBase {
 	function indexAction() {

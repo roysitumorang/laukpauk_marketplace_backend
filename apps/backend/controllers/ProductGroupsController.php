@@ -37,7 +37,7 @@ class ProductGroupsController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page           = $paginator->getPaginate();
+		$page           = $paginator->paginate();
 		$pages          = $this->_setPaginationRange($page);
 		$product_groups = new Set;
 		foreach ($page->items as $item) {
@@ -56,7 +56,7 @@ class ProductGroupsController extends ControllerBase {
 	function createAction() {
 		$product_group = new ProductGroup;
 		if ($this->request->isPost()) {
-			$product_group->assign($this->request->getPost(), null, ['name', 'url', 'published']);
+			$product_group->assign($this->request->getPost(), ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->create()) {
 				$this->flashSession->success('Penambahan group produk berhasil.');
 				return $this->response->redirect('/admin/product_groups');
@@ -82,7 +82,7 @@ class ProductGroupsController extends ControllerBase {
 			$next = '/admin/product_groups';
 		}
 		if ($this->request->isPost()) {
-			$product_group->assign($this->request->getPost(), null, ['name', 'url', 'published']);
+			$product_group->assign($this->request->getPost(), ['name', 'url', 'published']);
 			if ($product_group->validation() && $product_group->update()) {
 				$this->flashSession->success('Update group produk berhasil.');
 				return $this->response->redirect($next);
@@ -101,7 +101,7 @@ class ProductGroupsController extends ControllerBase {
 	function toggleStatusAction($id) {
 		if ($this->request->isPost()) {
 			if ($product_group = ProductGroup::findFirst($id)) {
-				$product_group->update(['published' => $product_group->published ? 0 : 1]);
+				$product_group->assign(['published' => $product_group->published ? 0 : 1])->update();
 			} else {
 				$this->flashSession->error('Grup produk tidak ditemukan!');
 			}

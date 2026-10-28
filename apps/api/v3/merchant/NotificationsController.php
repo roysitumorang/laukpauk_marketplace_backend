@@ -3,6 +3,7 @@
 namespace Application\Api\V3\Merchant;
 
 use Application\Models\NotificationRecipient;
+use Exception;
 
 class NotificationsController extends ControllerBase {
 	function indexAction() {

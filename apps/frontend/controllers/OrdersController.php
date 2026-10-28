@@ -5,8 +5,8 @@ namespace Application\Frontend\Controllers;
 use Application\Models\Order;
 use Application\Models\Village;
 use DateTimeImmutable;
-use Phalcon\Exception;
-use Phalcon\Paginator\Adapter\Model;
+use Exception;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
@@ -14,6 +14,8 @@ class OrdersController extends ControllerBase {
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset         = ($current_page - 1) * $limit;
 		$parameters     = ["merchant_id = {$this->currentUser->id}"];
+		$from           = null;
+		$to             = null;
 		$status         = Order::STATUS;
 		$current_status = filter_var($this->dispatcher->getParam('status'), FILTER_VALIDATE_INT);
 		if ($date = $this->dispatcher->getParam('from')) {
@@ -21,7 +23,7 @@ class OrdersController extends ControllerBase {
 				$from         = (new DateTimeImmutable($date))->format('Y-m-d');
 				$parameters[] = " AND DATE(created_at) >= '{$from}'";
 			} catch (Exception $e) {
-				unset($from);
+				$from = null;
 			}
 		}
 		if ($date = $this->dispatcher->getParam('to')) {
@@ -29,13 +31,13 @@ class OrdersController extends ControllerBase {
 				$to           = (new DateTimeImmutable($date))->format('Y-m-d');
 				$parameters[] = " AND DATE(created_at) <= '{$to}'";
 			} catch (Exception $e) {
-				unset($to);
+				$to = null;
 			}
 		}
 		if ($code = $this->dispatcher->getParam('code', 'int')) {
 			$parameters[] = " AND code = '{$code}'";
 		}
-		if (array_key_exists($current_status, $status)) {
+		if (is_int($current_status) && array_key_exists($current_status, $status)) {
 			$parameters[] = " AND status = {$current_status}";
 		}
 		$parameters['order'] = 'id DESC';
@@ -44,7 +46,7 @@ class OrdersController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page   = $paginator->getPaginate();
+		$page   = $paginator->paginate();
 		$pages  = $this->_setPaginationRange($page);
 		$orders = [];
 		foreach ($page->items as $item) {
@@ -54,7 +56,7 @@ class OrdersController extends ControllerBase {
 		$this->view->menu                   = $this->_menu('Order');
 		$this->view->orders                 = $orders;
 		$this->view->pages                  = $pages;
-		$this->view->page                   = $paginator->getPaginate();
+		$this->view->page                   = $paginator->paginate();
 		$this->view->from                   = $from;
 		$this->view->to                     = $to;
 		$this->view->status                 = $status;
@@ -71,7 +73,7 @@ class OrdersController extends ControllerBase {
 	function showAction($id) {
 		if (!$order = Order::findFirst(['merchant_id = ?0 AND (code = ?1 OR id = ?2)', 'bind' => [$this->currentUser->id, $id, $id]])) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		$order->writeAttribute('status', Order::STATUS[$order->status]);
 		$this->view->order   = $order;
@@ -82,7 +84,7 @@ class OrdersController extends ControllerBase {
 	function completeAction($id) {
 		if (!$this->request->isPost() || !($order = Order::findFirst(['merchant_id = ?0 AND status = 0 AND (code = ?1 OR id = ?2)', 'bind' => [$this->currentUser->id, $id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		$order->complete();
 		$this->flashSession->success('Order #' . $order->code . ' telah selesai');
@@ -92,7 +94,7 @@ class OrdersController extends ControllerBase {
 	function cancelAction($id) {
 		if (!$this->request->isPost() || !($order = Order::findFirst(['merchant_id = ?0 AND status = 0 AND (code = ?1 OR id = ?2)', 'bind' => [$this->currentUser->id, $id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		if ($order->cancel($this->request->getPost('cancellation_reason'))) {
 			$this->flashSession->success('Order #' . $order->code . ' telah dicancel');
@@ -106,7 +108,7 @@ class OrdersController extends ControllerBase {
 	function printAction($id) {
 		if (!$this->request->isPost() || !($order = Order::findFirst(['merchant_id = ?0 AND status = 1 AND (code = ?1 OR id = ?2)', 'bind' => [$this->currentUser->id, $id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		$this->view->order = $order;
 	}

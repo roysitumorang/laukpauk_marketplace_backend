@@ -4,6 +4,7 @@ namespace Application\Models;
 
 use Phalcon\Mvc\Model;
 
+#[\AllowDynamicProperties]
 class LoginHistory extends Model {
 	public $id;
 	public $user_id;

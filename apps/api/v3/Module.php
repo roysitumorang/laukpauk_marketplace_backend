@@ -5,31 +5,32 @@ namespace Application\Api\V3;
 use Application\Models\Role;
 use Application\Models\User;
 use IntlDateFormatter;
-use Phalcon\Cache\Backend\Redis;
-use Phalcon\Cache\Frontend\Data as FrontData;
-use Phalcon\DiInterface;
+use Phalcon\Autoload\Loader;
+use Phalcon\Cache\Adapter\Redis;
+use Phalcon\Cache\Cache;
+use Phalcon\Di\DiInterface;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
 use Phalcon\Http\Response;
-use Phalcon\Loader;
 use Phalcon\Mvc\Dispatcher;
 use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View;
+use Phalcon\Storage\SerializerFactory;
 
 class Module implements ModuleDefinitionInterface {
 	/**
 	 * Register a specific autoloader for the module.
 	 */
-	function registerAutoloaders(DiInterface $di = null) {
+	function registerAutoloaders(?DiInterface $di = null) {
 		$application = $di->getConfig()->application;
 		$loader      = new Loader;
-		$loader->registerNamespaces([
+		$loader->setNamespaces([
 			'Application\Api\V3\Buyer'    => APP_PATH . 'apps/api/v3/buyer/',
 			'Application\Api\V3\Merchant' => APP_PATH . 'apps/api/v3/merchant/',
 			'Application\Models'          => $application->modelsDir,
 			'Application\Plugins'         => $application->pluginsDir,
-			'Phalcon'                     => $application->libraryDir,
+			'Application\Library'         => $application->libraryDir,
 		]);
 		$loader->register();
 	}
@@ -47,7 +48,7 @@ class Module implements ModuleDefinitionInterface {
 				$old_params = $dispatcher->getParams();
 				$new_params = [];
 				foreach ($old_params as $key => $value) {
-					if (!strstr($value, ':')) {
+					if (!is_string($value) || !strstr($value, ':')) {
 						$new_params[$key] = $value;
 						continue;
 					}
@@ -57,7 +58,7 @@ class Module implements ModuleDefinitionInterface {
 				$dispatcher->setParams($new_params);
 			});
 			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, $exception) {
-				if ($exception instanceof DispatchException && in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
+				if ($exception instanceof DispatchException && in_array($exception->getCode(), [DispatchException::EXCEPTION_HANDLER_NOT_FOUND, DispatchException::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
 						'controller' => 'errors',
 						'action'     => 'notFound',
@@ -95,13 +96,13 @@ class Module implements ModuleDefinitionInterface {
 
 		// Register the cache component
 		$di->set('cache', function() {
-			$cache = new Redis(new FrontData(['lifetime' => 172800]), [
+			return new Cache(new Redis(new SerializerFactory, [
 				'host'       => 'localhost',
 				'port'       => 6379,
 				'persistent' => true,
 				'index'      => 0,
-			]);
-			return $cache;
+				'lifetime'   => 172800,
+			]));
 		});
 
 		$di->set('session', function() {
@@ -109,7 +110,7 @@ class Module implements ModuleDefinitionInterface {
 		});
 
 		$di->set('currentUser', function() {
-			$access_token = strtr(filter_input(INPUT_SERVER, 'Authorization'), ['Bearer ' => '']);
+			$access_token = strtr((string) filter_input(INPUT_SERVER, 'Authorization'), ['Bearer ' => '']);
 			if (!$access_token) {
 				return null;
 			}
@@ -122,7 +123,7 @@ class Module implements ModuleDefinitionInterface {
 		});
 
 		$di->set('server', function() {
-			return json_decode($this->getRequest()->getServer('HTTP_USER_DATA'));
+			return json_decode($this->getRequest()->getServer('HTTP_USER_DATA') ?? '');
 		});
 
 		$di->set('dateFormatter', function() {

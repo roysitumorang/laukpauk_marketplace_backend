@@ -6,7 +6,7 @@ use Application\Models\BankAccount;
 use Application\Models\Payment;
 use Ds\Set;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class PaymentsController extends ControllerBase {
 	function indexAction() {

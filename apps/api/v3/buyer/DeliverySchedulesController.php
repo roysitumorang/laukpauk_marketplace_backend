@@ -6,7 +6,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class DeliverySchedulesController extends ControllerBase {
 	private $_day_formatter;

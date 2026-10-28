@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Role;
 use Application\Models\Sms;
 use Application\Models\User;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class SmsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -22,7 +22,7 @@ class SmsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		$texts = [];
 		foreach ($page->items as $item) {

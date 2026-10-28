@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\BankAccount;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class BankAccountsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -20,14 +20,14 @@ class BankAccountsController extends ControllerBase {
 			'data'  => BankAccount::find(['order' => 'bank']),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$bank_accounts[] = $item;
 		}
 		$this->view->bank_accounts = $bank_accounts;
 		$this->view->pagination    = $pagination;
-		$this->view->pages         = $this->_setPaginationRange($page);
+		$this->view->pages         = $this->_setPaginationRange($pagination);
 	}
 
 	function createAction() {
@@ -50,7 +50,7 @@ class BankAccountsController extends ControllerBase {
 	function updateAction($id) {
 		if (!$bank_account = BankAccount::findFirst($id)) {
 			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward('bank_accounts');
+			return $this->dispatcher->forward(['controller' => 'bank_accounts', 'action' => 'index']);
 		}
 		if ($this->request->isPost()) {
 			$this->_assignModelAttributes($bank_account);
@@ -71,13 +71,13 @@ class BankAccountsController extends ControllerBase {
 			if (!$bank_account = BankAccount::findFirst($id)) {
 				$this->flashSession->error('Data tidak ditemukan.');
 			} else {
-				$bank_account->update(['published' => $bank_account->published ? 0 : 1]);
+				$bank_account->assign(['published' => $bank_account->published ? 0 : 1])->update();
 			}
 		}
 		return $this->response->redirect($this->request->getQuery('next'));
 	}
 
 	private function _assignModelAttributes(BankAccount &$bank_account) {
-		$bank_account->assign($this->request->getPost(), null, ['bank', 'number', 'holder', 'published']);
+		$bank_account->assign($this->request->getPost(), ['bank', 'number', 'holder', 'published']);
 	}
 }

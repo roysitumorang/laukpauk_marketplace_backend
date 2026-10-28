@@ -5,7 +5,7 @@ namespace Application\Frontend\Controllers;
 use Application\Models\Coupon;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class CouponsController extends ControllerBase {
 	private $_date_formatter;
@@ -43,7 +43,7 @@ class CouponsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page    = $paginator->getPaginate();
+		$page    = $paginator->paginate();
 		$pages   = $this->_setPaginationRange($page);
 		$coupons = [];
 		foreach ($page->items as $item) {
@@ -93,7 +93,7 @@ class CouponsController extends ControllerBase {
 		$coupon = Coupon::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $id]]);
 		if (!$coupon) {
 			$this->flashSession->error('Kupon tidak ditemukan.');
-			return $this->dispatcher->forward('coupons');
+			return $this->dispatcher->forward(['controller' => 'coupons', 'action' => 'index']);
 		}
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($coupon);

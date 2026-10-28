@@ -3,9 +3,9 @@
 namespace Application\Models;
 
 use Imagick;
-use Phalcon\Security\Random;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Between, Digit, File, PresenceOf, Uniqueness};
+use Phalcon\Encryption\Security\Random;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Between, Digit, File, PresenceOf, Uniqueness};
 
 class SalePackage extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
@@ -25,11 +25,8 @@ class SalePackage extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'sale_packages';
-	}
-
 	function initialize() {
+		$this->setSource('sale_packages');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'      => 'user',
@@ -115,6 +112,7 @@ class SalePackage extends ModelBase {
 			}
 			$image = new Imagick($this->new_picture['tmp_name']);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$this->thumbnails = (array) $this->thumbnails;
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
 				$file = strtr($this->picture, ['.jpg' => $width . '.jpg']);
 				in_array($file, $this->thumbnails) || $this->thumbnails[] = $file;
@@ -126,13 +124,14 @@ class SalePackage extends ModelBase {
 			$image->writeImage($this->getDI()->getConfig()->upload->path . $this->picture);
 			unlink($this->new_picture['tmp_name']);
 		}
-		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
+		$this->thumbnails = is_array($this->thumbnails) ? (implode(',', array_filter($this->thumbnails)) ?: null) : null;
 	}
 
 	function beforeDelete() {
 		if (!$this->picture) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->getDI()->getConfig()->upload->path . $thumbnail);
@@ -140,13 +139,14 @@ class SalePackage extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = explode(',', $this->thumbnails);
+		$this->thumbnails = explode(',', (string) $this->thumbnails);
 	}
 
 	function deletePicture() {
 		if (!$this->picture) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->getDI()->getConfig()->upload->path . $thumbnail);

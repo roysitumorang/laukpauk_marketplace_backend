@@ -4,9 +4,9 @@ namespace Application\Models;
 
 Use Imagick;
 use Phalcon\Http\Request\File;
-use Phalcon\Security\Random;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\Callback;
+use Phalcon\Encryption\Security\Random;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\Callback;
 
 class Banner extends ModelBase {
 	public $id;
@@ -19,13 +19,6 @@ class Banner extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	private $_filter;
-	private $_upload_config;
-
-	function getSource() {
-		return 'banners';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_filter        = $di->getFilter();
@@ -33,6 +26,7 @@ class Banner extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('banners');
 		parent::initialize();
 		$this->keepSnapshots(true);
 	}
@@ -47,7 +41,7 @@ class Banner extends ModelBase {
 		}
 	}
 
-	function setThumbnails(array $thumbnails = null) {
+	function setThumbnails(?array $thumbnails = null) {
 		$this->thumbnails = array_filter($thumbnails ?? []);
 	}
 
@@ -89,17 +83,18 @@ class Banner extends ModelBase {
 
 	function beforeUpdate() {
 		if ($this->new_file) {
+			$this->thumbnails   = (array) $this->thumbnails;
 			$this->thumbnails[] = $this->file;
 			foreach ($this->thumbnails as $thumbnail) {
 				unlink($this->_upload_config->path . $thumbnail);
 			}
 			$this->thumbnails = [];
 		}
-		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
+		$this->thumbnails = is_array($this->thumbnails) ? (implode(',', array_filter($this->thumbnails)) ?: null) : null;
 	}
 
 	function afterSave() {
-		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
+		$this->thumbnails = array_filter(explode(',', (string) $this->thumbnails));
 		if (!$this->new_file) {
 			return true;
 		}
@@ -111,6 +106,7 @@ class Banner extends ModelBase {
 	}
 
 	function beforeDelete() {
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->file;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
@@ -118,7 +114,7 @@ class Banner extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
+		$this->thumbnails = array_filter(explode(',', (string) $this->thumbnails));
 	}
 
 	function getThumbnail(int $width, int $height) {

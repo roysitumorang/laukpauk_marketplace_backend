@@ -3,7 +3,7 @@
 namespace Application\Frontend\Controllers;
 
 use Application\Models\ProductCategory;
-use Phalcon\Exception;
+use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductCategoriesController extends ControllerBase {
@@ -47,7 +47,7 @@ class ProductCategoriesController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page       = $paginator->getPaginate();
+		$page       = $paginator->paginate();
 		$pages      = $this->_setPaginationRange($page);
 		$categories = [];
 		foreach ($page->items as $item) {
@@ -58,7 +58,7 @@ class ProductCategoriesController extends ControllerBase {
 		}
 		$this->view->keyword    = $keyword;
 		$this->view->categories = $categories;
-		$this->view->page       = $paginator->getPaginate();
+		$this->view->page       = $paginator->paginate();
 		$this->view->pages      = $pages;
 		$this->_prepare_datas();
 	}
@@ -84,7 +84,7 @@ class ProductCategoriesController extends ControllerBase {
 		$category = ProductCategory::findFirst(['user_id = ?0 AND id = ?1', 'bind' => [$this->currentUser->id, $id]]);
 		if (!$category) {
 			$this->flashSession->error('Kategori tidak ditemukan.');
-			return $this->dispatcher->forward('product_categories');
+			return $this->dispatcher->forward(['controller' => 'product_categories', 'action' => 'index']);
 		}
 		$old_name = $category->name;
 		$category->thumbnail = $category->thumbnail(120);
@@ -107,7 +107,7 @@ class ProductCategoriesController extends ControllerBase {
 		if ($this->request->isPost()) {
 			$category = ProductCategory::findFirst(['user_id = ?0 AND id = ?1 AND published = 0', 'bind' => [$this->currentUser->id, $id]]);
 			if ($category) {
-				$category->update(['published' => 1]);
+				$category->assign(['published' => 1])->update();
 			} else {
 				$this->flashSession->error('Kategori tidak ditemukan!');
 			}
@@ -119,7 +119,7 @@ class ProductCategoriesController extends ControllerBase {
 		if ($this->request->isPost()) {
 			$category = ProductCategory::findFirst(['user_id = ?0 AND id = ?1 AND published = 1', 'bind' => [$this->currentUser->id, $id]]);
 			if ($category) {
-				$category->update(['published' => 0]);
+				$category->assign(['published' => 0])->update();
 			} else {
 				$this->flashSession->error('Kategori tidak ditemukan!');
 			}
@@ -153,7 +153,7 @@ class ProductCategoriesController extends ControllerBase {
 		}
 	}
 
-	private function _prepare_datas(ProductCategory $category = null) {
+	private function _prepare_datas(?ProductCategory $category = null) {
 		$this->view->category = $category;
 	}
 

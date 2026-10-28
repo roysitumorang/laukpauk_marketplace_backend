@@ -5,7 +5,7 @@ namespace Application\Frontend\Controllers;
 use DateInterval;
 use DatePeriod;
 use Ds\Vector;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use Phalcon\Mvc\View;
 
 class HomeController extends ControllerBase {

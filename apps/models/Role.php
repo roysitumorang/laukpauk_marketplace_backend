@@ -17,11 +17,8 @@ class Role extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'roles';
-	}
-
 	function initialize() {
+		$this->setSource('roles');
 		parent::initialize();
 		$this->hasMany('id', User::class, 'role_id', ['alias' => 'users']);
 	}

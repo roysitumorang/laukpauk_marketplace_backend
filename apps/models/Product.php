@@ -4,9 +4,9 @@ namespace Application\Models;
 
 use Imagick;
 use Phalcon\Http\Request\File;
-use Phalcon\Security\Random;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Callback, InclusionIn, PresenceOf, StringLength, Uniqueness};
+use Phalcon\Encryption\Security\Random;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Callback, InclusionIn, PresenceOf, StringLength, Uniqueness};
 
 class Product extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
@@ -25,12 +25,6 @@ class Product extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	private $_filter;
-
-	function getSource() {
-		return 'products';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -38,6 +32,7 @@ class Product extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('products');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('product_category_id', ProductCategory::class, 'id', [
@@ -139,6 +134,7 @@ class Product extends ModelBase {
 			$this->new_picture->moveTo($picture);
 			$image = new Imagick($picture);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$this->thumbnails = (array) $this->thumbnails;
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
 				$file = strtr($this->picture, ['.jpg' => $width . '.jpg']);
 				in_array($file, $this->thumbnails) || $this->thumbnails[] = $file;
@@ -149,7 +145,7 @@ class Product extends ModelBase {
 			$image->thumbnailImage(512, 0);
 			$image->writeImage($picture);
 		}
-		$this->thumbnails  = implode(',', array_filter($this->thumbnails)) ?: null;
+		$this->thumbnails  = is_array($this->thumbnails) ? (implode(',', array_filter($this->thumbnails)) ?: null) : null;
 		$this->description = $this->description ?: null;
 	}
 
@@ -157,6 +153,7 @@ class Product extends ModelBase {
 		if (!$this->picture) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
@@ -164,11 +161,11 @@ class Product extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
+		$this->thumbnails = array_filter(explode(',', (string) $this->thumbnails));
 	}
 
 	function afterSave() {
-		$this->thumbnails = array_filter(explode(',', $this->thumbnails));
+		$this->thumbnails = array_filter(explode(',', (string) $this->thumbnails));
 		$this->getDI()->getDb()->execute("UPDATE products a SET keywords = TO_TSVECTOR('simple', b.name || ' ' || a.name) FROM product_categories b WHERE a.product_category_id = b.id AND a.id = {$this->id}");
 	}
 
@@ -176,10 +173,11 @@ class Product extends ModelBase {
 		if (!$this->picture) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
 		}
-		$this->save(['picture' => null, 'thumbnails' => null]);
+		$this->assign(['picture' => null, 'thumbnails' => null])->save();
 	}
 }
