@@ -4,7 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\City;
 use Application\Models\Subdistrict;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class SubdistrictsController extends ControllerBase {
 	private $_city;
@@ -59,7 +59,7 @@ class SubdistrictsController extends ControllerBase {
 		$this->_render($subdistrict);
 	}
 
-	private function _render(Subdistrict $subdistrict = null) {
+	private function _render(?Subdistrict $subdistrict = null) {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -68,7 +68,7 @@ class SubdistrictsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page         = $paginator->getPaginate();
+		$page         = $paginator->paginate();
 		$pages        = $this->_setPaginationRange($page);
 		$subdistricts = [];
 		foreach ($page->items as $item) {

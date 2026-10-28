@@ -65,7 +65,7 @@ class UserProductsController extends ControllerBase {
 			$this->flashSession->success('Update produk berhasil!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/products" . ($page > 1 ? '/index/page:' . $page : ''));
 		}
-		$this->_render($user_product, $page);
+		$this->_render(null, $page);
 	}
 
 	function publishAction($id) {
@@ -74,7 +74,7 @@ class UserProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/products");
 		}
-		$user_product->update(['published' => 1]);
+		$user_product->assign(['published' => 1])->update();
 		return $this->response->redirect($this->request->get('next'));
 	}
 
@@ -84,7 +84,7 @@ class UserProductsController extends ControllerBase {
 			$this->flashSession->error('Produk tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/products");
 		}
-		$user_product->update(['published' => 0]);
+		$user_product->assign(['published' => 0])->update();
 		return $this->response->redirect($this->request->get('next'));
 	}
 
@@ -96,7 +96,7 @@ class UserProductsController extends ControllerBase {
 		return $this->response->redirect($this->request->get('next'));
 	}
 
-	private function _render(UserProduct $user_product = null, $current_page = 1) {
+	private function _render(?UserProduct $user_product = null, $current_page = 1) {
 		$limit         = $this->config->per_page;
 		$offset        = ($current_page - 1) * $limit;
 		$user_products = [];
@@ -132,7 +132,7 @@ class UserProductsController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
@@ -155,7 +155,7 @@ class UserProductsController extends ControllerBase {
 		$this->view->user_products    = $user_products;
 		$this->view->categories       = $categories;
 		$this->view->products         = $products;
-		$this->view->current_products = $products[$categories[0]->id];
+		$this->view->current_products = $categories ? $products[$categories[0]->id] : null;
 		$this->view->keyword          = $search_query;
 		$this->view->next             = $this->request->getServer('REQUEST_URI');
 		if ($user_product) {

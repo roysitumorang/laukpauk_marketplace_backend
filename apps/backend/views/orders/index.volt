@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				{{ form('/admin/orders/index', 'method': 'GET', 'id': 'search') }}
+				{{ form_legacy('/admin/orders/index', 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -41,7 +41,7 @@
 							</td>
 							<td>
 								<i class="fa fa-tag"></i> Status :<br>
-								{{ select_static('status', order_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- Semua -', 'emptyValue': '') }}
+								{{ select_static(['status', order_status, 'value': current_status, 'useEmpty': true, 'emptyText': '- Semua -', 'emptyValue': '']) }}
 							</td>
 							<td>
 								<i class="fa fa-mobile"></i> HP Merchant :<br>
@@ -124,7 +124,7 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if pagination.total_pages > 1 %}
+				{% if pagination.last > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;

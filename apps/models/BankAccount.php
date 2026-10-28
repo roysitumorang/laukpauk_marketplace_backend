@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Digit, InclusionIn, PresenceOf, StringLength, Uniqueness};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Digit, InclusionIn, PresenceOf, StringLength, Uniqueness};
 
 class BankAccount extends ModelBase {
 	const BANKS = ['BCA', 'BNI', 'BRI', 'Mandiri', 'Bank Sumut'];
@@ -19,12 +19,9 @@ class BankAccount extends ModelBase {
 	public $updated_at;
 
 	function initialize() {
+		$this->setSource('bank_accounts');
 		parent::initialize();
 		$this->hasMany('id', Payment::class, 'bank_account_id', ['alias' => 'payments']);
-	}
-
-	function getSource() {
-		return 'bank_accounts';
 	}
 
 	function setBank($bank) {

@@ -31,7 +31,7 @@
 						<div id="areas" class="tab-pane active">
 							{{ flashSession.output() }}
 							{% if provinces %}
-								{{ form('/admin/users/' ~ user.id ~ '/coverage_areas/create') }}
+								{{ form_legacy('/admin/users/' ~ user.id ~ '/coverage_areas/create') }}
 									<table class="table table-striped">
 										<tr>
 											<td>
@@ -39,14 +39,14 @@
 												{% if coverage_area.id %}
 													{{ coverage_area.village.subdistrict.city.province.name }}
 												{% else %}
-													{{ select_static('province_id', provinces, 'using': ['id', 'name'], 'useEmpty': true, 'emptyText': '- pilih -', 'value': province_id) }}
+													{{ select_static(['province_id', provinces, 'using': ['id', 'name'], 'useEmpty': true, 'emptyText': '- pilih -', 'value': province_id]) }}
 												{% endif %}
 												<br>
 												<b>Kecamatan :</b><br>
 												{% if coverage_area.id %}
 													{{ coverage_area.village.subdistrict.name }}
 												{% else %}
-													{{ select_static('subdistrict_id', subdistricts, 'useEmpty': true, 'emptyText': '- pilih -', 'value': subdistrict_id) }}
+													{{ select_static(['subdistrict_id', subdistricts, 'useEmpty': true, 'emptyText': '- pilih -', 'value': subdistrict_id]) }}
 												{% endif %}
 											</td>
 											<td>
@@ -54,14 +54,14 @@
 												{% if coverage_area.id %}
 													{{ coverage_area.village.subdistrict.city.name }}
 												{% else %}
-													{{ select_static('city_id', cities, 'useEmpty': true, 'emptyText': '- pilih -', 'value': city_id) }}
+													{{ select_static(['city_id', cities, 'useEmpty': true, 'emptyText': '- pilih -', 'value': city_id]) }}
 												{% endif %}
 												<br>
 												<b>Kelurahan :</b><br>
 												{% if coverage_area.id %}
 													{{ coverage_area.village.name }}
 												{% else %}
-													{{ select_static('village_id', villages, 'value': coverage_area.village_id) }}
+													{{ select_static(['village_id', villages, 'value': coverage_area.village_id]) }}
 												{% endif %}
 											</td>
 											<td>
@@ -113,7 +113,7 @@
 								{% endfor %}
 								</tbody>
 							</table>
-							{% if pagination.total_pages > 1 %}
+							{% if pagination.last > 1 %}
 							<div class="weepaging">
 								<p>
 									<b>Halaman:</b>&nbsp;&nbsp;

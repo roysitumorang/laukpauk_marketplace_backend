@@ -25,7 +25,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				{{ form('/admin/orders/create/buyer_id:' ~ buyer.id ~ (product_category_id ? '/product_category_id:' ~ product_category_id : '') ~ (keyword ? '/keyword:' ~ keyword : '') ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
+				{{ form_legacy('/admin/orders/create/buyer_id:' ~ buyer.id ~ (product_category_id ? '/product_category_id:' ~ product_category_id : '') ~ (keyword ? '/keyword:' ~ keyword : '') ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -69,7 +69,7 @@
 								<b><font color="#000099"><i class="fa fa-calendar"></i> Pengantaran :</font></b>
 							</td>
 							<td>
-								{{ select_static('scheduled_delivery', delivery_datetimes, 'value': order.scheduled_delivery) }}
+								{{ select_static(['scheduled_delivery', delivery_datetimes, 'value': order.scheduled_delivery]) }}
 							</td>
 							<td>
 								{% if coupons %}
@@ -78,7 +78,7 @@
 							</td>
 							<td>
 								{% if coupons %}
-									{{ select_static('coupon_id', coupons, 'value': order.coupon_id, 'useEmpty': true, 'emptyText': '-', 'emptyValue': '') }}
+									{{ select_static(['coupon_id', coupons, 'value': order.coupon_id, 'useEmpty': true, 'emptyText': '-', 'emptyValue': '']) }}
 								{% endif %}
 							</td>
 						</tr>
@@ -104,7 +104,7 @@
 								{% endif %}
 							</td>
 							<td class="text-nowrap">
-								{{ select_static('quantity[' ~ item.id ~ ']', item.quantities, 'value': item.quantity, 'id': 'quantity_' ~ item.id, 'class': 'quantity', 'data-id': item.id) }}
+								{{ select_static(['quantity[' ~ item.id ~ ']', item.quantities, 'value': item.quantity, 'id': 'quantity_' ~ item.id, 'class': 'quantity', 'data-id': item.id]) }}
 								x Rp. {{ item.price | number_format }} @ {{ item.stock_unit }}
 							</td>
 							<td><b>Rp. {{ (item.quantity * item.price) | number_format }}</b></td>
@@ -157,12 +157,12 @@
 						{% endif %}
 					</table>
 				{{ endForm() }}
-				{{ form('/admin/orders/create/buyer_id:' ~ buyer.id, 'method': 'GET', 'id': 'search') }}
+				{{ form_legacy('/admin/orders/create/buyer_id:' ~ buyer.id, 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td bgcolor="#e0ebeb">
 								<strong>Kategori Produk</strong>
-								{{ select('product_category_id', product_categories, 'using': ['id', 'name'], 'value': product_category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '') }}
+								{{ select(['product_category_id', product_categories, 'using': ['id', 'name'], 'value': product_category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '']) }}
 								<strong>Nama Produk</strong>
 								{{ text_field('keyword', 'value': keyword, 'placeholder': 'Nama produk') }}
 								<button type="submit" class="btn btn-primary btn-sm"><i class="fa fa-search"></i> Cari</button>
@@ -175,7 +175,7 @@
 					{% for product in products %}
 						<div class="col-md-4 panel">
 							<div class="panel-body panel-featured text-center">
-								{{ form('/admin/orders/add_product/buyer_id:' ~ buyer.id ~ (product_category_id ? '/product_category_id:' ~ product_category_id : '') ~ (keyword ? '/keyword:' ~ keyword : '') ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
+								{{ form_legacy('/admin/orders/add_product/buyer_id:' ~ buyer.id ~ (product_category_id ? '/product_category_id:' ~ product_category_id : '') ~ (keyword ? '/keyword:' ~ keyword : '') ~ (pagination.current > 1 ? '/page:' ~ pagination.current : '')) }}
 									<img src="/assets/image/{% if product.picture %}{{ product.thumbnails[0] }}{% else %}no_picture_120.png{% endif %}" border="0" width="150" height="150">
 									<br>
 									<strong>{{ product.name }}</strong>
@@ -189,7 +189,7 @@
 									<strong><i class="fa fa-map-marker"></i> {{ product.address }}</strong>
 									<br>
 									{{ hidden_field('user_product_id', 'value': product.id) }}
-									{{ select_static('quantity', product.quantities) }}
+									{{ select_static(['quantity', product.quantities]) }}
 									<button type="submit" class="btn btn-primary"><i class="fa fa-cart-plus"></i></button>
 								{{ endForm() }}
 							</div>
@@ -201,7 +201,7 @@
 						<div class="panel-body">Belum ada produk</div>
 					</div>
 				{% endif %}
-				{% if pagination.total_pages > 1 %}
+				{% if pagination.last > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;

@@ -2,10 +2,10 @@
 
 namespace Application\Models;
 
-use Phalcon\Utils\Slug;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Application\Library\Utils\Slug;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class Post extends ModelBase {
 	public $id;
@@ -18,11 +18,8 @@ class Post extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'posts';
-	}
-
 	function initialize() {
+		$this->setSource('posts');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('post_category_id', PostCategory::class, 'id', [

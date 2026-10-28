@@ -4,7 +4,7 @@ namespace Application\Api\V3\Merchant;
 
 use Application\Models\CoverageArea;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class ShippingCostsController extends ControllerBase {
 	function indexAction() {

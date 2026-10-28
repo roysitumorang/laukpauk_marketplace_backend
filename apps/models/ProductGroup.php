@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Between, PresenceOf, Uniqueness, Url};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Between, PresenceOf, Uniqueness, Url};
 
 class ProductGroup extends ModelBase {
 	public $id;
@@ -16,11 +16,8 @@ class ProductGroup extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'product_groups';
-	}
-
 	function initialize() {
+		$this->setSource('product_groups');
 		parent::initialize();
 		$this->hasManyToMany('id', ProductGroupMember::class, 'product_group_id', 'product_id', Product::class, 'id', ['alias' => 'products']);
 	}

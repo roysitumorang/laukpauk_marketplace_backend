@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Feedback;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Application\Library\Paginator\Adapter\Resultset as PaginatorModel;
 
 class FeedbacksController extends ControllerBase {
 	function indexAction() {
@@ -15,7 +15,7 @@ class FeedbacksController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
+		$page      = $paginator->paginate();
 		$pages     = $this->_setPaginationRange($page);
 		$feedbacks = [];
 		foreach ($page->items as $item) {

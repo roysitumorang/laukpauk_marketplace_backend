@@ -4,8 +4,8 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\{Role, SalePackage, User};
 use Ds\Vector;
-use Phalcon\Db;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Db\Enum as Db;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class SalePackagesController extends ControllerBase {
 	private $_user;
@@ -41,7 +41,7 @@ class SalePackagesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
@@ -58,7 +58,7 @@ class SalePackagesController extends ControllerBase {
 		$sale_package          = new SalePackage;
 		$sale_package->user_id = $this->_user->id;
 		if ($this->request->isPost()) {
-			$sale_package->assign($this->request->getPost(), null, ['name', 'price', 'stock']);
+			$sale_package->assign($this->request->getPost(), ['name', 'price', 'stock']);
 			$sale_package->setPublished(0);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->create()) {
@@ -79,7 +79,7 @@ class SalePackagesController extends ControllerBase {
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
 		if ($this->request->isPost()) {
-			$sale_package->assign($this->request->getPost(), null, ['name', 'price', 'stock']);
+			$sale_package->assign($this->request->getPost(), ['name', 'price', 'stock']);
 			$sale_package->setNewPicture($_FILES['new_picture']);
 			if ($sale_package->validation() && $sale_package->update()) {
 				$this->flashSession->success('Update paket belanja berhasil!');
@@ -98,7 +98,7 @@ class SalePackagesController extends ControllerBase {
 			$this->flashSession->error('Paket belanja tidak ditemukan!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages");
 		}
-		$sale_package->update(['published' => $sale_package->published ? 0 : 1]);
+		$sale_package->assign(['published' => $sale_package->published ? 0 : 1])->update();
 		return $this->response->redirect($this->request->get('next'));
 	}
 
@@ -112,7 +112,7 @@ class SalePackagesController extends ControllerBase {
 		return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$sale_package->id}/update");
 	}
 
-	private function _prepare(SalePackage $sale_package = null) {
+	private function _prepare(?SalePackage $sale_package = null) {
 		$existing_products = new Vector;
 		$new_products      = new Vector;
 		$new_product       = $this->request->getPost('new_product') ?: [];

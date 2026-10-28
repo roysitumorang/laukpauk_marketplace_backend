@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class Setting extends ModelBase {
 	public $id;
@@ -15,14 +15,13 @@ class Setting extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	private $_filter;
+	function initialize() {
+		$this->setSource('settings');
+		parent::initialize();
+	}
 
 	function onConstruct() {
 		$this->_filter = $this->getDI()->getFilter();
-	}
-
-	function getSource() {
-		return 'settings';
 	}
 
 	function setName(string $name) {

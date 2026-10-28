@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class PostCategory extends ModelBase {
 	public $id;
@@ -15,11 +15,8 @@ class PostCategory extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'post_categories';
-	}
-
 	function initialize() {
+		$this->setSource('post_categories');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->hasMany('id', Post::class, 'post_category_id', [

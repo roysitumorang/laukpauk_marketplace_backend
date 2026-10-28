@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{Role, User};
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class OperationsController extends ControllerBase {
 	function indexAction() {
@@ -30,7 +30,7 @@ class OperationsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		foreach ($page->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
@@ -54,7 +54,7 @@ class OperationsController extends ControllerBase {
 			$users = User::find(['status = 1 AND role_id = ?0 AND id IN({ids:array})', 'bind' => [Role::MERCHANT, 'ids' => array_keys($merchants)], 'limit' => $this->config->per_page]);
 			foreach ($users as $user) {
 				$operation = $merchants[$user->id];
-				$user->assign($operation, null, [
+				$user->assign($operation, [
 					'business_opening_hour',
 					'business_closing_hour',
 					'delivery_hours',
@@ -92,7 +92,7 @@ class OperationsController extends ControllerBase {
 				$this->db->commit();
 			} else {
 				$this->flashSession->error('Update hari operasional untuk semua Merchant tidak berhasil.');
-				$this->db->rollback;
+				$this->db->rollback();
 			}
 		}
 		$this->dispatcher->forward(['action' => 'index']);

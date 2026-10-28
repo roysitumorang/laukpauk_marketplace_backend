@@ -4,7 +4,7 @@ namespace Application\Backend\Controllers;
 
 use Application\Models\Subdistrict;
 use Application\Models\Village;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class VillagesController extends ControllerBase {
 	private $_subdistrict;
@@ -59,7 +59,7 @@ class VillagesController extends ControllerBase {
 		$this->_render($village);
 	}
 
-	private function _render(Village $village = null) {
+	private function _render(?Village $village = null) {
 		$limit        = $this->config->per_page;
 		$current_page = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset       = ($current_page - 1) * $limit;
@@ -68,7 +68,7 @@ class VillagesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page     = $paginator->getPaginate();
+		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);
 		$villages = [];
 		foreach ($page->items as $item) {

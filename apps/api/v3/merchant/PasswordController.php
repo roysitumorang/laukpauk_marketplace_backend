@@ -3,6 +3,7 @@
 namespace Application\Api\V3\Merchant;
 
 use Application\Models\Device;
+use Application\Models\Role;
 use Application\Models\User;
 use Exception;
 
@@ -40,9 +41,9 @@ class PasswordController extends ControllerBase {
 				} else if ($this->post->device_token != $this->currentUser->device_token) {
 					$old_owner = User::findFirstByDeviceToken($this->post->device_token);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$this->currentUser->update(['device_token' => $this->post->device_token]);
+					$this->currentUser->assign(['device_token' => $this->post->device_token])->update();
 					$this->currentUser->getDevices()->delete();
 				}
 			}
@@ -100,9 +101,9 @@ class PasswordController extends ControllerBase {
 				} else if ($this->post->device_token != $user->device_token) {
 					$old_owner = User::findFirstByDeviceToken($this->post->device_token);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$user->update(['device_token' => $this->post->device_token]);
+					$user->assign(['device_token' => $this->post->device_token])->update();
 					$user->getDevices()->delete();
 				}
 			}

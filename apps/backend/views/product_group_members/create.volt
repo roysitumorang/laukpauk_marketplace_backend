@@ -79,7 +79,7 @@
 									<div class="panel-body">Belum ada produk</div>
 								</div>
 							{% endif %}
-							{% if page.total_pages > 1 %}
+							{% if page.last > 1 %}
 							<div class="weepaging">
 								<p>
 									<b>Halaman:</b>&nbsp;&nbsp;

@@ -24,7 +24,7 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				{{ form('/admin/banners/create', 'enctype': 'multipart/form-data') }}
+				{{ form_legacy('/admin/banners/create', 'enctype': 'multipart/form-data') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
@@ -51,14 +51,14 @@
 							<a href="/assets/image/{{ banner.file }}" class="image-popup-no-margins"><img src="/assets/image/{{ banner.file }}" border="0" width="300px"></a>
 						</td>
 						<td>
-							{{ form('/admin/banners/' ~ banner.id ~ '/toggle_status') }}
+							{{ form_legacy('/admin/banners/' ~ banner.id ~ '/toggle_status') }}
 								<button type="submit" class="btn btn-primary">
 									<i class="fa fa-eye{% if !banner.published %}-slash{% endif %} fa-2x"></i>
 								</button>
 							{{ endForm() }}
 						</td>
 						<td>
-							{{ form('/admin/banners/' ~ banner.id ~ '/delete') }}
+							{{ form_legacy('/admin/banners/' ~ banner.id ~ '/delete') }}
 								<button type="submit" class="btn btn-danger" onclick="return confirm('Anda yakin mau menghapus banner ini ?')">
 									<i class="fa fa-trash-o fa-2x"></i>
 								</button>
@@ -71,7 +71,7 @@
 					</tr>
 				{% endfor %}
 				</table>
-				{% if pagination.total_pages > 1 %}
+				{% if pagination.last > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;

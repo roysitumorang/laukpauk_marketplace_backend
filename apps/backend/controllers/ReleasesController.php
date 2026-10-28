@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Release;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class ReleasesController extends ControllerBase {
 	private $_date_formatter;
@@ -36,7 +36,7 @@ class ReleasesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page     = $paginator->getPaginate();
+		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);
 		$releases = [];
 		foreach ($page->items as $item) {
@@ -70,7 +70,7 @@ class ReleasesController extends ControllerBase {
 	function updateAction($id) {
 		if (!$release = Release::findFirst($id)) {
 			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward('releases');
+			return $this->dispatcher->forward(['controller' => 'releases', 'action' => 'index']);
 		}
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($release);

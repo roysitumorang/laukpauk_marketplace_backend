@@ -2,32 +2,32 @@
 
 namespace Application\Backend;
 
+use Application\Library\Session\Adapter\Database;
 use Application\Models\User;
-use Phalcon\Dispatcher;
-use Phalcon\DiInterface;
+use Phalcon\Autoload\Loader;
+use Phalcon\Di\DiInterface;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
-use Phalcon\Loader;
 use Phalcon\Mvc\Dispatcher as MvcDispatcher;
 use Phalcon\Mvc\Dispatcher\Exception as DispatchException;
 use Phalcon\Mvc\ModuleDefinitionInterface;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt;
-use Phalcon\Session\Adapter\Database;
+use Phalcon\Session\Manager as SessionManager;
 
 class Module implements ModuleDefinitionInterface {
 	/**
 	 * Register a specific autoloader for the module.
 	 */
-	function registerAutoloaders(DiInterface $di = null) {
+	function registerAutoloaders(?DiInterface $di = null) {
 		$application = $di->getConfig()->application;
 		$loader      = new Loader;
-		$loader->registerNamespaces([
+		$loader->setNamespaces([
 			'Application\Backend\Controllers' => APP_PATH . 'apps/backend/controllers/',
 			'Application\Backend\Forms'       => APP_PATH . 'apps/backend/forms',
 			'Application\Models'              => $application->modelsDir,
 			'Application\Plugins'             => $application->pluginsDir,
-			'Phalcon'                         => $application->libraryDir,
+			'Application\Library'             => $application->libraryDir,
 		]);
 		$loader->register();
 	}
@@ -40,10 +40,8 @@ class Module implements ModuleDefinitionInterface {
 		 * Start the session the first time some component request the session service
 		 */
 		$di->setShared('session', function() {
-			$session = new Database([
-				'db'    => $this->getDb(),
-				'table' => 'sessions',
-			]);
+			$session = new SessionManager;
+			$session->setAdapter(new Database($this->getDb(), 'sessions'));
 			$session->start();
 			return $session;
 		});
@@ -58,7 +56,7 @@ class Module implements ModuleDefinitionInterface {
 				$oldParams = $dispatcher->getParams();
 				$newParams = [];
 				foreach ($oldParams as $key => $value) {
-					if (!strstr($value, ':')) {
+					if (!is_string($value) || !strstr($value, ':')) {
 						$newParams[$key] = $value;
 						continue;
 					}
@@ -67,8 +65,8 @@ class Module implements ModuleDefinitionInterface {
 				}
 				$dispatcher->setParams($newParams);
 			});
-			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, \Exception $exception) {
-				if ($exception instanceof DispatchException || in_array($exception->getCode(), [Dispatcher::EXCEPTION_HANDLER_NOT_FOUND, Dispatcher::EXCEPTION_ACTION_NOT_FOUND])) {
+			$eventsManager->attach('dispatch:beforeException', function(Event $event, $dispatcher, \Throwable $exception) {
+				if ($exception instanceof DispatchException || in_array($exception->getCode(), [DispatchException::EXCEPTION_HANDLER_NOT_FOUND, DispatchException::EXCEPTION_ACTION_NOT_FOUND])) {
 					$dispatcher->forward([
 						'controller' => 'home',
 						'action'     => 'route404',
@@ -82,18 +80,20 @@ class Module implements ModuleDefinitionInterface {
 		});
 
 		// Registering the view component
-		$di->set('view', function() {
+		$di->set('view', function() use($di) {
 			$view = new View;
 			$view->setViewsDir(APP_PATH . 'apps/backend/views/');
 			$view->registerEngines([
-				'.volt' => function($view, $di) {
+				'.volt' => function($view) use($di) {
 					$volt = new Volt($view, $di);
 					$volt->setOptions([
-						'compiledPath'      => APP_PATH . 'apps/backend/cache/',
-						'compiledSeparator' => '_',
+						'path'      => APP_PATH . 'apps/backend/cache/',
+						'separator' => '_',
 					]);
 					$volt->getCompiler()
-						->addFunction('ctype_digit', 'ctype_digit')
+						->addFunction('ctype_digit', function($resolvedArgs, $exprArgs) {
+							return 'ctype_digit((string) ' . $resolvedArgs . ')';
+						})
 						->addFunction('in_array', 'in_array')
 						->addFunction('count', 'count')
 						->addFilter('count', function($resolvedArgs, $exprArgs) {

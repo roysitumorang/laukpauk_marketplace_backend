@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class Subdistrict extends ModelBase {
 	public $id;
@@ -15,11 +15,8 @@ class Subdistrict extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'subdistricts';
-	}
-
 	function initialize() {
+		$this->setSource('subdistricts');
 		parent::initialize();
 		$this->belongsTo('city_id', City::class, 'id', [
 			'alias'    => 'city',

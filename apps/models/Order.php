@@ -6,8 +6,8 @@ use DateInterval;
 use DatePeriod;
 use DateTimeImmutable;
 use DateTimeZone;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Callback, Date, InclusionIn, PresenceOf, Regex, Uniqueness};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Callback, Date, InclusionIn, PresenceOf, Regex, Uniqueness};
 
 class Order extends ModelBase {
 	public $id;
@@ -43,11 +43,8 @@ class Order extends ModelBase {
 		1  => 'COMPLETED',
 	];
 
-	function getSource() {
-		return 'orders';
-	}
-
 	function initialize() {
+		$this->setSource('orders');
 		parent::initialize();
 		$this->belongsTo('merchant_id', User::class, 'id', [
 			'alias'      => 'merchant',
@@ -120,7 +117,7 @@ class Order extends ModelBase {
 					try {
 						$scheduled_delivery = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data->scheduled_delivery, new DateTimeZone($this->getDI()->getConfig()->timezone));
 						$delivery_day       = $scheduled_delivery->format('l');
-					} catch (Exception $e) {
+					} catch (\Throwable $e) {
 						return false;
 					}
 					$valid_dates = [];
@@ -169,21 +166,21 @@ class Order extends ModelBase {
 
 	function afterCreate() {
 		$session = $this->getDI()->getSession();
-		$this->buyer->update([
+		$this->buyer->assign([
 			'name'       => $this->name,
 			'address'    => $this->address,
 			'updated_by' => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
-		]);
+		])->update();
 		$this->_push_notification('new order', [$this->merchant]);
 	}
 
 	function cancel($cancellation_reason) {
 		$session = $this->getDI()->getSession();
-		$this->update([
+		$this->assign([
 			'status'              => array_search('CANCELLED', static::STATUS),
 			'cancellation_reason' => $cancellation_reason ?: null,
 			'updated_by'          => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
-		]);
+		])->update();
 		$this->_push_notification('cancelled order', [$this->buyer]);
 	}
 
@@ -191,20 +188,20 @@ class Order extends ModelBase {
 		$session = $this->getDI()->getSession();
 		foreach ($this->getRelated('orderProducts', ['parent_id IS NULL']) as $item) {
 			if ($item->salePackage) {
-				$item->salePackage->update(['stock' => max(0, $item->salePackage->stock - $item->quantity)]);
+				$item->salePackage->assign(['stock' => max(0, $item->salePackage->stock - $item->quantity)])->update();
 				continue;
 			}
-			$item->product->update(['stock' => max(0, $item->product->stock - $item->quantity)]);
+			$item->product->assign(['stock' => max(0, $item->product->stock - $item->quantity)])->update();
 		}
-		$this->update([
+		$this->assign([
 			'status'          => array_search('COMPLETED', static::STATUS),
 			'actual_delivery' => $this->getDI()->getCurrentDatetime()->format('Y-m-d H:i:s'),
 			'updated_by'      => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
-		]);
-		$this->merchant->update([
+		])->update();
+		$this->merchant->assign([
 			'deposit'    => $this->merchant->deposit - $this->admin_fee,
 			'updated_by' => $session && $session->has('user_id') ? $session->get('user_id') : $this->created_by,
-		]);
+		])->update();
 		$this->_push_notification('delivered order', [$this->buyer]);
 	}
 

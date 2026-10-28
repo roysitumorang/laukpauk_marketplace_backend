@@ -1,16 +1,16 @@
 <?php
 
-use Phalcon\Config;
+use Phalcon\Config\Config;
 
 return new Config([
 	'application' => [
 		'modelsDir'  => APP_PATH . 'apps/models/',
 		'pluginsDir' => APP_PATH . 'apps/plugins/',
-		'libraryDir' => APP_PATH . 'apps/library/Phalcon/',
+		'libraryDir' => APP_PATH . 'apps/library/',
 		'baseUri'    => '/',
 	],
 	'database' => [
-		'adapter'    => 'Postgresql',
+		'adapter'    => 'postgresql',
 		'host'       => 'localhost',
 		'username'   => 'postgres',
 		'password'   => 'tR1adpass#',

@@ -25,7 +25,7 @@ class SalePackageProductsController extends ControllerBase {
 
 	function createAction() {
 		$sale_package_product = new SalePackageProduct(['sale_package_id' => $this->_sale_package->id]);
-		$sale_package_product->assign($this->request->getPost('new_product'), null, ['user_product_id', 'quantity']);
+		$sale_package_product->assign($this->request->getPost('new_product'), ['user_product_id', 'quantity']);
 		if ($sale_package_product->validation() && $sale_package_product->create()) {
 			$this->flashSession->success('Penambahan paket belanja berhasil!');
 			return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$this->_sale_package->id}/update");
@@ -38,7 +38,7 @@ class SalePackageProductsController extends ControllerBase {
 
 	function updateAction() {
 		foreach (SalePackageProduct::findBySalePackageId($this->_sale_package->id) as $product) {
-			$product->update(['quantity' => $this->request->getPost('product')[$product->id]['quantity']]);
+			$product->assign(['quantity' => $this->request->getPost('product')[$product->id]['quantity']])->update();
 		}
 		$this->flashSession->success('Update paket belanja berhasil!');
 		return $this->response->redirect("/admin/users/{$this->_user->id}/sale_packages/{$this->_sale_package->id}/update");

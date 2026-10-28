@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{City, LoginHistory, Province, Role, Subdistrict, User, Village};
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class UsersController extends ControllerBase {
@@ -13,7 +13,7 @@ class UsersController extends ControllerBase {
 		$offset         = ($current_page - 1) * $limit;
 		$users          = [];
 		$user_status    = User::STATUS;
-		$keyword        = strtr($this->dispatcher->getParam('keyword', 'string'), [':' => '', '/' => '']);
+		$keyword        = strtr((string) $this->dispatcher->getParam('keyword', 'string'), [':' => '', '/' => '']);
 		$current_role   = $this->dispatcher->getParam('role_id', 'int', null);
 		$current_status = $this->dispatcher->getParam('status', 'int', array_search('ACTIVE', $user_status));
 		$builder        = $this->modelsManager->createBuilder()
@@ -81,7 +81,7 @@ class UsersController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('status', $user_status[$item->status]);
@@ -124,6 +124,10 @@ class UsersController extends ControllerBase {
 
 	function showAction($id) {
 		$user = User::findFirst(['id = ?0 AND status = 1', 'bind' => [$id]]);
+		if (!$user) {
+			$this->flashSession->error('Data tidak ditemukan.');
+			return $this->response->redirect('/admin/users');
+		}
 		if ($user->role_id == Role::BUYER) {
 			$total = [
 				'orders'           => $user->countBuyerOrders(),
@@ -342,7 +346,7 @@ QUERY
 		while ($row = $result->fetch()) {
 			$provinces[$row->id] = $row->name;
 		}
-		if ($province_id = $this->request->getPost('province_id', 'int', $user->village->subdistrict->city->province_id)) {
+		if ($province_id = $this->request->getPost('province_id', 'int', $user->village?->subdistrict?->city?->province_id)) {
 			$result = $this->db->query(<<<QUERY
 				SELECT
 					a.id,
@@ -361,7 +365,7 @@ QUERY
 				$cities[$row->id] = $row->name;
 			}
 		}
-		if ($city_id = $this->request->getPost('city_id', 'int', $user->village->subdistrict->city_id)) {
+		if ($city_id = $this->request->getPost('city_id', 'int', $user->village?->subdistrict?->city_id)) {
 			$result  = $this->db->query(<<<QUERY
 				SELECT
 					a.id,
@@ -379,7 +383,7 @@ QUERY
 				$subdistricts[$row->id] = $row->name;
 			}
 		}
-		if ($subdistrict_id = $this->request->getPost('subdistrict_id', 'int', $user->village->subdistrict_id)) {
+		if ($subdistrict_id = $this->request->getPost('subdistrict_id', 'int', $user->village?->subdistrict_id)) {
 			$result = $this->db->query(<<<QUERY
 				SELECT
 					id,
@@ -427,7 +431,7 @@ QUERY
 		if (($role_id = $this->request->getPost('role_id', 'int')) && Role::count(['id = ?0', 'bind' => [$role_id]])) {
 			$user->role_id = $role_id;
 		}
-		$user->assign($this->request->getPost(), null, [
+		$user->assign($this->request->getPost(), [
 			'minimum_purchase',
 			'admin_fee',
 			'accumulation_divisor',
@@ -450,7 +454,7 @@ QUERY
 			'merchant_note',
 		]);
 		if ($user->role_id == Role::MERCHANT) {
-			$user->assign($this->request->getPost(), null, [
+			$user->assign($this->request->getPost(), [
 				'deposit',
 				'delivery_hours',
 				'delivery_max_distance',
@@ -461,7 +465,7 @@ QUERY
 		$user->setNewPassword($this->request->getPost('new_password'));
 		$user->setNewPasswordConfirmation($this->request->getPost('new_password_confirmation'));
 		if ($this->request->hasFiles()) {
-			$user->setNewAvatar(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
+			$user->setNewAvatar(current(array_filter($this->request->getUploadedFiles(), function($v, $k) {
 				return $v->getKey() == 'new_avatar';
 			}, ARRAY_FILTER_USE_BOTH)));
 		}

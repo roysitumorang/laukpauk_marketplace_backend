@@ -8,11 +8,8 @@ class ProductGroupMember extends ModelBase {
 	public $created_by;
 	public $created_at;
 
-	function getSource() {
-		return 'product_group_member';
-	}
-
 	function initialize() {
+		$this->setSource('product_group_member');
 		parent::initialize();
 		$this->belongsTo('product_group_id', ProductGroup::class, 'id', [
 			'foreignKey' => ['allowNulls' => false],

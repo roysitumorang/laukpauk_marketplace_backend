@@ -4,7 +4,7 @@ namespace Application\Api\V3\Buyer;
 
 use Application\Models\{Device, Order, OrderProduct, Release, Role, User, Setting, Village};
 use DateTime;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class OrdersController extends ControllerBase {
 	function indexAction() {
@@ -160,9 +160,9 @@ QUERY
 				} else if ($this->_post->device_token != $this->_current_user->device_token) {
 					$old_owner = User::findFirst(['id != ?0 AND device_token = ?1', 'bind' => [$this->_current_user->id, $this->_post->device_token]]);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$this->_current_user->update(['device_token' => $this->_post->device_token]);
+					$this->_current_user->assign(['device_token' => $this->_post->device_token])->update();
 					$this->_current_user->getDevices()->delete();
 				}
 			}
@@ -312,7 +312,7 @@ QUERY
 			}
 			if ($params) {
 				$params['updated_by'] = $this->_current_user->id;
-				$this->_current_user->update($params);
+				$this->_current_user->assign($params)->update();
 			}
 			$this->_response['status'] = 1;
 			throw new \Exception('Terima kasih, order Anda segera kami proses.');

@@ -14,7 +14,7 @@ class ErrorsController extends Controller {
 		return $this->response;
 	}
 
-	function uncaughtException() {
+	function uncaughtExceptionAction() {
 		$this->_response['message'] = 'Internal server error';
 		$this->response->setStatusCode(500, 'Internal Server Error');
 		$this->response->setJsonContent($this->_response);

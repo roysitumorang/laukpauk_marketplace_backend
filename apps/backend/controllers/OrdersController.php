@@ -8,7 +8,7 @@ use DatePeriod;
 use DateTime;
 use DateTimeImmutable;
 use Ds\Map;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class OrdersController extends ControllerBase {
@@ -24,6 +24,8 @@ class OrdersController extends ControllerBase {
 		$offset         = ($current_page - 1) * $limit;
 		$parameters     = [];
 		$conditions     = [];
+		$from           = null;
+		$to             = null;
 		$order_status   = Order::STATUS;
 		$current_status = filter_var($this->dispatcher->getParam('status'), FILTER_VALIDATE_INT);
 		if ($date = $this->dispatcher->getParam('from')) {
@@ -31,7 +33,7 @@ class OrdersController extends ControllerBase {
 				$from         = (new DateTimeImmutable($date))->format('Y-m-d');
 				$conditions[] = "DATE(a.created_at) >= '{$from}'";
 			} catch (\Exception $e) {
-				unset($from);
+				$from = null;
 			}
 		}
 		if ($date = $this->dispatcher->getParam('to')) {
@@ -39,13 +41,13 @@ class OrdersController extends ControllerBase {
 				$to           = (new DateTimeImmutable($date))->format('Y-m-d');
 				$conditions[] = "DATE(a.created_at) <= '{$to}'";
 			} catch (\Exception $e) {
-				unset($to);
+				$to = null;
 			}
 		}
 		if ($code = $this->dispatcher->getParam('code', 'int')) {
 			$conditions[] = "a.code = '{$code}'";
 		}
-		if (array_key_exists($current_status, $order_status)) {
+		if (is_int($current_status) && array_key_exists($current_status, $order_status)) {
 			$conditions[] = "a.status = {$current_status}";
 		}
 		if ($conditions) {
@@ -90,7 +92,7 @@ class OrdersController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$orders[] = $item;
@@ -105,8 +107,8 @@ class OrdersController extends ControllerBase {
 			'current_status'         => $current_status,
 			'code'                   => $code,
 			'mobile_phone'           => $mobile_phone,
-			'total_final_bill'       => $this->db->fetchColumn('SELECT SUM(a.final_bill) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0,
-			'total_admin_fee'        => $this->db->fetchColumn('SELECT SUM(a.admin_fee) FROM orders a' . ($parameters[0] ? " WHERE {$parameters[0]}" : '')) ?? 0,
+			'total_final_bill'       => $this->db->fetchColumn('SELECT SUM(a.final_bill) FROM orders a' . (isset($parameters[0]) ? " WHERE {$parameters[0]}" : '')) ?? 0,
+			'total_admin_fee'        => $this->db->fetchColumn('SELECT SUM(a.admin_fee) FROM orders a' . (isset($parameters[0]) ? " WHERE {$parameters[0]}" : '')) ?? 0,
 			'total_orders'           => $this->db->fetchColumn('SELECT COUNT(1) FROM orders'),
 			'pending_orders'         => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status = 0'),
 			'completed_orders'       => $this->db->fetchOne('SELECT COUNT(1) AS total, COALESCE(SUM(final_bill), 0) AS bill FROM orders WHERE status = 1'),
@@ -117,7 +119,7 @@ class OrdersController extends ControllerBase {
 	function showAction($id) {
 		if (!$order = Order::findFirst(['code = ?0 OR id = ?1', 'bind' => [$id, $id]])) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		$order->writeAttribute('status', Order::STATUS[$order->status]);
 		$this->view->setVars([
@@ -129,7 +131,7 @@ class OrdersController extends ControllerBase {
 	function completeAction($id) {
 		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND (code = ?0 OR id = ?1)', 'bind' => [$id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		$order->complete();
 		$this->flashSession->success('Order #' . $order->code . ' telah selesai');
@@ -139,7 +141,7 @@ class OrdersController extends ControllerBase {
 	function cancelAction($id) {
 		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 0 AND (code = ?0 OR id = ?1)', 'bind' => [$id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		if ($order->cancel($this->request->getPost('cancellation_reason'))) {
 			$this->flashSession->success('Order #' . $order->code . ' telah dicancel');
@@ -153,7 +155,7 @@ class OrdersController extends ControllerBase {
 	function printAction($id) {
 		if (!$this->request->isPost() || !($order = Order::findFirst(['status = 1 AND (code = ?0 OR id = ?1)', 'bind' => [$id, $id]]))) {
 			$this->flashSession->error('Order tidak ditemukan.');
-			return $this->dispatcher->forward('orders');
+			return $this->dispatcher->forward(['controller' => 'orders', 'action' => 'index']);
 		}
 		$this->view->order = $order;
 	}
@@ -320,7 +322,7 @@ QUERY
 					$params['address'] = $this->request->getPost('address');
 				}
 				if ($params) {
-					$buyer->update($params);
+					$buyer->assign($params)->update();
 				}
 				$this->flashSession->success('Order berhasil ditambah!');
 				return $this->response->redirect('/admin/orders');
@@ -493,7 +495,7 @@ QUERY
 			$result = $this->db->query($query);
 			$result->setFetchMode(Db::FETCH_OBJ);
 			while ($item = $result->fetch()) {
-				$delivery_hours = preg_split('/,/', $item->delivery_hours, -1, PREG_SPLIT_NO_EMPTY);
+				$delivery_hours = preg_split('/,/', (string) $item->delivery_hours, -1, PREG_SPLIT_NO_EMPTY);
 				if (!$delivery_hours) {
 					continue;
 				}
@@ -516,10 +518,10 @@ QUERY
 			if ($total_merchants > 1) {
 				$delivery_datetimes = call_user_func_array('array_intersect', array_values($delivery_datetimes));
 			} else {
-				$delivery_datetimes = array_shift($delivery_datetimes);
+				$delivery_datetimes = array_shift($delivery_datetimes) ?? [];
 			}
 			if (!$new_order->hasKey('scheduled_delivery') || !in_array($new_order->get('scheduled_delivery'), $delivery_datetimes)) {
-				$new_order->put('scheduled_delivery', $delivery_datetimes[0]);
+				$new_order->put('scheduled_delivery', $delivery_datetimes[0] ?? null);
 				$this->session->set('order', serialize($new_order));
 			}
 			$order->scheduled_delivery = $new_order->get('scheduled_delivery');
@@ -564,7 +566,7 @@ QUERY
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			if ($item->picture) {
 				$item->thumbnails = array_filter(explode(',', $item->thumbnails));
@@ -803,7 +805,7 @@ QUERY
 			$new_order = unserialize($this->session->get('order'));
 			if ($new_order->get('buyer_id') != $buyer->id) {
 				$new_order->put('buyer_id', $buyer->id);
-				$new_order->cart->clear();
+				$new_order->get('cart')->clear();
 			}
 			if ($scheduled_delivery) {
 				$new_order->put('scheduled_delivery', $scheduled_delivery);

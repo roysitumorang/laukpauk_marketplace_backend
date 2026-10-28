@@ -5,7 +5,7 @@ namespace Application\Api\V3\Merchant;
 use Application\Models\Village;
 use DateTime;
 use Exception;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use stdClass;
 
 class OrdersController extends ControllerBase {

@@ -47,9 +47,9 @@ abstract class ControllerBase extends Controller {
 		if ($latest_version != $this->request->getServer('HTTP_APP_VERSION')) {
 			$this->_response['message'] = "Tersedia update versi {$latest_version}, silahkan download di Play Store dan instal.";
 		}
-		$gps_coordinates = json_decode($this->request->getServer('HTTP_GPS_COORDINATES'), true);
+		$gps_coordinates = json_decode($this->request->getServer('HTTP_GPS_COORDINATES') ?? '', true);
 		if ($current_user && $gps_coordinates && ($current_user->latitude != $gps_coordinates['latitude'] || $current_user->longitude != $gps_coordinates['longitude'])) {
-			$current_user->update($gps_coordinates);
+			$current_user->assign($gps_coordinates)->update();
 		}
 		$this->_response['data']['total_new_orders']        = $current_user ? $current_user->totalNewOrders() : 0;
 		$this->_response['data']['total_new_notifications'] = $current_user ? $current_user->totalNewNotifications() : 0;

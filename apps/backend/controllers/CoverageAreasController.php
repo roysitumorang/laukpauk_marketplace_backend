@@ -6,16 +6,18 @@ use Application\Models\{City, CoverageArea, Province, Subdistrict, User, Village
 use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class CoverageAreasController extends ControllerBase {
+	private $_user, $_page, $_index_route;
+
 	function beforeExecuteRoute() {
 		parent::beforeExecuteRoute();
-		if (!$this->persistent->user = User::findFirst(['id = ?0 AND role_id = 3', 'bind' => [$this->dispatcher->getParam('user_id', 'int!')]])) {
+		if (!$this->_user = User::findFirst(['id = ?0 AND role_id = 3', 'bind' => [$this->dispatcher->getParam('user_id', 'int!')]])) {
 			$this->flashSession->error('Merchant tidak ditemukan');
 			$this->response->redirect('/admin/users');
 			$this->response->send();
 			return false;
 		}
-		$this->persistent->page        = $this->dispatcher->getParam('page', 'int!', 1);
-		$this->persistent->index_route = "/admin/users/{$this->persistent->user->id}/coverage_areas" . ($this->persistent->page > 1 ? '/index/page:' . $this->persistent->page : '');
+		$this->_page        = $this->dispatcher->getParam('page', 'int!', 1);
+		$this->_index_route = "/admin/users/{$this->_user->id}/coverage_areas" . ($this->_page > 1 ? '/index/page:' . $this->_page : '');
 
 	}
 
@@ -26,7 +28,7 @@ class CoverageAreasController extends ControllerBase {
 	function createAction() {
 		$coverage_area = new CoverageArea;
 		if ($this->request->isPost()) {
-			$coverage_area->user_id    = $this->persistent->user->id;
+			$coverage_area->user_id    = $this->_user->id;
 			$coverage_area->village_id = Village::findFirstById($this->request->getPost('village_id', 'int!'))->id;
 			$coverage_area->setShippingCost($this->request->getPost('shipping_cost', 'int!', 0));
 			if ($coverage_area->validation() && $coverage_area->create()) {
@@ -43,30 +45,30 @@ class CoverageAreasController extends ControllerBase {
 
 	function updateAction() {
 		if ($this->request->isPost() && ($shipping_costs = $this->request->getPost('shipping_cost'))) {
-			$coverage_areas = CoverageArea::find(['user_id = ?0 AND id IN({ids:array})', 'bind' => [$this->persistent->user->id, 'ids' => array_keys($shipping_costs)]]);
+			$coverage_areas = CoverageArea::find(['user_id = ?0 AND id IN({ids:array})', 'bind' => [$this->_user->id, 'ids' => array_keys($shipping_costs)]]);
 			foreach ($coverage_areas as $coverage_area) {
 				$coverage_area->setShippingCost($shipping_costs[$coverage_area->id]);
 				$coverage_area->update();
 			}
 			$this->flashSession->success('Update area operasional berhasil!');
-			return $this->response->redirect($this->persistent->index_route);
+			return $this->response->redirect($this->_index_route);
 		}
 		$this->_render(new CoverageArea);
 	}
 
 	function deleteAction($id) {
-		if (!$coverage_area = CoverageArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->persistent->user->id, $id]])) {
+		if (!$coverage_area = CoverageArea::findFirst(['user_id = ?0 AND village_id = ?1', 'bind' => [$this->_user->id, $id]])) {
 			$this->flashSession->error('Area operasional tidak ditemukan');
 		} else {
 			$coverage_area->delete();
 			$this->flashSession->success('Area operasional berhasil dihapus');
 		}
-		return $this->response->redirect($this->persistent->index_route);
+		return $this->response->redirect($this->_index_route);
 	}
 
 	function citiesAction($province_id) {
 		$cities = [];
-		$result = City::find(['province_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Subdistrict] JOIN [Application\Models\Village] ON [Application\Models\Subdistrict].id = [Application\Models\Village].subdistrict_id WHERE [Application\Models\Subdistrict].city_id = [Application\Models\City].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$province_id, $this->persistent->user->id], 'columns' => 'id, type, name', 'order' => 'type, name']);
+		$result = City::find(['province_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Subdistrict] JOIN [Application\Models\Village] ON [Application\Models\Subdistrict].id = [Application\Models\Village].subdistrict_id WHERE [Application\Models\Subdistrict].city_id = [Application\Models\City].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$province_id, $this->_user->id], 'columns' => 'id, type, name', 'order' => 'type, name']);
 		foreach ($result as $city) {
 			$cities[] = [
 				'id'   => $city->id,
@@ -79,7 +81,7 @@ class CoverageAreasController extends ControllerBase {
 
 	function subdistrictsAction($city_id) {
 		$subdistricts = [];
-		$result       = Subdistrict::find(['city_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Village] WHERE [Application\Models\Village].subdistrict_id = [Application\Models\Subdistrict].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$city_id, $this->persistent->user->id], 'columns' => 'id, name', 'order' => 'name']);
+		$result       = Subdistrict::find(['city_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Village] WHERE [Application\Models\Village].subdistrict_id = [Application\Models\Subdistrict].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$city_id, $this->_user->id], 'columns' => 'id, name', 'order' => 'name']);
 		foreach ($result as $subdistrict) {
 			$subdistricts[] = $subdistrict;
 		}
@@ -89,7 +91,7 @@ class CoverageAreasController extends ControllerBase {
 
 	function villagesAction($subdistrict_id) {
 		$villages = [];
-		$result   = Village::find(['subdistrict_id = ?0 AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1)', 'bind' => [$subdistrict_id, $this->persistent->user->id], 'columns' => 'id, name', 'order' => 'name']);
+		$result   = Village::find(['subdistrict_id = ?0 AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1)', 'bind' => [$subdistrict_id, $this->_user->id], 'columns' => 'id, name', 'order' => 'name']);
 		foreach ($result as $village) {
 			$villages[] = $village;
 		}
@@ -102,12 +104,12 @@ class CoverageAreasController extends ControllerBase {
 		$province_id    = $this->request->getPost('province_id', 'int!');
 		$city_id        = $this->request->getPost('city_id', 'int!');
 		$subdistrict_id = $this->request->getPost('subdistrict_id', 'int!');
-		$provinces      = Province::find(['EXISTS(SELECT 1 FROM [Application\Models\City] JOIN [Application\Models\Subdistrict] ON [Application\Models\City].id = [Application\Models\Subdistrict].city_id JOIN [Application\Models\Village] ON [Application\Models\Subdistrict].id = [Application\Models\Village].subdistrict_id WHERE [Application\Models\City].province_id = [Application\Models\Province].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?0))', 'bind' => [$this->persistent->user->id], 'columns' => 'id, name', 'order' => 'name']);
+		$provinces      = Province::find(['EXISTS(SELECT 1 FROM [Application\Models\City] JOIN [Application\Models\Subdistrict] ON [Application\Models\City].id = [Application\Models\Subdistrict].city_id JOIN [Application\Models\Village] ON [Application\Models\Subdistrict].id = [Application\Models\Village].subdistrict_id WHERE [Application\Models\City].province_id = [Application\Models\Province].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?0))', 'bind' => [$this->_user->id], 'columns' => 'id, name', 'order' => 'name']);
 		$cities         = [];
 		$subdistricts   = [];
 		$villages       = [];
 		$limit          = $this->config->per_page;
-		$offset         = ($this->persistent->page - 1) * $limit;
+		$offset         = ($this->_page - 1) * $limit;
 		$builder        = $this->modelsManager->createBuilder()
 			->columns([
 				'e.id',
@@ -126,31 +128,31 @@ class CoverageAreasController extends ControllerBase {
 			->join(Subdistrict::class, 'b.id = c.city_id', 'c')
 			->join(Village::class, 'c.id = d.subdistrict_id', 'd')
 			->join(CoverageArea::class, 'd.id = e.village_id', 'e')
-			->where('e.user_id = ' . $this->persistent->user->id)
+			->where('e.user_id = ' . $this->_user->id)
 			->orderBy('province_name, city_name, subdistrict_name, village_name');
 		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
-			'page'    => $this->persistent->page,
-		]))->getPaginate();
+			'page'    => $this->_page,
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$coverage_areas[] = $item;
 		}
 		if ($province_id) {
-			$result = City::find(['province_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Subdistrict] JOIN [Application\Models\Village] ON [Application\Models\Subdistrict].id = [Application\Models\Village].subdistrict_id WHERE [Application\Models\Subdistrict].city_id = [Application\Models\City].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$province_id, $this->persistent->user->id], 'columns' => 'id, type, name', 'order' => 'type, name']);
+			$result = City::find(['province_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Subdistrict] JOIN [Application\Models\Village] ON [Application\Models\Subdistrict].id = [Application\Models\Village].subdistrict_id WHERE [Application\Models\Subdistrict].city_id = [Application\Models\City].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$province_id, $this->_user->id], 'columns' => 'id, type, name', 'order' => 'type, name']);
 			foreach ($result as $city) {
 				$cities[$city->id] = $city->type . ' ' . $city->name;
 			}
 		}
 		if ($city_id) {
-			$result = Subdistrict::find(['city_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Village] WHERE [Application\Models\Village].subdistrict_id = [Application\Models\Subdistrict].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$city_id, $this->persistent->user->id], 'columns' => 'id, name', 'order' => 'name']);
+			$result = Subdistrict::find(['city_id = ?0 AND EXISTS(SELECT 1 FROM [Application\Models\Village] WHERE [Application\Models\Village].subdistrict_id = [Application\Models\Subdistrict].id AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1))', 'bind' => [$city_id, $this->_user->id], 'columns' => 'id, name', 'order' => 'name']);
 			foreach ($result as $subdistrict) {
 				$subdistricts[$subdistrict->id] = $subdistrict->name;
 			}
 		}
 		if ($subdistrict_id) {
-			$result = Village::find(['subdistrict_id = ?0 AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1)', 'bind' => [$subdistrict_id, $this->persistent->user->id], 'columns' => 'id, name', 'order' => 'name']);
+			$result = Village::find(['subdistrict_id = ?0 AND NOT EXISTS(SELECT 1 FROM [Application\Models\CoverageArea] WHERE [Application\Models\CoverageArea].village_id = [Application\Models\Village].id AND [Application\Models\CoverageArea].user_id = ?1)', 'bind' => [$subdistrict_id, $this->_user->id], 'columns' => 'id, name', 'order' => 'name']);
 			foreach ($result as $village) {
 				$villages[$village->id] = $village->name;
 			}
@@ -159,7 +161,7 @@ class CoverageAreasController extends ControllerBase {
 			'menu'           => $this->_menu('Members'),
 			'pages'          => $this->_setPaginationRange($pagination),
 			'pagination'     => $pagination,
-			'user'           => $this->persistent->user,
+			'user'           => $this->_user,
 			'coverage_areas' => $coverage_areas,
 			'provinces'      => $provinces,
 			'cities'         => $cities,

@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class NotificationTemplate extends ModelBase {
 	public $id;
@@ -19,8 +19,9 @@ class NotificationTemplate extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'notification_templates';
+	function initialize() {
+		$this->setSource('notification_templates');
+		parent::initialize();
 	}
 
 	function onConstruct() {

@@ -3,11 +3,11 @@
 namespace Application\Models;
 
 use Imagick;
-use Phalcon\Security\Random;
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\File;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Encryption\Security\Random;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\File;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class ProductCategory extends ModelBase {
 	const THUMBNAIL_WIDTHS = [120, 300];
@@ -29,13 +29,6 @@ class ProductCategory extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	private $_upload_config;
-	private $_filter;
-
-	function getSource() {
-		return 'product_categories';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -43,6 +36,7 @@ class ProductCategory extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('product_categories');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->hasMany('id', Product::class, 'product_category_id', ['alias' => 'products']);
@@ -62,11 +56,11 @@ class ProductCategory extends ModelBase {
 		}
 	}
 
-	function setThumbnails(array $thumbnails = null) {
+	function setThumbnails(?array $thumbnails = null) {
 		$this->thumbnails = array_filter($thumbnails ?? []);
 	}
 
-	function setPublished(int $published = null) {
+	function setPublished(?int $published = null) {
 		$this->published = $published ?? 0;
 	}
 
@@ -137,6 +131,7 @@ class ProductCategory extends ModelBase {
 			}
 			$image = new Imagick($this->new_picture['tmp_name']);
 			$image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			$this->thumbnails = (array) $this->thumbnails;
 			foreach (static::THUMBNAIL_WIDTHS as $width) {
 				$file = strtr($this->picture, ['.jpg' => $width . '.jpg']);
 				$path = $this->_upload_config->path . $file;
@@ -149,13 +144,14 @@ class ProductCategory extends ModelBase {
 			$image->writeImage($this->_upload_config->path . $this->picture);
 			unlink($this->new_picture['tmp_name']);
 		}
-		$this->thumbnails = implode(',', array_filter($this->thumbnails)) ?: null;
+		$this->thumbnails = is_array($this->thumbnails) ? (implode(',', array_filter($this->thumbnails)) ?: null) : null;
 	}
 
 	function beforeDelete() {
 		if (!$this->picture) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);
@@ -163,13 +159,14 @@ class ProductCategory extends ModelBase {
 	}
 
 	function afterFetch() {
-		$this->thumbnails = explode(',', $this->thumbnails);
+		$this->thumbnails = explode(',', (string) $this->thumbnails);
 	}
 
 	function deletePicture() {
 		if (!$this->picture) {
 			return;
 		}
+		$this->thumbnails   = (array) $this->thumbnails;
 		$this->thumbnails[] = $this->picture;
 		foreach ($this->thumbnails as $thumbnail) {
 			unlink($this->_upload_config->path . $thumbnail);

@@ -1,5 +1,5 @@
 {{ flashSession.output() }}
-{{ form(action) }}
+{{ form_legacy(action) }}
 	<table class="table table-striped">
 		<tr>
 			<td>

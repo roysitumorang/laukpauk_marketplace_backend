@@ -35,16 +35,16 @@
 								<strong>Suspended:</strong>&nbsp;{{ total_suspended_users }}
 							</font>
 						</div>
-						{{ form('/admin/users', 'method': 'GET', 'id': 'search') }}
+						{{ form_legacy('/admin/users', 'method': 'GET', 'id': 'search') }}
 							<table class="table table-striped">
 								<tr>
 									<td><i class="fa fa-tag"></i> Status</td>
 									<td>
-										{{ select_static('status', user_status, 'value': current_status) }}
+										{{ select_static(['status', user_status, 'value': current_status]) }}
 									</td>
 									<td class="text-nowrap"><i class="fa fa-users"></i> Role</td>
 									<td>
-										{{ select_static('role_id', roles, 'using': ['id', 'name'], 'value': current_role, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
+										{{ select_static(['role_id', roles, 'using': ['id', 'name'], 'value': current_role, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '']) }}
 									</td>
 								</tr>
 								<tr>
@@ -121,7 +121,7 @@
 								{% endfor %}
 							</tbody>
 						</table>
-						{% if pagination.total_pages > 1 %}
+						{% if pagination.last > 1 %}
 						<div class="weepaging">
 							<p>
 								<b>Halaman:</b>&nbsp;&nbsp;

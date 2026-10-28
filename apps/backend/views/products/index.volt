@@ -24,18 +24,18 @@
 			<div class="panel-body">
 				<!-- Content //-->
 				{{ flashSession.output() }}
-				{{ form('/admin/products/index', 'method': 'GET', 'id': 'search') }}
+				{{ form_legacy('/admin/products/index', 'method': 'GET', 'id': 'search') }}
 					<table class="table table-striped">
 						<tr>
 							<td>
 								<b>Kategori :</b>
 								<br>
-								{{ select('category_id', categories, 'value': category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '') }}
+								{{ select(['category_id', categories, 'value': category_id, 'useEmpty': true, 'emptyText': '- semua kategori -', 'emptyValue': '']) }}
 							</td>
 							<td>
 								<b>Status :</b>
 								<br>
-								{{ select('published', ['Tersembunyi', 'Tampil'], 'value': published, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '') }}
+								{{ select(['published', ['Tersembunyi', 'Tampil'], 'value': published, 'useEmpty': true, 'emptyText': '- semua -', 'emptyValue': '']) }}
 							</td>
 							<td>
 								<b>ID / Nama :</b>
@@ -97,7 +97,7 @@
 					{% endfor %}
 					</tbody>
 				</table>
-				{% if pagination.total_pages > 1 %}
+				{% if pagination.last > 1 %}
 				<div class="weepaging">
 					<p>
 						<b>Halaman:</b>&nbsp;&nbsp;

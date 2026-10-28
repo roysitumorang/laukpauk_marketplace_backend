@@ -3,8 +3,9 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\{Product, ProductCategory, User, UserProduct};
-use Phalcon\Db;
-use Phalcon\Paginator\Adapter\{Model, QueryBuilder};
+use Phalcon\Db\Enum as Db;
+use Application\Library\Paginator\Adapter\Resultset as Model;
+use Phalcon\Paginator\Adapter\QueryBuilder;
 
 class ProductsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -28,13 +29,13 @@ class ProductsController extends ControllerBase {
 			$conditions['bind']['category_id'] = $category_id;
 			$next                             .= "/category_id:{$category_id}";
 		}
-		if (ctype_digit($published)) {
+		if (ctype_digit((string) $published)) {
 			$conditions[0]                  .= ($conditions[0] ? ' AND' : '') . ' published = :published:';
 			$conditions['bind']['published'] = $published;
 			$next                           .= "/published:{$published}";
 		}
 		if ($keyword) {
-			if (ctype_digit($keyword)) {
+			if (ctype_digit((string) $keyword)) {
 				$conditions[0]           .= ($conditions[0] ? ' AND' : '') . ' id = :id:';
 				$conditions['bind']['id'] = $keyword;
 			} else if ($keyword) {
@@ -47,7 +48,7 @@ class ProductsController extends ControllerBase {
 			'data'  => Product::find($conditions),
 			'limit' => $limit,
 			'page'  => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$products[] = $item;
@@ -86,7 +87,7 @@ class ProductsController extends ControllerBase {
 	function updateAction($id) {
 		if (!$product = Product::findFirst($id)) {
 			$this->flashSession->error('Produk tidak ditemukan.');
-			return $this->dispatcher->forward('products');
+			return $this->dispatcher->forward(['controller' => 'products', 'action' => 'index']);
 		}
 		$next = $this->request->get('next');
 		if ($this->request->isPost()) {
@@ -113,7 +114,7 @@ class ProductsController extends ControllerBase {
 			if (!$product = Product::findFirst($id)) {
 				$this->flashSession->error('Produk tidak ditemukan.');
 			} else {
-				$product->update(['published' => $product->published ? 0 : 1]);
+				$product->assign(['published' => $product->published ? 0 : 1])->update();
 			}
 		}
 		return $this->response->redirect($this->request->getQuery('next'));
@@ -146,7 +147,7 @@ class ProductsController extends ControllerBase {
 	function merchantsAction($id) {
 		if (!$product = Product::findFirst($id)) {
 			$this->flashSession->error('Produk tidak ditemukan.');
-			return $this->dispatcher->forward('products');
+			return $this->dispatcher->forward(['controller' => 'products', 'action' => 'index']);
 		}
 		$users        = [];
 		$limit        = $this->config->per_page;
@@ -165,7 +166,7 @@ class ProductsController extends ControllerBase {
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$users[] = $item;
@@ -194,14 +195,14 @@ class ProductsController extends ControllerBase {
 		if ($product_category_id = $this->request->getPost('product_category_id')) {
 			$product->category = ProductCategory::findFirst($product_category_id);
 		}
-		$product->assign($this->request->getPost(), null, [
+		$product->assign($this->request->getPost(), [
 			'name',
 			'stock_unit',
 			'description',
 			'published',
 		]);
 		if ($this->request->hasFiles()) {
-			$product->setNewPicture(current(array_filter($this->request->getUploadedFiles(), function(&$v, $k) {
+			$product->setNewPicture(current(array_filter($this->request->getUploadedFiles(), function($v, $k) {
 				return $v->getKey() == 'new_picture';
 			}, ARRAY_FILTER_USE_BOTH)));
 		}

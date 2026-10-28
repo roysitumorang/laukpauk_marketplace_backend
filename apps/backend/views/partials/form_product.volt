@@ -1,12 +1,12 @@
 {{ flashSession.output() }}
 <i style="float:right"><font color="red"><b>*</b> harus diisi</font></i>
-{{ form(action, 'enctype': 'multipart/form-data') }}
+{{ form_legacy(action, 'enctype': 'multipart/form-data') }}
 	<table class="table table-striped">
 		<tr>
 			<td>
 				<b><font color="#000099">Kategori</font> <font color="red">*</font></b>
 				<br>
-				{{ select('product_category_id', categories, 'value': product.product_category_id) }}
+				{{ select(['product_category_id', categories, 'value': product.product_category_id]) }}
 			</td>
 		</tr>
 		<tr>

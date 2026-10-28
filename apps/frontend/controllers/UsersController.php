@@ -6,7 +6,7 @@ use Application\Models\LoginHistory;
 use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class UsersController extends ControllerBase {
@@ -14,7 +14,7 @@ class UsersController extends ControllerBase {
 		$limit          = $this->config->per_page;
 		$current_page   = $this->dispatcher->getParam('page', 'int') ?: 1;
 		$offset         = ($current_page - 1) * $limit;
-		$keyword        = str_replace([':', '/'], '', $this->dispatcher->getParam('keyword', 'string'));
+		$keyword        = str_replace([':', '/'], '', (string) $this->dispatcher->getParam('keyword', 'string'));
 		$status         = User::STATUS;
 		$current_status = $this->dispatcher->getParam('status', 'int');
 		if ($current_status === null || !array_key_exists($current_status, $status)) {
@@ -69,7 +69,7 @@ class UsersController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page  = $paginator->getPaginate();
+		$page  = $paginator->paginate();
 		$pages = $this->_setPaginationRange($page);
 		$users = [];
 		foreach ($page->items as $item) {
@@ -80,7 +80,7 @@ class UsersController extends ControllerBase {
 		$this->view->menu                  = $this->_menu('Members');
 		$this->view->users                 = $users;
 		$this->view->pages                 = $pages;
-		$this->view->page                  = $paginator->getPaginate();
+		$this->view->page                  = $paginator->paginate();
 		$this->view->status                = $status;
 		$this->view->current_status        = $current_status;
 		$this->view->keyword               = $keyword;

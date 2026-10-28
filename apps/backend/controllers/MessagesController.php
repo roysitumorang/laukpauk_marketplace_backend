@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\Message;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Application\Library\Paginator\Adapter\Resultset as PaginatorModel;
 
 class MessagesController extends ControllerBase {
 	function indexAction() {
@@ -18,7 +18,7 @@ class MessagesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page      = $paginator->getPaginate();
+		$page      = $paginator->paginate();
 		$pages     = $this->_setPaginationRange($page);
 		$messages  = [];
 		foreach ($page->items as $item) {

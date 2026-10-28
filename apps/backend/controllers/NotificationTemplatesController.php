@@ -3,7 +3,7 @@
 namespace Application\Backend\Controllers;
 
 use Application\Models\NotificationTemplate;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class NotificationTemplatesController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -20,7 +20,7 @@ class NotificationTemplatesController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page                   = $paginator->getPaginate();
+		$page                   = $paginator->paginate();
 		$pages                  = $this->_setPaginationRange($page);
 		$notification_templates = [];
 		foreach ($page->items as $item) {
@@ -52,7 +52,7 @@ class NotificationTemplatesController extends ControllerBase {
 		$notification_template = NotificationTemplate::findFirst($id);
 		if (!$notification_template) {
 			$this->flashSession->error('Data tidak ditemukan.');
-			return $this->dispatcher->forward('notification_templates');
+			return $this->dispatcher->forward(['controller' => 'notification_templates', 'action' => 'index']);
 		}
 		if ($this->request->isPost()) {
 			$this->_set_model_attributes($notification_template);

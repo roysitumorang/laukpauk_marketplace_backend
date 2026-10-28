@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Digit, InclusionIn, PresenceOf, Uniqueness};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Digit, InclusionIn, PresenceOf, Uniqueness};
 
 class UserProduct extends ModelBase {
 	public $id;
@@ -17,12 +17,6 @@ class UserProduct extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	private $_filter;
-
-	function getSource() {
-		return 'user_product';
-	}
-
 	function onConstruct() {
 		$di                   = $this->getDI();
 		$this->_upload_config = $di->getConfig()->upload;
@@ -30,6 +24,7 @@ class UserProduct extends ModelBase {
 	}
 
 	function initialize() {
+		$this->setSource('user_product');
 		parent::initialize();
 		$this->keepSnapshots(true);
 		$this->belongsTo('user_id', User::class, 'id', [

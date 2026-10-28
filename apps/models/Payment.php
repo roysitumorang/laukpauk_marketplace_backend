@@ -2,11 +2,11 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\Digit;
-use Phalcon\Validation\Validator\InclusionIn;
-use Phalcon\Validation\Validator\PresenceOf;
-use Phalcon\Validation\Validator\Uniqueness;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\Digit;
+use Phalcon\Filter\Validation\Validator\InclusionIn;
+use Phalcon\Filter\Validation\Validator\PresenceOf;
+use Phalcon\Filter\Validation\Validator\Uniqueness;
 
 class Payment extends ModelBase {
 	const STATUS = [0 => 'Menunggu Konfirmasi', -1 => 'Ditolak', 1 => 'Diterima'];
@@ -24,11 +24,8 @@ class Payment extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'payments';
-	}
-
 	function initialize() {
+		$this->setSource('payments');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',
@@ -97,10 +94,10 @@ class Payment extends ModelBase {
 	}
 
 	function approve() {
-		return $this->user->update(['deposit' => $this->user->deposit + $this->amount]) && $this->update(['status' => 1]);
+		return $this->user->assign(['deposit' => $this->user->deposit + $this->amount])->update() && $this->assign(['status' => 1])->update();
 	}
 
 	function reject() {
-		return $this->update(['status' => -1]);
+		return $this->assign(['status' => -1])->update();
 	}
 }

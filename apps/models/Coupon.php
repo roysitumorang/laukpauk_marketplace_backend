@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{Date, Digit, InclusionIn, PresenceOf};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{Date, Digit, InclusionIn, PresenceOf};
 
 class Coupon extends ModelBase {
 	const DISCOUNT_TYPES = ['%', 'Rp'];
@@ -30,11 +30,8 @@ class Coupon extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	function getSource() {
-		return 'coupons';
-	}
-
 	function initialize() {
+		$this->setSource('coupons');
 		parent::initialize();
 		$this->hasMany('id', Order::class, 'coupon_id', ['alias' => 'orders']);
 		$this->belongsTo('release_id', Release::class, 'id', [

@@ -5,7 +5,7 @@ namespace Application\Backend\Controllers;
 use Application\Models\Payment;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class PaymentsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -44,7 +44,7 @@ class PaymentsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page     = $paginator->getPaginate();
+		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);
 		$payments = [];
 		foreach ($page->items as $item) {

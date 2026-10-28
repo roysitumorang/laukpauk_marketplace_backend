@@ -7,7 +7,7 @@ use Application\Models\Role;
 use Application\Models\User;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model;
+use Application\Library\Paginator\Adapter\Resultset as Model;
 
 class PushNotificationsController extends ControllerBase {
 	function beforeExecuteRoute() {
@@ -32,7 +32,7 @@ class PushNotificationsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page          = $paginator->getPaginate();
+		$page          = $paginator->paginate();
 		$pages         = $this->_setPaginationRange($page);
 		$notifications = [];
 		foreach ($page->items as $item) {

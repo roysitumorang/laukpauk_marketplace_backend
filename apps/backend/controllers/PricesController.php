@@ -33,7 +33,7 @@ class PricesController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page     = $paginator->getPaginate();
+		$page     = $paginator->paginate();
 		$pages    = $this->_setPaginationRange($page);
 		$products = [];
 		foreach ($page->items as $item) {
@@ -52,7 +52,7 @@ class PricesController extends ControllerBase {
 		if ($this->request->isPost()) {
 			foreach ($prices as $id => $price) {
 				if (($user_product = UserProduct::findFirst($id)) && filter_var($price, FILTER_VALIDATE_INT)) {
-					$user_product->update(['price' => $price]);
+					$user_product->assign(['price' => $price])->update();
 				}
 			}
 			$this->flashSession->success('Update harga berhasil.');

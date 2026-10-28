@@ -8,7 +8,8 @@ use Application\Models\Role;
 use Application\Models\User;
 use Application\Models\Village;
 use Ds\Set;
-use Phalcon\Db;
+use Exception;
+use Phalcon\Db\Enum as Db;
 use stdClass;
 
 class AccountController extends ControllerBase {
@@ -174,9 +175,9 @@ QUERY
 				} else if ($this->post->device_token != $this->currentUser->device_token) {
 					$old_owner = User::findFirstByDeviceToken($this->post->device_token);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$this->currentUser->update(['device_token' => $this->post->device_token]);
+					$this->currentUser->assign(['device_token' => $this->post->device_token])->update();
 					$this->currentUser->getDevices()->delete();
 				}
 			}
@@ -263,14 +264,14 @@ QUERY
 				} else if ($this->post->device_token != $user->device_token) {
 					$old_owner = User::findFirstByDeviceToken($this->post->device_token);
 					if ($old_owner) {
-						$old_owner->update(['device_token' => null]);
+						$old_owner->assign(['device_token' => null])->update();
 					}
-					$user->update(['device_token' => $this->post->device_token]);
+					$user->assign(['device_token' => $this->post->device_token])->update();
 					$user->getDevices()->delete();
 				}
 			}
 			$login_history = new LoginHistory;
-			$login_history->create(['user_id' => $user->id]);
+			$login_history->assign(['user_id' => $user->id])->create();
 			$this->_response['status']               = 1;
 			$this->_response['data']['access_token'] = $this->jsonWebToken->encode(['api_key' => $user->api_key]);
 			$this->_response['data']['current_user'] = [
@@ -331,7 +332,7 @@ QUERY
 				JOIN users f ON e.user_id = f.id
 			WHERE e.user_id = {$this->currentUser->id}
 			GROUP BY a.id
-			ORDER BY a.name'
+			ORDER BY a.name
 QUERY
 		);
 		$result->setFetchMode(Db::FETCH_OBJ);

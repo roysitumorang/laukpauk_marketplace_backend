@@ -2,7 +2,7 @@
 
 namespace Application\Api\V3\Buyer;
 
-use Phalcon\Db;
+use Phalcon\Db\Enum as Db;
 
 class ProductGroupsController extends ControllerBase {
 	function indexAction() {

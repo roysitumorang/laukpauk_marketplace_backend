@@ -4,7 +4,7 @@ namespace Application\Frontend\Controllers;
 
 use Application\Models\ProductGroup;
 use Application\Models\ProductGroupMember;
-use Phalcon\Exception;
+use Exception;
 use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 
 class ProductGroupsController extends ControllerBase {
@@ -38,7 +38,7 @@ class ProductGroupsController extends ControllerBase {
 			'limit'   => $limit,
 			'page'    => $current_page,
 		]);
-		$page           = $paginator->getPaginate();
+		$page           = $paginator->paginate();
 		$pages          = $this->_setPaginationRange($page);
 		$product_groups = [];
 		foreach ($page->items as $item) {
@@ -47,7 +47,7 @@ class ProductGroupsController extends ControllerBase {
 		}
 		$this->view->keyword        = $keyword;
 		$this->view->product_groups = $product_groups;
-		$this->view->page           = $paginator->getPaginate();
+		$this->view->page           = $paginator->paginate();
 		$this->view->pages          = $pages;
 	}
 
@@ -94,7 +94,7 @@ class ProductGroupsController extends ControllerBase {
 		if ($this->request->isPost()) {
 			$product_group = ProductGroup::findFirst(['user_id = ?0 AND id = ?1 AND published = 0', 'bind' => [$this->currentUser->id, $id]]);
 			if ($product_group) {
-				$product_group->update(['published' => 1]);
+				$product_group->assign(['published' => 1])->update();
 			} else {
 				$this->flashSession->error('Group produk tidak ditemukan!');
 			}
@@ -106,7 +106,7 @@ class ProductGroupsController extends ControllerBase {
 		if ($this->request->isPost()) {
 			$product_group = ProductGroup::findFirst(['user_id = ?0 AND id = ?1 AND published = 1', 'bind' => [$this->currentUser->id, $id]]);
 			if ($product_group) {
-				$product_group->update(['published' => 0]);
+				$product_group->assign(['published' => 0])->update();
 			} else {
 				$this->flashSession->error('Group produk tidak ditemukan!');
 			}

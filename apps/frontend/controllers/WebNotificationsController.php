@@ -5,7 +5,7 @@ namespace Application\Frontend\Controllers;
 use Application\Models\NotificationRecipient;
 use DateTime;
 use IntlDateFormatter;
-use Phalcon\Paginator\Adapter\Model as PaginatorModel;
+use Application\Library\Paginator\Adapter\Resultset as PaginatorModel;
 
 class WebNotificationsController extends ControllerBase {
 	function indexAction() {
@@ -28,7 +28,7 @@ class WebNotificationsController extends ControllerBase {
 			'limit' => $limit,
 			'page'  => $current_page,
 		]);
-		$page          = $paginator->getPaginate();
+		$page          = $paginator->paginate();
 		$pages         = $this->_setPaginationRange($page);
 		$notifications = [];
 		foreach ($page->items as $item) {
@@ -39,7 +39,7 @@ class WebNotificationsController extends ControllerBase {
 		$this->view->menu          = $this->_menu('Options');
 		$this->view->notifications = $notifications;
 		$this->view->pages         = $pages;
-		$this->view->page          = $paginator->getPaginate();
+		$this->view->page          = $paginator->paginate();
 	}
 
 	function updateAction($id) {
@@ -52,7 +52,7 @@ class WebNotificationsController extends ControllerBase {
 				],
 			]);
 			if ($notification_recipient) {
-				$notification_recipient->update(['read_at' => $this->currentDatetime->format('Y-m-d H:i:s')]);
+				$notification_recipient->assign(['read_at' => $this->currentDatetime->format('Y-m-d H:i:s')])->update();
 			}
 		}
 	}

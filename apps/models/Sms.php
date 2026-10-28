@@ -2,9 +2,9 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\Callback;
-use Phalcon\Validation\Validator\StringLength;
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\Callback;
+use Phalcon\Filter\Validation\Validator\StringLength;
 use SimpleXMLElement;
 use stdClass;
 
@@ -17,15 +17,12 @@ class Sms extends ModelBase {
 
 	private $_config;
 
-	function getSource() {
-		return 'sms';
-	}
-
 	function onConstruct() {
 		$this->_config = $this->getDI()->getConfig()->sms;
 	}
 
 	function initialize() {
+		$this->setSource('sms');
 		parent::initialize();
 		$this->belongsTo('user_id', User::class, 'id', [
 			'alias'    => 'user',
@@ -55,7 +52,6 @@ class Sms extends ModelBase {
 					CURLOPT_SSL_VERIFYPEER => 0,
 				]);
 				$response = curl_exec($ch);
-				curl_close($ch);
 				$result = new SimpleXMLElement($response);
 				return $result->message->value >= count($data->recipients);
 			},
@@ -92,19 +88,19 @@ class Sms extends ModelBase {
 			if (curl_multi_select($master) != -1) {
 				do {
 					$execution = curl_multi_exec($master, $active);
-				} while ($master == CURLM_CALL_MULTI_PERFORM);
+				} while ($execution == CURLM_CALL_MULTI_PERFORM);
 			}
 		}
 		foreach ($nodes as $node) {
 			$result        = new SimpleXMLElement(curl_multi_getcontent($node->curl));
 			$message       = $result->message;
 			$sms_recipient = new SmsRecipient;
-			$sms_recipient->create([
+			$sms_recipient->assign([
 				'sms_id'       => $this->id,
 				'user_id'      => $node->id,
 				'mobile_phone' => $message->to,
 				'status'       => $message->status == 0 ? 1 : 0,
-			]);
+			])->create();
 			curl_multi_remove_handle($master, $node->curl);
 		}
 		curl_multi_close($master);

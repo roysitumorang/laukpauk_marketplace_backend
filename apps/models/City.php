@@ -2,8 +2,8 @@
 
 namespace Application\Models;
 
-use Phalcon\Validation;
-use Phalcon\Validation\Validator\{InclusionIn, PresenceOf, Uniqueness};
+use Phalcon\Filter\Validation;
+use Phalcon\Filter\Validation\Validator\{InclusionIn, PresenceOf, Uniqueness};
 
 class City extends ModelBase {
 	const TYPES = ['Kabupaten', 'Kota'];
@@ -17,13 +17,8 @@ class City extends ModelBase {
 	public $updated_by;
 	public $updated_at;
 
-	private $_filter;
-
-	function getSource() {
-		return 'cities';
-	}
-
 	function initialize() {
+		$this->setSource('cities');
 		parent::initialize();
 		$this->belongsTo('province_id', Province::class, 'id', [
 			'alias'    => 'province',
@@ -35,6 +30,9 @@ class City extends ModelBase {
 				'message' => 'kota / kabupaten tidak dapat dihapus karena memiliki kecamatan',
 			],
 		]);
+	}
+
+	function onConstruct() {
 		$this->_filter = $this->getDI()->getFilter();
 	}
 

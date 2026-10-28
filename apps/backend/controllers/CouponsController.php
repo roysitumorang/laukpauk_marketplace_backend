@@ -54,14 +54,14 @@ class CouponsController extends ControllerBase {
 		if ($keyword) {
 			$builder->andWhere('a.code ILIKE :code:', ['code' => "%{$keyword}%"]);
 		}
-		if (ctype_digit($current_status)) {
+		if (ctype_digit((string) $current_status)) {
 			$builder->andWhere("a.status = :status:", ['status' => $current_status]);
 		}
 		$pagination = (new QueryBuilder([
 			'builder' => $builder,
 			'limit'   => $limit,
 			'page'    => $current_page,
-		]))->getPaginate();
+		]))->paginate();
 		foreach ($pagination->items as $item) {
 			$item->writeAttribute('rank', ++$offset);
 			$item->writeAttribute('multiple_use', Coupon::USAGE_TYPES[$item->multiple_use]);
@@ -110,7 +110,7 @@ class CouponsController extends ControllerBase {
 	function updateAction($id) {
 		if (!$coupon = Coupon::findFirst($id)) {
 			$this->flashSession->error('Kupon tidak ditemukan.');
-			return $this->dispatcher->forward('coupons');
+			return $this->dispatcher->forward(['controller' => 'coupons', 'action' => 'index']);
 		}
 		if ($this->request->isPost()) {
 			$this->_assignModelAttributes($coupon);
@@ -133,7 +133,7 @@ class CouponsController extends ControllerBase {
 		if (!$this->request->isPost() || !($coupon = Coupon::findFirst(['id = ?0 AND expiry_date > ?1', 'bind' => [$id, $this->currentDatetime->format('Y-m-d')]]))) {
 			$this->flashSession->error('Kupon tidak ditemukan.');
 		} else {
-			$coupon->update(['status' => $coupon->status ? 0 : 1]);
+			$coupon->assign(['status' => $coupon->status ? 0 : 1])->update();
 		}
 		return $this->response->redirect("/admin/coupons/index" . ($keyword ? "/keyword:{$keyword}" : '') . ($status ? "/status:{$status}" : '') . ($page > 1 ? "/page:{$page}" : ''));
 	}
@@ -152,7 +152,7 @@ class CouponsController extends ControllerBase {
 		if (!$coupon->id) {
 			$coupon->code = $this->request->getPost('code');
 		}
-		$coupon->assign($this->request->getPost(), null, [
+		$coupon->assign($this->request->getPost(), [
 			'price_discount',
 			'discount_type',
 			'effective_date',
